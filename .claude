@@ -1,0 +1,36 @@
+# VN-Studio - Configuration Claude
+
+## CONTEXTE DE RECUPERATION DE SESSION
+
+Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) vers React.
+
+### Documents de référence (LIRE EN PRIORITE)
+1. `PORTAGE_SUIVI.md` - Document principal de suivi du portage
+2. `ENGINE_PSEUDOCODE.md` - Pseudo-code complet du moteur C++
+
+### Fichiers binaires analysés
+- `europeo.exe` - Exécutable principal (vn21_32.exe, Visual Navigator 2.1)
+- `vnoption.dll` - Module dialogues d'options utilisateur
+- `vnresmod.dll` - Module ressources (curseurs, etc.)
+
+### Résumé technique
+- **Produit**: Virtual Navigator Studio/Runtime par Sopra Multimedia (France, 1999)
+- **Technologie originale**: Borland C++ Builder, OWL 5.2, DirectDraw
+- **Cible du portage**: React avec Canvas 2D / Web Audio API
+- **Classes principales**: TVNApplication, TVNScene, TVNCommand, TVNHotspot, TVNVariable
+- **Système de scripting**: Commandes GOTO, SETVAR, IF, WAVE, MIDI, AVI, IMAGE, TEXT
+
+### Outils installés
+- radare2 5.5.0 (analyse binaire)
+- pev (analyse PE)
+
+### État du projet
+- Phase 1 (Analyse): COMPLETE
+- Phase 2 (Conception React): EN ATTENTE
+- Phase 3 (Implémentation): EN ATTENTE
+
+### Instructions pour nouvelles sessions
+1. Toujours lire PORTAGE_SUIVI.md en premier pour récupérer le contexte
+2. Consulter ENGINE_PSEUDOCODE.md pour les détails techniques
+3. Ne pas créer de nouveaux fichiers de documentation (utiliser les 2 existants)
+4. Utiliser radare2 pour toute analyse supplémentaire des binaires

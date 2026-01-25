@@ -1,0 +1,42 @@
+{
+  "name": "vn-studio",
+  "version": "1.0.0",
+  "description": "Visual Novel Engine - React port of Virtual Navigator 2.1 (Sopra Multimedia, 1999)",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "jest",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "visual-novel",
+    "game-engine",
+    "react",
+    "canvas",
+    "virtual-navigator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aciderix/VN-Studio.git"
+  }
+}

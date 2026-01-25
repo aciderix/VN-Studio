@@ -27,8 +27,16 @@ Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) ver
 
 ### État du projet
 - Phase 1 (Analyse): COMPLETE
-- Phase 2 (Conception React): EN ATTENTE
-- Phase 3 (Implémentation): EN ATTENTE
+- Phase 2 (Conception React): COMPLETE
+- Phase 3 (Implémentation): COMPLETE
+
+### Fichiers React créés
+- src/engine/* - Moteur complet (8 fichiers)
+- src/components/* - Composants React
+- src/hooks/* - Hooks React
+- src/types/* - Types TypeScript
+- src/examples/* - Projet de démonstration
+- package.json, tsconfig.json - Configuration
 
 ### Instructions pour nouvelles sessions
 1. Toujours lire PORTAGE_SUIVI.md en premier pour récupérer le contexte

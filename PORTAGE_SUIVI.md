@@ -165,19 +165,49 @@ Total: 264 bytes (0x108)
 - [x] Extraction des fichiers sources originaux (commands.cpp, scene.cpp, etc.)
 - [x] Documentation pseudo-code (voir ENGINE_PSEUDOCODE.md)
 
-### Phase 2: Conception React
-- [ ] Architecture des composants
-- [ ] Système de state management
-- [ ] Rendu graphique (Canvas/WebGL)
-- [ ] Système audio (Web Audio API)
+### Phase 2: Conception React (COMPLETE)
+- [x] Architecture des composants
+- [x] Système de state management
+- [x] Rendu graphique (Canvas/WebGL)
+- [x] Système audio (Web Audio API)
 
-### Phase 3: Implémentation
-- [ ] Core engine
-- [ ] Système de scènes
-- [ ] Système de commandes
-- [ ] Rendu graphique
-- [ ] Système audio
-- [ ] Interactions utilisateur
+### Phase 3: Implémentation (COMPLETE)
+- [x] Core engine (VNEngine.ts)
+- [x] Système de scènes (VNSceneManager.ts)
+- [x] Système de commandes (VNCommandProcessor.ts)
+- [x] Rendu graphique (VNRenderer.ts)
+- [x] Système audio (VNAudioManager.ts)
+- [x] Interactions utilisateur (Hotspots, curseurs)
+- [x] Système de variables (VNVariableStore.ts - structure exacte 264 bytes)
+- [x] Timers et effets (VNTimerManager.ts)
+- [x] Composants React (GameContainer.tsx)
+- [x] Hooks React (useVNEngine.ts)
+
+### Structure du projet React
+
+```
+src/
+├── engine/
+│   ├── VNEngine.ts           # Moteur principal (TVNApplication)
+│   ├── VNVariableStore.ts    # Variables (structure exacte 264 bytes)
+│   ├── VNCommandProcessor.ts # Commandes (30+ types)
+│   ├── VNSceneManager.ts     # Scènes (TVNScene, TVNSceneArray)
+│   ├── VNRenderer.ts         # Rendu Canvas (DirectDraw → Canvas 2D)
+│   ├── VNAudioManager.ts     # Audio (MCI → Web Audio API)
+│   ├── VNTimerManager.ts     # Timers (TVNTimer, effets)
+│   └── index.ts
+├── components/
+│   ├── GameContainer.tsx     # Composant principal (TVNFrame)
+│   └── index.ts
+├── hooks/
+│   ├── useVNEngine.ts        # Hook React
+│   └── index.ts
+├── types/
+│   └── vn.types.ts           # Types TypeScript complets
+├── examples/
+│   └── ExampleProject.ts     # Projet de démo
+└── index.ts                  # Export principal
+```
 
 ---
 

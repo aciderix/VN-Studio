@@ -40,6 +40,45 @@ DirectDraw Surface / TVNBitmap
 
 ---
 
+## 1.3 API vndllapi.dll - ANALYSE COMPLETE
+
+**DLL d'API centrale analysée par rétro-ingénierie (12 KB)**
+
+### Fonctions exportées
+
+```cpp
+// 1. InitVNCommandMessage() - Enregistre le message Windows personnalisé
+// Adresse: 0x00401480
+UINT InitVNCommandMessage() {
+    // Enregistre "wm_vncommand" comme message Windows global
+    return RegisterWindowMessageA("wm_vncommand");
+}
+// Retour: ID du message Windows (utilisé pour la communication inter-processus)
+
+// 2. DirectDrawEnabled() - État de DirectDraw
+// Adresse: 0x0040148f
+BOOL DirectDrawEnabled() {
+    return TRUE;  // Toujours activé (retourne 1)
+}
+
+// 3. VNDLLVarFind(VNVariable** head, const char* name) -> VNVariable*
+// Adresse: 0x00401499
+// Recherche une variable par nom (insensible à la casse)
+
+// 4. VNDLLVarAddModify(VNVariable** head, const char* name, int value) -> VNVariable*
+// Adresse: 0x004014dd
+// Ajoute ou modifie une variable
+```
+
+### Protocole de communication
+
+Le moteur utilise un message Windows personnalisé `wm_vncommand` pour:
+- Communiquer entre les DLLs et l'exécutable principal
+- Déclencher l'exécution de commandes VN
+- Synchroniser les plugins
+
+---
+
 ## 2. Classes principales - Pseudo-code
 
 ### 2.1 TVNApplication (Point d'entrée)
@@ -298,56 +337,92 @@ public:
 };
 ```
 
-### 2.4 TVNVariable (Système de variables)
+### 2.4 TVNVariable (Système de variables) - STRUCTURE EXACTE
+
+**Extrait de vndllapi.dll - Structure confirmée par rétro-ingénierie:**
 
 ```cpp
-class TVNVariable {
-private:
-    string  name;
-    int     type;   // 0=int, 1=string, 2=bool
-    union {
-        int     intValue;
-        string* strValue;
-        bool    boolValue;
-    };
-
-public:
-    void SetValue(int val) { type = 0; intValue = val; }
-    void SetValue(string val) { type = 1; strValue = new string(val); }
-    void SetValue(bool val) { type = 2; boolValue = val; }
-
-    int GetInt() { return intValue; }
-    string GetString() { return *strValue; }
-    bool GetBool() { return boolValue; }
-
-    void Increment() { if (type == 0) intValue++; }
-    void Decrement() { if (type == 0) intValue--; }
+// Structure exacte (264 bytes = 0x108)
+// Extraite de VNDLLVarAddModify @ 0x004014dd
+struct VNVariable {
+    char        name[256];      // Offset 0x000 - Nom (converti en MAJUSCULES via strupr)
+    int32_t     value;          // Offset 0x100 - Valeur entière (4 bytes)
+    VNVariable* next;           // Offset 0x104 - Pointeur vers variable suivante
 };
+// Total: 0x108 (264 bytes)
 
-class TVNVariableArray {
+// API exportée par vndllapi.dll:
+// - VNDLLVarFind(VNVariable** head, const char* name) -> VNVariable*
+// - VNDLLVarAddModify(VNVariable** head, const char* name, int value) -> VNVariable*
+
+class TVNVariableList {
 private:
-    TArray<TVNVariable*> variables;
+    VNVariable* head;  // Tête de la liste chaînée
 
 public:
-    TVNVariable* Find(string name) {
-        for (int i = 0; i < variables.GetCount(); i++) {
-            if (variables[i]->GetName() == name) {
-                return variables[i];
+    // Recherche insensible à la casse (utilise stricmp)
+    VNVariable* Find(const char* name) {
+        VNVariable* current = head;
+        while (current != NULL) {
+            if (stricmp(current->name, name) == 0) {
+                return current;
             }
+            current = current->next;
         }
         return NULL;
     }
 
-    void Set(string name, int value) {
-        TVNVariable* var = Find(name);
-        if (!var) {
-            var = new TVNVariable(name);
-            variables.Add(var);
+    // Ajouter ou modifier une variable
+    VNVariable* AddModify(const char* name, int value) {
+        // Chercher si existe déjà
+        VNVariable* existing = Find(name);
+        if (existing) {
+            existing->value = value;
+            return existing;
         }
-        var->SetValue(value);
+
+        // Créer nouvelle variable
+        VNVariable* newVar = (VNVariable*)malloc(0x108);
+        strcpy(newVar->name, name);
+        strupr(newVar->name);  // Convertir en majuscules
+        newVar->value = value;
+        newVar->next = NULL;
+
+        // Ajouter à la fin de la liste
+        if (head == NULL) {
+            head = newVar;
+        } else {
+            VNVariable* last = head;
+            while (last->next != NULL) {
+                last = last->next;
+            }
+            last->next = newVar;
+        }
+        return newVar;
+    }
+
+    int GetValue(const char* name) {
+        VNVariable* var = Find(name);
+        return var ? var->value : 0;
+    }
+
+    void Increment(const char* name) {
+        VNVariable* var = Find(name);
+        if (var) var->value++;
+    }
+
+    void Decrement(const char* name) {
+        VNVariable* var = Find(name);
+        if (var) var->value--;
     }
 };
 ```
+
+**Notes importantes:**
+- Les noms de variables sont insensibles à la casse (comparaison avec `stricmp`)
+- Les noms sont stockés en MAJUSCULES (conversion avec `strupr`)
+- Les valeurs sont uniquement des entiers 32-bit signés
+- Structure en liste chaînée simple (pas un tableau)
 
 ### 2.5 TVNHotspot (Zone cliquable)
 

@@ -12,6 +12,7 @@ Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) ver
 - `europeo.exe` - Exécutable principal (vn21_32.exe, Visual Navigator 2.1)
 - `vnoption.dll` - Module dialogues d'options utilisateur
 - `vnresmod.dll` - Module ressources (curseurs, etc.)
+- `vndllapi.dll` - API centrale (variables, messages) - STRUCTURE EXACTE EXTRAITE
 
 ### Résumé technique
 - **Produit**: Virtual Navigator Studio/Runtime par Sopra Multimedia (France, 1999)

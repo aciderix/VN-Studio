@@ -129,9 +129,25 @@
 - `TVNStringParms` - Paramètres string
 
 ### Fonctions exportées DLL
-- `VNCreateDLLWindow` - Créer fenêtre DLL
+- `VNCreateDLLWindow` - Créer fenêtre DLL (vnoption.dll)
 - `VNDestroyDLLWindow` - Détruire fenêtre DLL
 - `VNSetDLLArguments` - Définir arguments DLL
+
+### API vndllapi.dll (ANALYSEE)
+| Fonction | Description |
+|----------|-------------|
+| `InitVNCommandMessage()` | Enregistre le message Windows "wm_vncommand" |
+| `DirectDrawEnabled()` | Retourne toujours TRUE |
+| `VNDLLVarFind(head, name)` | Recherche une variable (insensible casse) |
+| `VNDLLVarAddModify(head, name, value)` | Ajoute/modifie une variable |
+
+### Structure VNVariable (EXACTE)
+```
+Offset 0x000: char name[256]      // Nom en MAJUSCULES
+Offset 0x100: int32_t value       // Valeur entière
+Offset 0x104: VNVariable* next    // Pointeur suivant
+Total: 264 bytes (0x108)
+```
 
 ---
 
@@ -145,6 +161,7 @@
 - [x] Décompilation pseudo-code europeo.exe
 - [x] Analyse vnoption.dll (dialogues options)
 - [x] Analyse vnresmod.dll (module ressources)
+- [x] Analyse vndllapi.dll (API variables et messages)
 - [x] Extraction des fichiers sources originaux (commands.cpp, scene.cpp, etc.)
 - [x] Documentation pseudo-code (voir ENGINE_PSEUDOCODE.md)
 

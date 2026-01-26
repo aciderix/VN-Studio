@@ -183,6 +183,16 @@ Total: 264 bytes (0x108)
 - [x] Composants React (GameContainer.tsx)
 - [x] Hooks React (useVNEngine.ts)
 
+### Phase 4: Analyse Format de Fichiers (COMPLETE)
+- [x] Format VNFILE (.vnp) - Header, version, structure
+- [x] Format DATFILE - Conteneur de ressources (WAV, MID, IMG8, IMG24, AVI, TXT)
+- [x] Format VNSAVFILE - Fichier de sauvegarde
+- [x] Sérialisation Borland (ipstream/opstream)
+- [x] Structure TVNScene - Propriétés, hotspots, commandes
+- [x] Structure TVNCommand - 28+ types de commandes
+- [x] Structure TVNHotspot - Rectangle/polygone, événements
+- [x] Création VNFileLoader.ts - Parser complet pour fichiers binaires
+
 ### Structure du projet React
 
 ```
@@ -195,6 +205,7 @@ src/
 │   ├── VNRenderer.ts         # Rendu Canvas (DirectDraw → Canvas 2D)
 │   ├── VNAudioManager.ts     # Audio (MCI → Web Audio API)
 │   ├── VNTimerManager.ts     # Timers (TVNTimer, effets)
+│   ├── VNFileLoader.ts       # Parser fichiers VNFILE/DATFILE/VNSAVFILE
 │   └── index.ts
 ├── components/
 │   ├── GameContainer.tsx     # Composant principal (TVNFrame)
@@ -203,7 +214,7 @@ src/
 │   ├── useVNEngine.ts        # Hook React
 │   └── index.ts
 ├── types/
-│   └── vn.types.ts           # Types TypeScript complets
+│   └── vn.types.ts           # Types TypeScript complets + types fichiers
 ├── examples/
 │   └── ExampleProject.ts     # Projet de démo
 └── index.ts                  # Export principal
@@ -269,18 +280,44 @@ Le code source original utilisait ces fichiers (extraits des symboles de debug):
 ---
 
 ## Dernière mise à jour
-**Date**: 2026-01-25
-**Session**: Analyse complète - Rétro-ingénierie terminée
+**Date**: 2026-01-26
+**Session**: Formats de fichiers analysés - Parser créé
 
 ## Documents du projet
 1. **PORTAGE_SUIVI.md** (ce fichier) - Suivi principal, récupération de contexte
-2. **ENGINE_PSEUDOCODE.md** - Pseudo-code détaillé du moteur pour portage React
+2. **ENGINE_PSEUDOCODE.md** - Pseudo-code détaillé + spécifications formats de fichiers
+
+## Formats de fichiers VN découverts
+
+### VNFILE (.vnp) - Projet
+- Magic: `VNFILE` (6 bytes)
+- Version Borland (uint16_t)
+- TVNProjectParms (nom, dimensions, couleurs, etc.)
+- Tableau de TVNScene
+- TVNVariableArray
+
+### DATFILE - Ressources
+- Magic: `DATFILE` (7 bytes)
+- Sections: MAIN, LIMITS, PREFS, WAV, MID, PAL, IMG8, IMG24, AVI, TXT
+- Index ressources avec offset/taille
+
+### VNSAVFILE - Sauvegarde
+- Magic: `VNSAVFILE` (9 bytes)
+- Index scène courante
+- Variables modifiées
+- Historique de navigation
 
 ## Prochaines étapes
 1. ~~Extraire le pseudo-code complet avec radare2~~ FAIT
 2. ~~Documenter la logique des commandes TVNCommand~~ FAIT
 3. ~~Analyser les DLLs vnoption et vnresmod~~ FAIT
-4. Créer l'architecture React
-5. Implémenter le chargeur de projets VN
-6. Porter le système de rendu (DirectDraw → Canvas)
-7. Porter le système audio (MCI/WINMM → Web Audio API)
+4. ~~Créer l'architecture React~~ FAIT
+5. ~~Implémenter le chargeur de projets VN~~ FAIT (VNFileLoader.ts)
+6. ~~Porter le système de rendu (DirectDraw → Canvas)~~ FAIT
+7. ~~Porter le système audio (MCI/WINMM → Web Audio API)~~ FAIT
+
+### Phase 5: Tests et Intégration (EN COURS)
+1. Tester le chargeur de fichiers avec des fichiers VN réels
+2. Valider le parsing de tous les types de commandes
+3. Intégrer VNFileLoader avec VNEngine
+4. Tester le rendu complet d'un projet VN

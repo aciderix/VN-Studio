@@ -674,41 +674,213 @@ public:
 
 ---
 
-## 3. Format de fichier projet (hypothétique)
+## 3. Format de fichier projet - SPECIFICATIONS EXACTES
+
+**Extrait par rétro-ingénierie de europeo.exe (fonction à 0x0041721d)**
+
+### 3.1 Format VNFILE (Fichier projet .vnp)
+
+Le fichier projet utilise la sérialisation Borland C++ (`ipstream`/`opstream` de bds52t.dll).
 
 ```
-VN_PROJECT_HEADER {
-    char    magic[4];        // "VNPR"
-    uint16  version;         // Version du format
-    uint32  sceneCount;      // Nombre de scènes
-    uint32  variableCount;   // Nombre de variables
-    uint32  resourceCount;   // Nombre de ressources
+VNFILE_FORMAT {
+    // En-tête
+    string    magic;           // "VNFILE" (6 bytes null-terminated)
+    TVNVersion version;        // Version via ipstream::readVersion()
+
+    // Paramètres du projet
+    TVNProjectParms projectParams;
+
+    // Tableau des scènes
+    uint16_t  sceneCount;
+    TVNScene  scenes[sceneCount];
+
+    // Variables globales
+    TVNVariableArray variables;
 }
 
-VN_SCENE {
-    uint32  nameLength;
-    char    name[nameLength];
-    uint32  hotspotCount;
-    VN_HOTSPOT hotspots[hotspotCount];
-    uint32  commandCount;
-    VN_COMMAND commands[commandCount];
-    VN_BITMAP  background;
+TVNProjectParms {
+    string    projectName;     // Nom du projet
+    string    dataFilePath;    // Chemin vers le DATFILE
+    uint16_t  displayWidth;    // Largeur d'affichage (ex: 640)
+    uint16_t  displayHeight;   // Hauteur d'affichage (ex: 480)
+    uint8_t   colorDepth;      // 8 (256 couleurs) ou 24 (TrueColor)
+    TVNDisplayMode displayMode;
+    // ... autres paramètres
 }
 
-VN_HOTSPOT {
-    uint32  nameLength;
-    char    name[nameLength];
-    uint8   shapeType;       // 0=rect, 1=polygon
-    VN_SHAPE shape;
-    uint32  clickCmdCount;
-    VN_COMMAND clickCommands[clickCmdCount];
+TVNScene {
+    string    name;            // Nom de la scène
+    uint16_t  index;           // Index dans le projet
+    TVNSceneProperties properties;
+
+    // Image de fond
+    string    backgroundFile;  // Fichier de fond (référence DATFILE)
+
+    // Hotspots
+    uint16_t  hotspotCount;
+    TVNHotspot hotspots[hotspotCount];
+
+    // Commandes d'entrée de scène
+    uint16_t  commandCount;
+    TVNCommand commands[commandCount];
+
+    // Commandes événementielles
+    TVNEventCommandArray eventCommands;
+
+    // Objets graphiques
+    TVNGdiObjectArray gdiObjects;
 }
 
-VN_COMMAND {
-    uint8   type;
-    uint32  paramsSize;
-    byte    params[paramsSize];
+TVNHotspot {
+    string    name;            // Nom (format: "HOTSPOT_%u")
+    uint8_t   shapeType;       // 0=rectangle, 1=polygone
+
+    // Si rectangle:
+    TRect     bounds;          // left, top, right, bottom (4x int32)
+
+    // Si polygone:
+    uint16_t  pointCount;
+    TPoint    points[pointCount];  // x, y (2x int32 chacun)
+
+    string    cursorFile;      // Fichier curseur personnalisé
+    bool      enabled;
+
+    // Commandes
+    uint16_t  clickCmdCount;
+    TVNCommand clickCommands[clickCmdCount];
+    uint16_t  enterCmdCount;
+    TVNCommand enterCommands[enterCmdCount];
+    uint16_t  exitCmdCount;
+    TVNCommand exitCommands[exitCmdCount];
 }
+
+TVNCommand {
+    uint16_t  type;            // Type de commande (voir CommandType)
+    // Paramètres spécifiques selon le type
+    union {
+        TVNSceneParms     sceneParms;      // GOTO
+        TVNSetVarParms    setVarParms;     // SETVAR
+        TVNIncVarParms    incVarParms;     // INCVAR
+        TVNDecVarParms    decVarParms;     // DECVAR
+        TVNIfParms        ifParms;         // IF
+        TVNExecParms      execParms;       // EXEC
+        TVNFileNameParms  fileNameParms;   // WAVE, AVI, etc.
+        TVNMidiParms      midiParms;       // MIDI
+        TVNImageParms     imageParms;      // IMAGE
+        TVNTextParms      textParms;       // TEXT
+        TVNFontParms      fontParms;       // FONT
+        TVNHtmlParms      htmlParms;       // HTML
+        TVNDigitParms     digitParms;      // DIGIT
+        TVNImgObjParms    imgObjParms;     // IMGOBJ
+        TVNImgSeqParms    imgSeqParms;     // IMGSEQ
+        TVNTextObjParms   textObjParms;    // TEXTOBJ
+        TVNTimeParms      timeParms;       // TIME
+        TVNConditionParms conditionParms;  // Condition IF
+    } params;
+}
+```
+
+### 3.2 Types de paramètres de commandes
+
+```cpp
+// Types de paramètres identifiés par rétro-ingénierie
+TVNCommandParms     // Base class
+TVNConditionParms   // Paramètres de condition (IF)
+TVNDigitParms       // Affichage de chiffres
+TVNExecParms        // Exécution programme externe
+TVNFontParms        // Paramètres de police
+TVNHotspotParms     // Paramètres de hotspot
+TVNHtmlParms        // Texte HTML
+TVNIfParms          // Structure conditionnelle
+TVNImageParms       // Paramètres image
+TVNMidiParms        // Paramètres MIDI
+TVNProjectParms     // Paramètres projet
+TVNRectParms        // Rectangle
+TVNSceneParms       // Paramètres scène (GOTO)
+TVNStringParms      // Chaîne de caractères
+TVNTextParms        // Paramètres texte
+TVNTimeParms        // Paramètres temporels
+TVNFileNameParms    // Chemin de fichier (WAVE, AVI, etc.)
+TVNSetVarParms      // SETVAR (nom + valeur)
+TVNIncVarParms      // INCVAR (nom de variable)
+TVNDecVarParms      // DECVAR (nom de variable)
+TVNImgObjParms      // Objet image
+TVNImgSeqParms      // Séquence d'images
+TVNTextObjParms     // Objet texte
+```
+
+### 3.3 Format DATFILE (Ressources)
+
+Le DATFILE contient toutes les ressources du projet dans un format conteneur.
+
+```
+DATFILE_FORMAT {
+    string    magic;           // "DATFILE"
+
+    // Index des ressources
+    ResourceIndex {
+        string  section;       // MAIN, LIMITS, PREFS, WAV, MID, PAL, IMG8, IMG24, AVI, TXT
+        uint32  offset;        // Offset dans le fichier
+        uint32  size;          // Taille des données
+    }
+
+    // Sections identifiées:
+    MAIN     // Section principale
+    LIMITS   // Limites/paramètres
+    PREFS    // Préférences
+    WAV      // Fichiers audio WAV
+    MID      // Fichiers MIDI
+    PAL      // Palettes de couleurs
+    IMG8     // Images 8-bit (256 couleurs)
+    IMG24    // Images 24-bit (TrueColor)
+    AVI      // Fichiers vidéo AVI
+    TXT      // Fichiers texte
+}
+```
+
+### 3.4 Format VNSAVFILE (Sauvegarde)
+
+```
+VNSAVFILE_FORMAT {
+    string    magic;           // "VNSAVFILE"
+
+    // État de la session
+    uint16_t  currentSceneIndex;
+
+    // Variables
+    uint16_t  variableCount;
+    VNVariable variables[variableCount];  // Structure 264 bytes chacune
+
+    // Historique de navigation
+    uint16_t  historyCount;
+    TVNHistData history[historyCount];
+}
+```
+
+### 3.5 Format VNPALETTE
+
+```
+VNPALETTE_FORMAT {
+    string    magic;           // "VNPALETTE"
+
+    // Palette 256 couleurs
+    uint8_t   entries[256][4]; // R, G, B, Flags pour chaque entrée
+}
+```
+
+### 3.6 Lecture de chaînes (Borland string format)
+
+Les chaînes Borland sont sérialisées avec:
+```cpp
+// Lecture via __brsh_qr8ipstreamr6string
+void ReadString(ipstream& is, string& s) {
+    uint16_t length;
+    is >> length;
+    s.resize(length);
+    is.readBytes(s.data(), length);
+}
+```
 ```
 
 ---

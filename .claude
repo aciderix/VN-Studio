@@ -29,12 +29,19 @@ Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) ver
 - Phase 1 (Analyse): COMPLETE
 - Phase 2 (Conception React): COMPLETE
 - Phase 3 (Implémentation): COMPLETE
+- Phase 4 (Formats de fichiers): COMPLETE
+
+### Formats de fichiers VN analysés
+- **VNFILE** (.vnp): Projets VN - Magic "VNFILE", sérialisation Borland
+- **DATFILE**: Ressources - WAV, MID, PAL, IMG8, IMG24, AVI, TXT
+- **VNSAVFILE**: Sauvegardes - État du jeu et variables
+- Parser créé: `src/engine/VNFileLoader.ts`
 
 ### Fichiers React créés
-- src/engine/* - Moteur complet (8 fichiers)
+- src/engine/* - Moteur complet (9 fichiers dont VNFileLoader.ts)
 - src/components/* - Composants React
 - src/hooks/* - Hooks React
-- src/types/* - Types TypeScript
+- src/types/* - Types TypeScript (types fichiers ajoutés)
 - src/examples/* - Projet de démonstration
 - package.json, tsconfig.json - Configuration
 

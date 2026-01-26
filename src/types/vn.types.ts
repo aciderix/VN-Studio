@@ -503,3 +503,124 @@ export interface VNEvent {
 export type VNCommandCallback = (command: VNCommand) => Promise<void> | void;
 export type VNEventCallback = (event: VNEvent) => void;
 export type VNErrorCallback = (error: Error, context?: string) => void;
+
+// =============================================================================
+// TYPES POUR VNFileLoader (Compatibilité avec le parser de fichiers binaires)
+// =============================================================================
+
+/**
+ * Type de commande utilisé dans les fichiers binaires VNFILE
+ */
+export enum VNCommandType {
+  GOTO = 0,
+  SETVAR = 1,
+  INCVAR = 2,
+  DECVAR = 3,
+  IF = 4,
+  EXEC = 5,
+  WAVE = 6,
+  MIDI = 7,
+  CDAUDIO = 8,
+  AVI = 9,
+  IMAGE = 10,
+  TEXT = 11,
+  FONT = 12,
+  HTML = 13,
+  HIDE = 14,
+  SHOW = 15,
+  SCROLL = 16,
+  ZOOM = 17,
+  WAIT = 18,
+  RETURN = 19,
+  EXIT = 20,
+  IMGOBJ = 21,
+  IMGSEQ = 22,
+  TEXTOBJ = 23,
+  DIGIT = 24,
+  CURSOR = 25,
+  STOPAUDIO = 26,
+  STOPVIDEO = 27,
+  UNKNOWN = 255,
+}
+
+/**
+ * Mode d'affichage pour le projet
+ */
+export enum VNDisplayMode {
+  WINDOWED = 0,
+  FULLSCREEN = 1,
+  BORDERLESS = 2,
+}
+
+/**
+ * Structure d'un projet VN (format fichier)
+ */
+export interface VNProject {
+  name: string;
+  version: string;
+  displayWidth: number;
+  displayHeight: number;
+  colorDepth: number;
+  displayMode: VNDisplayMode;
+  dataFilePath: string;
+  scenes: VNScene[];
+  variables: Map<string, VNVariable>;
+  startSceneIndex: number;
+}
+
+/**
+ * Commande générique pour le parser
+ */
+export interface VNCommandGeneric {
+  type: VNCommandType;
+  params: Record<string, unknown>;
+}
+
+/**
+ * Objet GDI générique (pour le parser)
+ */
+export interface VNGdiObjectGeneric {
+  id: string;
+  type: 'image' | 'text' | 'html';
+  name: string;
+  visible: boolean;
+  bounds: VNRect;
+  filename?: string;
+  transparent?: boolean;
+  transparentColor?: number;
+  text?: string;
+  color?: number;
+  fontName?: string;
+  fontSize?: number;
+  content?: string;
+}
+
+/**
+ * Hotspot pour le parser (format simplifié)
+ */
+export interface VNHotspotParsed {
+  id: string;
+  name: string;
+  bounds?: VNRect;
+  polygon?: VNPoint[];
+  cursorFile?: string;
+  enabled: boolean;
+  onClickCommands: VNCommandGeneric[];
+  onEnterCommands: VNCommandGeneric[];
+  onExitCommands: VNCommandGeneric[];
+}
+
+/**
+ * Scène pour le parser (format simplifié)
+ */
+export interface VNSceneParsed {
+  id: string;
+  name: string;
+  index: number;
+  backgroundFile: string;
+  properties: Record<string, unknown>;
+  hotspots: VNHotspotParsed[];
+  onEnterCommands: VNCommandGeneric[];
+  onExitCommands: VNCommandGeneric[];
+  gdiObjects: VNGdiObjectGeneric[];
+}

@@ -49,3 +49,11 @@ export {
   resetGlobalAnimationTimer,
 } from './VNTimerManager';
 export type { TimerState, TimerCallbacks } from './VNTimerManager';
+
+// Chargeur de fichiers VN
+export {
+  VNFileLoader,
+  vnFileLoader,
+  VNFileError,
+} from './VNFileLoader';
+export type { VNDataFile, VNResource, VNSaveData } from './VNFileLoader';

@@ -133,9 +133,15 @@ class BinaryReader {
   }
 
   // Lecture de chaîne avec longueur préfixée (format Borland)
+  // IMPORTANT: Le format VN utilise uint32 pour la longueur (pas uint16!)
+  // Confirmé par hex dump: 11 00 00 00 = 17 (uint32 LE) suivi de "euroland\face.bmp"
   readBorlandString(): string {
-    const length = this.readUint16();
+    const length = this.readUint32();
     if (length === 0) return '';
+    // Protection contre les longueurs invalides
+    if (length > this.remaining || length > 0x10000) {
+      throw new Error(`Invalid string length: ${length} at offset 0x${(this.position - 4).toString(16)}`);
+    }
     const bytes = this.readBytes(length);
     return this.textDecoder.decode(bytes);
   }
@@ -592,10 +598,19 @@ export class VNFileLoader {
     switch (cmdName) {
       // === NAVIGATION ===
       case 'scene':
-        command.params = {
-          ...command.params,
-          sceneName: args[0] || '',
-        };
+        // Format: "scene <ref>" où ref peut être:
+        // - Un nom de scène: "menu"
+        // - Un index avec suffixe: "57j", "13i", "38"
+        {
+          const sceneRef = args[0] || '';
+          const sceneRefParsed = this.parseSceneReference(sceneRef);
+          command.params = {
+            ...command.params,
+            sceneName: sceneRef,
+            sceneIndex: sceneRefParsed.index,
+            sceneSuffix: sceneRefParsed.suffix,
+          };
+        }
         break;
 
       case 'next':
@@ -777,15 +792,42 @@ export class VNFileLoader {
         break;
 
       case 'font':
-        // Format: "font fontname size [bold] [italic] [color]"
-        command.params = {
-          ...command.params,
-          fontName: args[0] || 'Arial',
-          fontSize: parseInt(args[1]) || 12,
-          bold: args.includes('bold'),
-          italic: args.includes('italic'),
-          color: parseInt(args[args.length - 1]) || 0x000000,
-        };
+        // Format découvert: "%u %u #%lX %i %u %s"
+        // Exemple: "18 0 #ffffff Comic sans MS"
+        // Args: [size, style, #color, ...fontname_parts]
+        {
+          const fontParts: string[] = [];
+          let fontColor = 0x000000;
+          let fontStyle = 0;
+          let fontSize = 12;
+
+          for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+            if (i === 0) {
+              fontSize = parseInt(arg) || 12;
+            } else if (i === 1) {
+              fontStyle = parseInt(arg) || 0;
+            } else if (arg.startsWith('#')) {
+              // Parse hex color (#RRGGBB or #RGB)
+              fontColor = this.parseHexColor(arg);
+            } else if (!isNaN(parseInt(arg)) && fontParts.length === 0) {
+              // Skip numeric values before font name
+              continue;
+            } else {
+              fontParts.push(arg);
+            }
+          }
+
+          command.params = {
+            ...command.params,
+            fontSize,
+            fontStyle, // 0 = normal, 1 = bold, 2 = italic, 3 = bold+italic
+            fontName: fontParts.join(' ') || 'Arial',
+            color: fontColor,
+            bold: (fontStyle & 1) !== 0,
+            italic: (fontStyle & 2) !== 0,
+          };
+        }
         break;
 
       case 'tiptext':
@@ -979,6 +1021,57 @@ export class VNFileLoader {
 
     // Sinon c'est probablement une référence à une variable
     return value.toUpperCase();
+  }
+
+  /**
+   * Parse une couleur hexadécimale avec préfixe #
+   * Formats supportés: #RGB, #RRGGBB
+   * Découvert dans europeo.exe @ 0x0043fa48: format "#%lX"
+   */
+  private parseHexColor(colorStr: string): number {
+    if (!colorStr || !colorStr.startsWith('#')) return 0x000000;
+
+    const hex = colorStr.slice(1); // Enlever le #
+
+    if (hex.length === 3) {
+      // Format #RGB -> #RRGGBB
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      return (r << 16) | (g << 8) | b;
+    } else if (hex.length === 6) {
+      // Format #RRGGBB
+      return parseInt(hex, 16);
+    }
+
+    return 0x000000;
+  }
+
+  /**
+   * Parse une référence de scène
+   * Formats découverts dans les fichiers .vnd:
+   * - "57j" -> index=57, suffix='j'
+   * - "13i" -> index=13, suffix='i'
+   * - "38"  -> index=38, suffix=undefined
+   * - "menu" -> index=undefined, suffix=undefined (nom de scène)
+   *
+   * Les suffixes semblent indiquer des variantes de scène (état, branche, etc.)
+   */
+  private parseSceneReference(ref: string): { index?: number; suffix?: string } {
+    if (!ref) return {};
+
+    // Pattern: chiffres optionnels suivis d'une lettre optionnelle
+    const match = ref.match(/^(\d+)([a-z])?$/i);
+
+    if (match) {
+      return {
+        index: parseInt(match[1]),
+        suffix: match[2]?.toLowerCase(),
+      };
+    }
+
+    // Sinon c'est un nom de scène sans index
+    return {};
   }
 
   /**

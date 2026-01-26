@@ -1153,15 +1153,103 @@ RANDOM        - Génère une valeur aléatoire
 
 ### 3.8 Lecture de chaînes (Borland string format)
 
-Les chaînes Borland sont sérialisées avec:
+**IMPORTANT: Découverte confirmée par analyse hexadécimale des fichiers .vnd**
+
+Les chaînes Borland utilisent un préfixe **uint32** (4 bytes) pour la longueur, pas uint16!
+
 ```cpp
-// Lecture via __brsh_qr8ipstreamr6string
+// Lecture de chaîne - Format réel découvert
 void ReadString(ipstream& is, string& s) {
-    uint16_t length;
+    uint32_t length;    // 4 bytes, little-endian!
     is >> length;
     s.resize(length);
     is.readBytes(s.data(), length);
 }
+```
+
+**Exemple de hex dump:**
+```
+11 00 00 00 65 75 72 6F 6C 61 6E 64 5C 66 61 63 65 2E 62 6D 70
+└── 17 ───┘ └─────────── "euroland\face.bmp" (17 chars) ───────┘
+```
+
+### 3.9 Format de police (font command)
+
+Le format de police découvert à 0x0043fa50:
+```
+%u %u #%lX %i %u %s
+```
+
+**Structure:**
+```
+<size> <style> #<color> <weight> <charset> <fontname>
+```
+
+**Exemple:**
+```
+"18 0 #ffffff Comic sans MS"
+  │  │    │        └── Nom de la police
+  │  │    └── Couleur hex (blanc)
+  │  └── Style (0 = normal)
+  └── Taille en points
+```
+
+### 3.10 Entités HTML supportées
+
+Le moteur reconnaît les entités HTML suivantes (pour le contenu HTML/texte):
+```
+&quot;    - Guillemet double (")
+&lt;      - Inférieur (<)
+&gt;      - Supérieur (>)
+&middot;  - Point médian (·)
+```
+
+### 3.11 Références de scènes avec suffixes
+
+Les références de scène peuvent inclure des **suffixes alphabétiques**:
+```
+".vnp 57j"    - Scène 57 avec suffixe 'j'
+".vnp 13i"    - Scène 13 avec suffixe 'i'
+".vnp 38"     - Scène 38 sans suffixe
+```
+
+Les suffixes semblent indiquer des variantes ou des états de scène.
+
+### 3.12 Système de sérialisation - Pas d'opcodes binaires
+
+**DÉCOUVERTE IMPORTANTE:** Le moteur VN n'utilise **PAS** de système d'opcodes binaires
+(0x01, 0x02, etc.) pour les commandes. Toutes les commandes sont:
+
+1. **Stockées en texte clair** (ex: "playwav", "set_var", "scene")
+2. **Comparées par chaîne** (via lstrcmpiA, insensible à la casse)
+3. **Sérialisées avec formats printf-style**
+
+Les patterns comme `01 00 00 00 06 00 00 00` trouvés dans les fichiers sont:
+- Des compteurs (nombre de scènes, hotspots, commandes)
+- Des longueurs de tableaux
+- Des valeurs de paramètres
+
+**Structure typique d'un fichier VN:**
+```
+[magic: "VNFILE"]
+[version: uint16]
+[project_name: uint32_len + string]
+[display_params]
+[scene_count: uint16]
+[scene_0]
+  [name: uint32_len + string]
+  [background: uint32_len + string]
+  [properties]
+  [hotspot_count: uint16]
+  [hotspot_0]
+    [name: uint32_len + string]
+    [shape_type: uint8]
+    [bounds or polygon]
+    [command_count: uint16]
+    [command_0: uint32_len + "playwav music.wav"]
+    ...
+  ...
+...
 ```
 
 ---

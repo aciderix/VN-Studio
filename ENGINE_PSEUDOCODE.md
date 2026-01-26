@@ -1098,7 +1098,60 @@ BITMAPINFOHEADER {
 }
 ```
 
-### 3.7 Lecture de chaînes (Borland string format)
+### 3.7 Système de sérialisation des commandes (DÉCOUVERTE IMPORTANTE)
+
+Les commandes VN utilisent un système de **sérialisation textuelle** avec des patterns printf-style.
+Découvert dans europeo.exe @ 0x0043f900.
+
+#### Formats de base
+```
+%li           - Long integer
+%u            - Unsigned integer
+%i            - Signed integer
+%s            - String (sans guillemets)
+"%s"          - String (avec guillemets, échappement: \")
+%+i, %+u      - Valeur signée avec signe explicite (+5 ou -3)
+#%lX          - Couleur hexadécimale avec préfixe # (ex: #FF00FF)
+```
+
+#### Formats composites pour les commandes
+```
+"%s" %u                            - addbmp: "nom_objet" index
+"%s" %u %i %i %i %i               - objet + param + rectangle (x,y,w,h)
+"%s" %u %i %i %i %i %s            - objet + param + rect + fichier
+%s "%s" %u %i %i %i %i %s         - cmd + "nom" + param + rect + extra
+"%s" %u %u %u %i %i %i %i %s      - format complexe multi-params
+%s %li                             - set_var: VARNAME valeur
+%li %s %li                         - condition: valeur opérateur valeur
+%i %i %i %i                        - rectangle (left,top,right,bottom)
+%i %i %i %i %u %s                 - rect + unsigned + string
+```
+
+#### Format conditionnel IF
+```
+%s then %s                         - if COND then CMD
+%s then %s else %s                 - if COND then CMD1 else CMD2
+
+Exemple: "if SCORE > 10 then scene WIN else scene LOSE"
+```
+
+#### Opérateurs de comparaison
+```
+=    - Égal
+!=   - Différent
+>    - Supérieur
+<    - Inférieur
+>=   - Supérieur ou égal
+<=   - Inférieur ou égal
+```
+
+#### Valeur spéciale
+```
+RANDOM        - Génère une valeur aléatoire
+              Exemple: set_var SCORE RANDOM 1 100
+```
+
+### 3.8 Lecture de chaînes (Borland string format)
 
 Les chaînes Borland sont sérialisées avec:
 ```cpp
@@ -1109,7 +1162,6 @@ void ReadString(ipstream& is, string& s) {
     s.resize(length);
     is.readBytes(s.data(), length);
 }
-```
 ```
 
 ---

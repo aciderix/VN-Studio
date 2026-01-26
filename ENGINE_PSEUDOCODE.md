@@ -700,10 +700,25 @@ VNFILE_FORMAT {
 }
 
 TVNProjectParms {
-    string    projectName;     // Nom du projet
-    string    dataFilePath;    // Chemin vers le DATFILE
-    uint16_t  displayWidth;    // Largeur d'affichage (ex: 640)
-    uint16_t  displayHeight;   // Hauteur d'affichage (ex: 480)
+    string    projectName;     // Nom du projet (offset +0x31)
+
+    // Si version >= 0x2000d (2.0.13):
+    string    extraField_2d;   // Champ additionnel (offset +0x35)
+
+    // Toujours présent:
+    // Paramètres d'affichage (offset +0x1d via fcn.00416781)
+    uint16_t  displayWidth;    // Largeur d'affichage (offset +0x3d)
+    uint16_t  displayHeight;   // Hauteur d'affichage (offset +0x41)
+
+    // Si version >= 0x2000b (2.0.11):
+    // Appel virtuel via objet à offset +0x49
+
+    // Si version >= 0x2000b (2.0.11):
+    uint16_t  extraWord_45;    // Champ additionnel (offset +0x45)
+
+    // Si version >= 0x2000a (2.0.10):
+    string    dataFilePath;    // Chemin vers le DATFILE (offset +0x39)
+
     uint8_t   colorDepth;      // 8 (256 couleurs) ou 24 (TrueColor)
     TVNDisplayMode displayMode;
     // ... autres paramètres

@@ -337,10 +337,12 @@ export class VNFileLoader {
 
     // Lire la version (format Borland readVersion)
     const version = this.readVersion(reader);
-    console.log(`VNFile version: ${version.major}.${version.minor}`);
+    // Calculer le mot de version pour les comparaisons (format 0x2000a, 0x2000b, etc.)
+    const versionWord = (version.major << 12) | version.minor;
+    console.log(`VNFile version: ${version.major}.${version.minor} (0x${versionWord.toString(16)})`);
 
-    // Paramètres du projet
-    const projectParams = this.readProjectParams(reader);
+    // Paramètres du projet (dépend de la version)
+    const projectParams = this.readProjectParams(reader, versionWord);
 
     // Scènes
     const sceneCount = reader.readUint16();
@@ -380,13 +382,38 @@ export class VNFileLoader {
   }
 
   /**
-   * Lit les paramètres du projet
+   * Lit les paramètres du projet (version-aware)
+   *
+   * Structure basée sur l'analyse de fcn.0041721d:
+   * - Version >= 0x2000a (2.0.10): champ dataFilePath ajouté
+   * - Version >= 0x2000b (2.0.11): champs additionnels
+   * - Version >= 0x2000d (2.0.13): encore plus de champs
    */
-  private readProjectParams(reader: BinaryReader): VNProjectParams {
+  private readProjectParams(reader: BinaryReader, versionWord: number): VNProjectParams {
+    // Nom du projet (toujours présent)
     const name = reader.readBorlandString();
-    const dataFilePath = reader.readBorlandString();
+
+    // Champ additionnel pour version >= 0x2000d (usage futur, structure inconnue)
+    if (versionWord >= 0x2000d) {
+      reader.readBorlandString(); // Skip extra field
+    }
+
+    // Paramètres d'affichage
     const displayWidth = reader.readUint16();
     const displayHeight = reader.readUint16();
+
+    // Champ additionnel pour version >= 0x2000b (usage futur, structure inconnue)
+    if (versionWord >= 0x2000b) {
+      reader.readUint16(); // Skip extra word
+    }
+
+    // Chemin du fichier de données (version >= 0x2000a)
+    let dataFilePath = '';
+    if (versionWord >= 0x2000a) {
+      dataFilePath = reader.readBorlandString();
+    }
+
+    // Profondeur de couleur et mode d'affichage
     const colorDepth = reader.readUint8();
     const displayModeValue = reader.readUint8();
 
@@ -397,7 +424,7 @@ export class VNFileLoader {
           ? VNDisplayModeType.FULLSCREEN
           : VNDisplayModeType.BORDERLESS;
 
-    // Autres paramètres potentiels
+    // Autres paramètres optionnels
     const hasToolbar = reader.readBool();
     const smoothZoom = reader.readBool();
     const smoothScroll = reader.readBool();

@@ -48,6 +48,90 @@ interface VNOpcodeRef {
 }
 
 /**
+ * Types de records binaires pour la sérialisation VN
+ * Découverts dans europeo.exe - format uint32 LE
+ */
+export enum VNRecordType {
+  RECT_COLLISION = 0x02,      // Rectangle de collision simple (X1,Y1,X2,Y2)
+  AUDIO_WAV = 0x0b,           // Référence fichier audio WAV
+  AUDIO_MIDI = 0x0c,          // Référence fichier audio MIDI
+  CONDITIONAL = 0x15,         // Instructions conditionnelles (if...then)
+  HOTSPOT_TEXT = 0x26,        // Texte de hotspot (libellé survol)
+  POLYGON_COLLISION = 0x69,   // Zone de collision polygonale (n sommets)
+}
+
+/**
+ * Record de collision rectangulaire (Type 2)
+ */
+export interface VNRectCollision {
+  type: VNRecordType.RECT_COLLISION;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+/**
+ * Record audio WAV (Type 11)
+ */
+export interface VNAudioWavRecord {
+  type: VNRecordType.AUDIO_WAV;
+  filePath: string;
+}
+
+/**
+ * Record audio MIDI (Type 12)
+ */
+export interface VNAudioMidiRecord {
+  type: VNRecordType.AUDIO_MIDI;
+  filePath: string;
+}
+
+/**
+ * Record conditionnel (Type 21)
+ * Format: "VARIABLE OPERATEUR VALEUR then COMMANDE"
+ */
+export interface VNConditionalRecord {
+  type: VNRecordType.CONDITIONAL;
+  expression: string;
+  variable?: string;
+  operator?: string;  // =, !=, <, >, <=, >=
+  value?: number | string;
+  thenCommand?: string;
+}
+
+/**
+ * Record texte de hotspot (Type 38)
+ */
+export interface VNHotspotTextRecord {
+  type: VNRecordType.HOTSPOT_TEXT;
+  text: string;
+  x: number;
+  y: number;
+}
+
+/**
+ * Record de collision polygonale (Type 105)
+ * Utilisé pour les zones cliquables complexes (bâtiments, personnages)
+ */
+export interface VNPolygonCollision {
+  type: VNRecordType.POLYGON_COLLISION;
+  pointCount: number;
+  points: VNPoint[];
+}
+
+/**
+ * Union de tous les types de records
+ */
+export type VNRecord =
+  | VNRectCollision
+  | VNAudioWavRecord
+  | VNAudioMidiRecord
+  | VNConditionalRecord
+  | VNHotspotTextRecord
+  | VNPolygonCollision;
+
+/**
  * Buffer Reader - Lecture binaire avec position
  */
 class BinaryReader {
@@ -1166,6 +1250,162 @@ export class VNFileLoader {
     // Sinon c'est un nom de scène sans index
     return {};
   }
+
+  // ==================== PARSING DES RECORDS BINAIRES ====================
+
+  /**
+   * Lit un record binaire et retourne le type approprié
+   * Le type est lu comme uint32 LE au début du record
+   */
+  private readRecord(reader: BinaryReader): VNRecord | null {
+    if (reader.remaining < 4) return null;
+
+    const recordType = reader.readUint32();
+
+    switch (recordType) {
+      case VNRecordType.RECT_COLLISION:
+        return this.readRectCollision(reader);
+      case VNRecordType.AUDIO_WAV:
+        return this.readAudioWavRecord(reader);
+      case VNRecordType.AUDIO_MIDI:
+        return this.readAudioMidiRecord(reader);
+      case VNRecordType.CONDITIONAL:
+        return this.readConditionalRecord(reader);
+      case VNRecordType.HOTSPOT_TEXT:
+        return this.readHotspotTextRecord(reader);
+      case VNRecordType.POLYGON_COLLISION:
+        return this.readPolygonCollision(reader);
+      default:
+        console.warn(`Unknown record type: 0x${recordType.toString(16)}`);
+        return null;
+    }
+  }
+
+  /**
+   * Lit un record de collision rectangulaire (Type 2)
+   */
+  private readRectCollision(reader: BinaryReader): VNRectCollision {
+    return {
+      type: VNRecordType.RECT_COLLISION,
+      x1: reader.readInt32(),
+      y1: reader.readInt32(),
+      x2: reader.readInt32(),
+      y2: reader.readInt32(),
+    };
+  }
+
+  /**
+   * Lit un record audio WAV (Type 11)
+   */
+  private readAudioWavRecord(reader: BinaryReader): VNAudioWavRecord {
+    return {
+      type: VNRecordType.AUDIO_WAV,
+      filePath: reader.readBorlandString(),
+    };
+  }
+
+  /**
+   * Lit un record audio MIDI (Type 12)
+   */
+  private readAudioMidiRecord(reader: BinaryReader): VNAudioMidiRecord {
+    return {
+      type: VNRecordType.AUDIO_MIDI,
+      filePath: reader.readBorlandString(),
+    };
+  }
+
+  /**
+   * Lit un record conditionnel (Type 21)
+   * Format: "VARIABLE OPERATEUR VALEUR then COMMANDE"
+   */
+  private readConditionalRecord(reader: BinaryReader): VNConditionalRecord {
+    const expression = reader.readBorlandString();
+
+    // Parser l'expression conditionnelle
+    const record: VNConditionalRecord = {
+      type: VNRecordType.CONDITIONAL,
+      expression,
+    };
+
+    // Pattern: VARIABLE OPERATOR VALUE then COMMAND
+    const match = expression.match(/^(\w+)\s*(=|!=|<|>|<=|>=)\s*(\S+)\s+then\s+(.+)$/i);
+    if (match) {
+      record.variable = match[1];
+      record.operator = match[2];
+      record.value = isNaN(Number(match[3])) ? match[3] : Number(match[3]);
+      record.thenCommand = match[4];
+    }
+
+    return record;
+  }
+
+  /**
+   * Lit un record texte de hotspot (Type 38)
+   */
+  private readHotspotTextRecord(reader: BinaryReader): VNHotspotTextRecord {
+    return {
+      type: VNRecordType.HOTSPOT_TEXT,
+      text: reader.readBorlandString(),
+      x: reader.readInt32(),
+      y: reader.readInt32(),
+    };
+  }
+
+  /**
+   * Lit un record de collision polygonale (Type 105)
+   * Structure: [pointCount:uint32] [points: (x:int32, y:int32) * pointCount]
+   */
+  private readPolygonCollision(reader: BinaryReader): VNPolygonCollision {
+    const pointCount = reader.readUint32();
+
+    // Validation: éviter les corruptions de données
+    if (pointCount > 1000) {
+      throw new VNFileError(`Invalid polygon point count: ${pointCount}`, reader.pos);
+    }
+
+    const points: VNPoint[] = [];
+    for (let i = 0; i < pointCount; i++) {
+      points.push({
+        x: reader.readInt32(),
+        y: reader.readInt32(),
+      });
+    }
+
+    return {
+      type: VNRecordType.POLYGON_COLLISION,
+      pointCount,
+      points,
+    };
+  }
+
+  /**
+   * Convertit un VNPolygonCollision en tableau de VNPoint pour les hotspots
+   */
+  polygonToPoints(polygon: VNPolygonCollision): VNPoint[] {
+    return polygon.points;
+  }
+
+  /**
+   * Vérifie si un point est à l'intérieur d'un polygone (ray casting algorithm)
+   */
+  isPointInPolygon(point: VNPoint, polygon: VNPoint[]): boolean {
+    let inside = false;
+    const n = polygon.length;
+
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = polygon[i].x, yi = polygon[i].y;
+      const xj = polygon[j].x, yj = polygon[j].y;
+
+      if (((yi > point.y) !== (yj > point.y)) &&
+          (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  }
+
+  // ==================== FIN PARSING DES RECORDS ====================
 
   /**
    * Lit un objet GDI

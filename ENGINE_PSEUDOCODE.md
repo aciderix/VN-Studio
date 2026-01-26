@@ -1793,5 +1793,125 @@ Ces opcodes utilisent la formule `index = char - 'a' + offset` :
 
 ---
 
+## 7. Types de Records Binaires (Sérialisation VN)
+
+Les fichiers VN utilisent un système de records typés pour stocker les différentes structures de données.
+Chaque record commence par un identifiant de type codé sur 4 octets (uint32 Little Endian).
+
+### 7.1 Énumération des types de records (0x00 - 0x69+)
+
+| Type | Hex    | Nom                | Description                                    |
+|:----:|:------:|:-------------------|:-----------------------------------------------|
+| 2    | 0x02   | RECT_COLLISION     | Rectangle de collision simple (X1,Y1,X2,Y2)    |
+| 11   | 0x0B   | AUDIO_WAV          | Référence fichier audio WAV                    |
+| 12   | 0x0C   | AUDIO_MIDI         | Référence fichier audio MIDI                   |
+| 21   | 0x15   | CONDITIONAL        | Instructions conditionnelles (if...then)       |
+| 38   | 0x26   | HOTSPOT_TEXT       | Texte de hotspot (libellé survol)              |
+| 105  | 0x69   | POLYGON_COLLISION  | Zone de collision polygonale (n sommets)       |
+
+### 7.2 Structure détaillée des types de records
+
+#### Type 2 (0x02) - Rectangle de collision
+
+Structure simple pour zones cliquables rectangulaires :
+
+```
+Offset  Taille  Type    Description
+------  ------  ------  -----------
+0x00    4       uint32  Type = 0x02
+0x04    4       int32   X1 (coin haut-gauche)
+0x08    4       int32   Y1 (coin haut-gauche)
+0x0C    4       int32   X2 (coin bas-droit)
+0x10    4       int32   Y2 (coin bas-droit)
+```
+
+#### Type 11 (0x0B) - Audio WAV
+
+Référence vers un fichier audio WAV :
+
+```
+Offset  Taille  Type    Description
+------  ------  ------  -----------
+0x00    4       uint32  Type = 0x0B
+0x04    4       uint32  Longueur du chemin
+0x08    n       string  Chemin du fichier WAV
+```
+
+#### Type 21 (0x15) - Instructions conditionnelles
+
+Script conditionnel utilisant une syntaxe if/then :
+
+```
+Offset  Taille  Type    Description
+------  ------  ------  -----------
+0x00    4       uint32  Type = 0x15
+0x04    4       uint32  Longueur de la chaîne
+0x08    n       string  Expression conditionnelle
+                        Format: "VARIABLE OPERATEUR VALEUR then COMMANDE"
+                        Exemple: "score < 0 then runprj gameover.vnp"
+```
+
+Opérateurs supportés : `=`, `!=`, `<`, `>`, `<=`, `>=`
+
+#### Type 38 (0x26) - Texte de Hotspot
+
+Libellé affiché au survol d'une zone interactive :
+
+```
+Offset  Taille  Type    Description
+------  ------  ------  -----------
+0x00    4       uint32  Type = 0x26
+0x04    4       uint32  Longueur du texte
+0x08    n       string  Texte du tooltip
+0x??    4       int32   X position affichage
+0x??    4       int32   Y position affichage
+```
+
+#### Type 105 (0x69) - Polygone de collision
+
+Zone cliquable de forme complexe (polygone) pour détourer bâtiments/personnages :
+
+```
+Offset  Taille  Type    Description
+------  ------  ------  -----------
+0x00    4       uint32  Type = 0x69
+0x04    4       uint32  Nombre de sommets (N)
+0x08    8*N     int32[] Coordonnées des sommets
+                        Pour chaque sommet: X (4 bytes), Y (4 bytes)
+```
+
+Exemple pour un polygone à 8 sommets :
+- 4 bytes : Type (0x69 0x00 0x00 0x00)
+- 4 bytes : Count (0x08 0x00 0x00 0x00)
+- 64 bytes : 8 paires (X, Y) de 32 bits chacune
+
+### 7.3 Enchaînement logique des records
+
+Dans le flux binaire d'un fichier VN, les records suivent un ordre spécifique :
+
+```
+[Record Type 38 - Texte du Hotspot]
+       ↓
+[Record Type 105 - Polygone de collision]
+       ↓
+[Record suivant...]
+```
+
+Le Type 38 définit le texte affiché au survol, puis le Type 105 définit la zone
+géométrique de la collision.
+
+### 7.4 Notes sur le parsing
+
+1. **Version du moteur** : Certaines versions lisent les données binaires directement
+   après le texte sans ID de type explicite. Les versions finales (comme europeo.exe)
+   utilisent l'ID 105 pour isoler proprement les données géométriques.
+
+2. **Validation** : Toujours vérifier que le nombre de sommets est raisonnable
+   (< 1000) pour éviter les corruptions de données.
+
+3. **Ordre des octets** : Tous les entiers sont en format Little Endian (x86).
+
+---
+
 **Dernière mise à jour**: 2026-01-26
 **Analysé par**: radare2 5.5.0

@@ -457,7 +457,7 @@ export interface VNEngineState {
   previousSceneIndex: number;
   variables: Map<string, number>;  // Noms en MAJUSCULES
   objects: Map<string, VNDisplayObject>;
-  activeTimers: Map<string, NodeJS.Timeout | number>;
+  activeTimers: Map<string, ReturnType<typeof setTimeout> | number>;
   isPlaying: boolean;
   isPaused: boolean;
   isZooming: boolean;
@@ -544,9 +544,9 @@ export enum VNCommandType {
 }
 
 /**
- * Mode d'affichage pour le projet
+ * Type de mode d'affichage pour le projet (utilisé dans les fichiers binaires)
  */
-export enum VNDisplayMode {
+export enum VNDisplayModeType {
   WINDOWED = 0,
   FULLSCREEN = 1,
   BORDERLESS = 2,
@@ -561,9 +561,9 @@ export interface VNProject {
   displayWidth: number;
   displayHeight: number;
   colorDepth: number;
-  displayMode: VNDisplayMode;
+  displayMode: VNDisplayModeType;
   dataFilePath: string;
-  scenes: VNScene[];
+  scenes: VNSceneParsed[];
   variables: Map<string, VNVariable>;
   startSceneIndex: number;
 }

@@ -781,7 +781,183 @@ TVNCommand {
 }
 ```
 
-### 3.2 Types de paramètres de commandes
+### 3.2 Commandes - LISTE COMPLETE (extraite de europeo.exe @ 0x43f700)
+
+Les commandes sont stockées comme **chaînes de caractères en minuscules**, pas comme IDs binaires.
+
+```
+COMMANDES DE NAVIGATION
+-----------------------
+quit          - Quitter l'application
+about         - Afficher la boîte "À propos"
+prefs         - Ouvrir les préférences
+prev          - Scène précédente
+next          - Scène suivante
+zoom          - Activer le mode zoom
+scene         - Aller à une scène (scene nom_scene)
+hotspot       - Référencer un hotspot
+tiptext       - Afficher un texte d'aide
+
+COMMANDES MÉDIA
+---------------
+playavi       - Jouer une vidéo AVI
+playbmp       - Animer un bitmap
+playwav       - Jouer un son WAV
+playmid       - Jouer un fichier MIDI
+playhtml      - Afficher du contenu HTML
+playcda       - Jouer un CD Audio
+playseq       - Jouer une séquence d'images
+closeavi      - Arrêter la vidéo AVI
+closemid      - Arrêter le MIDI
+closewav      - Arrêter le son WAV
+zoomin        - Zoom avant
+zoomout       - Zoom arrière
+pause         - Mettre en pause
+
+COMMANDES D'AFFICHAGE
+---------------------
+addbmp        - Ajouter un bitmap (addbmp id,fichier,x,y)
+delbmp        - Supprimer un bitmap
+showbmp       - Afficher un bitmap
+hidebmp       - Cacher un bitmap
+addtext       - Ajouter du texte (addtext id,texte,x,y)
+playtext      - Afficher du texte avec effet
+font          - Définir la police
+showobj       - Afficher un objet
+hideobj       - Cacher un objet
+delobj        - Supprimer un objet
+defcursor     - Définir le curseur par défaut
+invalidate    - Forcer le redessin
+update        - Mettre à jour l'affichage
+
+COMMANDES SYSTÈME
+-----------------
+exec          - Exécuter un programme externe
+explore       - Ouvrir l'explorateur
+rundll        - Exécuter une fonction DLL
+runprj        - Charger un autre projet
+load          - Charger une sauvegarde
+save          - Sauvegarder
+msgbox        - Afficher une boîte de message
+playcmd       - Exécuter une commande
+rem           - Commentaire (ignoré)
+closedll      - Fermer une DLL
+
+VARIABLES ET LOGIQUE
+--------------------
+set_var       - Définir une variable (set_var NOM,valeur)
+inc_var       - Incrémenter (inc_var NOM)
+dec_var       - Décrémenter (dec_var NOM)
+if            - Condition (if NOM opérateur valeur then commande)
+
+OPÉRATEURS DE COMPARAISON
+-------------------------
+=             - Égal
+!=            - Différent
+>             - Supérieur
+<             - Inférieur
+>=            - Supérieur ou égal
+<=            - Inférieur ou égal
+RANDOM        - Valeur aléatoire
+
+ÉVÉNEMENTS
+----------
+EV_ONFOCUS    - Quand le focus est obtenu
+EV_ONCLICK    - Quand un clic est effectué
+EV_ONINIT     - À l'initialisation
+EV_AFTERINIT  - Après l'initialisation
+```
+
+### 3.3 Syntaxe détaillée des commandes
+
+Les commandes sont stockées au format textuel dans les fichiers VN. Voici la syntaxe exacte de chaque commande:
+
+```
+NAVIGATION
+----------
+scene <nom_scene>                     - Aller à une scène spécifique
+next                                  - Scène suivante
+prev                                  - Scène précédente
+quit [code]                           - Quitter (code de sortie optionnel)
+about                                 - Boîte "À propos"
+prefs                                 - Préférences
+
+VARIABLES
+---------
+set_var <VARNAME> <valeur>            - Définir une variable
+set_var <VARNAME> RANDOM <min> <max>  - Valeur aléatoire entre min et max
+inc_var <VARNAME> [montant]           - Incrémenter (défaut: 1)
+dec_var <VARNAME> [montant]           - Décrémenter (défaut: 1)
+
+CONDITION (avec commande binaire imbriquée)
+-------------------------------------------
+if <VARNAME> <op> <valeur>            - Condition suivie de then/else binaire
+   Opérateurs: = != < > <= >=
+
+MÉDIA AUDIO
+-----------
+playwav <fichier> [loop]              - Jouer WAV (loop = répétition)
+playmid <fichier> [loop] [volume]     - Jouer MIDI (volume: 0-100)
+playcda <piste> [loop]                - Jouer CD Audio
+closewav                              - Arrêter WAV
+closemid                              - Arrêter MIDI
+
+MÉDIA VIDÉO
+-----------
+playavi <fichier> [x y w h] [loop]    - Jouer AVI avec position/taille
+closeavi                              - Arrêter AVI
+
+IMAGES/BITMAPS
+--------------
+addbmp <objname> <fichier> <x> <y> [transparent] [couleur]
+                                      - Ajouter bitmap (couleur transparente en hex)
+delbmp <objname>                      - Supprimer bitmap
+showbmp <objname>                     - Afficher bitmap
+hidebmp <objname>                     - Cacher bitmap
+playseq <pattern> <start> <end> <x> <y> <delay> [loop]
+                                      - Séquence d'images animées
+
+TEXTE
+-----
+addtext <objname> <texte> <x> <y>     - Ajouter texte
+playtext <objname> <texte> <x> <y>    - Texte avec effet
+font <nom> <taille> [bold] [italic] [couleur]
+                                      - Définir police
+tiptext <texte>                       - Texte d'aide (tooltip)
+playhtml <objname> <url> <x> <y> <w> <h>
+                                      - Afficher HTML
+
+OBJETS
+------
+showobj <objname>                     - Afficher objet
+hideobj <objname>                     - Cacher objet
+delobj <objname>                      - Supprimer objet
+
+EFFETS
+------
+zoom <start> <end> <cx> <cy> <durée>  - Zoom animé
+zoomin                                - Zoom avant (raccourci)
+zoomout                               - Zoom arrière (raccourci)
+pause <durée_ms>                      - Attendre
+
+SYSTÈME
+-------
+exec <programme> [args] [wait]        - Exécuter programme
+explore <url>                         - Ouvrir URL dans navigateur
+rundll <dll> <fonction> [args]        - Appeler fonction DLL
+runprj <projet> [scene]               - Charger autre projet
+load <fichier>                        - Charger sauvegarde
+save <fichier>                        - Sauvegarder
+msgbox <message> [titre] [type]       - Boîte de message
+defcursor <fichier>                   - Curseur par défaut
+hotspot <nom> enable|disable          - Activer/désactiver hotspot
+rem <commentaire>                     - Commentaire (ignoré)
+closedll <dll>                        - Décharger DLL
+update                                - Rafraîchir affichage
+invalidate                            - Forcer redessin
+```
+
+### 3.4 Types de paramètres de commandes (C++)
 
 ```cpp
 // Types de paramètres identifiés par rétro-ingénierie

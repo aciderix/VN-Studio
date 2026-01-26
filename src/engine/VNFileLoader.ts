@@ -8,16 +8,22 @@
 
 import {
   VNProject,
-  VNScene,
-  VNHotspot,
-  VNCommand,
+  VNSceneParsed,
+  VNHotspotParsed,
+  VNCommandGeneric,
   VNCommandType,
   VNVariable,
-  VNGdiObject,
-  VNDisplayMode,
+  VNGdiObjectGeneric,
+  VNDisplayModeType,
   VNRect,
   VNPoint,
 } from '../types/vn.types';
+
+// Alias pour compatibilité
+type VNScene = VNSceneParsed;
+type VNHotspot = VNHotspotParsed;
+type VNCommand = VNCommandGeneric;
+type VNGdiObject = VNGdiObjectGeneric;
 
 /**
  * Buffer Reader - Lecture binaire avec position
@@ -195,38 +201,85 @@ export class VNFileError extends Error {
 }
 
 /**
- * Types de commandes mapping
+ * Mapping des noms de commandes textuelles vers les types
+ * Extrait de europeo.exe @ 0x43f700
  */
-const CommandTypeMap: Record<number, VNCommandType> = {
-  0: VNCommandType.GOTO,
-  1: VNCommandType.SETVAR,
-  2: VNCommandType.INCVAR,
-  3: VNCommandType.DECVAR,
-  4: VNCommandType.IF,
-  5: VNCommandType.EXEC,
-  6: VNCommandType.WAVE,
-  7: VNCommandType.MIDI,
-  8: VNCommandType.CDAUDIO,
-  9: VNCommandType.AVI,
-  10: VNCommandType.IMAGE,
-  11: VNCommandType.TEXT,
-  12: VNCommandType.FONT,
-  13: VNCommandType.HTML,
-  14: VNCommandType.HIDE,
-  15: VNCommandType.SHOW,
-  16: VNCommandType.SCROLL,
-  17: VNCommandType.ZOOM,
-  18: VNCommandType.WAIT,
-  19: VNCommandType.RETURN,
-  20: VNCommandType.EXIT,
-  21: VNCommandType.IMGOBJ,
-  22: VNCommandType.IMGSEQ,
-  23: VNCommandType.TEXTOBJ,
-  24: VNCommandType.DIGIT,
-  25: VNCommandType.CURSOR,
-  26: VNCommandType.STOPAUDIO,
-  27: VNCommandType.STOPVIDEO,
+const CommandNameMap: Record<string, VNCommandType> = {
+  // Navigation
+  'scene': VNCommandType.GOTO,
+  'quit': VNCommandType.EXIT,
+  'prev': VNCommandType.RETURN,
+  'next': VNCommandType.GOTO,
+  'about': VNCommandType.UNKNOWN,
+  'prefs': VNCommandType.UNKNOWN,
+
+  // Variables
+  'set_var': VNCommandType.SETVAR,
+  'inc_var': VNCommandType.INCVAR,
+  'dec_var': VNCommandType.DECVAR,
+  'if': VNCommandType.IF,
+
+  // Média audio
+  'playwav': VNCommandType.WAVE,
+  'playmid': VNCommandType.MIDI,
+  'playcda': VNCommandType.CDAUDIO,
+  'closewav': VNCommandType.STOPAUDIO,
+  'closemid': VNCommandType.STOPAUDIO,
+
+  // Vidéo
+  'playavi': VNCommandType.AVI,
+  'closeavi': VNCommandType.STOPVIDEO,
+
+  // Images/Bitmaps
+  'addbmp': VNCommandType.IMAGE,
+  'delbmp': VNCommandType.HIDE,
+  'showbmp': VNCommandType.SHOW,
+  'hidebmp': VNCommandType.HIDE,
+  'playbmp': VNCommandType.IMGSEQ,
+  'playseq': VNCommandType.IMGSEQ,
+
+  // Texte
+  'addtext': VNCommandType.TEXT,
+  'playtext': VNCommandType.TEXT,
+  'font': VNCommandType.FONT,
+  'playhtml': VNCommandType.HTML,
+  'tiptext': VNCommandType.TEXT,
+
+  // Objets
+  'showobj': VNCommandType.SHOW,
+  'hideobj': VNCommandType.HIDE,
+  'delobj': VNCommandType.HIDE,
+
+  // Zoom/Effets
+  'zoom': VNCommandType.ZOOM,
+  'zoomin': VNCommandType.ZOOM,
+  'zoomout': VNCommandType.ZOOM,
+  'pause': VNCommandType.WAIT,
+
+  // Système
+  'exec': VNCommandType.EXEC,
+  'explore': VNCommandType.EXEC,
+  'rundll': VNCommandType.EXEC,
+  'runprj': VNCommandType.EXEC,
+  'load': VNCommandType.UNKNOWN,
+  'save': VNCommandType.UNKNOWN,
+  'msgbox': VNCommandType.TEXT,
+  'playcmd': VNCommandType.UNKNOWN,
+  'update': VNCommandType.UNKNOWN,
+  'invalidate': VNCommandType.UNKNOWN,
+  'defcursor': VNCommandType.CURSOR,
+  'rem': VNCommandType.UNKNOWN, // Commentaire
+  'closedll': VNCommandType.UNKNOWN,
+  'hotspot': VNCommandType.UNKNOWN,
 };
+
+/**
+ * Parse une commande textuelle et retourne le type
+ */
+function parseCommandName(name: string): VNCommandType {
+  const normalized = name.toLowerCase().trim();
+  return CommandNameMap[normalized] || VNCommandType.UNKNOWN;
+}
 
 /**
  * VNFileLoader - Classe principale de chargement
@@ -337,12 +390,12 @@ export class VNFileLoader {
     const colorDepth = reader.readUint8();
     const displayModeValue = reader.readUint8();
 
-    const displayMode: VNDisplayMode =
+    const displayMode: VNDisplayModeType =
       displayModeValue === 0
-        ? VNDisplayMode.WINDOWED
+        ? VNDisplayModeType.WINDOWED
         : displayModeValue === 1
-          ? VNDisplayMode.FULLSCREEN
-          : VNDisplayMode.BORDERLESS;
+          ? VNDisplayModeType.FULLSCREEN
+          : VNDisplayModeType.BORDERLESS;
 
     // Autres paramètres potentiels
     const hasToolbar = reader.readBool();
@@ -405,7 +458,7 @@ export class VNFileLoader {
       name,
       index,
       backgroundFile,
-      properties,
+      properties: { ...properties } as Record<string, unknown>,
       hotspots,
       onEnterCommands,
       onExitCommands,
@@ -487,195 +540,418 @@ export class VNFileLoader {
   }
 
   /**
-   * Lit une commande
+   * Lit une commande (format textuel)
+   * Le format VN utilise des commandes textuelles comme "playwav", "set_var", etc.
+   * Format typique: "commande param1,param2,param3" ou données binaires additionnelles
    */
   private readCommand(reader: BinaryReader): VNCommand {
-    const typeValue = reader.readUint16();
-    const type = CommandTypeMap[typeValue] || VNCommandType.UNKNOWN;
+    // Lire la chaîne de commande textuelle
+    const commandStr = reader.readBorlandString();
+
+    // Parser les paramètres de la commande textuelle
+    // Format typique: "commande param1,param2,param3" ou "commande param1 param2"
+    const parts = commandStr.split(/[\s,]+/);
+    const cmdName = parts[0]?.toLowerCase() || '';
+    const args = parts.slice(1);
+
+    const type = parseCommandName(cmdName);
 
     const command: VNCommand = {
       type,
-      params: {},
+      params: { rawCommand: commandStr },
     };
 
-    // Lecture des paramètres selon le type
-    switch (type) {
-      case VNCommandType.GOTO:
+    // Lecture des paramètres selon le type de commande
+    switch (cmdName) {
+      // === NAVIGATION ===
+      case 'scene':
         command.params = {
-          sceneIndex: reader.readUint16(),
-          sceneName: reader.readBorlandString(),
+          ...command.params,
+          sceneName: args[0] || '',
         };
         break;
 
-      case VNCommandType.SETVAR:
+      case 'next':
+      case 'prev':
+        // Navigation simple, pas de paramètres nécessaires
+        break;
+
+      case 'quit':
+        // Peut avoir un code de sortie optionnel
         command.params = {
-          varName: reader.readBorlandString(),
-          value: reader.readInt32(),
+          ...command.params,
+          exitCode: args[0] ? parseInt(args[0]) : 0,
         };
         break;
 
-      case VNCommandType.INCVAR:
-      case VNCommandType.DECVAR:
+      // === VARIABLES ===
+      case 'set_var':
+        // Format: "set_var VARNAME value" ou "set_var VARNAME RANDOM min max"
+        if (args[1]?.toUpperCase() === 'RANDOM') {
+          command.params = {
+            ...command.params,
+            varName: args[0]?.toUpperCase() || '',
+            random: true,
+            min: parseInt(args[2]) || 0,
+            max: parseInt(args[3]) || 100,
+          };
+        } else {
+          command.params = {
+            ...command.params,
+            varName: args[0]?.toUpperCase() || '',
+            value: parseInt(args[1]) || 0,
+          };
+        }
+        break;
+
+      case 'inc_var':
+        // Format: "inc_var VARNAME [amount]"
         command.params = {
-          varName: reader.readBorlandString(),
-          amount: reader.readInt32() || 1,
+          ...command.params,
+          varName: args[0]?.toUpperCase() || '',
+          amount: parseInt(args[1]) || 1,
         };
         break;
 
-      case VNCommandType.IF:
+      case 'dec_var':
+        // Format: "dec_var VARNAME [amount]"
         command.params = {
-          varName: reader.readBorlandString(),
-          operator: reader.readUint8(), // 0: ==, 1: !=, 2: <, 3: >, 4: <=, 5: >=
-          compareValue: reader.readInt32(),
+          ...command.params,
+          varName: args[0]?.toUpperCase() || '',
+          amount: parseInt(args[1]) || 1,
+        };
+        break;
+
+      case 'if':
+        // Format: "if VARNAME operator value" + données binaires pour then/else
+        // Opérateurs: =, !=, <, >, <=, >=
+        command.params = {
+          ...command.params,
+          varName: args[0]?.toUpperCase() || '',
+          operator: args[1] || '=',
+          compareValue: this.parseValue(args[2]),
           thenCommand: this.readCommand(reader),
           elseCommand: reader.readBool() ? this.readCommand(reader) : undefined,
         };
         break;
 
-      case VNCommandType.EXEC:
+      // === MÉDIA AUDIO ===
+      case 'playwav':
+        // Format: "playwav filename [loop]"
         command.params = {
-          program: reader.readBorlandString(),
-          arguments: reader.readBorlandString(),
-          waitForCompletion: reader.readBool(),
+          ...command.params,
+          filename: args[0] || '',
+          loop: args[1]?.toLowerCase() === 'loop' || args[1] === '1',
         };
         break;
 
-      case VNCommandType.WAVE:
-      case VNCommandType.AVI:
+      case 'playmid':
+        // Format: "playmid filename [loop] [volume]"
         command.params = {
-          filename: reader.readBorlandString(),
-          loop: reader.readBool(),
+          ...command.params,
+          filename: args[0] || '',
+          loop: args[1]?.toLowerCase() === 'loop' || args[1] === '1',
+          volume: parseInt(args[2]) || 100,
         };
         break;
 
-      case VNCommandType.MIDI:
+      case 'playcda':
+        // Format: "playcda track [loop]"
         command.params = {
-          filename: reader.readBorlandString(),
-          loop: reader.readBool(),
-          volume: reader.readUint8(),
+          ...command.params,
+          track: parseInt(args[0]) || 1,
+          loop: args[1]?.toLowerCase() === 'loop' || args[1] === '1',
         };
         break;
 
-      case VNCommandType.CDAUDIO:
+      case 'closewav':
+      case 'closemid':
+        // Arrêt audio - pas de paramètres
+        break;
+
+      // === VIDÉO ===
+      case 'playavi':
+        // Format: "playavi filename [x,y,width,height] [loop]"
         command.params = {
-          track: reader.readUint8(),
-          loop: reader.readBool(),
+          ...command.params,
+          filename: args[0] || '',
+          x: parseInt(args[1]) || 0,
+          y: parseInt(args[2]) || 0,
+          width: parseInt(args[3]) || 0,
+          height: parseInt(args[4]) || 0,
+          loop: args[5]?.toLowerCase() === 'loop',
         };
         break;
 
-      case VNCommandType.IMAGE:
-      case VNCommandType.IMGOBJ:
+      case 'closeavi':
+        // Arrêt vidéo - pas de paramètres
+        break;
+
+      // === IMAGES/BITMAPS ===
+      case 'addbmp':
+        // Format: "addbmp objname filename x y [transparent] [color]"
         command.params = {
-          filename: reader.readBorlandString(),
-          x: reader.readInt16(),
-          y: reader.readInt16(),
-          transparent: reader.readBool(),
-          transparentColor: reader.readUint32(),
+          ...command.params,
+          objectName: args[0] || '',
+          filename: args[1] || '',
+          x: parseInt(args[2]) || 0,
+          y: parseInt(args[3]) || 0,
+          transparent: args[4]?.toLowerCase() === 'transparent' || args[4] === '1',
+          transparentColor: parseInt(args[5]) || 0xFF00FF, // Magenta par défaut
         };
         break;
 
-      case VNCommandType.TEXT:
-      case VNCommandType.TEXTOBJ:
+      case 'delbmp':
+      case 'showbmp':
+      case 'hidebmp':
+        // Format: "delbmp objname" ou "showbmp objname" ou "hidebmp objname"
         command.params = {
-          text: reader.readBorlandString(),
-          x: reader.readInt16(),
-          y: reader.readInt16(),
-          color: reader.readUint32(),
-          fontName: reader.readBorlandString(),
-          fontSize: reader.readUint16(),
-          fontStyle: reader.readUint8(),
+          ...command.params,
+          objectName: args[0] || '',
         };
         break;
 
-      case VNCommandType.HTML:
+      case 'playbmp':
+      case 'playseq':
+        // Format: "playseq pattern startframe endframe x y delay [loop]"
         command.params = {
-          content: reader.readBorlandString(),
-          bounds: reader.readRect(),
+          ...command.params,
+          filenamePattern: args[0] || '',
+          startFrame: parseInt(args[1]) || 0,
+          endFrame: parseInt(args[2]) || 0,
+          x: parseInt(args[3]) || 0,
+          y: parseInt(args[4]) || 0,
+          delay: parseInt(args[5]) || 100,
+          loop: args[6]?.toLowerCase() === 'loop',
         };
         break;
 
-      case VNCommandType.FONT:
+      // === TEXTE ===
+      case 'addtext':
+        // Format: "addtext objname text x y"
         command.params = {
-          fontName: reader.readBorlandString(),
-          fontSize: reader.readUint16(),
-          fontStyle: reader.readUint8(),
-          color: reader.readUint32(),
+          ...command.params,
+          objectName: args[0] || '',
+          text: args.slice(1, -2).join(' '),
+          x: parseInt(args[args.length - 2]) || 0,
+          y: parseInt(args[args.length - 1]) || 0,
         };
         break;
 
-      case VNCommandType.HIDE:
-      case VNCommandType.SHOW:
+      case 'playtext':
+        // Format: "playtext objname text x y"
         command.params = {
-          objectName: reader.readBorlandString(),
+          ...command.params,
+          objectName: args[0] || '',
+          text: args.slice(1, -2).join(' '),
+          x: parseInt(args[args.length - 2]) || 0,
+          y: parseInt(args[args.length - 1]) || 0,
         };
         break;
 
-      case VNCommandType.SCROLL:
+      case 'font':
+        // Format: "font fontname size [bold] [italic] [color]"
         command.params = {
-          direction: reader.readUint8(), // 0: up, 1: down, 2: left, 3: right
-          duration: reader.readUint32(),
-          targetScene: reader.readBorlandString(),
+          ...command.params,
+          fontName: args[0] || 'Arial',
+          fontSize: parseInt(args[1]) || 12,
+          bold: args.includes('bold'),
+          italic: args.includes('italic'),
+          color: parseInt(args[args.length - 1]) || 0x000000,
         };
         break;
 
-      case VNCommandType.ZOOM:
+      case 'tiptext':
+        // Format: "tiptext text"
         command.params = {
-          startZoom: reader.readFloat32(),
-          endZoom: reader.readFloat32(),
-          centerX: reader.readInt16(),
-          centerY: reader.readInt16(),
-          duration: reader.readUint32(),
+          ...command.params,
+          text: args.join(' '),
         };
         break;
 
-      case VNCommandType.WAIT:
+      case 'playhtml':
+        // Format: "playhtml objname url/content x y width height"
         command.params = {
-          duration: reader.readUint32(),
+          ...command.params,
+          objectName: args[0] || '',
+          content: args[1] || '',
+          x: parseInt(args[2]) || 0,
+          y: parseInt(args[3]) || 0,
+          width: parseInt(args[4]) || 320,
+          height: parseInt(args[5]) || 240,
         };
         break;
 
-      case VNCommandType.CURSOR:
+      // === OBJETS ===
+      case 'showobj':
+      case 'hideobj':
+      case 'delobj':
+        // Format: "showobj objname"
         command.params = {
-          cursorFile: reader.readBorlandString(),
+          ...command.params,
+          objectName: args[0] || '',
         };
         break;
 
-      case VNCommandType.IMGSEQ:
+      // === EFFETS ===
+      case 'zoom':
+      case 'zoomin':
+      case 'zoomout':
+        // Format: "zoom startscale endscale centerx centery duration"
         command.params = {
-          filenamePattern: reader.readBorlandString(),
-          startFrame: reader.readUint16(),
-          endFrame: reader.readUint16(),
-          x: reader.readInt16(),
-          y: reader.readInt16(),
-          delay: reader.readUint32(),
-          loop: reader.readBool(),
+          ...command.params,
+          startZoom: parseFloat(args[0]) || 1.0,
+          endZoom: parseFloat(args[1]) || 2.0,
+          centerX: parseInt(args[2]) || 0,
+          centerY: parseInt(args[3]) || 0,
+          duration: parseInt(args[4]) || 1000,
         };
         break;
 
-      case VNCommandType.DIGIT:
+      case 'pause':
+        // Format: "pause duration_ms"
         command.params = {
-          varName: reader.readBorlandString(),
-          x: reader.readInt16(),
-          y: reader.readInt16(),
-          digitCount: reader.readUint8(),
-          digitImages: reader.readBorlandString(), // Pattern pour 0-9
+          ...command.params,
+          duration: parseInt(args[0]) || 1000,
         };
         break;
 
-      case VNCommandType.RETURN:
-      case VNCommandType.EXIT:
-      case VNCommandType.STOPAUDIO:
-      case VNCommandType.STOPVIDEO:
-        // Pas de paramètres
+      // === SYSTÈME ===
+      case 'exec':
+        // Format: "exec program [args] [wait]"
+        command.params = {
+          ...command.params,
+          program: args[0] || '',
+          arguments: args.slice(1, -1).join(' '),
+          waitForCompletion: args[args.length - 1]?.toLowerCase() === 'wait',
+        };
+        break;
+
+      case 'explore':
+        // Format: "explore url"
+        command.params = {
+          ...command.params,
+          url: args[0] || '',
+        };
+        break;
+
+      case 'rundll':
+        // Format: "rundll dllname function [args]"
+        command.params = {
+          ...command.params,
+          dllName: args[0] || '',
+          functionName: args[1] || '',
+          arguments: args.slice(2).join(' '),
+        };
+        break;
+
+      case 'runprj':
+        // Format: "runprj projectfile [scene]"
+        command.params = {
+          ...command.params,
+          projectFile: args[0] || '',
+          startScene: args[1] || '',
+        };
+        break;
+
+      case 'msgbox':
+        // Format: "msgbox message [title] [type]"
+        command.params = {
+          ...command.params,
+          message: args[0] || '',
+          title: args[1] || 'Message',
+          type: args[2] || 'info',
+        };
+        break;
+
+      case 'defcursor':
+        // Format: "defcursor cursorfile"
+        command.params = {
+          ...command.params,
+          cursorFile: args[0] || '',
+        };
+        break;
+
+      case 'hotspot':
+        // Format: "hotspot name enable/disable"
+        command.params = {
+          ...command.params,
+          hotspotName: args[0] || '',
+          enabled: args[1]?.toLowerCase() !== 'disable',
+        };
+        break;
+
+      case 'rem':
+        // Commentaire - ignorer
+        command.params = {
+          ...command.params,
+          comment: args.join(' '),
+        };
+        break;
+
+      case 'load':
+        // Format: "load savefile"
+        command.params = {
+          ...command.params,
+          saveFile: args[0] || '',
+        };
+        break;
+
+      case 'save':
+        // Format: "save savefile"
+        command.params = {
+          ...command.params,
+          saveFile: args[0] || '',
+        };
+        break;
+
+      case 'update':
+      case 'invalidate':
+        // Rafraîchissement d'affichage - pas de paramètres
+        break;
+
+      case 'about':
+      case 'prefs':
+        // Dialogues système - pas de paramètres
+        break;
+
+      case 'closedll':
+        // Format: "closedll dllname"
+        command.params = {
+          ...command.params,
+          dllName: args[0] || '',
+        };
+        break;
+
+      case 'playcmd':
+        // Commande spéciale pour exécuter une série de commandes
+        command.params = {
+          ...command.params,
+          commandString: args.join(' '),
+        };
         break;
 
       default:
-        // Commande inconnue - essayer de lire la taille et skipper
-        console.warn(`Unknown command type: ${typeValue}`);
+        // Commande inconnue - garder la commande brute pour debugging
+        console.warn(`Unknown command: ${cmdName} (raw: ${commandStr})`);
         break;
     }
 
     return command;
+  }
+
+  /**
+   * Parse une valeur (peut être un nombre ou un nom de variable)
+   */
+  private parseValue(value: string | undefined): number | string {
+    if (!value) return 0;
+
+    // Si c'est un nombre
+    const num = parseInt(value);
+    if (!isNaN(num)) return num;
+
+    // Sinon c'est probablement une référence à une variable
+    return value.toUpperCase();
   }
 
   /**
@@ -872,7 +1148,7 @@ interface VNProjectParams {
   displayWidth: number;
   displayHeight: number;
   colorDepth: number;
-  displayMode: VNDisplayMode;
+  displayMode: VNDisplayModeType;
   hasToolbar: boolean;
   smoothZoom: boolean;
   smoothScroll: boolean;

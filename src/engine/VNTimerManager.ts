@@ -22,7 +22,7 @@ export interface TimerState {
   startTime: number;       // Timestamp de démarrage
   lastTickTime: number;    // Dernier tick
   tickCount: number;       // Nombre de ticks
-  timerId: number | NodeJS.Timeout | null;  // ID du timer JS
+  timerId: number | ReturnType<typeof setTimeout> | null;  // ID du timer JS
 }
 
 // Callbacks
@@ -114,7 +114,7 @@ export class VNTimerManager {
 
     // Arrêter le timer JS
     if (state.timerId !== null) {
-      clearInterval(state.timerId as NodeJS.Timeout);
+      clearInterval(state.timerId as ReturnType<typeof setTimeout>);
     }
 
     state.isRunning = false;
@@ -133,7 +133,7 @@ export class VNTimerManager {
 
     // Arrêter le timer JS temporairement
     if (state.timerId !== null) {
-      clearInterval(state.timerId as NodeJS.Timeout);
+      clearInterval(state.timerId as ReturnType<typeof setTimeout>);
       state.timerId = null;
     }
 

@@ -1117,6 +1117,8 @@ export class VNFileLoader {
 
   /**
    * Extrait une image du DATFILE
+   * Supporte les formats IMG8 (8-bit palettisé) et IMG24 (24-bit TrueColor)
+   * Les images sont stockées au format Windows DIB (BITMAPINFOHEADER)
    */
   async extractImage(
     dataFile: VNDataFile,
@@ -1130,37 +1132,119 @@ export class VNFileLoader {
     const buffer = this.extractResource(dataFile, resource);
     const reader = new BinaryReader(buffer);
 
-    // Format IMG8 ou IMG24
-    const width = reader.readUint16();
-    const height = reader.readUint16();
-    const bpp = reader.readUint8(); // 8 ou 24
+    // Lire BITMAPINFOHEADER (40 bytes)
+    const biSize = reader.readUint32(); // Doit être 40
+    if (biSize !== 40) {
+      throw new VNFileError(`Invalid BITMAPINFOHEADER size: ${biSize}`, reader.pos);
+    }
 
-    if (bpp === 8) {
-      // Image palettisée
-      const palette = reader.readBytes(256 * 4); // RGBX
-      const pixels = reader.readBytes(width * height);
+    const biWidth = reader.readInt32();
+    const biHeight = reader.readInt32(); // Négatif = top-down, positif = bottom-up
+    reader.readUint16(); // biPlanes (doit être 1)
+    const biBitCount = reader.readUint16(); // 8 ou 24
+    reader.readUint32(); // biCompression (0 = BI_RGB non compressé)
+    reader.skip(20); // biSizeImage, biXPelsPerMeter, biYPelsPerMeter, biClrUsed, biClrImportant
+
+    const width = Math.abs(biWidth);
+    const height = Math.abs(biHeight);
+    const isBottomUp = biHeight > 0;
+
+    // Calculer le stride (lignes alignées sur 4 bytes pour Windows DIB)
+    const rowSize = Math.ceil((width * biBitCount) / 32) * 4;
+
+    if (biBitCount === 8) {
+      // Image 8-bit palettisée - lire la palette (256 entrées RGBQUAD)
+      const palette = reader.readBytes(256 * 4); // B, G, R, Reserved
+
+      // Lire les pixels
+      const pixelData = reader.readBytes(rowSize * height);
 
       // Convertir en RGBA
       const data = new Uint8ClampedArray(width * height * 4);
+      for (let y = 0; y < height; y++) {
+        const srcY = isBottomUp ? (height - 1 - y) : y;
+        for (let x = 0; x < width; x++) {
+          const srcIndex = srcY * rowSize + x;
+          const dstIndex = (y * width + x) * 4;
+          const colorIndex = pixelData[srcIndex];
+
+          // RGBQUAD est B, G, R, Reserved (pas R, G, B!)
+          data[dstIndex] = palette[colorIndex * 4 + 2]; // R
+          data[dstIndex + 1] = palette[colorIndex * 4 + 1]; // G
+          data[dstIndex + 2] = palette[colorIndex * 4]; // B
+          data[dstIndex + 3] = 255; // A
+        }
+      }
+
+      return { width, height, data, palette };
+    } else if (biBitCount === 24) {
+      // Image 24-bit - pas de palette
+      const pixelData = reader.readBytes(rowSize * height);
+      const data = new Uint8ClampedArray(width * height * 4);
+
+      for (let y = 0; y < height; y++) {
+        const srcY = isBottomUp ? (height - 1 - y) : y;
+        for (let x = 0; x < width; x++) {
+          const srcIndex = srcY * rowSize + x * 3;
+          const dstIndex = (y * width + x) * 4;
+
+          // DIB 24-bit est B, G, R (pas R, G, B!)
+          data[dstIndex] = pixelData[srcIndex + 2]; // R
+          data[dstIndex + 1] = pixelData[srcIndex + 1]; // G
+          data[dstIndex + 2] = pixelData[srcIndex]; // B
+          data[dstIndex + 3] = 255; // A
+        }
+      }
+
+      return { width, height, data };
+    } else {
+      throw new VNFileError(`Unsupported bit depth: ${biBitCount}`, reader.pos);
+    }
+  }
+
+  /**
+   * Extrait une image avec format simplifié (fallback pour formats non-DIB)
+   */
+  async extractImageSimple(
+    dataFile: VNDataFile,
+    resource: VNResource
+  ): Promise<{
+    width: number;
+    height: number;
+    data: Uint8ClampedArray;
+    palette?: Uint8Array;
+  }> {
+    const buffer = this.extractResource(dataFile, resource);
+    const reader = new BinaryReader(buffer);
+
+    // Format simplifié: width(16), height(16), bpp(8), [palette], pixels
+    const width = reader.readUint16();
+    const height = reader.readUint16();
+    const bpp = reader.readUint8();
+
+    if (bpp === 8) {
+      const palette = reader.readBytes(256 * 4);
+      const pixels = reader.readBytes(width * height);
+      const data = new Uint8ClampedArray(width * height * 4);
+
       for (let i = 0; i < pixels.length; i++) {
         const colorIndex = pixels[i];
-        data[i * 4] = palette[colorIndex * 4]; // R
+        data[i * 4] = palette[colorIndex * 4 + 2]; // R (BGR order)
         data[i * 4 + 1] = palette[colorIndex * 4 + 1]; // G
-        data[i * 4 + 2] = palette[colorIndex * 4 + 2]; // B
-        data[i * 4 + 3] = 255; // A
+        data[i * 4 + 2] = palette[colorIndex * 4]; // B
+        data[i * 4 + 3] = 255;
       }
 
       return { width, height, data, palette };
     } else {
-      // Image 24-bit
       const pixels = reader.readBytes(width * height * 3);
       const data = new Uint8ClampedArray(width * height * 4);
 
       for (let i = 0; i < width * height; i++) {
-        data[i * 4] = pixels[i * 3]; // R
+        data[i * 4] = pixels[i * 3 + 2]; // R (BGR order)
         data[i * 4 + 1] = pixels[i * 3 + 1]; // G
-        data[i * 4 + 2] = pixels[i * 3 + 2]; // B
-        data[i * 4 + 3] = 255; // A
+        data[i * 4 + 2] = pixels[i * 3]; // B
+        data[i * 4 + 3] = 255;
       }
 
       return { width, height, data };

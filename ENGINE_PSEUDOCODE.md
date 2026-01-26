@@ -1055,12 +1055,50 @@ VNSAVFILE_FORMAT {
 VNPALETTE_FORMAT {
     string    magic;           // "VNPALETTE"
 
-    // Palette 256 couleurs
-    uint8_t   entries[256][4]; // R, G, B, Flags pour chaque entrée
+    // Palette 256 couleurs (Windows PALETTEENTRY)
+    struct PALETTEENTRY {
+        uint8_t peRed;         // Composante rouge
+        uint8_t peGreen;       // Composante verte
+        uint8_t peBlue;        // Composante bleue
+        uint8_t peFlags;       // 0 = normal, PC_RESERVED, PC_EXPLICIT, PC_NOCOLLAPSE
+    } entries[256];
 }
 ```
 
-### 3.6 Lecture de chaînes (Borland string format)
+### 3.6 Formats d'images (IMG8 et IMG24)
+
+Le moteur utilise OWL TDib pour les images, qui sont des DIB (Device Independent Bitmaps).
+
+```
+IMG8_FORMAT (8-bit palettisé) {
+    // En-tête DIB standard Windows
+    BITMAPINFOHEADER header;   // 40 bytes
+    RGBQUAD          colors[256]; // Palette locale (4 bytes × 256)
+    uint8_t          pixels[];    // Données pixels (1 byte par pixel)
+}
+
+IMG24_FORMAT (24-bit TrueColor) {
+    BITMAPINFOHEADER header;   // 40 bytes
+    uint8_t          pixels[];    // Données BGR (3 bytes par pixel)
+                                  // Note: ordre Blue-Green-Red (pas RGB!)
+}
+
+BITMAPINFOHEADER {
+    uint32_t biSize;           // 40
+    int32_t  biWidth;          // Largeur en pixels
+    int32_t  biHeight;         // Hauteur (positif = bottom-up, négatif = top-down)
+    uint16_t biPlanes;         // 1
+    uint16_t biBitCount;       // 8 ou 24
+    uint32_t biCompression;    // 0 (BI_RGB = non compressé)
+    uint32_t biSizeImage;      // Taille des données (peut être 0 si BI_RGB)
+    int32_t  biXPelsPerMeter;  // Résolution horizontale
+    int32_t  biYPelsPerMeter;  // Résolution verticale
+    uint32_t biClrUsed;        // Nombre de couleurs utilisées (0 = toutes)
+    uint32_t biClrImportant;   // Nombre de couleurs importantes (0 = toutes)
+}
+```
+
+### 3.7 Lecture de chaînes (Borland string format)
 
 Les chaînes Borland sont sérialisées avec:
 ```cpp

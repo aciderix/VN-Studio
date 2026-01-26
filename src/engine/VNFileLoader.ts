@@ -131,6 +131,483 @@ export type VNRecord =
   | VNHotspotTextRecord
   | VNPolygonCollision;
 
+// ============================================================================
+// ÉVÉNEMENTS VN - Découverts dans europeo.exe @ 0x43f8cf
+// ============================================================================
+
+/**
+ * Types d'événements VN
+ * Chaque hotspot/scène peut avoir des handlers pour ces événements
+ */
+export enum VNEventType {
+  /** Événement déclenché quand la souris survole un élément */
+  EV_ONFOCUS = 0,
+  /** Événement déclenché au clic sur un élément */
+  EV_ONCLICK = 1,
+  /** Événement déclenché à l'initialisation de la scène (avant affichage) */
+  EV_ONINIT = 2,
+  /** Événement déclenché après l'initialisation (après affichage background) */
+  EV_AFTERINIT = 3,
+}
+
+/**
+ * Noms des événements tels qu'utilisés dans les fichiers VN
+ */
+export const VNEventNames: Record<VNEventType, string> = {
+  [VNEventType.EV_ONFOCUS]: 'EV_ONFOCUS',
+  [VNEventType.EV_ONCLICK]: 'EV_ONCLICK',
+  [VNEventType.EV_ONINIT]: 'EV_ONINIT',
+  [VNEventType.EV_AFTERINIT]: 'EV_AFTERINIT',
+};
+
+// ============================================================================
+// CLASSES TVN*Parms - Paramètres de commandes découverts dans europeo.exe
+// ============================================================================
+
+/**
+ * Types de classes TVN*Parms (Borland C++ serialization)
+ * Chaque commande VN a une classe de paramètres associée
+ * Découvert dans europeo.exe @ 0x40ec00-0x411000
+ */
+export enum TVNParmsType {
+  // === Paramètres projet/scène ===
+  PROJECT = 'TVNProjectParms',     // Paramètres globaux du projet
+  SCENE = 'TVNSceneParms',         // Paramètres d'une scène
+  HOTSPOT = 'TVNHotspotParms',     // Paramètres d'un hotspot
+
+  // === Paramètres média audio ===
+  MIDI = 'TVNMidiParms',           // Lecture fichier MIDI
+  DIGIT = 'TVNDigitParms',         // Lecture audio numérique (WAV)
+  CDA = 'TVNCDAParms',             // Lecture CD Audio
+
+  // === Paramètres média visuel ===
+  IMAGE = 'TVNImageParms',         // Affichage image statique
+  IMG_OBJ = 'TVNImgObjParms',      // Objet image (sprite)
+  IMG_SEQ = 'TVNImgSeqParms',      // Séquence d'images (animation)
+
+  // === Paramètres texte ===
+  TEXT = 'TVNTextParms',           // Affichage texte simple
+  TEXT_OBJ = 'TVNTextObjParms',    // Objet texte (label)
+  FONT = 'TVNFontParms',           // Configuration police
+  STRING = 'TVNStringParms',       // Chaîne de caractères
+  HTML = 'TVNHtmlParms',           // Contenu HTML
+
+  // === Paramètres variables ===
+  SET_VAR = 'TVNSetVarParms',      // Définir variable
+  INC_VAR = 'TVNIncVarParms',      // Incrémenter variable
+  DEC_VAR = 'TVNDecVarParms',      // Décrémenter variable
+
+  // === Paramètres contrôle de flux ===
+  IF = 'TVNIfParms',               // Condition if
+  CONDITION = 'TVNConditionParms', // Expression conditionnelle
+
+  // === Paramètres géométrie ===
+  RECT = 'TVNRectParms',           // Rectangle (collision/zone)
+
+  // === Paramètres système ===
+  EXEC = 'TVNExecParms',           // Exécution programme externe
+  FILENAME = 'TVNFileNameParms',   // Référence fichier
+  TIME = 'TVNTimeParms',           // Temporisation/délai
+  COMMAND = 'TVNCommandParms',     // Commande générique
+}
+
+/**
+ * Interface de base pour tous les paramètres TVN
+ */
+export interface TVNBaseParms {
+  parmsType: TVNParmsType;
+}
+
+/**
+ * Paramètres de projet (TVNProjectParms)
+ */
+export interface TVNProjectParms extends TVNBaseParms {
+  parmsType: TVNParmsType.PROJECT;
+  name: string;
+  displayWidth: number;
+  displayHeight: number;
+  colorDepth: number;
+  dataFilePath?: string;
+}
+
+/**
+ * Paramètres de scène (TVNSceneParms)
+ */
+export interface TVNSceneParms extends TVNBaseParms {
+  parmsType: TVNParmsType.SCENE;
+  name: string;
+  backgroundFile: string;
+  backgroundColor?: number;
+  musicFile?: string;
+  musicLoop?: boolean;
+}
+
+/**
+ * Paramètres de hotspot (TVNHotspotParms)
+ */
+export interface TVNHotspotParms extends TVNBaseParms {
+  parmsType: TVNParmsType.HOTSPOT;
+  name: string;
+  shapeType: number; // 0 = rect, 1 = polygon
+  enabled: boolean;
+  cursorFile?: string;
+}
+
+/**
+ * Paramètres audio MIDI (TVNMidiParms)
+ */
+export interface TVNMidiParms extends TVNBaseParms {
+  parmsType: TVNParmsType.MIDI;
+  filename: string;
+  loop: boolean;
+  volume?: number;
+}
+
+/**
+ * Paramètres audio numérique/WAV (TVNDigitParms)
+ */
+export interface TVNDigitParms extends TVNBaseParms {
+  parmsType: TVNParmsType.DIGIT;
+  filename: string;
+  loop: boolean;
+  volume?: number;
+}
+
+/**
+ * Paramètres CD Audio (TVNCDAParms)
+ */
+export interface TVNCDAParms extends TVNBaseParms {
+  parmsType: TVNParmsType.CDA;
+  track: number;
+  loop: boolean;
+}
+
+/**
+ * Paramètres image (TVNImageParms)
+ */
+export interface TVNImageParms extends TVNBaseParms {
+  parmsType: TVNParmsType.IMAGE;
+  filename: string;
+  x: number;
+  y: number;
+  transparent?: boolean;
+  transparentColor?: number;
+}
+
+/**
+ * Paramètres objet image (TVNImgObjParms)
+ */
+export interface TVNImgObjParms extends TVNBaseParms {
+  parmsType: TVNParmsType.IMG_OBJ;
+  objectName: string;
+  filename: string;
+  x: number;
+  y: number;
+  visible: boolean;
+  transparent?: boolean;
+  transparentColor?: number;
+}
+
+/**
+ * Paramètres séquence d'images (TVNImgSeqParms)
+ */
+export interface TVNImgSeqParms extends TVNBaseParms {
+  parmsType: TVNParmsType.IMG_SEQ;
+  filenamePattern: string;
+  startFrame: number;
+  endFrame: number;
+  x: number;
+  y: number;
+  delay: number;
+  loop: boolean;
+}
+
+/**
+ * Paramètres texte (TVNTextParms)
+ */
+export interface TVNTextParms extends TVNBaseParms {
+  parmsType: TVNParmsType.TEXT;
+  text: string;
+  x: number;
+  y: number;
+  color?: number;
+}
+
+/**
+ * Paramètres objet texte (TVNTextObjParms)
+ */
+export interface TVNTextObjParms extends TVNBaseParms {
+  parmsType: TVNParmsType.TEXT_OBJ;
+  objectName: string;
+  text: string;
+  x: number;
+  y: number;
+  visible: boolean;
+  color?: number;
+  fontName?: string;
+  fontSize?: number;
+}
+
+/**
+ * Paramètres police (TVNFontParms)
+ */
+export interface TVNFontParms extends TVNBaseParms {
+  parmsType: TVNParmsType.FONT;
+  fontName: string;
+  fontSize: number;
+  fontStyle: number; // 0=normal, 1=bold, 2=italic, 3=bold+italic
+  color: number;
+}
+
+/**
+ * Paramètres chaîne (TVNStringParms)
+ */
+export interface TVNStringParms extends TVNBaseParms {
+  parmsType: TVNParmsType.STRING;
+  value: string;
+}
+
+/**
+ * Paramètres HTML (TVNHtmlParms)
+ */
+export interface TVNHtmlParms extends TVNBaseParms {
+  parmsType: TVNParmsType.HTML;
+  objectName: string;
+  content: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Paramètres set variable (TVNSetVarParms)
+ */
+export interface TVNSetVarParms extends TVNBaseParms {
+  parmsType: TVNParmsType.SET_VAR;
+  varName: string;
+  value: number | string;
+  random?: boolean;
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Paramètres incrémenter variable (TVNIncVarParms)
+ */
+export interface TVNIncVarParms extends TVNBaseParms {
+  parmsType: TVNParmsType.INC_VAR;
+  varName: string;
+  amount: number;
+}
+
+/**
+ * Paramètres décrémenter variable (TVNDecVarParms)
+ */
+export interface TVNDecVarParms extends TVNBaseParms {
+  parmsType: TVNParmsType.DEC_VAR;
+  varName: string;
+  amount: number;
+}
+
+/**
+ * Paramètres condition if (TVNIfParms)
+ */
+export interface TVNIfParms extends TVNBaseParms {
+  parmsType: TVNParmsType.IF;
+  varName: string;
+  operator: string; // =, !=, <, >, <=, >=
+  compareValue: number | string;
+}
+
+/**
+ * Paramètres expression conditionnelle (TVNConditionParms)
+ */
+export interface TVNConditionParms extends TVNBaseParms {
+  parmsType: TVNParmsType.CONDITION;
+  expression: string;
+  variable?: string;
+  operator?: string;
+  value?: number | string;
+}
+
+/**
+ * Paramètres rectangle (TVNRectParms)
+ */
+export interface TVNRectParms extends TVNBaseParms {
+  parmsType: TVNParmsType.RECT;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+/**
+ * Paramètres exécution (TVNExecParms)
+ */
+export interface TVNExecParms extends TVNBaseParms {
+  parmsType: TVNParmsType.EXEC;
+  program: string;
+  arguments?: string;
+  waitForCompletion?: boolean;
+}
+
+/**
+ * Paramètres nom de fichier (TVNFileNameParms)
+ */
+export interface TVNFileNameParms extends TVNBaseParms {
+  parmsType: TVNParmsType.FILENAME;
+  filename: string;
+  path?: string;
+}
+
+/**
+ * Paramètres temps (TVNTimeParms)
+ */
+export interface TVNTimeParms extends TVNBaseParms {
+  parmsType: TVNParmsType.TIME;
+  duration: number; // en millisecondes
+}
+
+/**
+ * Paramètres commande générique (TVNCommandParms)
+ */
+export interface TVNCommandParms extends TVNBaseParms {
+  parmsType: TVNParmsType.COMMAND;
+  commandString: string;
+}
+
+/**
+ * Union de tous les types de paramètres TVN
+ */
+export type TVNParms =
+  | TVNProjectParms
+  | TVNSceneParms
+  | TVNHotspotParms
+  | TVNMidiParms
+  | TVNDigitParms
+  | TVNCDAParms
+  | TVNImageParms
+  | TVNImgObjParms
+  | TVNImgSeqParms
+  | TVNTextParms
+  | TVNTextObjParms
+  | TVNFontParms
+  | TVNStringParms
+  | TVNHtmlParms
+  | TVNSetVarParms
+  | TVNIncVarParms
+  | TVNDecVarParms
+  | TVNIfParms
+  | TVNConditionParms
+  | TVNRectParms
+  | TVNExecParms
+  | TVNFileNameParms
+  | TVNTimeParms
+  | TVNCommandParms;
+
+// ============================================================================
+// CLASSES STREAMABLES - Classes sérialisables Borland découvertes dans europeo.exe
+// ============================================================================
+
+/**
+ * Toutes les classes streamables du moteur VN
+ * Ces classes héritent de TStreamableBase (Borland) via TVNStreamable
+ * Découvert dans europeo.exe @ 0x40ec00-0x411600
+ */
+export enum TVNStreamableClass {
+  // === Classes de base ===
+  STREAMABLE_BASE = 'TStreamableBase',
+  VN_STREAMABLE = 'TVNStreamable',
+  VN_OBJECT = 'TVNObject',
+  VN_INDEX_DEPENDANT = 'TVNIndexDependant',
+
+  // === Variables ===
+  VN_VARIABLE = 'TVNVariable',
+  VN_VARIABLE_ARRAY = 'TVNVariableArray',
+
+  // === Commandes ===
+  VN_COMMAND = 'TVNCommand',
+  VN_COMMAND_ARRAY = 'TVNCommandArray',
+  VN_EVENT_COMMAND = 'TVNEventCommand',
+  VN_EVENT_COMMAND_ARRAY = 'TVNEventCommandArray',
+
+  // === Paramètres (mêmes que TVNParmsType mais en tant que classes) ===
+  PROJECT_PARMS = 'TVNProjectParms',
+  SCENE_PARMS = 'TVNSceneParms',
+  HOTSPOT_PARMS = 'TVNHotspotParms',
+  MIDI_PARMS = 'TVNMidiParms',
+  DIGIT_PARMS = 'TVNDigitParms',
+  CDA_PARMS = 'TVNCDAParms',
+  IMAGE_PARMS = 'TVNImageParms',
+  IMG_OBJ_PARMS = 'TVNImgObjParms',
+  IMG_SEQ_PARMS = 'TVNImgSeqParms',
+  TEXT_PARMS = 'TVNTextParms',
+  TEXT_OBJ_PARMS = 'TVNTextObjParms',
+  FONT_PARMS = 'TVNFontParms',
+  STRING_PARMS = 'TVNStringParms',
+  HTML_PARMS = 'TVNHtmlParms',
+  SET_VAR_PARMS = 'TVNSetVarParms',
+  INC_VAR_PARMS = 'TVNIncVarParms',
+  DEC_VAR_PARMS = 'TVNDecVarParms',
+  IF_PARMS = 'TVNIfParms',
+  CONDITION_PARMS = 'TVNConditionParms',
+  RECT_PARMS = 'TVNRectParms',
+  EXEC_PARMS = 'TVNExecParms',
+  FILENAME_PARMS = 'TVNFileNameParms',
+  TIME_PARMS = 'TVNTimeParms',
+  COMMAND_PARMS = 'TVNCommandParms',
+}
+
+/**
+ * Information de classe streamable pour la sérialisation Borland
+ */
+export interface TVNStreamableInfo {
+  className: TVNStreamableClass;
+  version: number;
+  delta?: number; // Offset dans le stream
+}
+
+/**
+ * Mapping nom de classe -> type pour désérialisation
+ */
+export const StreamableClassMap: Record<string, TVNStreamableClass> = {
+  'TStreamableBase': TVNStreamableClass.STREAMABLE_BASE,
+  'TVNStreamable': TVNStreamableClass.VN_STREAMABLE,
+  'TVNObject': TVNStreamableClass.VN_OBJECT,
+  'TVNIndexDependant': TVNStreamableClass.VN_INDEX_DEPENDANT,
+  'TVNVariable': TVNStreamableClass.VN_VARIABLE,
+  'TVNVariableArray': TVNStreamableClass.VN_VARIABLE_ARRAY,
+  'TVNCommand': TVNStreamableClass.VN_COMMAND,
+  'TVNCommandArray': TVNStreamableClass.VN_COMMAND_ARRAY,
+  'TVNEventCommand': TVNStreamableClass.VN_EVENT_COMMAND,
+  'TVNEventCommandArray': TVNStreamableClass.VN_EVENT_COMMAND_ARRAY,
+  'TVNProjectParms': TVNStreamableClass.PROJECT_PARMS,
+  'TVNSceneParms': TVNStreamableClass.SCENE_PARMS,
+  'TVNHotspotParms': TVNStreamableClass.HOTSPOT_PARMS,
+  'TVNMidiParms': TVNStreamableClass.MIDI_PARMS,
+  'TVNDigitParms': TVNStreamableClass.DIGIT_PARMS,
+  'TVNCDAParms': TVNStreamableClass.CDA_PARMS,
+  'TVNImageParms': TVNStreamableClass.IMAGE_PARMS,
+  'TVNImgObjParms': TVNStreamableClass.IMG_OBJ_PARMS,
+  'TVNImgSeqParms': TVNStreamableClass.IMG_SEQ_PARMS,
+  'TVNTextParms': TVNStreamableClass.TEXT_PARMS,
+  'TVNTextObjParms': TVNStreamableClass.TEXT_OBJ_PARMS,
+  'TVNFontParms': TVNStreamableClass.FONT_PARMS,
+  'TVNStringParms': TVNStreamableClass.STRING_PARMS,
+  'TVNHtmlParms': TVNStreamableClass.HTML_PARMS,
+  'TVNSetVarParms': TVNStreamableClass.SET_VAR_PARMS,
+  'TVNIncVarParms': TVNStreamableClass.INC_VAR_PARMS,
+  'TVNDecVarParms': TVNStreamableClass.DEC_VAR_PARMS,
+  'TVNIfParms': TVNStreamableClass.IF_PARMS,
+  'TVNConditionParms': TVNStreamableClass.CONDITION_PARMS,
+  'TVNRectParms': TVNStreamableClass.RECT_PARMS,
+  'TVNExecParms': TVNStreamableClass.EXEC_PARMS,
+  'TVNFileNameParms': TVNStreamableClass.FILENAME_PARMS,
+  'TVNTimeParms': TVNStreamableClass.TIME_PARMS,
+  'TVNCommandParms': TVNStreamableClass.COMMAND_PARMS,
+};
+
 /**
  * Buffer Reader - Lecture binaire avec position
  */

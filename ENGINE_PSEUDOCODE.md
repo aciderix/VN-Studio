@@ -1596,63 +1596,390 @@ SYSTÈME (11)
 49. save          - Sauvegarder
 ```
 
-### 6.2 Événements (extraits @ 0x43f8cf)
+### 6.2 Événements VN (extraits @ 0x43f8cf)
 
-```
-EV_ONFOCUS      - Événement focus
-EV_ONCLICK      - Événement clic
-EV_ONINIT       - Événement initialisation
-EV_AFTERINIT    - Événement après init
-```
-
-### 6.3 Énumération des classes TVN*Parms (sérialisation Borland)
-
-Classes de paramètres utilisées pour la sérialisation des commandes :
+Les événements VN sont utilisés pour déclencher des commandes à différents moments du cycle de vie d'une scène ou d'un hotspot.
 
 ```cpp
-// Hiérarchie des classes de paramètres
-TVNCommandParms         // Classe de base pour tous les paramètres
+// Enumération des types d'événements
+enum VNEventType {
+    EV_ONFOCUS    = 0,  // Événement déclenché au survol (mouse over)
+    EV_ONCLICK    = 1,  // Événement déclenché au clic
+    EV_ONINIT     = 2,  // Événement déclenché à l'initialisation (avant affichage)
+    EV_AFTERINIT  = 3   // Événement déclenché après l'initialisation (après background)
+};
 
-// Paramètres de navigation
-TVNSceneParms           // Navigation scène (GOTO)
-TVNIndexDependant       // Dépendance d'index
+// Chaînes correspondantes (@ 0x43f8cf)
+const char* EventNames[] = {
+    "EV_ONFOCUS",     // Offset 0x43f8cf
+    "EV_ONCLICK",     // Offset 0x43f8da
+    "EV_ONINIT",      // Offset 0x43f8e5
+    "EV_AFTERINIT"    // Offset 0x43f8ef
+};
+```
 
-// Paramètres de variables
-TVNSetVarParms          // set_var (nom + valeur)
-TVNIncVarParms          // inc_var
-TVNDecVarParms          // dec_var
-TVNIfParms              // Structure conditionnelle
-TVNConditionParms       // Expression conditionnelle
+**Utilisation dans les scènes :**
 
-// Paramètres d'images
-TVNImageParms           // Image simple
-TVNImgObjParms          // Objet image
-TVNImgSeqParms          // Séquence d'images
+| Événement     | Déclencheur                     | Cas d'usage typique                    |
+|:--------------|:--------------------------------|:---------------------------------------|
+| EV_ONINIT     | Entrée dans la scène (phase 1)  | Initialiser variables, préparer audio  |
+| EV_AFTERINIT  | Après chargement du fond        | Jouer son d'ambiance, afficher objets  |
+| EV_ONFOCUS    | Survol d'un hotspot             | Afficher tooltip, changer curseur      |
+| EV_ONCLICK    | Clic sur un hotspot             | Naviguer, déclencher action            |
 
-// Paramètres de texte
-TVNTextParms            // Texte simple
-TVNTextObjParms         // Objet texte
-TVNFontParms            // Police
-TVNHtmlParms            // Contenu HTML
-TVNDigitParms           // Affichage de chiffres
-TVNStringParms          // Chaîne de caractères
+**Structure TVNEventCommand :**
 
-// Paramètres audio/vidéo
-TVNMidiParms            // MIDI
-TVNFileNameParms        // Chemin fichier (WAV, AVI)
-TVNCDAParms             // CD Audio
+```cpp
+class TVNEventCommand : public TVNStreamable {
+    VNEventType   eventType;    // Type d'événement
+    TVNCommand*   command;      // Commande à exécuter
+};
 
-// Paramètres divers
-TVNExecParms            // Exécution externe
-TVNTimeParms            // Temporisation
-TVNHotspotParms         // Zones cliquables
-TVNRectParms            // Rectangles
-TVNProjectParms         // Paramètres projet
+class TVNEventCommandArray : public TVNStreamable {
+    int                count;
+    TVNEventCommand*   items[];
+};
+```
+
+### 6.3 Énumération complète des classes TVN*Parms (sérialisation Borland)
+
+Classes de paramètres utilisées pour la sérialisation des commandes.
+Découvertes dans europeo.exe @ 0x40ec00-0x411000.
+
+```cpp
+// ============================================================================
+// ENUMÉRATION TVNParmsType
+// ============================================================================
+
+enum TVNParmsType {
+    // === Paramètres projet/scène ===
+    PARMS_PROJECT,      // TVNProjectParms - Paramètres globaux du projet
+    PARMS_SCENE,        // TVNSceneParms - Paramètres d'une scène
+    PARMS_HOTSPOT,      // TVNHotspotParms - Paramètres d'un hotspot
+
+    // === Paramètres média audio ===
+    PARMS_MIDI,         // TVNMidiParms - Lecture fichier MIDI
+    PARMS_DIGIT,        // TVNDigitParms - Lecture audio numérique (WAV)
+    PARMS_CDA,          // TVNCDAParms - Lecture CD Audio
+
+    // === Paramètres média visuel ===
+    PARMS_IMAGE,        // TVNImageParms - Affichage image statique
+    PARMS_IMG_OBJ,      // TVNImgObjParms - Objet image (sprite)
+    PARMS_IMG_SEQ,      // TVNImgSeqParms - Séquence d'images (animation)
+
+    // === Paramètres texte ===
+    PARMS_TEXT,         // TVNTextParms - Affichage texte simple
+    PARMS_TEXT_OBJ,     // TVNTextObjParms - Objet texte (label)
+    PARMS_FONT,         // TVNFontParms - Configuration police
+    PARMS_STRING,       // TVNStringParms - Chaîne de caractères
+    PARMS_HTML,         // TVNHtmlParms - Contenu HTML
+
+    // === Paramètres variables ===
+    PARMS_SET_VAR,      // TVNSetVarParms - Définir variable
+    PARMS_INC_VAR,      // TVNIncVarParms - Incrémenter variable
+    PARMS_DEC_VAR,      // TVNDecVarParms - Décrémenter variable
+
+    // === Paramètres contrôle de flux ===
+    PARMS_IF,           // TVNIfParms - Condition if
+    PARMS_CONDITION,    // TVNConditionParms - Expression conditionnelle
+
+    // === Paramètres géométrie ===
+    PARMS_RECT,         // TVNRectParms - Rectangle (collision/zone)
+
+    // === Paramètres système ===
+    PARMS_EXEC,         // TVNExecParms - Exécution programme externe
+    PARMS_FILENAME,     // TVNFileNameParms - Référence fichier
+    PARMS_TIME,         // TVNTimeParms - Temporisation/délai
+    PARMS_COMMAND       // TVNCommandParms - Commande générique
+};
+
+// ============================================================================
+// STRUCTURES DÉTAILLÉES
+// ============================================================================
+
+// Base class pour tous les paramètres
+class TVNCommandParms : public TVNStreamable {
+    virtual void Read(ipstream& is) = 0;
+    virtual void Write(opstream& os) = 0;
+};
+
+// Paramètres projet
+class TVNProjectParms : public TVNCommandParms {
+    string  name;           // Nom du projet
+    uint16  displayWidth;   // Largeur d'affichage
+    uint16  displayHeight;  // Hauteur d'affichage
+    uint8   colorDepth;     // 8 ou 24 bits
+    string  dataFilePath;   // Chemin du DATFILE
+};
+
+// Paramètres scène
+class TVNSceneParms : public TVNCommandParms {
+    string  name;           // Nom de la scène
+    string  backgroundFile; // Fichier de fond
+    uint32  backgroundColor;// Couleur de fond
+    string  musicFile;      // Musique de fond
+    bool    musicLoop;      // Boucle audio
+};
+
+// Paramètres hotspot
+class TVNHotspotParms : public TVNCommandParms {
+    string  name;           // Nom du hotspot
+    uint8   shapeType;      // 0 = rect, 1 = polygon
+    bool    enabled;        // Actif ou non
+    string  cursorFile;     // Fichier curseur
+};
+
+// Paramètres MIDI
+class TVNMidiParms : public TVNCommandParms {
+    string  filename;       // Fichier MIDI
+    bool    loop;           // Boucle
+    int     volume;         // Volume 0-100
+};
+
+// Paramètres audio numérique (WAV)
+class TVNDigitParms : public TVNCommandParms {
+    string  filename;       // Fichier WAV
+    bool    loop;           // Boucle
+    int     volume;         // Volume 0-100
+};
+
+// Paramètres CD Audio
+class TVNCDAParms : public TVNCommandParms {
+    int     track;          // Piste CD
+    bool    loop;           // Boucle
+};
+
+// Paramètres image
+class TVNImageParms : public TVNCommandParms {
+    string  filename;       // Fichier image
+    int     x, y;           // Position
+    bool    transparent;    // Transparence activée
+    uint32  transparentColor; // Couleur transparente
+};
+
+// Paramètres objet image
+class TVNImgObjParms : public TVNCommandParms {
+    string  objectName;     // Nom de l'objet
+    string  filename;       // Fichier image
+    int     x, y;           // Position
+    bool    visible;        // Visible ou non
+    bool    transparent;    // Transparence
+    uint32  transparentColor;
+};
+
+// Paramètres séquence d'images
+class TVNImgSeqParms : public TVNCommandParms {
+    string  filenamePattern; // Pattern (ex: "img%03d.bmp")
+    int     startFrame;     // Frame de début
+    int     endFrame;       // Frame de fin
+    int     x, y;           // Position
+    int     delay;          // Délai entre frames (ms)
+    bool    loop;           // Boucle
+};
+
+// Paramètres texte
+class TVNTextParms : public TVNCommandParms {
+    string  text;           // Texte à afficher
+    int     x, y;           // Position
+    uint32  color;          // Couleur du texte
+};
+
+// Paramètres objet texte
+class TVNTextObjParms : public TVNCommandParms {
+    string  objectName;     // Nom de l'objet
+    string  text;           // Texte
+    int     x, y;           // Position
+    bool    visible;        // Visible
+    uint32  color;          // Couleur
+    string  fontName;       // Police
+    int     fontSize;       // Taille
+};
+
+// Paramètres police
+class TVNFontParms : public TVNCommandParms {
+    string  fontName;       // Nom de la police
+    int     fontSize;       // Taille en points
+    int     fontStyle;      // 0=normal, 1=bold, 2=italic, 3=both
+    uint32  color;          // Couleur
+};
+
+// Paramètres chaîne
+class TVNStringParms : public TVNCommandParms {
+    string  value;          // Valeur de la chaîne
+};
+
+// Paramètres HTML
+class TVNHtmlParms : public TVNCommandParms {
+    string  objectName;     // Nom de l'objet
+    string  content;        // Contenu HTML ou URL
+    int     x, y;           // Position
+    int     width, height;  // Dimensions
+};
+
+// Paramètres set_var
+class TVNSetVarParms : public TVNCommandParms {
+    string  varName;        // Nom de la variable (MAJUSCULES)
+    int     value;          // Valeur ou type spécial
+    bool    random;         // Si true, valeur aléatoire
+    int     min, max;       // Bornes si random
+};
+
+// Paramètres inc_var
+class TVNIncVarParms : public TVNCommandParms {
+    string  varName;        // Nom de la variable
+    int     amount;         // Montant à ajouter (défaut: 1)
+};
+
+// Paramètres dec_var
+class TVNDecVarParms : public TVNCommandParms {
+    string  varName;        // Nom de la variable
+    int     amount;         // Montant à soustraire (défaut: 1)
+};
+
+// Paramètres if
+class TVNIfParms : public TVNCommandParms {
+    string  varName;        // Variable à tester
+    string  operator;       // =, !=, <, >, <=, >=
+    int     compareValue;   // Valeur de comparaison
+    TVNCommand* thenCommand; // Commande si vrai
+    TVNCommand* elseCommand; // Commande si faux (optionnel)
+};
+
+// Paramètres condition
+class TVNConditionParms : public TVNCommandParms {
+    string  expression;     // Expression complète
+    string  variable;       // Variable extraite
+    string  operator;       // Opérateur
+    int     value;          // Valeur
+};
+
+// Paramètres rectangle
+class TVNRectParms : public TVNCommandParms {
+    int     x1, y1;         // Coin haut-gauche
+    int     x2, y2;         // Coin bas-droit
+};
+
+// Paramètres exécution
+class TVNExecParms : public TVNCommandParms {
+    string  program;        // Programme à exécuter
+    string  arguments;      // Arguments
+    bool    waitForCompletion; // Attendre la fin
+};
+
+// Paramètres nom de fichier
+class TVNFileNameParms : public TVNCommandParms {
+    string  filename;       // Chemin du fichier
+    string  path;           // Chemin complet (optionnel)
+};
+
+// Paramètres temps
+class TVNTimeParms : public TVNCommandParms {
+    int     duration;       // Durée en millisecondes
+};
 ```
 
 ### 6.4 Classes streamables principales (pour fichiers VN)
 
+Toutes les classes sérialisables héritent de TStreamableBase (Borland) via TVNStreamable.
+Découvertes dans europeo.exe @ 0x40ec00-0x411600.
+
 ```cpp
+// ============================================================================
+// ENUMÉRATION TVNStreamableClass
+// ============================================================================
+
+enum TVNStreamableClass {
+    // === Classes de base ===
+    STREAMABLE_BASE,        // TStreamableBase (Borland)
+    VN_STREAMABLE,          // TVNStreamable (base VN)
+    VN_OBJECT,              // TVNObject
+    VN_INDEX_DEPENDANT,     // TVNIndexDependant
+
+    // === Variables ===
+    VN_VARIABLE,            // TVNVariable
+    VN_VARIABLE_ARRAY,      // TVNVariableArray
+
+    // === Commandes ===
+    VN_COMMAND,             // TVNCommand
+    VN_COMMAND_ARRAY,       // TVNCommandArray
+    VN_EVENT_COMMAND,       // TVNEventCommand
+    VN_EVENT_COMMAND_ARRAY, // TVNEventCommandArray
+
+    // === Classes de paramètres ===
+    PROJECT_PARMS,          // TVNProjectParms
+    SCENE_PARMS,            // TVNSceneParms
+    HOTSPOT_PARMS,          // TVNHotspotParms
+    MIDI_PARMS,             // TVNMidiParms
+    DIGIT_PARMS,            // TVNDigitParms
+    CDA_PARMS,              // TVNCDAParms
+    IMAGE_PARMS,            // TVNImageParms
+    IMG_OBJ_PARMS,          // TVNImgObjParms
+    IMG_SEQ_PARMS,          // TVNImgSeqParms
+    TEXT_PARMS,             // TVNTextParms
+    TEXT_OBJ_PARMS,         // TVNTextObjParms
+    FONT_PARMS,             // TVNFontParms
+    STRING_PARMS,           // TVNStringParms
+    HTML_PARMS,             // TVNHtmlParms
+    SET_VAR_PARMS,          // TVNSetVarParms
+    INC_VAR_PARMS,          // TVNIncVarParms
+    DEC_VAR_PARMS,          // TVNDecVarParms
+    IF_PARMS,               // TVNIfParms
+    CONDITION_PARMS,        // TVNConditionParms
+    RECT_PARMS,             // TVNRectParms
+    EXEC_PARMS,             // TVNExecParms
+    FILENAME_PARMS,         // TVNFileNameParms
+    TIME_PARMS,             // TVNTimeParms
+    COMMAND_PARMS           // TVNCommandParms
+};
+
+// ============================================================================
+// MAPPING NOM DE CLASSE -> TYPE
+// ============================================================================
+
+// Pour la désérialisation Borland, les noms de classes sont stockés
+// comme chaînes dans le flux et mappés vers les types correspondants
+
+const char* StreamableClassNames[] = {
+    "TStreamableBase",
+    "TVNStreamable",
+    "TVNObject",
+    "TVNIndexDependant",
+    "TVNVariable",
+    "TVNVariableArray",
+    "TVNCommand",
+    "TVNCommandArray",
+    "TVNEventCommand",
+    "TVNEventCommandArray",
+    "TVNProjectParms",
+    "TVNSceneParms",
+    "TVNHotspotParms",
+    "TVNMidiParms",
+    "TVNDigitParms",
+    "TVNCDAParms",
+    "TVNImageParms",
+    "TVNImgObjParms",
+    "TVNImgSeqParms",
+    "TVNTextParms",
+    "TVNTextObjParms",
+    "TVNFontParms",
+    "TVNStringParms",
+    "TVNHtmlParms",
+    "TVNSetVarParms",
+    "TVNIncVarParms",
+    "TVNDecVarParms",
+    "TVNIfParms",
+    "TVNConditionParms",
+    "TVNRectParms",
+    "TVNExecParms",
+    "TVNFileNameParms",
+    "TVNTimeParms",
+    "TVNCommandParms"
+};
+
+// ============================================================================
+// HIÉRARCHIE COMPLÈTE DES CLASSES
+// ============================================================================
+
 // Hiérarchie TVNStreamable
 TVNStreamable           // Classe de base sérialisable
 ├── TVNObject           // Objet de base
@@ -1692,7 +2019,7 @@ TVNToolBar              // Barre d'outils
 TVNTimer                // Timer
 TVNTimerRes             // Résolution timer
 
-// Classes conteneurs
+// Classes conteneurs (Borland templates)
 TVNCommandArray         // Tableau de commandes
 TVNEventCommandArray    // Tableau de commandes événementielles
 TVNHotspotArray         // Tableau de hotspots
@@ -1711,6 +2038,17 @@ TVNToolBarProperties    // Propriétés toolbar
 TVNProtectData          // Données de protection
 TVNPluginData           // Données plugin
 ```
+
+**Notes sur la sérialisation Borland :**
+
+1. **Enregistrement des classes** : Chaque classe streamable doit être enregistrée
+   avec `TStreamableBase::RegisterClass()` avant de pouvoir être lue/écrite.
+
+2. **Format du flux** : Le nom de la classe est écrit en premier (chaîne null-terminée),
+   suivi d'un numéro de version (uint16), puis des données de l'objet.
+
+3. **Références circulaires** : Le système Borland gère les références circulaires
+   via un mécanisme de "delta" (offset dans le flux) pour les objets déjà écrits.
 
 ### 6.5 Table complète des opcodes de contrôle (0x06-0x30)
 
@@ -1915,3 +2253,38 @@ géométrique de la collision.
 
 **Dernière mise à jour**: 2026-01-26
 **Analysé par**: radare2 5.5.0
+
+---
+
+## 8. Récapitulatif des découvertes
+
+### 8.1 Éléments intégrés dans VNFileLoader.ts
+
+| Catégorie | Élément | Statut |
+|:----------|:--------|:-------|
+| Records binaires | VNRecordType enum (6 types) | ✅ Implémenté |
+| Événements | VNEventType enum (4 types) | ✅ Implémenté |
+| Paramètres | TVNParmsType enum (24 types) | ✅ Implémenté |
+| Paramètres | Interfaces TVN*Parms (24 interfaces) | ✅ Implémenté |
+| Classes | TVNStreamableClass enum (34 classes) | ✅ Implémenté |
+| Classes | StreamableClassMap (mapping nom→type) | ✅ Implémenté |
+| Opcodes | OPCODE_MAP (43 entrées) | ✅ Implémenté |
+| Commandes | CommandNameMap (49 commandes) | ✅ Implémenté |
+
+### 8.2 Adresses clés dans europeo.exe
+
+| Adresse | Contenu |
+|:--------|:--------|
+| 0x40ec00 | Début table enregistrement classes TVN*Parms |
+| 0x411600 | Fin table classes streamables |
+| 0x43f76c | Table des 49 commandes textuelles |
+| 0x43f8cf | Chaînes événements (EV_ONFOCUS, etc.) |
+| 0x4317D5 | Table de dispatch opcodes (43 entrées) |
+| 0x43177D | Fonction dispatcher principal |
+
+### 8.3 Formats de données clés
+
+- **Chaînes** : uint32 LE longueur + données (pas uint16!)
+- **Records** : uint32 LE type + données spécifiques
+- **Couleurs** : #RRGGBB (format hexadécimal avec préfixe #)
+- **Polygones** : uint32 count + (int32 x, int32 y) * count

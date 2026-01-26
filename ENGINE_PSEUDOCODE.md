@@ -1204,52 +1204,140 @@ Le moteur reconnaît les entités HTML suivantes (pour le contenu HTML/texte):
 &middot;  - Point médian (·)
 ```
 
-### 3.11 Références de scènes avec suffixes
+### 3.11 Système d'Opcodes par Suffixes (DÉCOUVERTE MAJEURE)
 
-Les références de scène peuvent inclure des **suffixes alphabétiques**:
+**Les "suffixes" alphabétiques (d, f, h, i, j, k, l, etc.) sont en réalité des OPCODES !**
+
+#### Mécanisme de parsing (sub_407FE5)
+
+Le moteur lit le flux binaire `.vnd` de manière séquentielle :
+1. La fonction utilise **`atol()`** pour extraire la valeur numérique
+2. `atol()` consomme les chiffres et **s'arrête** dès qu'il rencontre une lettre
+3. Le pointeur se trouve alors sur la lettre, interprétée comme **opcode suivant**
+4. Le répartiteur (`sub_43177D`) dispatch vers le handler approprié
+
+**Exemple:** La séquence `54h` est parsée ainsi :
+- `atol("54h")` retourne 54, pointer sur "h"
+- "h" (opcode 8) → exécute le handler Tooltip
+
+#### Table de dispatch (sub_43177D @ 0x43177D)
+
+Formule de calcul : **`index = caractère - 6`** (après `add ecx, -6`)
+
+La table contient **43 entrées** (indices 0-42).
+
+| Suffixe | Valeur | Index | Handler | Fonction |
+|:-------:|:------:|:-----:|:--------|:---------|
+| **d** | 0x64 | 4 | sub_431881 | **Saut Direct** - ID absolu de scène |
+| **f** | 0x66 | 6 | sub_4268F8 | **Saut de Scène** - changement de scène |
+| **h** | 0x68 | 8 | sub_426D33 | **Tooltip** - bulle d'aide/texte info |
+| **i** | 0x69 | 9 | sub_42703A | **Index/Image** - saut indexé ou image |
+| **j** | 0x6A | 10 | sub_4275F6 | **Bitmap/Palette** - gestion graphique |
+| **k** | 0x6B | 11 | sub_427B56 | **Audio WAV** - jouer fichier sonore |
+| **l** | 0x6C | 12 | sub_427C42 | **Musique MIDI** - jouer séquence MIDI |
+
+#### Adresses des handlers dans la jump table (0x4317D5)
+
 ```
-".vnp 57j"    - Scène 57 avec suffixe 'j'
-".vnp 13i"    - Scène 13 avec suffixe 'i'
-".vnp 38"     - Scène 38 sans suffixe
-```
-
-Les suffixes semblent indiquer des variantes ou des états de scène.
-
-### 3.12 Système de sérialisation - Pas d'opcodes binaires
-
-**DÉCOUVERTE IMPORTANTE:** Le moteur VN n'utilise **PAS** de système d'opcodes binaires
-(0x01, 0x02, etc.) pour les commandes. Toutes les commandes sont:
-
-1. **Stockées en texte clair** (ex: "playwav", "set_var", "scene")
-2. **Comparées par chaîne** (via lstrcmpiA, insensible à la casse)
-3. **Sérialisées avec formats printf-style**
-
-Les patterns comme `01 00 00 00 06 00 00 00` trouvés dans les fichiers sont:
-- Des compteurs (nombre de scènes, hotspots, commandes)
-- Des longueurs de tableaux
-- Des valeurs de paramètres
-
-**Structure typique d'un fichier VN:**
-```
-[magic: "VNFILE"]
-[version: uint16]
-[project_name: uint32_len + string]
-[display_params]
-[scene_count: uint16]
-[scene_0]
-  [name: uint32_len + string]
-  [background: uint32_len + string]
-  [properties]
-  [hotspot_count: uint16]
-  [hotspot_0]
-    [name: uint32_len + string]
-    [shape_type: uint8]
-    [bounds or polygon]
-    [command_count: uint16]
-    [command_0: uint32_len + "playwav music.wav"]
-    ...
-  ...
+Index 0  (0x06): 0x004319FA
+Index 1  (0x07): 0x00431A20
+Index 2  (0x08): 0x00431A39  - 'h' handler setup
+Index 3  (0x09): 0x00431881  - 'd' direct jump
+Index 4  (0x0A): 0x00431A53
+Index 5  (0x0B): 0x004318EE
+Index 6  (0x0C): 0x0043198B  - 'f' scene jump
+Index 7  (0x0D): 0x00431B2B
+Index 8  (0x0E): 0x004321B6  - (default/skip)
+Index 9  (0x0F): 0x004321B6  - (default/skip)
+Index 10 (0x10): 0x00431B4E  - 'j' bitmap
+Index 11 (0x11): 0x00431B71  - 'k' wav
+Index 12 (0x12): 0x00431B91  - 'l' midi
 ...
+```
+
+#### Logique de navigation avec opcodes
+
+Dans le contexte `scene N[suffixe]` :
+
+| Syntaxe | Description |
+|:--------|:------------|
+| `Ni` | **Index** : cible = `INDEX_ID` + N |
+| `Nd` | **Direct** : saut à la scène N (ID absolu) |
+| `N+` | **Relatif +** : scène actuelle + N |
+| `N-` | **Relatif -** : scène actuelle - N |
+| `N` | **Défaut** : mode direct (sans suffixe) |
+
+#### Cas spécial : Suffixe dans le texte
+
+Une séquence comme `euroj` est parsée :
+1. "euro" = données textuelles
+2. `0x6A` ("j") = **fin du texte**, déclenchement opcode 10
+3. Opcode 10 → `sub_4275F6` → mise à jour bitmap/palette
+
+#### Pseudo-code du dispatcher
+
+```cpp
+// sub_43177D - Command dispatcher
+void DispatchCommand(TVNApp* app, int opcode, void* params) {
+    int index = opcode - 6;  // Offset de la table
+
+    if (index > 42) {
+        // Opcode invalide
+        return;
+    }
+
+    // Table de saut à 0x4317D5
+    void (*handler)(TVNApp*, void*) = jumpTable[index];
+    handler(app, params);
+}
+
+// Exemple: Handler 'f' (scene jump) @ 0x4268F8
+void HandleSceneJump(TVNApp* app, int sceneId) {
+    if (!app->IsReady()) return;
+    if (app->sceneManager == NULL) return;
+
+    // Calculer la scène cible
+    int targetScene = CalculateTargetScene(app, sceneId);
+
+    // Effectuer le saut
+    app->sceneManager->GoToScene(targetScene);
+}
+
+// Exemple: Handler 'k' (WAV) @ 0x427B56
+void HandlePlayWav(TVNApp* app, const char* filename) {
+    if (!app->IsReady()) return;
+
+    // Vérifier si audio activé
+    if (!(app->prefs & PREF_AUDIO_ENABLED)) return;
+
+    // Vérifier si déjà en lecture
+    if (app->prefs & PREF_AUDIO_PLAYING) {
+        app->wavePlayer->Stop();
+    }
+
+    // Jouer le fichier
+    app->wavePlayer->Play(filename, 0x62);  // 0x62 = flags
+}
+```
+
+### 3.12 Structure mixte texte/opcodes
+
+**CORRECTION:** Le moteur utilise un système **HYBRIDE** :
+
+1. **Commandes textuelles** (`playwav`, `set_var`, `scene`) pour le haut niveau
+2. **Opcodes par suffixe** (d, f, h, i, j, k, l) pour le contrôle bas niveau
+
+Les commandes textuelles sont **enveloppées** dans le système d'opcodes :
+- Une commande `scene 54h` est d'abord parsée comme texte "scene"
+- Puis le paramètre "54h" est traité par le système d'opcodes
+- atol extrait 54, puis 'h' déclenche l'opcode tooltip
+
+**Structure réelle du flux de données :**
+```
+[command: uint32_len + "scene 54h"]
+        ↓
+    "scene" → match commande texte
+    "54h"   → atol(54) + opcode 'h' (tooltip)
 ```
 
 ---

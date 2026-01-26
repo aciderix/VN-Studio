@@ -26,6 +26,28 @@ type VNCommand = VNCommandGeneric;
 type VNGdiObject = VNGdiObjectGeneric;
 
 /**
+ * Information sur un opcode suffixe
+ * Découvert dans europeo.exe @ sub_43177D (table de dispatch)
+ */
+interface VNOpcodeInfo {
+  code: number;       // Index dans la table de dispatch
+  name: string;       // Nom de l'opcode (DIRECT_JUMP, SCENE_JUMP, etc.)
+  description: string; // Description en français
+}
+
+/**
+ * Référence parsée avec opcode
+ * Format: "[+-]<nombre><opcode_letter>"
+ */
+interface VNOpcodeRef {
+  raw: string;           // Chaîne originale
+  value?: number;        // Valeur numérique extraite
+  isRelative?: boolean;  // true si préfixé par + ou -
+  opcode?: VNOpcodeInfo; // Opcode détecté (d, f, h, i, j, k, l)
+  sceneName?: string;    // Nom de scène si pas de nombre
+}
+
+/**
  * Buffer Reader - Lecture binaire avec position
  */
 class BinaryReader {
@@ -1048,25 +1070,81 @@ export class VNFileLoader {
   }
 
   /**
-   * Parse une référence de scène
-   * Formats découverts dans les fichiers .vnd:
-   * - "57j" -> index=57, suffix='j'
-   * - "13i" -> index=13, suffix='i'
-   * - "38"  -> index=38, suffix=undefined
-   * - "menu" -> index=undefined, suffix=undefined (nom de scène)
+   * Opcodes par suffixe - Découverts dans europeo.exe @ sub_43177D
    *
-   * Les suffixes semblent indiquer des variantes de scène (état, branche, etc.)
+   * Les "suffixes" (d, f, h, i, j, k, l) sont des OPCODES !
+   * Le moteur utilise atol() pour extraire le nombre, puis le caractère
+   * suivant est interprété comme opcode par le dispatcher.
+   *
+   * Table de dispatch (43 entrées, offset -6):
+   * - 'd' (0x64) = index 4  = Saut Direct (ID absolu)
+   * - 'f' (0x66) = index 6  = Saut de Scène
+   * - 'h' (0x68) = index 8  = Tooltip
+   * - 'i' (0x69) = index 9  = Index/Image
+   * - 'j' (0x6A) = index 10 = Bitmap/Palette
+   * - 'k' (0x6B) = index 11 = Audio WAV
+   * - 'l' (0x6C) = index 12 = Musique MIDI
    */
-  private parseSceneReference(ref: string): { index?: number; suffix?: string } {
-    if (!ref) return {};
+  private static readonly OPCODE_MAP: Record<string, VNOpcodeInfo> = {
+    d: { code: 4, name: 'DIRECT_JUMP', description: 'Saut direct vers ID scène absolu' },
+    f: { code: 6, name: 'SCENE_JUMP', description: 'Changement de scène' },
+    h: { code: 8, name: 'TOOLTIP', description: 'Afficher tooltip/texte info' },
+    i: { code: 9, name: 'INDEX_IMAGE', description: 'Saut indexé ou chargement image' },
+    j: { code: 10, name: 'BITMAP_PALETTE', description: 'Gestion bitmap/palette' },
+    k: { code: 11, name: 'PLAY_WAV', description: 'Jouer fichier audio WAV' },
+    l: { code: 12, name: 'PLAY_MIDI', description: 'Jouer séquence MIDI' },
+  };
 
-    // Pattern: chiffres optionnels suivis d'une lettre optionnelle
-    const match = ref.match(/^(\d+)([a-z])?$/i);
+  /**
+   * Parse une référence avec opcode suffixe
+   * Format: "<nombre><opcode>" où opcode est une lettre (d, f, h, i, j, k, l, etc.)
+   *
+   * Exemples:
+   * - "54h" -> value=54, opcode='h' (tooltip)
+   * - "13i" -> value=13, opcode='i' (index/image)
+   * - "57j" -> value=57, opcode='j' (bitmap)
+   * - "38"  -> value=38, opcode=undefined (défaut)
+   * - "+1"  -> relative=+1, opcode=undefined (relatif)
+   * - "-2"  -> relative=-2, opcode=undefined (relatif)
+   */
+  private parseOpcodeReference(ref: string): VNOpcodeRef {
+    if (!ref) return { raw: ref };
+
+    // Pattern: signe optionnel + chiffres + lettre optionnelle
+    const match = ref.match(/^([+-])?(\d+)([a-z])?$/i);
 
     if (match) {
-      return {
-        index: parseInt(match[1]),
-        suffix: match[2]?.toLowerCase(),
+      const sign = match[1];
+      const value = parseInt(match[2]);
+      const opcodeLetter = match[3]?.toLowerCase();
+
+      const result: VNOpcodeRef = {
+        raw: ref,
+        value: sign === '-' ? -value : value,
+        isRelative: sign === '+' || sign === '-',
+      };
+
+      if (opcodeLetter && VNFileLoader.OPCODE_MAP[opcodeLetter]) {
+        result.opcode = VNFileLoader.OPCODE_MAP[opcodeLetter];
+      }
+
+      return result;
+    }
+
+    // Sinon c'est un nom de scène sans opcode
+    return { raw: ref, sceneName: ref };
+  }
+
+  /**
+   * Parse une référence de scène (wrapper pour compatibilité)
+   */
+  private parseSceneReference(ref: string): { index?: number; suffix?: string; opcode?: VNOpcodeInfo } {
+    const parsed = this.parseOpcodeReference(ref);
+
+    return {
+      index: parsed.value,
+      suffix: parsed.opcode?.name?.charAt(0).toLowerCase(),
+      opcode: parsed.opcode,
       };
     }
 

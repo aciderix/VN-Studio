@@ -1204,75 +1204,127 @@ Le moteur reconnaît les entités HTML suivantes (pour le contenu HTML/texte):
 &middot;  - Point médian (·)
 ```
 
-### 3.11 Système d'Opcodes par Suffixes (DÉCOUVERTE MAJEURE)
+### 3.11 Système d'Opcodes - Table de Dispatch Complète (43 entrées)
 
-**Les "suffixes" alphabétiques (d, f, h, i, j, k, l, etc.) sont en réalité des OPCODES !**
+**DÉCOUVERTE MAJEURE:** Le moteur utilise un système d'opcodes binaires allant de 0x06 à 0x30.
 
 #### Mécanisme de parsing (sub_407FE5)
 
 Le moteur lit le flux binaire `.vnd` de manière séquentielle :
 1. La fonction utilise **`atol()`** pour extraire la valeur numérique
-2. `atol()` consomme les chiffres et **s'arrête** dès qu'il rencontre une lettre
-3. Le pointeur se trouve alors sur la lettre, interprétée comme **opcode suivant**
-4. Le répartiteur (`sub_43177D`) dispatch vers le handler approprié
+2. `atol()` consomme les chiffres et **s'arrête** dès qu'il rencontre un non-chiffre
+3. Le caractère suivant est interprété comme **opcode**
+4. Le répartiteur (`sub_43177D`) dispatch via : **`index = opcode - 6`**
 
-**Exemple:** La séquence `54h` est parsée ainsi :
-- `atol("54h")` retourne 54, pointer sur "h"
-- "h" (opcode 8) → exécute le handler Tooltip
+#### Table de dispatch COMPLÈTE (sub_43177D @ 0x4317D5)
 
-#### Table de dispatch (sub_43177D @ 0x43177D)
+**Caractères de contrôle (0x06-0x1F):**
 
-Formule de calcul : **`index = caractère - 6`** (après `add ecx, -6`)
+| Opcode | Index | Handler | Description |
+|:------:|:-----:|:--------|:------------|
+| 0x06 | 0 | sub_4319FA | Control (inconnu) |
+| 0x07 | 1 | sub_431A20 | Control (inconnu) |
+| 0x08 | 2 | sub_431A39 | Control (inconnu) |
+| 0x09 | 3 | sub_431881 | Control (inconnu) |
+| 0x0A | 4 | sub_431A53 | Control (inconnu) |
+| 0x0B | 5 | sub_4318EE | Control (inconnu) |
+| 0x0C | 6 | sub_43198B | Control (inconnu) |
+| 0x0D (\\r) | 7 | sub_431B2B | **Retour chariot / nouveau record** |
+| 0x0E | 8 | sub_4321B6 | Skip/défaut |
+| 0x0F | 9 | sub_4321B6 | Skip/défaut |
+| 0x10 | 10 | sub_431B4E | Control (inconnu) |
+| 0x11 | 11 | sub_431B71 | Control (inconnu) |
+| 0x12 | 12 | sub_431B91 | Control (inconnu) |
+| 0x13 | 13 | sub_4319CB | Control (inconnu) |
+| 0x14 | 14 | sub_431BAB | Control (inconnu) |
+| 0x15 | 15 | sub_431BB8 | Control (inconnu) |
+| 0x16 | 16 | sub_431BCF | Control (inconnu) |
+| 0x17 | 17 | sub_431BEE | Control (inconnu) |
+| 0x18 | 18 | sub_431C0D | Control (inconnu) |
+| 0x19 | 19 | sub_431C2C | Control (inconnu) |
+| 0x1A | 20 | sub_431D6A | Control (inconnu) |
+| 0x1B (ESC) | 21 | sub_431A7C | **Séquence d'échappement** |
+| 0x1C | 22 | sub_431AD9 | Control (inconnu) |
+| 0x1D | 23 | sub_431AF3 | Control (inconnu) |
+| 0x1E | 24 | sub_431B0F | Control (inconnu) |
+| 0x1F | 25 | sub_431D84 | Control (inconnu) |
 
-La table contient **43 entrées** (indices 0-42).
+**Caractères ASCII imprimables (0x20-0x30):**
 
-| Suffixe | Valeur | Index | Handler | Fonction |
-|:-------:|:------:|:-----:|:--------|:---------|
-| **d** | 0x64 | 4 | sub_431881 | **Saut Direct** - ID absolu de scène |
-| **f** | 0x66 | 6 | sub_4268F8 | **Saut de Scène** - changement de scène |
-| **h** | 0x68 | 8 | sub_426D33 | **Tooltip** - bulle d'aide/texte info |
-| **i** | 0x69 | 9 | sub_42703A | **Index/Image** - saut indexé ou image |
-| **j** | 0x6A | 10 | sub_4275F6 | **Bitmap/Palette** - gestion graphique |
-| **k** | 0x6B | 11 | sub_427B56 | **Audio WAV** - jouer fichier sonore |
-| **l** | 0x6C | 12 | sub_427C42 | **Musique MIDI** - jouer séquence MIDI |
+| Opcode | Char | Index | Handler | Description |
+|:------:|:----:|:-----:|:--------|:------------|
+| 0x20 | SPACE | 26 | sub_431D58 | **Séparateur / espace** |
+| 0x21 | ! | 27 | sub_431DE5 | **Opérateur NOT / flag** |
+| 0x22 | " | 28 | sub_431E11 | **Délimiteur de chaîne** |
+| 0x23 | # | 29 | sub_431F5A | **Couleur hex (#RRGGBB)** |
+| 0x24 | $ | 30 | sub_43192E | **Référence variable / Stop WAV** |
+| 0x25 | % | 31 | sub_431E05 | **Spécificateur de format** |
+| 0x26 | & | 32 | sub_431FE0 | **Opération bitmap / AND** |
+| 0x27 | ' | 33 | sub_432005 | **Caractère littéral / flags** |
+| 0x28 | ( | 34 | sub_4321B6 | Skip/défaut (groupement) |
+| 0x29 | ) | 35 | sub_431AAB | **Fin de groupement** |
+| 0x2A | * | 36 | sub_431AD9 | **Multiplication / wildcard** |
+| 0x2B | + | 37 | sub_431AF3 | **Addition / relatif positif** (→ sub_428E06) |
+| 0x2C | , | 38 | sub_431B0F | **Séparateur virgule** (→ sub_428E06) |
+| 0x2D | - | 39 | sub_432105 | **Soustraction / relatif négatif** (→ sub_42999A) |
+| 0x2E | . | 40 | sub_43216D | **Point décimal / extension** |
+| 0x2F | / | 41 | sub_43194D | **Division / path / Stop MIDI** |
+| 0x30 | 0 | 42 | sub_43196C | **Chiffre 0 / contrôle MIDI** |
 
-#### Adresses des handlers dans la jump table (0x4317D5)
+#### Opcodes "suffixes" pour la navigation (lettres)
 
-```
-Index 0  (0x06): 0x004319FA
-Index 1  (0x07): 0x00431A20
-Index 2  (0x08): 0x00431A39  - 'h' handler setup
-Index 3  (0x09): 0x00431881  - 'd' direct jump
-Index 4  (0x0A): 0x00431A53
-Index 5  (0x0B): 0x004318EE
-Index 6  (0x0C): 0x0043198B  - 'f' scene jump
-Index 7  (0x0D): 0x00431B2B
-Index 8  (0x0E): 0x004321B6  - (default/skip)
-Index 9  (0x0F): 0x004321B6  - (default/skip)
-Index 10 (0x10): 0x00431B4E  - 'j' bitmap
-Index 11 (0x11): 0x00431B71  - 'k' wav
-Index 12 (0x12): 0x00431B91  - 'l' midi
-...
-```
+Les lettres a-z (0x61-0x7A) suivent un autre schéma via la formule `index = char - 'a' + 1`:
+
+| Suffixe | Fonction principale |
+|:-------:|:--------------------|
+| **d** | Saut Direct (ID absolu) |
+| **f** | Saut de Scène (sub_4268F8) |
+| **h** | Tooltip (sub_426D33) |
+| **i** | Index/Image (sub_42703A) |
+| **j** | Bitmap/Palette (sub_4275F6) |
+| **k** | Audio WAV (sub_427B56) |
+| **l** | Musique MIDI (sub_427C42) |
 
 #### Logique de navigation avec opcodes
 
-Dans le contexte `scene N[suffixe]` :
-
 | Syntaxe | Description |
 |:--------|:------------|
-| `Ni` | **Index** : cible = `INDEX_ID` + N |
-| `Nd` | **Direct** : saut à la scène N (ID absolu) |
-| `N+` | **Relatif +** : scène actuelle + N |
-| `N-` | **Relatif -** : scène actuelle - N |
-| `N` | **Défaut** : mode direct (sans suffixe) |
+| `Ni` | **Index** : cible = INDEX_ID + N |
+| `Nd` | **Direct** : saut à scène N (ID absolu) |
+| `N+` ou `+N` | **Relatif +** : scène actuelle + N |
+| `N-` ou `-N` | **Relatif -** : scène actuelle - N |
+| `N` | **Défaut** : mode direct |
 
-#### Cas spécial : Suffixe dans le texte
+#### Classes de paramètres (TVN*Parms)
 
-Une séquence comme `euroj` est parsée :
-1. "euro" = données textuelles
-2. `0x6A` ("j") = **fin du texte**, déclenchement opcode 10
-3. Opcode 10 → `sub_4275F6` → mise à jour bitmap/palette
+Chaque type de record utilise une classe de paramètres spécifique :
+
+```
+TVNCommandParms     - Base class pour tous les paramètres
+TVNSceneParms       - Navigation (GOTO)
+TVNSetVarParms      - set_var (nom + valeur)
+TVNIncVarParms      - inc_var
+TVNDecVarParms      - dec_var
+TVNIfParms          - Conditions IF
+TVNConditionParms   - Expressions conditionnelles
+TVNImageParms       - Images/bitmaps
+TVNImgObjParms      - Objets image
+TVNImgSeqParms      - Séquences animées
+TVNTextParms        - Texte
+TVNTextObjParms     - Objets texte
+TVNFontParms        - Polices
+TVNHtmlParms        - Contenu HTML
+TVNDigitParms       - Affichage chiffres
+TVNMidiParms        - Musique MIDI
+TVNFileNameParms    - Chemins de fichiers (WAV, AVI)
+TVNExecParms        - Exécution externe
+TVNTimeParms        - Temporisation
+TVNHotspotParms     - Zones cliquables
+TVNCDAParms         - CD Audio
+TVNRectParms        - Rectangles
+TVNStringParms      - Chaînes
+TVNProjectParms     - Paramètres projet
+```
 
 #### Pseudo-code du dispatcher
 
@@ -1457,5 +1509,289 @@ src/
 
 ---
 
-**Dernière mise à jour**: 2026-01-25
+## 6. Énumération complète des classes et commandes
+
+### 6.1 Liste des 49 commandes textuelles (extraite @ 0x43f76c)
+
+Commandes extraites de europeo.exe, stockées comme chaînes null-terminées :
+
+```
+NAVIGATION (6)
+--------------
+ 1. quit          - Quitter l'application
+ 2. about         - Afficher "À propos"
+ 3. prefs         - Ouvrir les préférences
+ 4. prev          - Scène précédente
+ 5. next          - Scène suivante
+ 6. scene         - Aller à une scène
+
+MÉDIA AUDIO (7)
+---------------
+ 7. playwav       - Jouer fichier WAV
+ 8. playmid       - Jouer fichier MIDI
+ 9. playcda       - Jouer CD Audio
+10. closewav      - Arrêter WAV
+11. closemid      - Arrêter MIDI
+12. closedll      - Fermer DLL audio
+
+MÉDIA VIDÉO (2)
+---------------
+13. playavi       - Jouer vidéo AVI
+14. closeavi      - Arrêter vidéo AVI
+
+IMAGES/BITMAPS (7)
+------------------
+15. playbmp       - Animer un bitmap
+16. playseq       - Séquence d'images
+17. addbmp        - Ajouter bitmap
+18. delbmp        - Supprimer bitmap
+19. showbmp       - Afficher bitmap
+20. hidebmp       - Cacher bitmap
+
+TEXTE/HTML (5)
+--------------
+21. playhtml      - Afficher contenu HTML
+22. playtext      - Texte avec effet
+23. addtext       - Ajouter texte
+24. tiptext       - Tooltip
+25. font          - Définir police
+
+OBJETS (3)
+----------
+26. showobj       - Afficher objet
+27. hideobj       - Cacher objet
+28. delobj        - Supprimer objet
+
+HOTSPOTS (2)
+------------
+29. hotspot       - Gérer hotspot
+30. defcursor     - Curseur par défaut
+
+ZOOM/EFFETS (4)
+---------------
+31. zoom          - Activer zoom
+32. zoomin        - Zoom avant
+33. zoomout       - Zoom arrière
+34. pause         - Mettre en pause
+
+VARIABLES/LOGIQUE (4)
+---------------------
+35. if            - Condition
+36. set_var       - Définir variable
+37. inc_var       - Incrémenter
+38. dec_var       - Décrémenter
+
+SYSTÈME (11)
+------------
+39. exec          - Exécuter programme
+40. explore       - Ouvrir explorateur
+41. rundll        - Appeler fonction DLL
+42. runprj        - Charger projet
+43. msgbox        - Boîte de message
+44. playcmd       - Exécuter commande
+45. update        - Rafraîchir affichage
+46. invalidate    - Forcer redessin
+47. rem           - Commentaire
+48. load          - Charger sauvegarde
+49. save          - Sauvegarder
+```
+
+### 6.2 Événements (extraits @ 0x43f8cf)
+
+```
+EV_ONFOCUS      - Événement focus
+EV_ONCLICK      - Événement clic
+EV_ONINIT       - Événement initialisation
+EV_AFTERINIT    - Événement après init
+```
+
+### 6.3 Énumération des classes TVN*Parms (sérialisation Borland)
+
+Classes de paramètres utilisées pour la sérialisation des commandes :
+
+```cpp
+// Hiérarchie des classes de paramètres
+TVNCommandParms         // Classe de base pour tous les paramètres
+
+// Paramètres de navigation
+TVNSceneParms           // Navigation scène (GOTO)
+TVNIndexDependant       // Dépendance d'index
+
+// Paramètres de variables
+TVNSetVarParms          // set_var (nom + valeur)
+TVNIncVarParms          // inc_var
+TVNDecVarParms          // dec_var
+TVNIfParms              // Structure conditionnelle
+TVNConditionParms       // Expression conditionnelle
+
+// Paramètres d'images
+TVNImageParms           // Image simple
+TVNImgObjParms          // Objet image
+TVNImgSeqParms          // Séquence d'images
+
+// Paramètres de texte
+TVNTextParms            // Texte simple
+TVNTextObjParms         // Objet texte
+TVNFontParms            // Police
+TVNHtmlParms            // Contenu HTML
+TVNDigitParms           // Affichage de chiffres
+TVNStringParms          // Chaîne de caractères
+
+// Paramètres audio/vidéo
+TVNMidiParms            // MIDI
+TVNFileNameParms        // Chemin fichier (WAV, AVI)
+TVNCDAParms             // CD Audio
+
+// Paramètres divers
+TVNExecParms            // Exécution externe
+TVNTimeParms            // Temporisation
+TVNHotspotParms         // Zones cliquables
+TVNRectParms            // Rectangles
+TVNProjectParms         // Paramètres projet
+```
+
+### 6.4 Classes streamables principales (pour fichiers VN)
+
+```cpp
+// Hiérarchie TVNStreamable
+TVNStreamable           // Classe de base sérialisable
+├── TVNObject           // Objet de base
+├── TVNCommand          // Commande simple
+├── TVNEventCommand     // Commande événementielle
+├── TVNHotspot          // Zone cliquable
+├── TVNScene            // Scène complète
+├── TVNGdiObject        // Objet GDI (image, texte)
+├── TVNVariable         // Variable du jeu
+├── TVNProjectInfo      // Informations projet
+├── TVNVersion          // Version du fichier
+└── TVNHistData         // Données d'historique
+
+// Classes multimédia
+TVNMciBase              // Base MCI
+├── TVNWaveMedia        // Audio WAV
+├── TVNMidiMedia        // Audio MIDI
+├── TVNAviMedia         // Vidéo AVI
+└── TVNCDAMedia         // CD Audio
+
+// Classes graphiques
+TVNBitmap               // Bitmap simple
+TVNTransparentBmp       // Bitmap transparent
+TVNBmpImg               // Image bitmap
+TVNBkTexture            // Texture de fond
+TVNHtmlText             // Texte HTML
+
+// Classes d'effets
+TVNTimerBasedFx         // Base effets temporels
+├── TVNZoomFx           // Effet zoom
+└── TVNScrollFx         // Effet défilement
+
+// Classes UI
+TVNWindow               // Fenêtre principale
+TVNFrame                // Cadre
+TVNToolBar              // Barre d'outils
+TVNTimer                // Timer
+TVNTimerRes             // Résolution timer
+
+// Classes conteneurs
+TVNCommandArray         // Tableau de commandes
+TVNEventCommandArray    // Tableau de commandes événementielles
+TVNHotspotArray         // Tableau de hotspots
+TVNSceneArray           // Tableau de scènes
+TVNGdiObjectArray       // Tableau d'objets GDI
+TVNVariableArray        // Tableau de variables
+TVNPaletteEntries       // Entrées de palette
+
+// Classes d'application
+TVNApplication          // Application principale
+TVNApplicationInfo      // Infos application
+TVNDisplayMode          // Mode d'affichage
+TVNSceneProperties      // Propriétés de scène
+TVNTimerProperties      // Propriétés de timer
+TVNToolBarProperties    // Propriétés toolbar
+TVNProtectData          // Données de protection
+TVNPluginData           // Données plugin
+```
+
+### 6.5 Table complète des opcodes de contrôle (0x06-0x30)
+
+Table de dispatch complète extraite de sub_43177D @ 0x4317D5 :
+
+| Opcode | Char | Index | Handler    | Nom              | Description                    |
+|:------:|:----:|:-----:|:-----------|:-----------------|:-------------------------------|
+| 0x06   | -    | 0     | sub_4319FA | CTRL_06          | Contrôle (réservé)             |
+| 0x07   | -    | 1     | sub_431A20 | CTRL_07          | Contrôle (réservé)             |
+| 0x08   | -    | 2     | sub_431A39 | CTRL_08          | Contrôle (réservé)             |
+| 0x09   | TAB  | 3     | sub_431881 | CTRL_TAB         | Tabulation                     |
+| 0x0A   | LF   | 4     | sub_431A53 | LINE_FEED        | Nouvelle ligne                 |
+| 0x0B   | -    | 5     | sub_4318EE | CTRL_0B          | Contrôle (réservé)             |
+| 0x0C   | -    | 6     | sub_43198B | CTRL_0C          | Contrôle (réservé)             |
+| 0x0D   | CR   | 7     | sub_431B2B | CARRIAGE_RETURN  | Retour chariot / nouveau record |
+| 0x0E   | -    | 8     | sub_4321B6 | DEFAULT          | Défaut/skip                    |
+| 0x0F   | -    | 9     | sub_4321B6 | DEFAULT          | Défaut/skip                    |
+| 0x10   | -    | 10    | sub_431B4E | CTRL_10          | Contrôle (réservé)             |
+| 0x11   | -    | 11    | sub_431B71 | CTRL_11          | Contrôle (réservé)             |
+| 0x12   | -    | 12    | sub_431B91 | CTRL_12          | Contrôle (réservé)             |
+| 0x13   | -    | 13    | sub_4319CB | CTRL_13          | Contrôle (réservé)             |
+| 0x14   | -    | 14    | sub_431BAB | CTRL_14          | Contrôle (réservé)             |
+| 0x15   | -    | 15    | sub_431BB8 | CTRL_15          | Contrôle (réservé)             |
+| 0x16   | -    | 16    | sub_431BCF | CTRL_16          | Contrôle (réservé)             |
+| 0x17   | -    | 17    | sub_431BEE | CTRL_17          | Contrôle (réservé)             |
+| 0x18   | -    | 18    | sub_431C0D | CTRL_18          | Contrôle (réservé)             |
+| 0x19   | -    | 19    | sub_431C2C | CTRL_19          | Contrôle (réservé)             |
+| 0x1A   | -    | 20    | sub_431D6A | CTRL_1A          | Contrôle (réservé)             |
+| 0x1B   | ESC  | 21    | sub_431A7C | ESCAPE           | Séquence d'échappement         |
+| 0x1C   | -    | 22    | sub_431AD9 | CTRL_1C          | Contrôle (réservé)             |
+| 0x1D   | -    | 23    | sub_431AF3 | CTRL_1D          | Contrôle (réservé)             |
+| 0x1E   | -    | 24    | sub_431B0F | CTRL_1E          | Contrôle (réservé)             |
+| 0x1F   | -    | 25    | sub_431D84 | CTRL_1F          | Contrôle (réservé)             |
+| 0x20   | ' '  | 26    | sub_431D58 | SPACE            | Séparateur / espace            |
+| 0x21   | '!'  | 27    | sub_431DE5 | NOT/EXCLAIM      | Opérateur NOT / flag           |
+| 0x22   | '"'  | 28    | sub_431E11 | QUOTE            | Délimiteur de chaîne           |
+| 0x23   | '#'  | 29    | sub_431F5A | COLOR            | Couleur hex (#RRGGBB)          |
+| 0x24   | '$'  | 30    | sub_43192E | VARIABLE/STOP_WAV| Référence variable / Stop WAV  |
+| 0x25   | '%'  | 31    | sub_431E05 | FORMAT           | Spécificateur de format        |
+| 0x26   | '&'  | 32    | sub_431FE0 | BITMAP/AND       | Opération bitmap / AND         |
+| 0x27   | "'"  | 33    | sub_432005 | APOSTROPHE       | Caractère littéral / flags     |
+| 0x28   | '('  | 34    | sub_4321B6 | PAREN_OPEN       | Parenthèse ouvrante (défaut)   |
+| 0x29   | ')'  | 35    | sub_431AAB | PAREN_CLOSE      | Fin de groupement              |
+| 0x2A   | '*'  | 36    | sub_431AD9 | MULTIPLY/WILDCARD| Multiplication / wildcard      |
+| 0x2B   | '+'  | 37    | sub_431AF3 | ADD/REL_PLUS     | Addition / relatif positif     |
+| 0x2C   | ','  | 38    | sub_431B0F | COMMA            | Séparateur virgule             |
+| 0x2D   | '-'  | 39    | sub_432105 | SUB/REL_MINUS    | Soustraction / relatif négatif |
+| 0x2E   | '.'  | 40    | sub_43216D | DOT/DECIMAL      | Point décimal / extension      |
+| 0x2F   | '/'  | 41    | sub_43194D | DIVIDE/STOP_MIDI | Division / path / Stop MIDI    |
+| 0x30   | '0'  | 42    | sub_43196C | ZERO/MIDI_CTRL   | Chiffre 0 / contrôle MIDI      |
+
+### 6.6 Opcodes de navigation par lettre (suffixes)
+
+Ces opcodes utilisent la formule `index = char - 'a' + offset` :
+
+| Suffixe | Code | Nom           | Description                    | Handler    |
+|:-------:|:----:|:--------------|:-------------------------------|:-----------|
+| d       | 4    | DIRECT_JUMP   | Saut direct vers ID absolu     | sub_4268F8 |
+| f       | 6    | SCENE_JUMP    | Changement de scène            | sub_4268F8 |
+| h       | 8    | TOOLTIP       | Afficher tooltip/texte info    | sub_426D33 |
+| i       | 9    | INDEX_IMAGE   | Saut indexé ou chargement image| sub_42703A |
+| j       | 10   | BITMAP_PALETTE| Gestion bitmap/palette         | sub_4275F6 |
+| k       | 11   | PLAY_WAV      | Jouer fichier audio WAV        | sub_427B56 |
+| l       | 12   | PLAY_MIDI     | Jouer séquence MIDI            | sub_427C42 |
+
+### 6.7 Combinaisons navigation + opcode
+
+| Syntaxe    | Description                                   |
+|:-----------|:----------------------------------------------|
+| `Ni`       | Index : cible = INDEX_ID + N                  |
+| `Nd`       | Direct : saut à scène N (ID absolu)           |
+| `Nf`       | Scene : changement de scène N                 |
+| `Nh`       | Tooltip : afficher tooltip avec paramètre N   |
+| `Nj`       | Bitmap : charger bitmap N                     |
+| `Nk`       | WAV : jouer fichier audio N                   |
+| `Nl`       | MIDI : jouer musique N                        |
+| `N+` ou `+N` | Relatif + : scène actuelle + N              |
+| `N-` ou `-N` | Relatif - : scène actuelle - N              |
+| `N`        | Défaut : mode direct                          |
+
+---
+
+**Dernière mise à jour**: 2026-01-26
 **Analysé par**: radare2 5.5.0

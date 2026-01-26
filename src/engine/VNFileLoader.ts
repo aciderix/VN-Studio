@@ -1072,20 +1072,15 @@ export class VNFileLoader {
   /**
    * Opcodes par suffixe - Découverts dans europeo.exe @ sub_43177D
    *
-   * Les "suffixes" (d, f, h, i, j, k, l) sont des OPCODES !
+   * Les "suffixes" (d, f, h, i, j, k, l, etc.) sont des OPCODES !
    * Le moteur utilise atol() pour extraire le nombre, puis le caractère
    * suivant est interprété comme opcode par le dispatcher.
    *
-   * Table de dispatch (43 entrées, offset -6):
-   * - 'd' (0x64) = index 4  = Saut Direct (ID absolu)
-   * - 'f' (0x66) = index 6  = Saut de Scène
-   * - 'h' (0x68) = index 8  = Tooltip
-   * - 'i' (0x69) = index 9  = Index/Image
-   * - 'j' (0x6A) = index 10 = Bitmap/Palette
-   * - 'k' (0x6B) = index 11 = Audio WAV
-   * - 'l' (0x6C) = index 12 = Musique MIDI
+   * Table de dispatch complète (43 entrées, formule: index = opcode - 6)
+   * Source: sub_43177D @ 0x4317D5
    */
   private static readonly OPCODE_MAP: Record<string, VNOpcodeInfo> = {
+    // === Opcodes de navigation (lettres) ===
     d: { code: 4, name: 'DIRECT_JUMP', description: 'Saut direct vers ID scène absolu' },
     f: { code: 6, name: 'SCENE_JUMP', description: 'Changement de scène' },
     h: { code: 8, name: 'TOOLTIP', description: 'Afficher tooltip/texte info' },
@@ -1093,6 +1088,25 @@ export class VNFileLoader {
     j: { code: 10, name: 'BITMAP_PALETTE', description: 'Gestion bitmap/palette' },
     k: { code: 11, name: 'PLAY_WAV', description: 'Jouer fichier audio WAV' },
     l: { code: 12, name: 'PLAY_MIDI', description: 'Jouer séquence MIDI' },
+
+    // === Opcodes spéciaux (caractères ASCII 0x20-0x30) ===
+    ' ': { code: 26, name: 'SPACE', description: 'Séparateur / espace' },
+    '!': { code: 27, name: 'NOT_EXCLAIM', description: 'Opérateur NOT / flag' },
+    '"': { code: 28, name: 'QUOTE', description: 'Délimiteur de chaîne' },
+    '#': { code: 29, name: 'COLOR', description: 'Couleur hex (#RRGGBB)' },
+    $: { code: 30, name: 'VARIABLE_STOP_WAV', description: 'Référence variable / Stop WAV' },
+    '%': { code: 31, name: 'FORMAT', description: 'Spécificateur de format' },
+    '&': { code: 32, name: 'BITMAP_AND', description: 'Opération bitmap / AND' },
+    "'": { code: 33, name: 'APOSTROPHE', description: 'Caractère littéral / flags' },
+    '(': { code: 34, name: 'PAREN_OPEN', description: 'Parenthèse ouvrante' },
+    ')': { code: 35, name: 'PAREN_CLOSE', description: 'Fin de groupement' },
+    '*': { code: 36, name: 'MULTIPLY_WILDCARD', description: 'Multiplication / wildcard' },
+    '+': { code: 37, name: 'ADD_REL_PLUS', description: 'Addition / relatif positif' },
+    ',': { code: 38, name: 'COMMA', description: 'Séparateur virgule' },
+    '-': { code: 39, name: 'SUB_REL_MINUS', description: 'Soustraction / relatif négatif' },
+    '.': { code: 40, name: 'DOT_DECIMAL', description: 'Point décimal / extension' },
+    '/': { code: 41, name: 'DIVIDE_STOP_MIDI', description: 'Division / path / Stop MIDI' },
+    '0': { code: 42, name: 'ZERO_MIDI_CTRL', description: 'Chiffre 0 / contrôle MIDI' },
   };
 
   /**
@@ -1141,10 +1155,11 @@ export class VNFileLoader {
   private parseSceneReference(ref: string): { index?: number; suffix?: string; opcode?: VNOpcodeInfo } {
     const parsed = this.parseOpcodeReference(ref);
 
-    return {
-      index: parsed.value,
-      suffix: parsed.opcode?.name?.charAt(0).toLowerCase(),
-      opcode: parsed.opcode,
+    if (parsed.value !== undefined || parsed.opcode) {
+      return {
+        index: parsed.value,
+        suffix: parsed.opcode?.name?.charAt(0).toLowerCase(),
+        opcode: parsed.opcode,
       };
     }
 

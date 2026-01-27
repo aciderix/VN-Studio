@@ -1182,44 +1182,106 @@ export class VNFileLoader {
   }
 
   /**
-   * Parse un fichier VNFILE
+   * Parse un fichier VND (VNFILE/DATFILE binaire)
+   *
+   * Structure découverte par rétro-ingénierie de europeo.exe:
+   * - 5 bytes: flags/version (3a 01 01 00 00)
+   * - Borland string: "VNFILE"
+   * - Borland string: version "2.13"
+   * - uint32: flags1
+   * - Borland strings: projectName, publisher, serial, shortName, regKey
+   * - uint32: width, height, colorDepth
+   * - Optionnel: 4 uint32 + Borland string (resourcePath)
+   * - uint32: variableCount + variables
+   * - uint32: sceneCount + scenes
    */
   private parseVNFile(buffer: ArrayBuffer): VNProject {
     const reader = new BinaryReader(buffer);
 
-    // Vérifier le magic "VNFILE"
-    if (!reader.checkMagic('VNFILE')) {
-      throw new VNFileError('Invalid VNFILE: magic header not found', 0);
+    // === HEADER (5 bytes) ===
+    const headerFlags = reader.readBytes(5);
+    console.log(`VND Header flags: ${Array.from(headerFlags).map(b => b.toString(16).padStart(2, '0')).join('')}`);
+
+    // === MAGIC "VNFILE" (Borland string) ===
+    const magic = reader.readBorlandString();
+    if (magic !== 'VNFILE') {
+      throw new VNFileError(`Invalid VND file: expected VNFILE magic, got "${magic}"`, reader.pos);
     }
 
-    // Lire la version (format Borland readVersion)
-    const version = this.readVersion(reader);
-    // Calculer le mot de version pour les comparaisons (format 0x2000a, 0x2000b, etc.)
+    // === VERSION (Borland string, e.g., "2.13") ===
+    const versionStr = reader.readBorlandString();
+    const versionParts = versionStr.split('.');
+    const version = {
+      major: parseInt(versionParts[0]) || 2,
+      minor: parseInt(versionParts[1]) || 0,
+    };
+    // Version word pour comparaisons: 2.13 -> 0x2000d (2 * 0x1000 + 13)
     const versionWord = (version.major << 12) | version.minor;
-    console.log(`VNFile version: ${version.major}.${version.minor} (0x${versionWord.toString(16)})`);
+    console.log(`VND version: ${versionStr} (word: 0x${versionWord.toString(16)})`);
 
-    // Paramètres du projet (dépend de la version)
-    const projectParams = this.readProjectParams(reader, versionWord);
+    // === FLAGS1 (uint32) ===
+    const flags1 = reader.readUint32();
 
-    // Scènes
-    const sceneCount = reader.readUint16();
+    // === PROJECT METADATA (Borland strings) ===
+    const projectName = reader.readBorlandString();
+    const publisher = reader.readBorlandString();
+    const serial = reader.readBorlandString();
+    const shortName = reader.readBorlandString();
+    const regKey = reader.readBorlandString();
+
+    console.log(`Project: ${projectName} by ${publisher}`);
+
+    // === DISPLAY SETTINGS (uint32) ===
+    const displayWidth = reader.readUint32();
+    const displayHeight = reader.readUint32();
+    const colorDepth = reader.readUint32();
+
+    console.log(`Display: ${displayWidth}x${displayHeight} @ ${colorDepth}bpp`);
+
+    // === OPTIONAL SECTION (before variables) ===
+    // 4 unknown uint32 + resource path string
+    const unknown0 = reader.readUint32();
+    const unknown1 = reader.readUint32();
+    const unknown2 = reader.readUint32();
+    const unknown3 = reader.readUint32();
+    const resourcePath = reader.readBorlandString();
+    if (resourcePath) {
+      console.log(`Resource path: ${resourcePath}`);
+    }
+
+    // === VARIABLES (AVANT les scènes!) ===
+    const variableCount = reader.readUint32();
+    console.log(`Variables: ${variableCount}`);
+    const variables = new Map<string, VNVariable>();
+
+    for (let i = 0; i < variableCount; i++) {
+      const varName = reader.readBorlandString().toUpperCase();
+      const varValue = reader.readInt32();
+      variables.set(varName, { name: varName, value: varValue });
+    }
+
+    // === SCENES ===
+    const sceneCount = reader.readUint32();
+    console.log(`Scenes: ${sceneCount}`);
     const scenes: VNScene[] = [];
 
     for (let i = 0; i < sceneCount; i++) {
-      scenes.push(this.readScene(reader, i));
+      try {
+        scenes.push(this.readSceneVND(reader, i));
+      } catch (e) {
+        console.error(`Error parsing scene ${i}:`, e);
+        break;
+      }
     }
 
-    // Variables globales
-    const variables = this.readVariables(reader);
-
     return {
-      name: projectParams.name,
-      version: `${version.major}.${version.minor}`,
-      displayWidth: projectParams.displayWidth,
-      displayHeight: projectParams.displayHeight,
-      colorDepth: projectParams.colorDepth,
-      displayMode: projectParams.displayMode,
-      dataFilePath: projectParams.dataFilePath,
+      name: projectName,
+      version: versionStr,
+      displayWidth,
+      displayHeight,
+      colorDepth,
+      displayMode: VNDisplayModeType.WINDOWED,
+      dataFilePath: resourcePath,
       scenes,
       variables,
       startSceneIndex: 0,
@@ -1227,7 +1289,171 @@ export class VNFileLoader {
   }
 
   /**
-   * Lit la version Borland
+   * Lit une scène au format VND réel
+   *
+   * Structure:
+   * - 50 bytes: nom (fixe, null-padded)
+   * - 1 byte: flag
+   * - Borland string: resource
+   * - 32 bytes: zeros (réservé)
+   * - 6 uint32: propriétés (bitmask, delay, autoJump, reserved×3)
+   * - uint32: hotspotCount
+   * - uint32: commandCount
+   * - hotspots et commands
+   */
+  private readSceneVND(reader: BinaryReader, index: number): VNScene {
+    const startPos = reader.pos;
+
+    // Nom de la scène (50 bytes fixe)
+    const nameBytes = reader.readBytes(50);
+    const name = new TextDecoder('windows-1252').decode(nameBytes).split('\0')[0];
+
+    // Flag (1 byte)
+    const sceneFlag = reader.readUint8();
+
+    // Resource (Borland string)
+    const backgroundFile = reader.readBorlandString();
+
+    // 32 bytes réservés (généralement zéros)
+    reader.skip(32);
+
+    // Propriétés de scène (6 uint32)
+    const bitmask = reader.readUint32();
+    const timerDelay = reader.readUint32();
+    const timerAutoJump = reader.readUint32();
+    reader.readUint32(); // reserved1
+    reader.readUint32(); // reserved2
+    reader.readUint32(); // reserved3
+
+    // Comptes
+    const hotspotCount = reader.readUint32();
+    const commandCount = reader.readUint32();
+
+    console.log(`  Scene ${index}: "${name}" (bg: ${backgroundFile || 'none'}, hs: ${hotspotCount}, cmd: ${commandCount})`);
+
+    // Parser les hotspots/commands
+    const hotspots: VNHotspot[] = [];
+    const onEnterCommands: VNCommand[] = [];
+
+    // Les "commands" dans ce contexte sont en fait des blocs combinés hotspot+action
+    for (let i = 0; i < commandCount; i++) {
+      try {
+        const cmd = this.readCommandBlockVND(reader);
+        onEnterCommands.push(cmd);
+      } catch (e) {
+        console.warn(`  Warning: Error parsing command ${i} in scene "${name}":`, e);
+        break;
+      }
+    }
+
+    return {
+      index,
+      name,
+      backgroundFile,
+      hotspots,
+      onEnterCommands,
+      onExitCommands: [],
+      properties: {
+        bitmask,
+        timerEnabled: timerDelay > 0,
+        timerDelay,
+        timerTargetScene: timerAutoJump > 0 ? `scene_${timerAutoJump}` : '',
+        musicFile: '',
+        musicLoop: false,
+      },
+    };
+  }
+
+  /**
+   * Lit un bloc de commande au format VND
+   *
+   * Structure:
+   * - 6 uint32: header (enabled, x, y, zOrder, reserved×2)
+   * - uint32: type
+   * - 50 bytes: description
+   * - 48 bytes: reserved/padding
+   * - Sous-commandes selon le type
+   */
+  private readCommandBlockVND(reader: BinaryReader): VNCommand {
+    // Header (6 uint32 = 24 bytes)
+    const enabled = reader.readUint32();
+    const x = reader.readInt32();
+    const y = reader.readInt32();
+    const zOrder = reader.readUint32();
+    reader.readUint32(); // reserved1
+    reader.readUint32(); // reserved2
+
+    // Type de commande
+    const cmdType = reader.readUint32();
+
+    // Description (50 bytes fixe)
+    const descBytes = reader.readBytes(50);
+    const description = new TextDecoder('windows-1252').decode(descBytes).split('\0')[0];
+
+    // 48 bytes padding
+    reader.skip(48);
+
+    // Créer la commande de base
+    const command: VNCommand = {
+      type: cmdType as VNCommandType,
+      params: {
+        rawCommand: description,
+        enabled: enabled !== 0,
+        x,
+        y,
+        zOrder,
+      },
+    };
+
+    // Parser les sous-commandes selon le type
+    this.parseCommandDataVND(reader, command, cmdType);
+
+    return command;
+  }
+
+  /**
+   * Parse les données spécifiques selon le type de commande
+   */
+  private parseCommandDataVND(reader: BinaryReader, command: VNCommand, cmdType: number): void {
+    // Structure des sous-commandes: visibility(u32), field1(u32), field2(u32), subType(u32), [data]
+    const visibility = reader.readUint32();
+    const field1 = reader.readUint32();
+    const field2 = reader.readUint32();
+    const subType = reader.readUint32();
+
+    command.params.visibility = visibility;
+    command.params.subType = subType;
+
+    // Parser selon le sous-type
+    switch (subType) {
+      case VNRecordType.PLAYAVI: // 9
+        command.params.aviPath = reader.readBorlandString();
+        break;
+
+      case VNRecordType.PLAYBMP: // 10
+        command.params.bmpPath = reader.readBorlandString();
+        break;
+
+      case VNRecordType.PLAYWAV: // 11
+        command.params.wavPath = reader.readBorlandString();
+        break;
+
+      case VNRecordType.SCENE: // 6
+        command.params.targetScene = reader.readBorlandString();
+        break;
+
+      default:
+        // Type inconnu, essayer de lire une chaîne si la longueur semble valide
+        const peekLen = reader.peekUint32();
+        if (peekLen > 0 && peekLen < 500) {
+          command.params.data = reader.readBorlandString();
+        }
+        break;
+    }
+  }
+
+  /**
+   * Lit la version Borland (ancien format, gardé pour compatibilité)
    */
   private readVersion(reader: BinaryReader): { major: number; minor: number } {
     // Format Borland: version stockée comme word (major << 8 | minor) ou similaire

@@ -2268,6 +2268,74 @@ Offset  Taille  Type      Description
 0x04+n  4       int32     Valeur initiale (généralement 0)
 ```
 
+**Structure d'une scène (découvert par analyse de start.vnd) :**
+
+```
+Offset  Taille  Type      Description
+------  ------  --------  ---------------------------
+0x00    50      fixed     Nom de la scène (null-padded)
+0x32    1       uint8     Flag de scène
+0x33    4       uint32    Longueur resource
+0x37    n       string    Resource (ex: "<res0001>" ou "background.bmp")
+0x37+n  32      bytes     Réservé (zeros)
+        4       uint32    Bitmask/flags
+        4       uint32    Timer delay (ms)
+        4       uint32    Timer auto-jump (index scène)
+        4       uint32    Réservé
+        4       uint32    Réservé
+        4       uint32    Réservé
+        4       uint32    Nombre de hotspots
+        4       uint32    Nombre de commandes
+        ...     variable  Blocs de commandes
+```
+
+**Structure d'un bloc de commande (VALIDATED) :**
+
+```
+Offset  Taille  Type      Description
+------  ------  --------  ---------------------------
+0x00    4       uint32    Enabled (0/1)
+0x04    4       int32     X position
+0x08    4       int32     Y position
+0x0C    4       uint32    Z-order
+0x10    4       uint32    Réservé
+0x14    4       uint32    Réservé
+0x18    4       uint32    Type de commande (0-48 ou 105)
+0x1C    50      fixed     Description (null-padded)
+0x4E    48      bytes     Padding/réservé
+0x7E    ...     variable  Sous-commandes (visibility, subtype, data)
+```
+
+**Format des sous-commandes :**
+
+```
+Offset  Taille  Type      Description
+------  ------  --------  ---------------------------
+0x00    4       uint32    Visibility (0/1)
+0x04    4       uint32    Field1 (context-dependent)
+0x08    4       uint32    Field2 (context-dependent)
+0x0C    4       uint32    Sub-type (9=PLAYAVI, 10=PLAYBMP, etc.)
+0x10    4       uint32    Longueur données
+0x14    n       string    Données (chemin fichier, paramètres, etc.)
+```
+
+**Exemple réel (Scene "Quitter" de start.vnd) :**
+
+```
+Position 4531: Scene name = "Quitter" (50 bytes)
+Position 4581: Flag = 0
+Position 4582: Resource = "<res0001>"
+Position 4595: 32 bytes zeros
+Position 4627: bitmask=1, delay=5000ms, autoJump=1
+Position 4651: hotspotCount=1, commandCount=1
+Position 4659: Command block:
+  - enabled=1, x=0, y=0, zOrder=100
+  - type=10 (PLAYBMP)
+  - description="La légende"
+  - Sub-command: type=9 (PLAYAVI)
+  - path="..\..\..\couleurs1\movie\intro12.avi 1 0 40 640 440"
+```
+
 **Format des commandes dans les records :**
 
 Les commandes utilisent un format textuel avec paramètres séparés par espaces :

@@ -32,10 +32,14 @@ Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) ver
 - Phase 4 (Formats de fichiers): COMPLETE
 
 ### Formats de fichiers VN analysés
-- **VNFILE** (.vnp): Projets VN - Magic "VNFILE", sérialisation Borland
-- **DATFILE**: Ressources - WAV, MID, PAL, IMG8, IMG24, AVI, TXT
+- **VNP** (.vnp): Configuration INI avec références DATFILE
+- **VND** (.vnd): Format binaire VALIDÉ avec:
+  - Header: 5 bytes flags + Borland strings (magic, version, metadata)
+  - Variables: uint32 count + (Borland string name + int32 value) × count
+  - Scenes: 50 bytes nom fixe + flag + resource + 32 bytes réservés + propriétés
+  - Commands: 24 bytes header + type + 50 bytes desc + 48 bytes padding + sous-commandes
 - **VNSAVFILE**: Sauvegardes - État du jeu et variables
-- Parser créé: `src/engine/VNFileLoader.ts`
+- Parser: `src/engine/VNFileLoader.ts` (RÉÉCRIT pour format VND réel)
 
 ### Fichiers React créés
 - src/engine/* - Moteur complet (9 fichiers dont VNFileLoader.ts)
@@ -45,8 +49,17 @@ Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) ver
 - src/examples/* - Projet de démonstration
 - package.json, tsconfig.json - Configuration
 
+### Découvertes clés (Session Jan 2026)
+- **Format chaînes VND**: uint32 longueur + data (PAS uint16!)
+- **Ordre des données**: Variables AVANT les scènes
+- **Noms de scènes**: 50 bytes fixes (pas Borland strings)
+- **Fichiers test**: `VNP-VND/start.vnd`, `VNP-VND/start.vnp` (vrais fichiers du jeu)
+- **Fonctions Borland** (bds52t.dll):
+  - `ipstream::readWord32` @ 0x439180
+  - `operator>>(ipstream, string)` @ 0x439138
+
 ### Instructions pour nouvelles sessions
 1. Toujours lire PORTAGE_SUIVI.md en premier pour récupérer le contexte
 2. Consulter ENGINE_PSEUDOCODE.md pour les détails techniques
-3. Ne pas créer de nouveaux fichiers de documentation (utiliser les 2 existants)
+3. Consulter VNP-VND/*.vnd pour tester le parser
 4. Utiliser radare2 pour toute analyse supplémentaire des binaires

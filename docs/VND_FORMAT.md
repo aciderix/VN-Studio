@@ -41,16 +41,26 @@ Le format utilise la sérialisation Borland C++ (ipstream/opstream) depuis `bds5
 | 5 | var | Borland string | Identifiant format ("VNFILE") |
 | var | var | Borland string | Version ("2.13") |
 | var | 4 | uint32 | Type de format (4) |
-| var | var | Borland string | Nom du projet |
-| var | var | Borland string | Éditeur (société) |
-| var | var | Borland string | Numéro de série |
-| var | var | Borland string | ID projet |
+| var | var | Borland string | Nom du projet ("Europeo") |
+| var | var | Borland string | Éditeur ("Sopra Multimedia") |
+| var | var | Borland string | Numéro de série ("5D51F233") |
+| var | var | Borland string | ID projet ("EUROPEO") |
 | var | var | Borland string | Chemin registre Windows |
-| var | 4 | uint32 | Largeur écran (ex: 640) |
-| var | 4 | uint32 | Hauteur écran (ex: 480) |
-| var | 4 | uint32 | Profondeur couleur (ex: 16) |
-| var | ~20 | bytes | Champs inconnus |
-| var | var | Borland string | Chemin DLL optionnel |
+| var | 4 | uint32 | Largeur écran (640) |
+| var | 4 | uint32 | Hauteur écran (480) |
+| var | 4 | uint32 | Profondeur couleur (16) |
+| var | 20 | bytes | Champs inconnus (5 × uint32) |
+| var | var | Borland string | **Chemin DLL** ("..\vnstudio\vnresmod.dll") |
+| var | 4 | uint32 | **VARIABLE COUNT** (284 dans start.vnd) |
+
+### Exemple concret (start.vnd)
+
+```
+Position 146: 18 00 00 00 = 24 (longueur DLL path)
+Position 150: "..\vnstudio\vnresmod.dll" (24 bytes)
+Position 174: 1c 01 00 00 = 0x011c = 284 ← NOMBRE DE VARIABLES
+Position 178: Début des variables (première = "SACADOS")
+```
 
 ### Borland String
 Format des chaînes Borland:
@@ -65,14 +75,33 @@ Format des chaînes Borland:
 
 ## 2. Variables
 
-Les variables suivent immédiatement le header. Chaque variable:
+Les variables suivent immédiatement le **variable count** dans le header.
+
+### Structure
+
+```
+Variable Count (uint32)     ← Lu dans le header, juste après DLL path
+Variables[varCount]:
+  ├── Nom (Borland string)
+  └── Valeur (uint32, généralement 0)
+```
 
 | Taille | Type | Description |
 |--------|------|-------------|
 | var | Borland string | Nom de la variable |
-| 4 | uint32 | Valeur par défaut (généralement 0) |
+| 4 | uint32 | Valeur par défaut (0x00000000) |
 
-**Fin des variables:** Quand le pattern nom+0x00000000 ne correspond plus.
+### Exemple (start.vnd = 284 variables)
+
+```
+Position 174: 1c 01 00 00 = 284 (count)
+Position 178: 07 00 00 00 "SACADOS" 00 00 00 00
+Position 193: 03 00 00 00 "JEU" 00 00 00 00
+Position 204: 05 00 00 00 "BIDON" 00 00 00 00
+... (284 variables au total)
+```
+
+**Fin des variables:** Après avoir lu exactement `varCount` variables.
 
 ---
 

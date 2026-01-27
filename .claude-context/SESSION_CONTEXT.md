@@ -121,8 +121,9 @@ npx ts-node --transpile-only scripts/debug-vnd.ts VNP-VND/start.vnd
 ### Positions clés dans start.vnd
 - Header: 0-177
 - Variable count: position 174 = 284
-- Variables: 178-4527 (284 vars)
-- Scènes: 4527+ (Quitter, Frontal, Intro)
+- Variables: 178-4526 (284 vars)
+- **Scene count: position 4527 = 7** ← TROUVÉ!
+- Scènes: 4531+ (7 scènes dont Quitter, Frontal, Intro)
 - Hotspots Frontal: 5050, 5309, 5521, 5753, 5934
 
 ---

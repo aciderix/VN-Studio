@@ -2211,6 +2211,92 @@ Certains types sont utilisés pour des données géométriques (collision) plut�
 | 2    | prefs          | Rectangle de collision (X1,Y1,X2,Y2) |
 | 105  | -              | Polygone de collision (n sommets)    |
 
+### 7.1.2 Format fichier VND (DATFILE) - Découvert par analyse de vrais fichiers
+
+**Structure globale du fichier .vnd :**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ HEADER (variable)                                       │
+├─────────────────────────────────────────────────────────┤
+│ VARIABLES ARRAY (variable_count × variable)             │
+├─────────────────────────────────────────────────────────┤
+│ SCENES ARRAY (scene_count × scene)                      │
+│   └── HOTSPOTS ARRAY (per scene)                        │
+│         └── COMMANDS ARRAY (per event)                  │
+│               └── COLLISION DATA (rect ou polygon)      │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Header détaillé (analysé depuis start.vnd et biblio.vnd) :**
+
+```
+Offset  Taille  Type      Description                    Exemple
+------  ------  --------  ---------------------------    -------
+0x0000  5       bytes     Version/flags                  3a 01 01 00 00
+0x0005  4       uint32    Longueur "VNFILE"              06 00 00 00
+0x0009  6       string    Magic "VNFILE"                 "VNFILE"
+0x000F  4       uint32    Longueur version               04 00 00 00
+0x0013  4       string    Version                        "2.13"
+0x0017  4       uint32    Flags/type                     3e 00 00 00 ou 04 00 00 00
+0x001B  4       uint32    Longueur nom projet            07 00 00 00
+0x001F  n       string    Nom du projet                  "Europeo"
+...     4       uint32    Longueur éditeur               10 00 00 00
+...     n       string    Éditeur                        "Sopra Multimedia"
+...     4       uint32    Longueur serial                08 00 00 00
+...     n       string    Serial                         "5D51F233"
+...     4       uint32    Longueur nom court             07 00 00 00
+...     n       string    Nom court                      "EUROPEO"
+...     4       uint32    Longueur clé registre          21 00 00 00
+...     n       string    Clé registre                   "SOFTWARE\SOPRA..."
+...     4       uint32    Largeur affichage              80 02 00 00 (640)
+...     4       uint32    Hauteur affichage              e0 01 00 00 (480)
+...     4       uint32    Profondeur couleur             10 00 00 00 (16 bits)
+...     4       uint32    Flags                          00/01/04...
+...     4       uint32    Longueur chemin DLL            18 00 00 00
+...     n       string    Chemin DLL                     "..\vnstudio\vnresmod.dll"
+...     4       uint32    Nombre de variables            1c 01 00 00 (284)
+```
+
+**Structure d'une variable :**
+
+```
+Offset  Taille  Type      Description
+------  ------  --------  ---------------------------
+0x00    4       uint32    Longueur du nom
+0x04    n       string    Nom (MAJUSCULES)
+0x04+n  4       int32     Valeur initiale (généralement 0)
+```
+
+**Format des commandes dans les records :**
+
+Les commandes utilisent un format textuel avec paramètres séparés par espaces :
+
+| Type | Commande | Format paramètres                          |
+|:----:|:---------|:-------------------------------------------|
+| 10   | playbmp  | `"fichier.bmp x y flags"`                  |
+| 11   | playwav  | `"fichier.wav loop"`                       |
+| 12   | playmid  | `"fichier.mid loop"`                       |
+| 26   | playtext | `"x y largeur hauteur flags texte"`        |
+| 27   | font     | `"taille loop #couleur Police Name"`       |
+| 31   | runprj   | `"..\chemin\projet.vnp sceneIndex"`        |
+| 105  | polygon  | `count` + `(x, y) × count` (binaire pur)   |
+
+**Exemple concret (biblio.vnd @ 0x1280) :**
+
+```
+0a 00 00 00         # Type 10 (playbmp)
+19 00 00 00         # Longueur = 25 bytes
+"themes\roi2.bmp 0 247 122"  # fichier x=0 y=247 z=122
+
+69 00 00 00         # Type 105 (polygon)
+02 00 00 00         # 2 points
+65 00 00 00         # x1 = 101
+50 00 00 00         # y1 = 80
+cf 00 00 00         # x2 = 207
+bd 00 00 00         # y2 = 189
+```
+
 ### 7.2 Structure détaillée des types de records
 
 #### Type 2 (0x02) - Rectangle de collision

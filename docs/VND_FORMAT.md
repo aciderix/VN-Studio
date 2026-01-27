@@ -49,7 +49,7 @@ Le format utilise la sérialisation Borland C++ (ipstream/opstream) depuis `bds5
 | var | 4 | uint32 | Largeur écran (640) |
 | var | 4 | uint32 | Hauteur écran (480) |
 | var | 4 | uint32 | Profondeur couleur (16) |
-| var | 20 | bytes | Champs inconnus (5 × uint32) |
+| var | 16 | bytes | Champs inconnus (4 × uint32: 0, 4, 1, 0) |
 | var | var | Borland string | **Chemin DLL** ("..\vnstudio\vnresmod.dll") |
 | var | 4 | uint32 | **VARIABLE COUNT** (284 dans start.vnd) |
 

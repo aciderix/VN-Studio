@@ -104,48 +104,33 @@ function debugParseVND(filePath: string) {
   const colorDepth = reader.readUint32();
   console.log(`Screen: ${screenWidth}x${screenHeight} @ ${colorDepth}bit`);
 
-  // Unknown fields - trace to understand
+  // Unknown fields (4 × uint32) - entre dimensions écran et DLL path
   console.log(`\nPosition after metadata: ${reader.pos}`);
-  console.log(`Next 20 bytes:`);
-  for (let i = 0; i < 5; i++) {
+  console.log(`Unknown fields:`);
+  for (let i = 0; i < 4; i++) {
     const val = reader.readUint32();
     console.log(`  [${reader.pos - 4}] = ${val}`);
   }
 
-  // Look for DLL path (pattern ..\something.dll)
+  // DLL path (juste avant le variable count)
   const dllPath = reader.readBorlandString();
   console.log(`\nDLL Path: ${dllPath}`);
 
-  // Now we should be at variables
-  // Variables have format: Borland string (name) + 4 null bytes (default value?)
-  console.log(`\nPosition after DLL: ${reader.pos}`);
+  // VARIABLE COUNT - stocké directement après le DLL path!
+  const varCount = reader.readUint32();
+  console.log(`Variable count: ${varCount} (from header @ position ${reader.pos - 4})`);
 
-  // Count variables by looking for the pattern: string + 4 zeros
-  let varCount = 0;
+  // Lire les variables
   const variables: string[] = [];
   const varStartPos = reader.pos;
 
-  while (reader.pos < buffer.length - 100) {
-    const strLen = reader.peekUint32();
-    if (strLen > 0 && strLen < 50) {
-      const varName = reader.readBorlandString();
-      // Check if followed by 4 zeros
-      const afterStr = reader.peekUint32();
-      if (afterStr === 0) {
-        reader.readUint32(); // consume the zeros
-        variables.push(varName);
-        varCount++;
-      } else {
-        // Not a variable, backtrack
-        reader.seek(reader.pos - strLen - 4);
-        break;
-      }
-    } else {
-      break;
-    }
+  for (let i = 0; i < varCount; i++) {
+    const varName = reader.readBorlandString();
+    const varValue = reader.readUint32(); // valeur par défaut (généralement 0)
+    variables.push(varName);
   }
 
-  console.log(`Found ${varCount} variables (${varStartPos} to ${reader.pos})`);
+  console.log(`Read ${variables.length} variables (${varStartPos} to ${reader.pos})`);
   console.log(`First 10 vars: ${variables.slice(0, 10).join(', ')}`);
   console.log(`Last 10 vars: ${variables.slice(-10).join(', ')}`);
 

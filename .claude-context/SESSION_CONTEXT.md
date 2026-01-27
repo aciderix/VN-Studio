@@ -93,10 +93,37 @@ npx ts-node --transpile-only scripts/debug-vnd.ts VNP-VND/start.vnd
 
 ## Notes pour la prochaine session
 
-1. Commencer par corriger les erreurs TypeScript
-2. Le fichier ENGINE_PSEUDOCODE.md contient des notes sur les fonctions désassemblées
-3. Les positions des hotspots dans start.vnd: 5050, 5309, 5521, 5753, 5934
-4. La scène "Frontal" commence à position 4895
+### Ce qui est FAIT ✓
+- Parser du header complet (flags, metadata, dimensions écran)
+- Lecture du DLL path + **variable count** (284 dans start.vnd)
+- Lecture des 284 variables (nom + valeur)
+- Parser des 5 hotspots avec polygones de collision
+
+### PROCHAINES ÉTAPES
+
+1. **Corriger erreurs TypeScript dans VNFileLoader.ts**
+   - Types VNRect (left/top vs x1/y1)
+   - Casting VNRecordType → VNCommandType
+
+2. **Porter la logique de debug-vnd.ts vers VNFileLoader.ts**
+   - Lire varCount depuis le header (pas pattern matching)
+   - Utiliser varCount pour boucler sur les variables
+
+3. **Trouver le scene count**
+   - Il doit être stocké quelque part (après les variables?)
+   - Actuellement on détecte 3 scènes par pattern matching
+
+4. **Implémenter le rendu**
+   - Charger les BMP
+   - Dessiner les polygones (debug)
+   - Gérer les clics sur hotspots
+
+### Positions clés dans start.vnd
+- Header: 0-177
+- Variable count: position 174 = 284
+- Variables: 178-4527 (284 vars)
+- Scènes: 4527+ (Quitter, Frontal, Intro)
+- Hotspots Frontal: 5050, 5309, 5521, 5753, 5934
 
 ---
 

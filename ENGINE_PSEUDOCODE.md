@@ -2136,16 +2136,80 @@ Ces opcodes utilisent la formule `index = char - 'a' + offset` :
 Les fichiers VN utilisent un système de records typés pour stocker les différentes structures de données.
 Chaque record commence par un identifiant de type codé sur 4 octets (uint32 Little Endian).
 
-### 7.1 Énumération des types de records (0x00 - 0x69+)
+**DÉCOUVERTE MAJEURE** : La fonction `sub_40B990` contient un switch case géant qui traite les 49 types
+de records (0-48). Les indices correspondent exactement aux noms de commandes stockés à `0x43f76c`.
 
-| Type | Hex    | Nom                | Description                                    |
-|:----:|:------:|:-------------------|:-----------------------------------------------|
-| 2    | 0x02   | RECT_COLLISION     | Rectangle de collision simple (X1,Y1,X2,Y2)    |
-| 11   | 0x0B   | AUDIO_WAV          | Référence fichier audio WAV                    |
-| 12   | 0x0C   | AUDIO_MIDI         | Référence fichier audio MIDI                   |
-| 21   | 0x15   | CONDITIONAL        | Instructions conditionnelles (if...then)       |
-| 38   | 0x26   | HOTSPOT_TEXT       | Texte de hotspot (libellé survol)              |
-| 105  | 0x69   | POLYGON_COLLISION  | Zone de collision polygonale (n sommets)       |
+### 7.1 Table complète des 49 types de records (sub_40B990)
+
+Découvert par analyse du switch case dans `sub_40B990` (europeo.exe).
+Jump table à `0x40ba69`, compare avec `cmp eax, 0x30` (48 max).
+
+| Type | Hex  | Commande     | Catégorie     | Description                              |
+|:----:|:----:|:-------------|:--------------|:-----------------------------------------|
+| 0    | 0x00 | quit         | Navigation    | Quitter l'application                    |
+| 1    | 0x01 | about        | Navigation    | Afficher "À propos"                      |
+| 2    | 0x02 | prefs        | Navigation    | Ouvrir les préférences                   |
+| 3    | 0x03 | prev         | Navigation    | Scène précédente                         |
+| 4    | 0x04 | next         | Navigation    | Scène suivante                           |
+| 5    | 0x05 | zoom         | Navigation    | Activer le mode zoom                     |
+| 6    | 0x06 | scene        | Navigation    | Aller à une scène                        |
+| 7    | 0x07 | hotspot      | Navigation    | Gérer un hotspot                         |
+| 8    | 0x08 | tiptext      | Texte         | Afficher texte d'aide (tooltip)          |
+| 9    | 0x09 | playavi      | Média Vidéo   | Jouer vidéo AVI                          |
+| 10   | 0x0A | playbmp      | Affichage     | Animer un bitmap                         |
+| 11   | 0x0B | playwav      | Média Audio   | Jouer fichier WAV                        |
+| 12   | 0x0C | playmid      | Média Audio   | Jouer fichier MIDI                       |
+| 13   | 0x0D | playhtml     | Texte         | Afficher contenu HTML                    |
+| 14   | 0x0E | zoomin       | Affichage     | Zoom avant                               |
+| 15   | 0x0F | zoomout      | Affichage     | Zoom arrière                             |
+| 16   | 0x10 | pause        | Système       | Mettre en pause                          |
+| 17   | 0x11 | exec         | Système       | Exécuter programme externe               |
+| 18   | 0x12 | explore      | Système       | Ouvrir l'explorateur/URL                 |
+| 19   | 0x13 | playcda      | Média Audio   | Jouer CD Audio                           |
+| 20   | 0x14 | playseq      | Média Vidéo   | Jouer séquence d'images                  |
+| 21   | 0x15 | if           | Logique       | Condition                                |
+| 22   | 0x16 | set_var      | Logique       | Définir variable                         |
+| 23   | 0x17 | inc_var      | Logique       | Incrémenter variable                     |
+| 24   | 0x18 | dec_var      | Logique       | Décrémenter variable                     |
+| 25   | 0x19 | invalidate   | Affichage     | Forcer redessin                          |
+| 26   | 0x1A | defcursor    | Affichage     | Définir curseur par défaut               |
+| 27   | 0x1B | addbmp       | Affichage     | Ajouter bitmap                           |
+| 28   | 0x1C | delbmp       | Affichage     | Supprimer bitmap                         |
+| 29   | 0x1D | showbmp      | Affichage     | Afficher bitmap                          |
+| 30   | 0x1E | hidebmp      | Affichage     | Cacher bitmap                            |
+| 31   | 0x1F | runprj       | Système       | Charger autre projet                     |
+| 32   | 0x20 | update       | Affichage     | Mettre à jour affichage                  |
+| 33   | 0x21 | rundll       | Système       | Appeler fonction DLL                     |
+| 34   | 0x22 | msgbox       | Système       | Afficher boîte de message                |
+| 35   | 0x23 | playcmd      | Système       | Exécuter commande                        |
+| 36   | 0x24 | closewav     | Média Audio   | Arrêter WAV                              |
+| 37   | 0x25 | closedll     | Système       | Fermer DLL                               |
+| 38   | 0x26 | playtext     | Texte         | Texte avec effet                         |
+| 39   | 0x27 | font         | Texte         | Définir police                           |
+| 40   | 0x28 | rem          | Système       | Commentaire (ignoré)                     |
+| 41   | 0x29 | addtext      | Texte         | Ajouter texte                            |
+| 42   | 0x2A | delobj       | Objets        | Supprimer objet                          |
+| 43   | 0x2B | showobj      | Objets        | Afficher objet                           |
+| 44   | 0x2C | hideobj      | Objets        | Cacher objet                             |
+| 45   | 0x2D | load         | Sauvegarde    | Charger sauvegarde                       |
+| 46   | 0x2E | save         | Sauvegarde    | Sauvegarder                              |
+| 47   | 0x2F | closeavi     | Média Vidéo   | Arrêter vidéo AVI                        |
+| 48   | 0x30 | closemid     | Média Audio   | Arrêter MIDI                             |
+
+**Type spécial :**
+
+| Type | Hex  | Nom               | Description                              |
+|:----:|:----:|:------------------|:-----------------------------------------|
+| 105  | 0x69 | POLYGON_COLLISION | Zone de collision polygonale (n sommets) |
+
+### 7.1.1 Correspondance types de records et données géométriques
+
+Certains types sont utilisés pour des données géométriques (collision) plutôt que des commandes :
+
+| Type | Alias Commande | Usage Géométrique                    |
+|:----:|:---------------|:-------------------------------------|
+| 2    | prefs          | Rectangle de collision (X1,Y1,X2,Y2) |
+| 105  | -              | Polygone de collision (n sommets)    |
 
 ### 7.2 Structure détaillée des types de records
 
@@ -2285,6 +2349,57 @@ géométrique de la collision.
 ### 8.3 Formats de données clés
 
 - **Chaînes** : uint32 LE longueur + données (pas uint16!)
-- **Records** : uint32 LE type + données spécifiques
+- **Records** : uint32 LE type (0-48) + données spécifiques
 - **Couleurs** : #RRGGBB (format hexadécimal avec préfixe #)
 - **Polygones** : uint32 count + (int32 x, int32 y) * count
+
+### 8.4 Fonction clé: sub_40B990 (Switch Case Géant)
+
+**Localisation** : europeo.exe @ 0x40B990
+
+Cette fonction est le cœur du dispatch des commandes/records :
+
+```cpp
+void sub_40B990(TVNWindow* wnd, int recordType) {
+    // Vérifie que le type est dans les bornes (0-48)
+    if (recordType > 0x30) {  // 48
+        return;  // Type invalide
+    }
+
+    // Jump table à 0x40ba69 (49 entrées)
+    switch (recordType) {
+        case 0:  // quit
+            PostMessage(wnd, WM_COMMAND, 0xA4, 0);
+            break;
+        case 6:  // scene
+            ProcessSceneCommand(wnd);
+            break;
+        case 21: // if
+            ProcessConditional(wnd);
+            break;
+        case 31: // runprj
+            LoadNewProject(wnd);
+            break;
+        // ... 49 cases au total
+    }
+}
+```
+
+**Table de jump** : 0x40ba69 (49 × 4 bytes = 196 bytes)
+
+| Case | Adresse Handler | Fonction              |
+|:----:|:----------------|:----------------------|
+| 0    | 0x40bb2d        | PostMessage (quit)    |
+| 6    | 0x40bd2b        | Scene navigation      |
+| 11   | 0x40c4fe        | PlayWav               |
+| 12   | 0x40c5c3        | PlayMidi              |
+| 21   | 0x40c99c        | If condition          |
+| 22   | 0x40ca96        | Set variable          |
+| 31   | 0x40cdee        | Run project           |
+| 45   | 0x40d2ca        | Load save             |
+| 46   | 0x40d4c7        | Save                  |
+
+---
+
+**Dernière mise à jour**: 2026-01-27
+**Analysé par**: radare2 5.5.0

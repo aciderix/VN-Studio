@@ -49,19 +49,223 @@ interface VNOpcodeRef {
 
 /**
  * Types de records binaires pour la sérialisation VN
- * Découverts dans europeo.exe - format uint32 LE
+ * Découverts dans europeo.exe - fonction sub_40B990 (switch géant)
+ * Les indices 0-48 correspondent exactement aux commandes textuelles @ 0x43f76c
  */
 export enum VNRecordType {
-  RECT_COLLISION = 0x02,      // Rectangle de collision simple (X1,Y1,X2,Y2)
-  AUDIO_WAV = 0x0b,           // Référence fichier audio WAV
-  AUDIO_MIDI = 0x0c,          // Référence fichier audio MIDI
-  CONDITIONAL = 0x15,         // Instructions conditionnelles (if...then)
-  HOTSPOT_TEXT = 0x26,        // Texte de hotspot (libellé survol)
-  POLYGON_COLLISION = 0x69,   // Zone de collision polygonale (n sommets)
+  // === NAVIGATION (0-5) ===
+  QUIT = 0,              // quit - Quitter l'application
+  ABOUT = 1,             // about - Afficher "À propos"
+  PREFS = 2,             // prefs - Ouvrir les préférences
+  PREV = 3,              // prev - Scène précédente
+  NEXT = 4,              // next - Scène suivante
+  ZOOM = 5,              // zoom - Activer le mode zoom
+
+  // === SCÈNE/HOTSPOT (6-8) ===
+  SCENE = 6,             // scene - Aller à une scène
+  HOTSPOT = 7,           // hotspot - Gérer un hotspot
+  TIPTEXT = 8,           // tiptext - Afficher texte d'aide (tooltip)
+
+  // === MÉDIA VIDÉO (9-10) ===
+  PLAYAVI = 9,           // playavi - Jouer vidéo AVI
+  PLAYBMP = 10,          // playbmp - Animer un bitmap
+
+  // === MÉDIA AUDIO (11-13) ===
+  PLAYWAV = 11,          // playwav - Jouer fichier WAV (= AUDIO_WAV)
+  PLAYMID = 12,          // playmid - Jouer fichier MIDI (= AUDIO_MIDI)
+  PLAYHTML = 13,         // playhtml - Afficher contenu HTML
+
+  // === ZOOM/PAUSE (14-16) ===
+  ZOOMIN = 14,           // zoomin - Zoom avant
+  ZOOMOUT = 15,          // zoomout - Zoom arrière
+  PAUSE = 16,            // pause - Mettre en pause
+
+  // === SYSTÈME (17-18) ===
+  EXEC = 17,             // exec - Exécuter programme externe
+  EXPLORE = 18,          // explore - Ouvrir l'explorateur/URL
+
+  // === MÉDIA SUITE (19-20) ===
+  PLAYCDA = 19,          // playcda - Jouer CD Audio
+  PLAYSEQ = 20,          // playseq - Jouer séquence d'images
+
+  // === LOGIQUE/VARIABLES (21-24) ===
+  IF = 21,               // if - Condition (= CONDITIONAL)
+  SET_VAR = 22,          // set_var - Définir variable
+  INC_VAR = 23,          // inc_var - Incrémenter variable
+  DEC_VAR = 24,          // dec_var - Décrémenter variable
+
+  // === AFFICHAGE (25-30) ===
+  INVALIDATE = 25,       // invalidate - Forcer redessin
+  DEFCURSOR = 26,        // defcursor - Définir curseur par défaut
+  ADDBMP = 27,           // addbmp - Ajouter bitmap
+  DELBMP = 28,           // delbmp - Supprimer bitmap
+  SHOWBMP = 29,          // showbmp - Afficher bitmap
+  HIDEBMP = 30,          // hidebmp - Cacher bitmap
+
+  // === PROJET/SYSTÈME (31-35) ===
+  RUNPRJ = 31,           // runprj - Charger autre projet
+  UPDATE = 32,           // update - Mettre à jour affichage
+  RUNDLL = 33,           // rundll - Appeler fonction DLL
+  MSGBOX = 34,           // msgbox - Afficher boîte de message
+  PLAYCMD = 35,          // playcmd - Exécuter commande
+
+  // === FERMETURE MÉDIA (36-37) ===
+  CLOSEWAV = 36,         // closewav - Arrêter WAV
+  CLOSEDLL = 37,         // closedll - Fermer DLL
+
+  // === TEXTE (38-41) ===
+  PLAYTEXT = 38,         // playtext - Texte avec effet (= HOTSPOT_TEXT)
+  FONT = 39,             // font - Définir police
+  REM = 40,              // rem - Commentaire (ignoré)
+  ADDTEXT = 41,          // addtext - Ajouter texte
+
+  // === OBJETS (42-44) ===
+  DELOBJ = 42,           // delobj - Supprimer objet
+  SHOWOBJ = 43,          // showobj - Afficher objet
+  HIDEOBJ = 44,          // hideobj - Cacher objet
+
+  // === SAUVEGARDE (45-46) ===
+  LOAD = 45,             // load - Charger sauvegarde
+  SAVE = 46,             // save - Sauvegarder
+
+  // === FERMETURE MÉDIA SUITE (47-48) ===
+  CLOSEAVI = 47,         // closeavi - Arrêter vidéo AVI
+  CLOSEMID = 48,         // closemid - Arrêter MIDI
+
+  // === TYPES SPÉCIAUX (valeurs hexadécimales pour collision) ===
+  RECT_COLLISION = 0x02,      // Rectangle de collision simple (alias de PREFS)
+  POLYGON_COLLISION = 0x69,   // Zone de collision polygonale (105)
 }
 
 /**
- * Record de collision rectangulaire (Type 2)
+ * Noms des commandes textuelles correspondant aux indices
+ * Extrait de europeo.exe @ 0x43f76c
+ */
+export const VNRecordTypeNames: Record<number, string> = {
+  [VNRecordType.QUIT]: 'quit',
+  [VNRecordType.ABOUT]: 'about',
+  [VNRecordType.PREFS]: 'prefs',
+  [VNRecordType.PREV]: 'prev',
+  [VNRecordType.NEXT]: 'next',
+  [VNRecordType.ZOOM]: 'zoom',
+  [VNRecordType.SCENE]: 'scene',
+  [VNRecordType.HOTSPOT]: 'hotspot',
+  [VNRecordType.TIPTEXT]: 'tiptext',
+  [VNRecordType.PLAYAVI]: 'playavi',
+  [VNRecordType.PLAYBMP]: 'playbmp',
+  [VNRecordType.PLAYWAV]: 'playwav',
+  [VNRecordType.PLAYMID]: 'playmid',
+  [VNRecordType.PLAYHTML]: 'playhtml',
+  [VNRecordType.ZOOMIN]: 'zoomin',
+  [VNRecordType.ZOOMOUT]: 'zoomout',
+  [VNRecordType.PAUSE]: 'pause',
+  [VNRecordType.EXEC]: 'exec',
+  [VNRecordType.EXPLORE]: 'explore',
+  [VNRecordType.PLAYCDA]: 'playcda',
+  [VNRecordType.PLAYSEQ]: 'playseq',
+  [VNRecordType.IF]: 'if',
+  [VNRecordType.SET_VAR]: 'set_var',
+  [VNRecordType.INC_VAR]: 'inc_var',
+  [VNRecordType.DEC_VAR]: 'dec_var',
+  [VNRecordType.INVALIDATE]: 'invalidate',
+  [VNRecordType.DEFCURSOR]: 'defcursor',
+  [VNRecordType.ADDBMP]: 'addbmp',
+  [VNRecordType.DELBMP]: 'delbmp',
+  [VNRecordType.SHOWBMP]: 'showbmp',
+  [VNRecordType.HIDEBMP]: 'hidebmp',
+  [VNRecordType.RUNPRJ]: 'runprj',
+  [VNRecordType.UPDATE]: 'update',
+  [VNRecordType.RUNDLL]: 'rundll',
+  [VNRecordType.MSGBOX]: 'msgbox',
+  [VNRecordType.PLAYCMD]: 'playcmd',
+  [VNRecordType.CLOSEWAV]: 'closewav',
+  [VNRecordType.CLOSEDLL]: 'closedll',
+  [VNRecordType.PLAYTEXT]: 'playtext',
+  [VNRecordType.FONT]: 'font',
+  [VNRecordType.REM]: 'rem',
+  [VNRecordType.ADDTEXT]: 'addtext',
+  [VNRecordType.DELOBJ]: 'delobj',
+  [VNRecordType.SHOWOBJ]: 'showobj',
+  [VNRecordType.HIDEOBJ]: 'hideobj',
+  [VNRecordType.LOAD]: 'load',
+  [VNRecordType.SAVE]: 'save',
+  [VNRecordType.CLOSEAVI]: 'closeavi',
+  [VNRecordType.CLOSEMID]: 'closemid',
+};
+
+/**
+ * Catégories de commandes pour le regroupement logique
+ */
+export enum VNCommandCategory {
+  NAVIGATION = 'navigation',
+  MEDIA_VIDEO = 'media_video',
+  MEDIA_AUDIO = 'media_audio',
+  DISPLAY = 'display',
+  LOGIC = 'logic',
+  SYSTEM = 'system',
+  TEXT = 'text',
+  OBJECTS = 'objects',
+  SAVE_LOAD = 'save_load',
+}
+
+/**
+ * Mapping type de record -> catégorie
+ */
+export const VNRecordCategoryMap: Record<number, VNCommandCategory> = {
+  [VNRecordType.QUIT]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.ABOUT]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.PREFS]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.PREV]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.NEXT]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.ZOOM]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.SCENE]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.HOTSPOT]: VNCommandCategory.NAVIGATION,
+  [VNRecordType.TIPTEXT]: VNCommandCategory.TEXT,
+  [VNRecordType.PLAYAVI]: VNCommandCategory.MEDIA_VIDEO,
+  [VNRecordType.PLAYBMP]: VNCommandCategory.DISPLAY,
+  [VNRecordType.PLAYWAV]: VNCommandCategory.MEDIA_AUDIO,
+  [VNRecordType.PLAYMID]: VNCommandCategory.MEDIA_AUDIO,
+  [VNRecordType.PLAYHTML]: VNCommandCategory.TEXT,
+  [VNRecordType.ZOOMIN]: VNCommandCategory.DISPLAY,
+  [VNRecordType.ZOOMOUT]: VNCommandCategory.DISPLAY,
+  [VNRecordType.PAUSE]: VNCommandCategory.SYSTEM,
+  [VNRecordType.EXEC]: VNCommandCategory.SYSTEM,
+  [VNRecordType.EXPLORE]: VNCommandCategory.SYSTEM,
+  [VNRecordType.PLAYCDA]: VNCommandCategory.MEDIA_AUDIO,
+  [VNRecordType.PLAYSEQ]: VNCommandCategory.MEDIA_VIDEO,
+  [VNRecordType.IF]: VNCommandCategory.LOGIC,
+  [VNRecordType.SET_VAR]: VNCommandCategory.LOGIC,
+  [VNRecordType.INC_VAR]: VNCommandCategory.LOGIC,
+  [VNRecordType.DEC_VAR]: VNCommandCategory.LOGIC,
+  [VNRecordType.INVALIDATE]: VNCommandCategory.DISPLAY,
+  [VNRecordType.DEFCURSOR]: VNCommandCategory.DISPLAY,
+  [VNRecordType.ADDBMP]: VNCommandCategory.DISPLAY,
+  [VNRecordType.DELBMP]: VNCommandCategory.DISPLAY,
+  [VNRecordType.SHOWBMP]: VNCommandCategory.DISPLAY,
+  [VNRecordType.HIDEBMP]: VNCommandCategory.DISPLAY,
+  [VNRecordType.RUNPRJ]: VNCommandCategory.SYSTEM,
+  [VNRecordType.UPDATE]: VNCommandCategory.DISPLAY,
+  [VNRecordType.RUNDLL]: VNCommandCategory.SYSTEM,
+  [VNRecordType.MSGBOX]: VNCommandCategory.SYSTEM,
+  [VNRecordType.PLAYCMD]: VNCommandCategory.SYSTEM,
+  [VNRecordType.CLOSEWAV]: VNCommandCategory.MEDIA_AUDIO,
+  [VNRecordType.CLOSEDLL]: VNCommandCategory.SYSTEM,
+  [VNRecordType.PLAYTEXT]: VNCommandCategory.TEXT,
+  [VNRecordType.FONT]: VNCommandCategory.TEXT,
+  [VNRecordType.REM]: VNCommandCategory.SYSTEM,
+  [VNRecordType.ADDTEXT]: VNCommandCategory.TEXT,
+  [VNRecordType.DELOBJ]: VNCommandCategory.OBJECTS,
+  [VNRecordType.SHOWOBJ]: VNCommandCategory.OBJECTS,
+  [VNRecordType.HIDEOBJ]: VNCommandCategory.OBJECTS,
+  [VNRecordType.LOAD]: VNCommandCategory.SAVE_LOAD,
+  [VNRecordType.SAVE]: VNCommandCategory.SAVE_LOAD,
+  [VNRecordType.CLOSEAVI]: VNCommandCategory.MEDIA_VIDEO,
+  [VNRecordType.CLOSEMID]: VNCommandCategory.MEDIA_AUDIO,
+};
+
+/**
+ * Record de collision rectangulaire (Type 2 / PREFS)
+ * Note: Type 2 est utilisé pour les collisions, mais partage l'ID avec PREFS
  */
 export interface VNRectCollision {
   type: VNRecordType.RECT_COLLISION;
@@ -72,39 +276,45 @@ export interface VNRectCollision {
 }
 
 /**
- * Record audio WAV (Type 11)
+ * Record audio WAV (Type 11 / PLAYWAV)
  */
 export interface VNAudioWavRecord {
-  type: VNRecordType.AUDIO_WAV;
+  type: VNRecordType.PLAYWAV;
   filePath: string;
+  loop?: boolean;
+  volume?: number;
 }
 
 /**
- * Record audio MIDI (Type 12)
+ * Record audio MIDI (Type 12 / PLAYMID)
  */
 export interface VNAudioMidiRecord {
-  type: VNRecordType.AUDIO_MIDI;
+  type: VNRecordType.PLAYMID;
   filePath: string;
+  loop?: boolean;
+  volume?: number;
 }
 
 /**
- * Record conditionnel (Type 21)
+ * Record conditionnel (Type 21 / IF)
  * Format: "VARIABLE OPERATEUR VALEUR then COMMANDE"
  */
 export interface VNConditionalRecord {
-  type: VNRecordType.CONDITIONAL;
+  type: VNRecordType.IF;
   expression: string;
   variable?: string;
   operator?: string;  // =, !=, <, >, <=, >=
   value?: number | string;
   thenCommand?: string;
+  elseCommand?: string;
 }
 
 /**
- * Record texte de hotspot (Type 38)
+ * Record texte avec effet (Type 38 / PLAYTEXT)
  */
-export interface VNHotspotTextRecord {
-  type: VNRecordType.HOTSPOT_TEXT;
+export interface VNPlayTextRecord {
+  type: VNRecordType.PLAYTEXT;
+  objectName: string;
   text: string;
   x: number;
   y: number;
@@ -121,15 +331,73 @@ export interface VNPolygonCollision {
 }
 
 /**
- * Union de tous les types de records
+ * Record scène (Type 6 / SCENE)
+ */
+export interface VNSceneRecord {
+  type: VNRecordType.SCENE;
+  sceneName: string;
+  sceneIndex?: number;
+}
+
+/**
+ * Record variable (Type 22 / SET_VAR)
+ */
+export interface VNSetVarRecord {
+  type: VNRecordType.SET_VAR;
+  varName: string;
+  value: number | string;
+  isRandom?: boolean;
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Record bitmap (Type 27 / ADDBMP)
+ */
+export interface VNAddBmpRecord {
+  type: VNRecordType.ADDBMP;
+  objectName: string;
+  filePath: string;
+  x: number;
+  y: number;
+  transparent?: boolean;
+  transparentColor?: number;
+}
+
+/**
+ * Record exécution (Type 17 / EXEC)
+ */
+export interface VNExecRecord {
+  type: VNRecordType.EXEC;
+  program: string;
+  arguments?: string;
+  waitForCompletion?: boolean;
+}
+
+/**
+ * Record chargement projet (Type 31 / RUNPRJ)
+ */
+export interface VNRunPrjRecord {
+  type: VNRecordType.RUNPRJ;
+  projectFile: string;
+  startScene?: string;
+}
+
+/**
+ * Union de tous les types de records parsés
  */
 export type VNRecord =
   | VNRectCollision
   | VNAudioWavRecord
   | VNAudioMidiRecord
   | VNConditionalRecord
-  | VNHotspotTextRecord
-  | VNPolygonCollision;
+  | VNPlayTextRecord
+  | VNPolygonCollision
+  | VNSceneRecord
+  | VNSetVarRecord
+  | VNAddBmpRecord
+  | VNExecRecord
+  | VNRunPrjRecord;
 
 // ============================================================================
 // ÉVÉNEMENTS VN - Découverts dans europeo.exe @ 0x43f8cf

@@ -1461,6 +1461,8 @@ export class VNFileLoader {
    *
    * Pour les hotspots, la séquence typique est:
    * PLAYBMP (10) -> PLAYWAV (11) -> autres commandes -> POLYGON (105)
+   *
+   * NOTE: Il y a souvent des séparateurs nuls (4 bytes = 0) entre les records
    */
   private parseRecordSequence(reader: BinaryReader, endPosition: number): {
     commands: VNCommand[];
@@ -1471,12 +1473,21 @@ export class VNFileLoader {
     let currentHotspot: Partial<VNHotspot> | null = null;
 
     while (reader.pos < endPosition && reader.remaining > 8) {
+      // Skip null separators (common pattern between record groups)
+      while (reader.peekUint32() === 0 && reader.remaining > 8) {
+        reader.readUint32();
+      }
+
+      if (reader.pos >= endPosition || reader.remaining < 8) break;
+
       const recordType = reader.peekUint32();
 
       // Vérifier si c'est un type de record valide
       if (recordType > 200 || (recordType > 48 && recordType !== 105)) {
-        // Pas un type valide, on a probablement atteint la fin ou des données invalides
-        break;
+        // Pas un type valide - essayer d'avancer d'un byte et réessayer
+        // (pour gérer les données mal alignées)
+        reader.readUint8();
+        continue;
       }
 
       reader.readUint32(); // Consommer le type
@@ -1562,6 +1573,81 @@ export class VNFileLoader {
           } else {
             commands.push(cmd);
           }
+          break;
+        }
+
+        case 1: { // Type 1 = Commande wrapper avec sous-type
+          // Structure: Type(1) + SubType(uint32) + BorlandString
+          const subType = reader.readUint32();
+          const cmdData = reader.readBorlandString();
+          const cmd: VNCommand = {
+            type: subType as VNCommandType,
+            params: { rawCommand: cmdData },
+          };
+          if (currentHotspot) {
+            currentHotspot.onClickCommands?.push(cmd);
+          } else {
+            commands.push(cmd);
+          }
+          break;
+        }
+
+        case 3: { // Type 3 = Commande complexe (condition/scene/etc)
+          // Structure: Type(3) + SubType(uint32) + Data variable
+          const subType = reader.readUint32();
+          if (subType === 6) { // SCENE
+            const sceneData = reader.readBorlandString();
+            const cmd: VNCommand = {
+              type: VNRecordType.SCENE as VNCommandType,
+              params: { targetScene: sceneData },
+            };
+            if (currentHotspot) {
+              currentHotspot.onClickCommands?.push(cmd);
+            } else {
+              commands.push(cmd);
+            }
+          } else if (subType === 9) { // PLAYAVI
+            const aviData = reader.readBorlandString();
+            const cmd: VNCommand = {
+              type: VNRecordType.PLAYAVI as VNCommandType,
+              params: { aviPath: aviData },
+            };
+            commands.push(cmd);
+          } else if (subType === 16 || subType === 22) { // SET_VAR ou similaire
+            const varData = reader.readBorlandString();
+            const cmd: VNCommand = {
+              type: subType as VNCommandType,
+              params: { rawCommand: varData },
+            };
+            if (currentHotspot) {
+              currentHotspot.onClickCommands?.push(cmd);
+            } else {
+              commands.push(cmd);
+            }
+          } else {
+            // Type 3 avec autre sous-type - essayer de lire une string
+            const lenCheck = reader.peekUint32();
+            if (lenCheck > 0 && lenCheck < 200) {
+              const data = reader.readBorlandString();
+              const cmd: VNCommand = {
+                type: subType as VNCommandType,
+                params: { rawCommand: data },
+              };
+              if (currentHotspot) {
+                currentHotspot.onClickCommands?.push(cmd);
+              } else {
+                commands.push(cmd);
+              }
+            }
+          }
+          break;
+        }
+
+        case 4: // Type 4 - semble être un padding/marqueur
+        case 5: // Type 5 - marqueur de section
+        {
+          // Ces types semblent avoir une structure simple avec uint32 additionnels
+          // Skip for now - ils précèdent souvent les hotspots
           break;
         }
 

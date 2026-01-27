@@ -1453,6 +1453,196 @@ export class VNFileLoader {
   }
 
   /**
+   * Parse une séquence de records VND (format découvert par rétro-ingénierie)
+   *
+   * Le format VND utilise des records séquentiels:
+   * - Type (uint32): 0-48 pour commandes, 105 pour polygone
+   * - Data: varie selon le type (généralement Borland string)
+   *
+   * Pour les hotspots, la séquence typique est:
+   * PLAYBMP (10) -> PLAYWAV (11) -> autres commandes -> POLYGON (105)
+   */
+  private parseRecordSequence(reader: BinaryReader, endPosition: number): {
+    commands: VNCommand[];
+    hotspots: VNHotspot[];
+  } {
+    const commands: VNCommand[] = [];
+    const hotspots: VNHotspot[] = [];
+    let currentHotspot: Partial<VNHotspot> | null = null;
+
+    while (reader.pos < endPosition && reader.remaining > 8) {
+      const recordType = reader.peekUint32();
+
+      // Vérifier si c'est un type de record valide
+      if (recordType > 200 || (recordType > 48 && recordType !== 105)) {
+        // Pas un type valide, on a probablement atteint la fin ou des données invalides
+        break;
+      }
+
+      reader.readUint32(); // Consommer le type
+
+      switch (recordType) {
+        case VNRecordType.PLAYBMP: { // 10
+          // Début d'un nouveau hotspot
+          if (currentHotspot && currentHotspot.name) {
+            hotspots.push(currentHotspot as VNHotspot);
+          }
+
+          const bmpData = reader.readBorlandString();
+          // Format: "path x y zOrder" ou "path x y"
+          const parts = bmpData.split(' ');
+          const imagePath = parts[0] || '';
+          const x = parseInt(parts[1]) || 0;
+          const y = parseInt(parts[2]) || 0;
+          const zOrder = parseInt(parts[3]) || 0;
+
+          currentHotspot = {
+            index: hotspots.length,
+            name: imagePath.split('\\').pop()?.replace('.bmp', '') || `hotspot_${hotspots.length}`,
+            bounds: { x1: x, y1: y, x2: x + 100, y2: y + 100 }, // Taille estimée
+            enabled: true,
+            onClickCommands: [],
+            onEnterCommands: [],
+            onExitCommands: [],
+          };
+
+          // Ajouter la commande PLAYBMP
+          currentHotspot.onClickCommands?.push({
+            type: VNRecordType.PLAYBMP as VNCommandType,
+            params: { bmpPath: imagePath, x, y, zOrder },
+          });
+          break;
+        }
+
+        case VNRecordType.PLAYWAV: { // 11
+          const wavPath = reader.readBorlandString();
+          const cmd: VNCommand = {
+            type: VNRecordType.PLAYWAV as VNCommandType,
+            params: { wavPath },
+          };
+          if (currentHotspot) {
+            currentHotspot.onClickCommands?.push(cmd);
+          } else {
+            commands.push(cmd);
+          }
+          break;
+        }
+
+        case VNRecordType.PLAYAVI: { // 9
+          const aviPath = reader.readBorlandString();
+          commands.push({
+            type: VNRecordType.PLAYAVI as VNCommandType,
+            params: { aviPath },
+          });
+          break;
+        }
+
+        case VNRecordType.SCENE: { // 6
+          const targetScene = reader.readBorlandString();
+          const cmd: VNCommand = {
+            type: VNRecordType.SCENE as VNCommandType,
+            params: { targetScene },
+          };
+          if (currentHotspot) {
+            currentHotspot.onClickCommands?.push(cmd);
+          } else {
+            commands.push(cmd);
+          }
+          break;
+        }
+
+        case VNRecordType.RUNPRJ: { // 31
+          const projectPath = reader.readBorlandString();
+          const cmd: VNCommand = {
+            type: VNRecordType.RUNPRJ as VNCommandType,
+            params: { projectPath },
+          };
+          if (currentHotspot) {
+            currentHotspot.onClickCommands?.push(cmd);
+          } else {
+            commands.push(cmd);
+          }
+          break;
+        }
+
+        case VNRecordType.SET_VAR: { // 22
+          const varData = reader.readBorlandString();
+          const cmd: VNCommand = {
+            type: VNRecordType.SET_VAR as VNCommandType,
+            params: { rawCommand: varData },
+          };
+          if (currentHotspot) {
+            currentHotspot.onClickCommands?.push(cmd);
+          } else {
+            commands.push(cmd);
+          }
+          break;
+        }
+
+        case VNRecordType.POLYGON_COLLISION: { // 105
+          const pointCount = reader.readUint32();
+          const polygon: VNPoint[] = [];
+
+          for (let i = 0; i < pointCount && i < 100; i++) {
+            polygon.push({
+              x: reader.readInt32(),
+              y: reader.readInt32(),
+            });
+          }
+
+          if (currentHotspot) {
+            currentHotspot.polygon = polygon;
+            // Calculer les bounds à partir du polygone
+            if (polygon.length > 0) {
+              const xs = polygon.map(p => p.x);
+              const ys = polygon.map(p => p.y);
+              currentHotspot.bounds = {
+                x1: Math.min(...xs),
+                y1: Math.min(...ys),
+                x2: Math.max(...xs),
+                y2: Math.max(...ys),
+              };
+            }
+            // Terminer le hotspot courant
+            hotspots.push(currentHotspot as VNHotspot);
+            currentHotspot = null;
+          }
+          break;
+        }
+
+        default: {
+          // Autres types: essayer de lire une chaîne Borland
+          const strLen = reader.peekUint32();
+          if (strLen > 0 && strLen < 200) {
+            const data = reader.readBorlandString();
+            const cmd: VNCommand = {
+              type: recordType as VNCommandType,
+              params: { rawCommand: data },
+            };
+            if (currentHotspot) {
+              currentHotspot.onClickCommands?.push(cmd);
+            } else {
+              commands.push(cmd);
+            }
+          } else {
+            // Donnée invalide, arrêter le parsing
+            console.warn(`Unknown record type ${recordType} at position ${reader.pos}`);
+            return { commands, hotspots };
+          }
+          break;
+        }
+      }
+    }
+
+    // Ajouter le dernier hotspot s'il existe
+    if (currentHotspot && currentHotspot.name) {
+      hotspots.push(currentHotspot as VNHotspot);
+    }
+
+    return { commands, hotspots };
+  }
+
+  /**
    * Lit la version Borland (ancien format, gardé pour compatibilité)
    */
   private readVersion(reader: BinaryReader): { major: number; minor: number } {

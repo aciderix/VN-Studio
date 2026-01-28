@@ -1,0 +1,65 @@
+# VN-Studio - Configuration Claude
+
+## CONTEXTE DE RECUPERATION DE SESSION
+
+Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) vers React.
+
+### Documents de référence (LIRE EN PRIORITE)
+1. `PORTAGE_SUIVI.md` - Document principal de suivi du portage
+2. `ENGINE_PSEUDOCODE.md` - Pseudo-code complet du moteur C++
+
+### Fichiers binaires analysés
+- `europeo.exe` - Exécutable principal (vn21_32.exe, Visual Navigator 2.1)
+- `vnoption.dll` - Module dialogues d'options utilisateur
+- `vnresmod.dll` - Module ressources (curseurs, etc.)
+- `vndllapi.dll` - API centrale (variables, messages) - STRUCTURE EXACTE EXTRAITE
+
+### Résumé technique
+- **Produit**: Virtual Navigator Studio/Runtime par Sopra Multimedia (France, 1999)
+- **Technologie originale**: Borland C++ Builder, OWL 5.2, DirectDraw
+- **Cible du portage**: React avec Canvas 2D / Web Audio API
+- **Classes principales**: TVNApplication, TVNScene, TVNCommand, TVNHotspot, TVNVariable
+- **Système de scripting**: Commandes GOTO, SETVAR, IF, WAVE, MIDI, AVI, IMAGE, TEXT
+
+### Outils installés
+- radare2 5.5.0 (analyse binaire)
+- pev (analyse PE)
+
+### État du projet
+- Phase 1 (Analyse): COMPLETE
+- Phase 2 (Conception React): COMPLETE
+- Phase 3 (Implémentation): COMPLETE
+- Phase 4 (Formats de fichiers): COMPLETE
+
+### Formats de fichiers VN analysés
+- **VNP** (.vnp): Configuration INI avec références DATFILE
+- **VND** (.vnd): Format binaire VALIDÉ avec:
+  - Header: 5 bytes flags + Borland strings (magic, version, metadata)
+  - Variables: uint32 count + (Borland string name + int32 value) × count
+  - Scenes: 50 bytes nom fixe + flag + resource + 32 bytes réservés + propriétés
+  - Commands: 24 bytes header + type + 50 bytes desc + 48 bytes padding + sous-commandes
+- **VNSAVFILE**: Sauvegardes - État du jeu et variables
+- Parser: `src/engine/VNFileLoader.ts` (RÉÉCRIT pour format VND réel)
+
+### Fichiers React créés
+- src/engine/* - Moteur complet (9 fichiers dont VNFileLoader.ts)
+- src/components/* - Composants React
+- src/hooks/* - Hooks React
+- src/types/* - Types TypeScript (types fichiers ajoutés)
+- src/examples/* - Projet de démonstration
+- package.json, tsconfig.json - Configuration
+
+### Découvertes clés (Session Jan 2026)
+- **Format chaînes VND**: uint32 longueur + data (PAS uint16!)
+- **Ordre des données**: Variables AVANT les scènes
+- **Noms de scènes**: 50 bytes fixes (pas Borland strings)
+- **Fichiers test**: `VNP-VND/start.vnd`, `VNP-VND/start.vnp` (vrais fichiers du jeu)
+- **Fonctions Borland** (bds52t.dll):
+  - `ipstream::readWord32` @ 0x439180
+  - `operator>>(ipstream, string)` @ 0x439138
+
+### Instructions pour nouvelles sessions
+1. Toujours lire PORTAGE_SUIVI.md en premier pour récupérer le contexte
+2. Consulter ENGINE_PSEUDOCODE.md pour les détails techniques
+3. Consulter VNP-VND/*.vnd pour tester le parser
+4. Utiliser radare2 pour toute analyse supplémentaire des binaires

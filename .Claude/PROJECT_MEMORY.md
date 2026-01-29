@@ -316,3 +316,44 @@ Sérialisation: TVNStreamable (hérite TStreamableBase Borland)
 - Enum VNRecordType pour les types de records binaires
 - Encodage fichiers: Latin-1 / windows-1252
 - Little-endian pour tous les entiers
+
+---
+
+## 10. ALGORITHME DE DÉTECTION DE PARTS (branche part-detection-algorithm)
+
+### Scripts ajoutés
+- `scripts/detect-parts-final.js` - Détection ciblée Format 54 (couleurs1.vnd)
+- `scripts/detect-parts-universal.js` - Détection universelle multi-formats
+- `docs/PART_DETECTION_FORMAT54.md` - Documentation de l'algorithme
+
+### Concept de "Part"
+Une "part" est un segment de scène dans le VND. Les fichiers VND avec format type > 4
+n'utilisent PAS la structure 50-bytes nom fixe de start.vnd. Ils utilisent des délimiteurs
+binaires pour séparer les parts/scènes.
+
+### Format Type par fichier VND
+| Fichier | Format Type | Parts détectées | Commentaire |
+|---------|-------------|-----------------|-------------|
+| start.vnd | 4 | 4 (incomplet) | 7 scènes connues, algo pas adapté pour type 4 |
+| barre.vnd | 5 | 0 | Algo non adapté |
+| danem.vnd | 16 | 13 | Semble bon |
+| couleurs1.vnd | 54 | 54 | Validé (maison=#5, fontain2=#39, Fin Perdu=#54) |
+| biblio.vnd | 62 | 10 | Probablement incomplet pour 140KB |
+
+### 4 Patterns de détection
+1. **Standard delimiter** : 12+ zéros + `01 00 00 00`, puis BMP/AVI dans les 300 bytes suivants
+2. **Music scenes** : `0x81` + "music.wav" dans les 50 bytes, puis BMP après
+3. **Empty scenes** : 50+ zéros + uint32=5 + "Empty"
+4. **Named scenes** : zéros + Borland string = nom connu ("Toolbar", "Fin Perdu", etc.)
+
+### Filtres de faux positifs
+- z=19-21 ET même BMP que le suivant ET gap >= 250 → marqueur hotspot, pas une part
+- z >= 90 ET content = "fin2.avi" → commande fin de jeu
+
+### Bug connu
+`detect-parts-final.js` ligne Pattern 3 : utilise `buf` au lieu de `buffer`
+
+### À consolider
+- Adapter l'algo pour les formats 4, 5, 62 (start, barre, biblio)
+- Fusionner la logique avec le parser de scènes existant dans VNFileLoader.ts
+- Comprendre la différence structurelle entre format types (4, 5, 16, 54, 62)

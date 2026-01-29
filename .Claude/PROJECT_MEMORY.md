@@ -353,7 +353,40 @@ binaires pour séparer les parts/scènes.
 ### Bug connu
 `detect-parts-final.js` ligne Pattern 3 : utilise `buf` au lieu de `buffer`
 
+### Découverte: Deux types de structures VND après les variables
+
+**TYPE_A** (start.vnd, couleurs1.vnd) : `uint32 sceneCount` > 0, puis N scènes de 50 bytes
+**TYPE_B** (tous les autres 17 fichiers) : 16 bytes de zéros, puis records directs
+
+Marqueurs TYPE_B : `0x01` (10 fichiers), `0x81` (4 fichiers), `0x83` (2 fichiers), `0x00` (1 fichier)
+
+Le champ "format type" dans le header est un ID séquentiel (4-82), PAS un compteur de parts/scènes.
+
+### Tous les fichiers VND du jeu Europeo
+| Fichier | Format Type | Vars | Structure | Taille |
+|---------|-------------|------|-----------|--------|
+| start | 4 | 284 | TYPE_A (7 scènes) | 6 KB |
+| barre | 5 | 12 | TYPE_B (0x81) | 28 KB |
+| suede | 14 | 280 | TYPE_B (0x01) | 52 KB |
+| allem | 15 | 280 | TYPE_B (0x81) | 64 KB |
+| danem | 16 | 281 | TYPE_B (0x01) | 42 KB |
+| portu | 17 | 280 | TYPE_B (0x01) | 74 KB |
+| grece | 19 | 285 | TYPE_B (0x01) | 56 KB |
+| espa | 20 | 285 | TYPE_B (0x01) | 75 KB |
+| finlan | 20 | 280 | TYPE_B (0x81) | 45 KB |
+| holl | 22 | 282 | TYPE_B (0x83) | 56 KB |
+| irland | 23 | 280 | TYPE_B (0x01) | 62 KB |
+| autr | 24 | 283 | TYPE_B (0x01) | 75 KB |
+| belge | 28 | 280 | TYPE_B (0x01) | 76 KB |
+| france | 34 | 284 | TYPE_B (0x01) | 100 KB |
+| italie | 36 | 284 | TYPE_B (0x83) | 74 KB |
+| ecosse | 42 | 280 | TYPE_B (0x81) | 72 KB |
+| couleurs1 | 54 | 280 | TYPE_A (7 scènes) | 76 KB |
+| biblio | 62 | 284 | TYPE_B (0x00) | 141 KB |
+| angleterre | 82 | 284 | TYPE_B (0x00) | 87 KB |
+
 ### À consolider
-- Adapter l'algo pour les formats 4, 5, 62 (start, barre, biblio)
-- Fusionner la logique avec le parser de scènes existant dans VNFileLoader.ts
-- Comprendre la différence structurelle entre format types (4, 5, 16, 54, 62)
+- Comprendre la structure TYPE_B (records directs après 16 zéros)
+- Clarifier le rôle des marqueurs 0x01 vs 0x81 vs 0x83
+- Adapter le parser pour les deux types de structure
+- Fusionner la logique avec VNFileLoader.ts

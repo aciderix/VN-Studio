@@ -33,7 +33,7 @@ HEADER → VARIABLES[284] → SCENE_COUNT → SCENES[7]
 | Flags | 5 bytes | `3a 01 01 00 00` |
 | Magic | Borland string | "VNFILE" |
 | Version | Borland string | "2.13" |
-| Format type | uint32 | 4 |
+| Project ID | uint32 | 4 (start), 54 (couleurs1), 82 (angleterre)... |
 | Nom projet | Borland string | "Europeo" |
 | Éditeur | Borland string | "Sopra Multimedia" |
 | Serial | Borland string | "5D51F233" |
@@ -42,7 +42,10 @@ HEADER → VARIABLES[284] → SCENE_COUNT → SCENES[7]
 | Largeur | uint32 | 640 |
 | Hauteur | uint32 | 480 |
 | Profondeur | uint32 | 16 (bits) |
-| 4 inconnus | 4 × uint32 | 0, 4, 1, 0 |
+| Flag projet | uint32 | 0=main (start), 1=sub-projet (tous les autres) |
+| Scene count (header) | uint32 | Nombre de scènes pour TYPE_B (1-69), sens différent pour TYPE_A |
+| Champ lié au project ID | uint32 | Souvent == project ID, pas toujours |
+| Réservé | uint32 | Toujours 0 |
 | DLL path | Borland string | "..\vnstudio\vnresmod.dll" |
 | Variable count | uint32 | 284 |
 
@@ -360,7 +363,17 @@ binaires pour séparer les parts/scènes.
 
 Marqueurs TYPE_B : `0x01` (10 fichiers), `0x81` (4 fichiers), `0x83` (2 fichiers), `0x00` (1 fichier)
 
-Le champ "format type" dans le header est un ID séquentiel (4-82), PAS un compteur de parts/scènes.
+Le champ "format type" dans le header est un **project ID** (4-82), PAS un compteur de parts/scènes.
+La corrélation avec le nombre de parts détectées (couleurs1=54=54, suede=14=14) est **coincidentale**.
+Preuve : espa et finlan ont le même ID=20 mais des tailles et contenus différents.
+
+### Champs header décodés (les "4 inconnus")
+| Champ | start.vnd | danem.vnd | couleurs1.vnd | angleterre.vnd |
+|-------|-----------|-----------|---------------|----------------|
+| Flag (0=main,1=sub) | 0 | 1 | 1 | 1 |
+| u1 (scene count?) | 4 | 10 | 1 | 69 |
+| u2 (souvent==projectID) | 1 | 16 | 31 | 81 |
+| Réservé | 0 | 0 | 0 | 0 |
 
 ### Tous les fichiers VND du jeu Europeo
 | Fichier | Format Type | Vars | Structure | Taille |

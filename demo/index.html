@@ -415,6 +415,7 @@ var showPolygons = true;
 var showLabels = true;
 var fillPolygons = false;
 var hoveredCmd = null;
+var scrollX = 0; // offset de scroll horizontal pour scènes larges
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -437,17 +438,13 @@ function getSceneWidth(scene) {
 }
 
 function resizeCanvas() {
+  var cw = container.clientWidth;
   var ch = container.clientHeight;
+  var gameW = project ? project.header.width : 640;
   var gameH = project ? project.header.height : 480;
-  var scene = (project && currentSceneIndex >= 0) ? project.scenes[currentSceneIndex] : null;
-  var gameW = getSceneWidth(scene);
-
-  // Adapter le canvas interne à la taille de la scène
   canvas.width = gameW;
   canvas.height = gameH;
-
-  // Scale basé sur la hauteur du conteneur
-  var scale = ch / gameH;
+  var scale = Math.min(cw / gameW, ch / gameH);
   var dispW = Math.floor(gameW * scale);
   var dispH = Math.floor(gameH * scale);
   canvas.style.width = dispW + 'px';
@@ -461,12 +458,12 @@ window.addEventListener('resize', resizeCanvas);
 // Convertir coordonnées écran -> coordonnées jeu
 function screenToGame(clientX, clientY) {
   var rect = canvas.getBoundingClientRect();
-  var gameW = canvas.width;
-  var gameH = canvas.height;
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
   var scaleX = gameW / rect.width;
   var scaleY = gameH / rect.height;
   return {
-    x: (clientX - rect.left) * scaleX,
+    x: (clientX - rect.left) * scaleX + scrollX,
     y: (clientY - rect.top) * scaleY
   };
 }
@@ -478,12 +475,22 @@ function screenToGame(clientX, clientY) {
 function render() {
   if (!project || currentSceneIndex < 0) return;
   var scene = project.scenes[currentSceneIndex];
-  var w = getSceneWidth(scene);
+  var w = project.header.width;
   var h = project.header.height;
+  var sceneW = getSceneWidth(scene);
+
+  // Limiter le scroll
+  var maxScroll = Math.max(0, sceneW - w);
+  if (scrollX > maxScroll) scrollX = maxScroll;
+  if (scrollX < 0) scrollX = 0;
 
   // Fond
   ctx.fillStyle = '#2a2a4a';
   ctx.fillRect(0, 0, w, h);
+
+  // Appliquer le scroll
+  ctx.save();
+  ctx.translate(-scrollX, 0);
 
   // Image de fond si disponible
   var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
@@ -555,7 +562,9 @@ function render() {
     });
   }
 
-  // Info scène
+  ctx.restore(); // fin du scroll
+
+  // Info scène (fixe, pas scrollée)
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.fillRect(0, 0, w, 22);
   ctx.font = '12px monospace';
@@ -565,6 +574,19 @@ function render() {
   if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
   ctx.fillStyle = '#888';
   ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+
+  // Barre de scroll horizontale si scène plus large que la fenêtre
+  if (sceneW > w) {
+    var barY = h - 6;
+    var barH = 4;
+    var viewRatio = w / sceneW;
+    var barW = Math.max(20, w * viewRatio);
+    var barX = (scrollX / (sceneW - w)) * (w - barW);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(0, barY, w, barH);
+    ctx.fillStyle = 'rgba(233,69,96,0.7)';
+    ctx.fillRect(barX, barY, barW, barH);
+  }
 }
 
 // =============================================================================
@@ -691,8 +713,9 @@ canvas.addEventListener('click', function(e) {
 function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
+  scrollX = 0; // reset scroll on scene change
   updateUI();
-  resizeCanvas(); // recalcule la taille du canvas (appelle render)
+  resizeCanvas();
 }
 
 function updateUI() {
@@ -887,6 +910,48 @@ document.addEventListener('keydown', function(e) {
     document.getElementById('chk-labels').click();
   }
 });
+
+// Scroll horizontal pour scènes larges
+var isDragging = false;
+var dragStartX = 0;
+var dragStartScroll = 0;
+
+canvas.addEventListener('wheel', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+  var gameW = project.header.width;
+  if (sceneW <= gameW) return;
+  e.preventDefault();
+  scrollX += e.deltaY || e.deltaX;
+  scrollX = Math.max(0, Math.min(scrollX, sceneW - gameW));
+  render();
+}, { passive: false });
+
+canvas.addEventListener('mousedown', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  if (getSceneWidth(scene) <= project.header.width) return;
+  if (e.button === 1 || e.shiftKey) { // middle-click ou shift+clic
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartScroll = scrollX;
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', function(e) {
+  if (!isDragging) return;
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project.header.width;
+  var scale = gameW / rect.width;
+  scrollX = dragStartScroll - (e.clientX - dragStartX) * scale;
+  var scene = project.scenes[currentSceneIndex];
+  scrollX = Math.max(0, Math.min(scrollX, getSceneWidth(scene) - gameW));
+  render();
+});
+
+window.addEventListener('mouseup', function() { isDragging = false; });
 
 // Initial resize
 resizeCanvas();

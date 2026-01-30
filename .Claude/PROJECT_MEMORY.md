@@ -1,8 +1,7 @@
 # VN-Studio - Mémoire Complète du Projet
 
-**Dernière mise à jour:** 2026-01-29
+**Dernière mise à jour:** 2026-01-30
 **Branche de travail:** claude/review-vn-studio-context-OEujj
-**Branche précédente:** claude/game-engine-reverse-engineer-xlLE9 (mergée via PR #1)
 
 ---
 
@@ -18,126 +17,156 @@
 
 ---
 
-## 2. FORMAT VND - SPÉCIFICATION COMPLÈTE (VALIDÉE)
+## 2. FORMAT VND - SPÉCIFICATION COMPLÈTE (VALIDÉE 19/19 fichiers)
 
-### 2.1 Structure globale
+### 2.1 Découverte clé: Format UNIQUE
+
+**Il n'y a PAS de TYPE_A vs TYPE_B.** Tous les 19 fichiers VND utilisent le même format.
+Le champ à la position 23 (anciennement "projectID") est le **SCENE COUNT**.
+
+### 2.2 Borland OWL 5.2 Streaming
+
+Header de stream: 5 bytes `0x3A` + skip(1) + uint32LE version (0x00000101)
+- Version 0x101 = 257 → readWord = uint32, string lengths = uint32
+- Fonctions clés dans bds52t.dll:
+  - readWord (0x403c0d): dispatcher version-dépendant
+  - readWord16 (0x403c31): lit 2 bytes
+  - readWord32 (0x403c74): lit 4 bytes
+  - readStringLength (0x403cb6): si version > 0x100 → uint32, sinon uint8
+  - readVersion (0x403e12): parse le header 5 bytes
+  - operator>>(ipstream, TRect) (0x40aad8): 4 × readBytes(4) = 16 bytes
+  - operator>>(ipstream, string) (0x4047bd): readStringLength + readBytes
+
+### 2.3 Structure globale du VND
 
 ```
-HEADER → VARIABLES[284] → SCENE_COUNT → SCENES[7]
+STREAM_HEADER(5) → BS "VNFILE" → BS version("2.13") → uint32 sceneCount
+→ BS projectName → BS editor → BS serial → BS projectIDStr → BS registry
+→ uint32 width → uint32 height → uint32 depth → uint32 flag
+→ uint32 u1 → uint32 u2 → uint32 reserved
+→ BS dllPath → uint32 varCount → VARIABLES[varCount] → SCENES[sceneCount]
 ```
 
-### 2.2 Header
+### 2.4 Header
 
 | Champ | Type | Exemple (start.vnd) |
 |-------|------|---------------------|
-| Flags | 5 bytes | `3a 01 01 00 00` |
-| Magic | Borland string | "VNFILE" |
-| Version | Borland string | "2.13" |
-| Project ID | uint32 | 4 (start), 54 (couleurs1), 82 (angleterre)... |
-| Nom projet | Borland string | "Europeo" |
-| Éditeur | Borland string | "Sopra Multimedia" |
-| Serial | Borland string | "5D51F233" |
-| ID projet | Borland string | "EUROPEO" |
-| Registry path | Borland string | chemin registre Windows |
+| Stream header | 5 bytes | `3a 01 01 00 00` |
+| Magic | BS | "VNFILE" |
+| Version | BS | "2.13" |
+| Scene Count | uint32 | 4 |
+| Nom projet | BS | "Europeo" |
+| Éditeur | BS | "Sopra Multimedia" |
+| Serial | BS | "5D51F233" |
+| ID projet | BS | "EUROPEO" |
+| Registry | BS | chemin registre Windows |
 | Largeur | uint32 | 640 |
 | Hauteur | uint32 | 480 |
 | Profondeur | uint32 | 16 (bits) |
-| Flag projet | uint32 | 0=main (start), 1=sub-projet (tous les autres) |
-| Scene count (header) | uint32 | Nombre de scènes pour TYPE_B (1-69), sens différent pour TYPE_A |
-| Champ lié au project ID | uint32 | Souvent == project ID, pas toujours |
-| Réservé | uint32 | Toujours 0 |
-| DLL path | Borland string | "..\vnstudio\vnresmod.dll" |
+| Flag projet | uint32 | 0=main, 1=sub |
+| u1 | uint32 | variable |
+| u2 | uint32 | variable |
+| Réservé | uint32 | 0 |
+| DLL path | BS | "..\vnstudio\vnresmod.dll" |
 | Variable count | uint32 | 284 |
 
-### 2.3 Borland String
+### 2.5 Borland String (BS)
 
 ```
 uint32 LE (longueur) + N bytes Latin-1 (pas de \0)
 ```
 
-### 2.4 Variables
+### 2.6 Variables
 
-Immédiatement après variable count. Pour chaque variable:
-- Borland string (nom)
-- uint32 (valeur, généralement 0)
+Pour chaque variable: BS(nom) + uint32(valeur)
 
-Exemples: SACADOS, JEU, BIDON... (284 au total, positions 178-4526)
-
-### 2.5 Scene Count
-
-- Position 4527 dans start.vnd
-- uint32 = 7
-
-### 2.6 Structure d'une scène
-
-| Champ | Taille | Type |
-|-------|--------|------|
-| Nom | 50 bytes | fixe, null-padded |
-| Flag | 1 byte | uint8 (0-3) |
-| Resource | variable | Borland string (image fond) |
-| Réservé | 32 bytes | zéros |
-| Records | variable | séquence de records |
-
-### 2.7 Types de records
-
-| Type | Nom | Format données |
-|------|-----|----------------|
-| 1 | Wrapper | subtype(uint32) + Borland string |
-| 3 | Commande complexe | subtype(uint32) + Borland string |
-| 6 | SCENE | Borland string (nom scène cible) |
-| 9 | PLAYAVI | Borland string |
-| 10 | PLAYBMP | Borland string ("path x y zOrder") |
-| 11 | PLAYWAV | Borland string (chemin audio) |
-| 22 | SET_VAR | Borland string ("var value") |
-| 31 | RUNPRJ | Borland string (chemin .vnp) |
-| 105 | POLYGON | count(uint32) + N × (int32 x, int32 y) |
-
-Sous-types Type 1: 17=EXEC, 31=RUNPRJ, 36=inconnu
-Sous-types Type 3: 6=SCENE, 9=PLAYAVI, 22=SET_VAR, 26=DEFCURSOR
-
-Séparateurs: 4 bytes nuls entre groupes de records.
-
-### 2.8 Structure d'un hotspot
+### 2.7 Scene Count par fichier
 
 ```
-PLAYBMP (10) → PLAYWAV (11, optionnel) → Commandes → POLYGON (105)
+allem=15, angleterre=82, autr=24, barre=5, belge=28, biblio=62,
+couleurs1=54, danem=16, ecosse=42, espa=20, finlan=20, france=34,
+grece=19, holl=22, irland=23, italie=36, portu=17, start=4, suede=14
 ```
 
-### 2.9 Hotspots découverts dans start.vnd (scène Frontal)
-
-| # | Nom | Image | Position | z | Actions |
-|---|-----|-------|----------|---|---------|
-| 1 | jeu | interface\jeu.bmp | (0,176) | 257 | SET_VAR jeu=0, score=0 |
-| 2 | livres | interface\livres.bmp | (0,0) | 273 | RUNPRJ biblio.vnp |
-| 3 | tirelire | interface\tirelire.bmp | (0,483) | 207 | EXEC tirelire.exe |
-| 4 | oui | interface\oui.bmp | (0,470) | 0 | - |
-| 5 | video | interface\video.bmp | (0,0) | 0 | - |
-
-### 2.10 Enum VNRecordType complet (0-48 + 105)
+### 2.8 Structure d'une scène (TVNScene::Read)
 
 ```
-0=QUIT, 1=ABOUT, 2=PREFS, 3=PREV, 4=NEXT, 5=ZOOM,
-6=SCENE, 7=HOTSPOT, 8=TIPTEXT, 9=PLAYAVI, 10=PLAYBMP,
-11=PLAYWAV, 12=PLAYMID, 13=PLAYHTML, 14=ZOOMIN, 15=ZOOMOUT,
-16=PAUSE, 17=EXEC, 18=EXPLORE, 19=PLAYCDA, 20=PLAYSEQ,
-21=IF, 22=SET_VAR, 23=INC_VAR, 24=DEC_VAR, 25=INVALIDATE,
-26=DEFCURSOR, 27=ADDBMP, 28=DELBMP, 29=SHOWBMP, 30=HIDEBMP,
-31=RUNPRJ, 32=UPDATE, 33=RUNDLL, 34=MSGBOX, 35=PLAYCMD,
-36=CLOSEWAV, 37=CLOSEDLL, 38=PLAYTEXT, 39=FONT, 40=REM,
-41=ADDTEXT, 42=DELOBJ, 43=SHOWOBJ, 44=HIDEOBJ, 45=LOAD,
-46=SAVE, 47=CLOSEAVI, 48=CLOSEMID,
-105=POLYGON_COLLISION
+Depuis 0x414ca1 (base props):
+  BS → nom de scène
+  readBytes(4) → 4 flag bytes
+  uint32 prop1, uint32 prop2, uint32 prop3
+
+Depuis TVNScene::Read (0x4161fa, version >= 0x2000a):
+  BS string1 (field_0x24)
+  BS string2 (field_0x20)
+  uint32 val1 (field_0x54)
+  BS string3 (field_0x28)
+  uint32 val2 (field_0x58)
+  BS string4 (field_0x2c)
+  uint32 val3 (field_0x5c)
+  BS resource (field_0x30, e.g. "interface.bmp", "<res0001>")
+  uint32 val4 (field_0x60)
+  BS string6 (field_0x34)
+  uint32 val5 (field_0x64)
+  TRect (4 × int32 = 16 bytes: left, top, right, bottom)
+  uint32 val6 (field_0x50)
+  uint32 hotspotCount → si >0: readWord(timer) + collection(readWord count + N × readObject)
+  int32 cmdListValue → si ≠0: 5 × readWord (cmdList Read 0x414d9c)
+  Content collection (0x413e21): uint32 count + count × TVNCommand::Read
 ```
 
-### 2.11 Positions clés dans start.vnd (6323 bytes)
+### 2.9 TVNCommand::Read (0x4132f1)
 
-| Élément | Position | Valeur |
-|---------|----------|--------|
-| Variable count | 174 | 284 |
-| Variables | 178-4526 | 284 vars |
-| Scene count | 4527 | 7 |
-| Scènes | 4531+ | 7 scènes |
-| Hotspots Frontal | 5050, 5309, 5521, 5753, 5934 | 5 hotspots |
+```
+1. String collection (0x40e989):
+   uint32 count + count × (uint32 subIndex + readObject(uint32 type + BS string))
+2. uint32 commandType
+3. uint32 paramPairCount → si >0: paramPairCount × (int32 a, int32 b) = points polygon
+4. Si version >= 0x2000c: uint32 flags
+```
+
+### 2.10 Types de commandes (commandType)
+
+Les commandes contiennent leurs paramètres dans la string collection.
+Chaque string a un "type" qui indique sa sémantique:
+
+| String Type | Sémantique |
+|------------|-----------|
+| 6 | SCENE (nom scène cible) |
+| 7 | HOTSPOT |
+| 9 | PLAYAVI (chemin + params) |
+| 10 | PLAYBMP (chemin x y zOrder) |
+| 11 | PLAYWAV (chemin + mode) |
+| 16 | PAUSE (durée ms) |
+| 17 | EXEC (commande) |
+| 21 | IF (condition then action [else action]) |
+| 22 | SET_VAR (var value) |
+| 23 | INC_VAR (var value) |
+| 24 | DEC_VAR (var value) |
+| 26 | DEFCURSOR |
+| 28 | DELBMP (nom) |
+| 31 | RUNPRJ (chemin .vnp + scene) |
+| 33 | RUNDLL (chemin .dll) |
+| 36 | CLOSEWAV |
+| 38 | PLAYTEXT (x y w h flags texte) |
+| 39 | FONT (taille flags couleur famille) |
+
+### 2.11 Command Types globaux
+
+| commandType | Nom | Description |
+|------------|------|-------------|
+| 100 | CMD_100 | Commande avec hotspot polygon |
+| 101 | CMD_101 | Navigation avec polygon |
+| 103 | CMD_103 | Contrôle de score avec polygon |
+| 105 | POLYGON | Hotspot interactif principal |
+| 106 | CMD_106 | Information avec zone |
+| 107 | CMD_107 | Question bonus avec zone |
+| 108 | CMD_108 | Animation interactive avec polygon |
+
+### 2.12 Sémantique des paramPairs
+
+Les paramPairs sont des coordonnées (x, y) formant un polygone de collision.
+Chaque paire (a, b) = (x, y) d'un vertex du polygone.
 
 ---
 
@@ -148,258 +177,86 @@ PLAYBMP (10) → PLAYWAV (11, optionnel) → Commandes → POLYGON (105)
 ```
 src/
 ├── engine/
-│   ├── VNEngine.ts           # Moteur principal (TVNApplication)
-│   ├── VNFileLoader.ts       # Parser VND/VNP (88 KB, ~1800 lignes)
+│   ├── VNEngine.ts           # Moteur principal
+│   ├── VNFileLoader.ts       # Parser VND/VNP (~1800 lignes, à refaire)
 │   ├── VNSceneManager.ts     # Gestion des scènes
 │   ├── VNCommandProcessor.ts # Exécution des commandes
 │   ├── VNRenderer.ts         # Rendu Canvas 2D
 │   ├── VNAudioManager.ts     # Audio Web Audio API
 │   ├── VNTimerManager.ts     # Timers et effets
-│   ├── VNVariableStore.ts    # Variables (struct 264 bytes)
+│   ├── VNVariableStore.ts    # Variables
 │   └── index.ts
 ├── components/
-│   ├── GameContainer.tsx     # Composant React principal
+│   ├── GameContainer.tsx
 │   └── index.ts
 ├── hooks/
-│   ├── useVNEngine.ts        # Hook React
+│   ├── useVNEngine.ts
 │   └── index.ts
 ├── types/
-│   └── vn.types.ts           # Types TS complets (627 lignes)
+│   └── vn.types.ts           # Types TS (627 lignes)
 ├── examples/
 │   └── ExampleProject.ts
 └── index.ts
 
 scripts/
-├── debug-vnd.ts              # Parser debug complet (header + vars + scènes)
-└── parse-hotspots.ts         # Parser hotspots ciblé (zone 5000-6300)
+├── parse-vnd-universal.js    # Parser VND validé (19/19 fichiers, 0 bytes remaining)
+├── debug-vnd.ts              # Parser debug ancien
+└── parse-hotspots.ts         # Parser hotspots ancien
 
-docs/
-└── VND_FORMAT.md             # Documentation format VND
-
-VNP-VND/                      # Fichiers de données du jeu
-├── start.vnd (6323 B)        # Fichier principal analysé
-├── start.vnp (141 B)
-├── barre.vnd/vnp
-├── biblio.vnd/vnp
-├── couleurs1.vnd/vnp
-└── danem.vnd/vnp
+VNP-VND/                      # 19 fichiers .vnd + .vnp
 ```
 
-### 3.2 Types importants (vn.types.ts)
+### 3.2 Parser validé: parse-vnd-universal.js
 
-- `VNProject` - Projet complet (scenes, variables, display settings)
-- `VNSceneParsed` - Scène parsée (id, name, index, backgroundFile, hotspots, commands, gdiObjects)
-- `VNHotspotParsed` - Hotspot parsé (id, name, bounds, polygon, commands)
-- `VNCommandGeneric` - Commande générique (type: VNCommandType, params)
-- `VNVariable` - Variable (name, value)
-- `VNRect` - Rectangle (left, top, right, bottom) ← PAS x1/y1/x2/y2
-- `VNPoint` - Point (x, y)
-- `VNCommandType` - Enum des types de commandes binaires (GOTO=0..UNKNOWN=255)
-- `VNDisplayModeType` - Enum (WINDOWED=0, FULLSCREEN=1, BORDERLESS=2)
-- `VNGdiObjectGeneric` - Objet graphique (bounds: VNRect)
-- `CommandType` - Enum des commandes haut niveau ('GOTO', 'SETVAR', etc.)
-
-### 3.3 VNFileLoader.ts - État actuel
-
-Le fichier contient:
-- `VNRecordType` enum (0-48 + 105)
-- `VNRecordTypeNames` mapping
-- `VNCommandCategory` enum + mapping
-- Interfaces pour les records typés (VNRectCollision, VNAudioWavRecord, etc.)
-- `VNEventType` enum (EV_ONFOCUS=0..EV_AFTERINIT=3)
-- `TVNParmsType` enum + interfaces pour tous les paramètres TVN
-- `TVNStreamableClass` enum + mapping
-- `BinaryReader` class (ArrayBuffer-based, windows-1252)
-- `VNFileLoader` class avec:
-  - `loadProject()` / `loadDataFile()` / `loadSaveFile()`
-  - `parseVNFile()` - Parse le header VND complet (validé)
-  - `readSceneVND()` - Parse une scène (50b nom + flag + resource + 32b réservé + propriétés)
-  - `readCommandBlockVND()` - Parse un bloc commande (24b header + type + 50b desc + 48b padding)
-  - `parseRecordSequence()` - Parse les records séquentiels (hotspots/commandes)
+- Parse les 19 fichiers VND avec 0 bytes remaining
+- Basé sur le reverse-engineering de europeo.exe via radare2
+- Format unique (pas de TYPE_A/TYPE_B)
+- Supporte: header, variables, scènes, hotspots, commandes, polygones
+- CLI: `node scripts/parse-vnd-universal.js [-v] [fichiers...]`
 
 ---
 
-## 4. PROBLÈMES CONNUS À CORRIGER
+## 4. FONCTIONS CLÉS DANS EUROPEO.EXE
 
-### 4.1 Erreurs TypeScript dans VNFileLoader.ts
-
-1. **VNRect incompatibilité**: Le type `VNRect` utilise `left/top/right/bottom` mais le code dans `parseRecordSequence()` utilise `x1/y1/x2/y2` (ligne ~1513). Il faut utiliser `left/top/right/bottom`.
-
-2. **Casting VNRecordType → VNCommandType**: Le code cast `VNRecordType.PLAYBMP as VNCommandType` etc. (lignes ~1522, 1532, 1544, etc.). Ces enums ont des valeurs différentes (PLAYBMP=10 dans VNRecordType mais IMAGE=10 dans VNCommandType). Il faudrait un mapping correct.
-
-3. **readSceneVND mal structuré**: La méthode `readSceneVND()` lit 6 uint32 de propriétés + hotspotCount + commandCount après les 32 bytes réservés, mais le format réel (validé par les scripts debug) ne contient pas ces champs. Les scènes VND réelles enchaînent directement les records après les 32 bytes réservés.
-
-4. **Propriété `index` absente**: `VNHotspotParsed` n'a pas de propriété `index` mais le code l'utilise dans `parseRecordSequence()`.
-
-5. **Type `id` manquant**: Le code crée des hotspots sans `id` (requis par `VNHotspotParsed`).
-
-### 4.2 Parser de scènes incomplet
-
-Le script `debug-vnd.ts` utilise un pattern matching pour trouver les scènes (regex `^[A-Z][a-z]+`), ce qui est fragile. Le parser `parseVNFile()` dans VNFileLoader.ts lit correctement le `sceneCount` depuis le header, mais la méthode `readSceneVND()` assume une structure avec des compteurs hotspot/commandes qui n'existent pas dans le format réel.
-
-### 4.3 Logique de parsing des scènes à porter
-
-La logique correcte (validée dans debug-vnd.ts):
-1. Lire le scene count (uint32) après les variables
-2. Pour chaque scène: 50 bytes nom + 1 byte flag + Borland string resource + 32 bytes réservés
-3. Puis parser les records séquentiellement jusqu'à la prochaine scène
-
-Le problème: on ne connaît pas la taille exacte de chaque scène. debug-vnd.ts utilise le pattern matching pour délimiter. Il faudrait soit:
-- Trouver un marqueur de fin de scène
-- Calculer la taille depuis les données elles-mêmes
+| Adresse | Fonction | Description |
+|---------|----------|-------------|
+| 0x41721d | VND loader entry | Ouvre fichier, setup stream |
+| 0x4174e6 | Main loading | Après validation VNFILE |
+| 0x4176d0 | Scene loop | sceneCount itérations |
+| 0x4161fa | TVNScene::Read | Lecture scène complète |
+| 0x414ca1 | Base props | nom + flags + 3 props |
+| 0x413e21 | Content collection | Lecture commandes |
+| 0x4132f1 | TVNCommand::Read | Lecture commande |
+| 0x41318b | TVNCommand ctor | Constructeur + setup |
+| 0x40e989 | String collection | Lecture strings commande |
+| 0x40dc1e | Hotspot collection | Lecture hotspots |
+| 0x40d6f4 | Object reader | readWord(type) + readBS(string) |
+| 0x414d9c | CmdList::Read | 5 × readWord |
+| 0x41505f | Hotspot::Read | timer + collection |
 
 ---
 
-## 5. PROCHAINES ÉTAPES (PRIORITÉ)
+## 5. PROCHAINES ÉTAPES
 
 ### Priorité haute
-1. **Corriger VNFileLoader.ts** - Aligner les types (VNRect, VNCommandType), corriger readSceneVND()
-2. **Porter logique debug-vnd.ts → VNFileLoader.ts** - Utiliser sceneCount, parser records séquentiels
-3. **Tester avec tous les fichiers VND** - biblio.vnd (140KB), couleurs1.vnd (76KB), etc.
+1. **Porter parse-vnd-universal.js → VNFileLoader.ts** avec les types corrects
+2. **Corriger VNFileLoader.ts** pour utiliser le nouveau format
+3. **Build TypeScript sans erreurs**
 
 ### Priorité moyenne
-4. **Implémenter le rendu React** - Charger BMP, dessiner polygones debug, gérer clics
-5. **Implémenter les commandes** - SET_VAR, SCENE, PLAYWAV, RUNPRJ, EXEC, IF
+4. **Implémenter le rendu React** - Charger BMP, dessiner polygones, gérer clics
+5. **Implémenter les commandes** - SET_VAR, SCENE, PLAYWAV, RUNPRJ, IF, etc.
 
 ### Priorité basse
 6. **Optimisations** - Cache ressources, préchargement
-7. **Support VNP** - Parser les fichiers .vnp (INI-like, réfèrent les .vnd)
+7. **Support VNP** - Parser les fichiers .vnp (INI-like)
 
 ---
 
-## 6. OUTILS ET COMMANDES
-
-```bash
-# Debug VND complet
-npx ts-node --transpile-only scripts/debug-vnd.ts VNP-VND/start.vnd
-
-# Parser hotspots
-npx ts-node --transpile-only scripts/parse-hotspots.ts VNP-VND/start.vnd
-
-# Hex dump
-od -A d -t x1z -v VNP-VND/start.vnd | less
-
-# Radare2 (désactiver couleurs)
-r2 -e scr.color=0 europeo.exe
-```
-
----
-
-## 7. FICHIERS VND DISPONIBLES
-
-| Fichier | Taille | Contenu probable |
-|---------|--------|------------------|
-| start.vnd | 6323 B | Menu principal (7 scènes, 284 vars) |
-| barre.vnd | 28252 B | Barre de navigation |
-| biblio.vnd | 140765 B | Bibliothèque (plus gros fichier) |
-| couleurs1.vnd | 76174 B | Jeu des couleurs |
-| danem.vnd | 41862 B | Danemark? |
-
----
-
-## 8. CLASSES TVN ORIGINALES (60+)
-
-Core: TVNApplication, TVNFrame, TVNWindow, TVNVersion, TVNProjectInfo
-Scènes: TVNScene, TVNSceneArray, TVNSceneParms, TVNSceneProperties, TVNDisplayMode
-Commandes: TVNCommand, TVNCommandArray, TVNCommandParms, TVNEventCommand
-Variables: TVNVariable, TVNVariableArray, TVNIfParms, TVNSetVarParms, TVNIncVarParms, TVNDecVarParms
-Graphiques: TVNBitmap, TVNBmpImg, TVNTransparentBmp, TVNImageObject, TVNGdiObject
-Texte: TVNTextObject, TVNTextParms, TVNFontParms, TVNHtmlText, TVNHtmlParms
-Hotspots: TVNHotspot, TVNHotspotArray, TVNHotspotParms, TVNRectParms
-Média: TVNMciBase, TVNWaveMedia, TVNMidiMedia, TVNCDAMedia, TVNAviMedia
-Effets: TVNTimer, TVNTimerRes, TVNScrollFx, TVNZoomFx
-Sérialisation: TVNStreamable (hérite TStreamableBase Borland)
-
----
-
-## 9. CONVENTIONS DU PROJET
+## 6. CONVENTIONS
 
 - Français pour commentaires et documentation
 - Types préfixés VN (VNScene, VNHotspot, etc.)
-- Enum VNRecordType pour les types de records binaires
 - Encodage fichiers: Latin-1 / windows-1252
 - Little-endian pour tous les entiers
-
----
-
-## 10. ALGORITHME DE DÉTECTION DE PARTS (branche part-detection-algorithm)
-
-### Scripts ajoutés
-- `scripts/detect-parts-final.js` - Détection ciblée Format 54 (couleurs1.vnd)
-- `scripts/detect-parts-universal.js` - Détection universelle multi-formats
-- `docs/PART_DETECTION_FORMAT54.md` - Documentation de l'algorithme
-
-### Concept de "Part"
-Une "part" est un segment de scène dans le VND. Les fichiers VND avec format type > 4
-n'utilisent PAS la structure 50-bytes nom fixe de start.vnd. Ils utilisent des délimiteurs
-binaires pour séparer les parts/scènes.
-
-### Format Type par fichier VND
-| Fichier | Format Type | Parts détectées | Commentaire |
-|---------|-------------|-----------------|-------------|
-| start.vnd | 4 | 4 (incomplet) | 7 scènes connues, algo pas adapté pour type 4 |
-| barre.vnd | 5 | 0 | Algo non adapté |
-| danem.vnd | 16 | 13 | Semble bon |
-| couleurs1.vnd | 54 | 54 | Validé (maison=#5, fontain2=#39, Fin Perdu=#54) |
-| biblio.vnd | 62 | 10 | Probablement incomplet pour 140KB |
-
-### 4 Patterns de détection
-1. **Standard delimiter** : 12+ zéros + `01 00 00 00`, puis BMP/AVI dans les 300 bytes suivants
-2. **Music scenes** : `0x81` + "music.wav" dans les 50 bytes, puis BMP après
-3. **Empty scenes** : 50+ zéros + uint32=5 + "Empty"
-4. **Named scenes** : zéros + Borland string = nom connu ("Toolbar", "Fin Perdu", etc.)
-
-### Filtres de faux positifs
-- z=19-21 ET même BMP que le suivant ET gap >= 250 → marqueur hotspot, pas une part
-- z >= 90 ET content = "fin2.avi" → commande fin de jeu
-
-### Bug connu
-`detect-parts-final.js` ligne Pattern 3 : utilise `buf` au lieu de `buffer`
-
-### Découverte: Deux types de structures VND après les variables
-
-**TYPE_A** (start.vnd, couleurs1.vnd) : `uint32 sceneCount` > 0, puis N scènes de 50 bytes
-**TYPE_B** (tous les autres 17 fichiers) : 16 bytes de zéros, puis records directs
-
-Marqueurs TYPE_B : `0x01` (10 fichiers), `0x81` (4 fichiers), `0x83` (2 fichiers), `0x00` (1 fichier)
-
-Le champ "format type" dans le header est un **project ID** (4-82), PAS un compteur de parts/scènes.
-La corrélation avec le nombre de parts détectées (couleurs1=54=54, suede=14=14) est **coincidentale**.
-Preuve : espa et finlan ont le même ID=20 mais des tailles et contenus différents.
-
-### Champs header décodés (les "4 inconnus")
-| Champ | start.vnd | danem.vnd | couleurs1.vnd | angleterre.vnd |
-|-------|-----------|-----------|---------------|----------------|
-| Flag (0=main,1=sub) | 0 | 1 | 1 | 1 |
-| u1 (scene count?) | 4 | 10 | 1 | 69 |
-| u2 (souvent==projectID) | 1 | 16 | 31 | 81 |
-| Réservé | 0 | 0 | 0 | 0 |
-
-### Tous les fichiers VND du jeu Europeo
-| Fichier | Format Type | Vars | Structure | Taille |
-|---------|-------------|------|-----------|--------|
-| start | 4 | 284 | TYPE_A (7 scènes) | 6 KB |
-| barre | 5 | 12 | TYPE_B (0x81) | 28 KB |
-| suede | 14 | 280 | TYPE_B (0x01) | 52 KB |
-| allem | 15 | 280 | TYPE_B (0x81) | 64 KB |
-| danem | 16 | 281 | TYPE_B (0x01) | 42 KB |
-| portu | 17 | 280 | TYPE_B (0x01) | 74 KB |
-| grece | 19 | 285 | TYPE_B (0x01) | 56 KB |
-| espa | 20 | 285 | TYPE_B (0x01) | 75 KB |
-| finlan | 20 | 280 | TYPE_B (0x81) | 45 KB |
-| holl | 22 | 282 | TYPE_B (0x83) | 56 KB |
-| irland | 23 | 280 | TYPE_B (0x01) | 62 KB |
-| autr | 24 | 283 | TYPE_B (0x01) | 75 KB |
-| belge | 28 | 280 | TYPE_B (0x01) | 76 KB |
-| france | 34 | 284 | TYPE_B (0x01) | 100 KB |
-| italie | 36 | 284 | TYPE_B (0x83) | 74 KB |
-| ecosse | 42 | 280 | TYPE_B (0x81) | 72 KB |
-| couleurs1 | 54 | 280 | TYPE_A (7 scènes) | 76 KB |
-| biblio | 62 | 284 | TYPE_B (0x00) | 141 KB |
-| angleterre | 82 | 284 | TYPE_B (0x00) | 87 KB |
-
-### À consolider
-- Comprendre la structure TYPE_B (records directs après 16 zéros)
-- Clarifier le rôle des marqueurs 0x01 vs 0x81 vs 0x83
-- Adapter le parser pour les deux types de structure
-- Fusionner la logique avec VNFileLoader.ts
+- Pas d'emojis sauf demande explicite

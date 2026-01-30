@@ -1,0 +1,8180 @@
+{
+  "file": "holl.vnd",
+  "fileSize": 55887,
+  "header": {
+    "magic": "VNFILE",
+    "version": "2.13",
+    "sceneCount": 22,
+    "projectName": "Europeo",
+    "editor": "Sopra Multimedia",
+    "serial": "5D51F233",
+    "projectIDStr": "",
+    "registry": "",
+    "width": 640,
+    "height": 480,
+    "depth": 16,
+    "flag": 1,
+    "u1": 10,
+    "u2": 22,
+    "reserved": 0,
+    "dllPath": "..\\VnStudio\\vnresmod.dll",
+    "varCount": 282,
+    "endPos": 138
+  },
+  "variableCount": 282,
+  "variables": [
+    "COMPTEUR1",
+    "COMPTEUR2",
+    "COMPTEUR3",
+    "SACADOS",
+    "JEU",
+    "BIDON",
+    "MILLEEURO",
+    "CALC",
+    "TELEPHONE",
+    "ACTIVE",
+    "FRANCS",
+    "DELPHITEST1",
+    "DELPHITEST2",
+    "CPAYS",
+    "CMENU1",
+    "CMENU2",
+    "CMENU3",
+    "RAQUETTE",
+    "REPONSEM",
+    "AFFICHEM",
+    "PIECE",
+    "DICO",
+    "BEETHOVEN",
+    "PHOTO",
+    "SCOTCH",
+    "QUESTION",
+    "REPONSE",
+    "NOTE",
+    "MAUVAISENOTE",
+    "TAILLEPIERRE",
+    "EXPO",
+    "CHEVAL",
+    "SABOT2",
+    "RIZ",
+    "CLE",
+    "CAPITALE",
+    "CISEAUX",
+    "MENU",
+    "PIZZA",
+    "COSTUME",
+    "LOUPE",
+    "PALME",
+    "BOUEE",
+    "RESSORT",
+    "NUMERO",
+    "SCORE",
+    "HARPON",
+    "MASQUE",
+    "BOUT_PLO",
+    "BALLON1",
+    "PLONGE",
+    "GRECQUESTION",
+    "GRECREPONSE",
+    "FIOLEGRECE",
+    "RUBAN",
+    "MASSE",
+    "ORGUE",
+    "GUITARE",
+    "PIER_BERLIN",
+    "BUS",
+    "LEVRIERNUMERO",
+    "LEVRIERPARI",
+    "LEVRIERRESULTAT",
+    "JUSTEPRIXOBJ",
+    "JUSTEPRIXEURO",
+    "JUSTEPRIXCLIC",
+    "JUSTEPRIX1",
+    "JUSTEPRIX10",
+    "JUSTEPRIX15",
+    "JUSTEPRIX20",
+    "JUSTEPRIX25",
+    "JUSTEPRIX30",
+    "JUSTEPRIX50",
+    "JUSTEPRIX100",
+    "JUSTEPRIXSCORE",
+    "PAIN",
+    "HELICE",
+    "CARTETOUR",
+    "PARFUM",
+    "PEPE",
+    "CASTAGNETTE",
+    "DANSE",
+    "TICKET",
+    "TICKET_A",
+    "PALETTE",
+    "HOTTE",
+    "CPHOTO",
+    "MATH",
+    "FIOLEGRECE2",
+    "FIOLEVASE",
+    "ROUEDENT",
+    "VIOLON",
+    "MARMOTTE",
+    "MUSIC",
+    "FIOLEAUTR",
+    "PARTITION",
+    "ORGE",
+    "TONDEUSE",
+    "BOUTEILLE",
+    "SAC",
+    "CHEWING",
+    "CLEROUGE",
+    "PAPIERCADO",
+    "SABOT1",
+    "TONO",
+    "OEUF",
+    "SIROP",
+    "LEVURE",
+    "PEINTRE",
+    "SCOREPEINTRE",
+    "FROG",
+    "TRANS",
+    "ALLEMAGNE",
+    "FIOLE",
+    "FRANCE",
+    "ANGLETERRE",
+    "AUTRICHE",
+    "BELGIQUE",
+    "EUROLAND",
+    "DANEMARK",
+    "ECOSSE",
+    "ESPAGNE",
+    "FINLANDE",
+    "GRECE",
+    "PAYSBAS",
+    "IRLANDE",
+    "ITALIE",
+    "PORTUGAL",
+    "SUEDE",
+    "FIOLEECOSSE",
+    "FIOLEIRLANDE",
+    "FIOLEESPAGNE",
+    "FIOLESUEDE",
+    "FIOLEFINLANDE",
+    "FIOLEAUTRICHE",
+    "FIOLEPAYSBAS",
+    "FIOLEESPAGNE2",
+    "FIOLEITALIE",
+    "FIOLEANGLETERRE",
+    "OCCUPE1",
+    "OCCUPE2",
+    "OCCUPE3",
+    "OCCUPE4",
+    "OCCUPE5",
+    "OCCUPE6",
+    "OCCUPE7",
+    "OCCUPE8",
+    "OCCUPE9",
+    "OCCUPE10",
+    "OCCUPE11",
+    "OCCUPE12",
+    "OCCUPE",
+    "FIOLEOK",
+    "CLEJAUNE",
+    "AP_PHOTO",
+    "POIVROUGE",
+    "AIL",
+    "BONNET",
+    "SKATE",
+    "FARINE",
+    "API",
+    "DORADE",
+    "TEMPSLAPIN",
+    "CHIANTI",
+    "COLOMB",
+    "PASTEUR",
+    "PORTESECRETE",
+    "BOITE",
+    "CLEVERTE",
+    "PONPON",
+    "PONPONOR",
+    "FINIPONPON",
+    "CORNEMUSE",
+    "NESSIE",
+    "POIVJAUNE",
+    "OIGNON",
+    "MOULE",
+    "FROMAGE",
+    "TULIPEJAUNE",
+    "PEINTRE1",
+    "SECHE",
+    "BLEU",
+    "BONUS1",
+    "ALLUMETTE",
+    "BONUS2",
+    "BURETTE",
+    "BONUS3",
+    "BONUS4",
+    "CHAMPAGNE",
+    "BONUS5",
+    "NUMPAYS",
+    "NUMPAYS2",
+    "NUMPAYSSCORE",
+    "BONUS6",
+    "BONUS9",
+    "BONUS8",
+    "BONUS7",
+    "JUSTEPRIX",
+    "HUILE",
+    "LAINE",
+    "BOUT_EAU",
+    "ROUGE",
+    "CHAMPAGNE2",
+    "PATE",
+    "SALIERE",
+    "PUCE",
+    "BONUS18",
+    "BONUS19",
+    "BONUS20",
+    "HARPEOK",
+    "PUBOK",
+    "ERREUR7OK",
+    "ERREUR7D1",
+    "ERREUR7D2",
+    "ERREUR7D3",
+    "ERREUR7D4",
+    "ERREUR7D5",
+    "ERREUR7D6",
+    "ERREUR7D7",
+    "BONUS14",
+    "HOUBLON",
+    "VASE",
+    "NBINGR",
+    "INGROK",
+    "OLIVE",
+    "BOUILLON",
+    "PINCE",
+    "BOTTE",
+    "GLO",
+    "BONUS26",
+    "BONUS25",
+    "BONUS24",
+    "BONUS23",
+    "OUTIL",
+    "OUTIL2",
+    "OUTIL3",
+    "MACHINE",
+    "CIRE",
+    "BOUBOU",
+    "SOUSMARINOK",
+    "LAPINSORTIE",
+    "TOURNEVIS",
+    "NAINOK",
+    "PIERREOR",
+    "EAUBIERE",
+    "BIEREOK",
+    "CHOUETTE",
+    "CHOUETTEOR",
+    "ERREUR7OK2",
+    "PISE",
+    "BIERESO",
+    "BETAIL",
+    "CASTA",
+    "EAUPAIN",
+    "PAINOK",
+    "NON",
+    "VINCI",
+    "VA",
+    "VF",
+    "VE",
+    "BONUS29",
+    "SOUSMARINOK2",
+    "BONUS22",
+    "BONUS30",
+    "MESP",
+    "MGRE",
+    "MGRA",
+    "MITA",
+    "MALL",
+    "MFRA",
+    "MARMOT",
+    "BONUS15",
+    "BONUS16",
+    "JUSTEPRIXQUESTION",
+    "JUSTEPRIXREPONSE",
+    "JUSTEPRIXOK",
+    "PUNK",
+    "BOUCHE",
+    "LAPIN",
+    "LOC",
+    "POGNON",
+    "OBJETSFERMIER"
+  ],
+  "sceneCount": 22,
+  "scenesParsed": 22,
+  "bytesRemaining": 0,
+  "errors": [],
+  "scenes": [
+    {
+      "index": 1,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        131
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "camp.wav",
+        "string4": "",
+        "resource": "polder.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        20,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 102,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1250 30 125 365 0 Une petite ferme"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              1393,
+              158
+            ],
+            [
+              1478,
+              50
+            ],
+            [
+              1488,
+              20
+            ],
+            [
+              1534,
+              21
+            ],
+            [
+              1531,
+              41
+            ],
+            [
+              1704,
+              52
+            ],
+            [
+              1730,
+              85
+            ],
+            [
+              1702,
+              172
+            ],
+            [
+              1621,
+              178
+            ],
+            [
+              1681,
+              226
+            ],
+            [
+              1671,
+              312
+            ],
+            [
+              1368,
+              311
+            ],
+            [
+              1408,
+              281
+            ],
+            [
+              1412,
+              164
+            ]
+          ]
+        },
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "3"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "250 30 125 365 0 Un moulin"
+            }
+          ],
+          "polygon": [
+            [
+              83,
+              30
+            ],
+            [
+              230,
+              246
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "2350 270 125 365 0 Une barque"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 11,
+              "value": "barque.wav 2"
+            },
+            {
+              "type": 9,
+              "value": "barque.avi 1 2200 220 2560 400"
+            },
+            {
+              "type": 6,
+              "value": "4"
+            }
+          ],
+          "polygon": [
+            [
+              2194,
+              303
+            ],
+            [
+              2555,
+              390
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "chewing != -1 then playtext 1850 130 125 365 0 Une vache mélancolique"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then playtext 1850 130 125 365 0 Une vache heureuse"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 0 then addbmp langue rol\\vache.bmp 0 1676 314"
+            },
+            {
+              "type": 16,
+              "value": "100"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 0 thenclosewav"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 0 then playwav vache.wav 1"
+            },
+            {
+              "type": 11,
+              "value": "camp.wav 2"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then set_var chewing -1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then addbmp chew rol\\chew.bmp 0 1650 274"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then addbmp chew rol\\chew.bmp 0 1650 274"
+            }
+          ],
+          "polygon": [
+            [
+              1629,
+              179
+            ],
+            [
+              1710,
+              177
+            ],
+            [
+              1732,
+              80
+            ],
+            [
+              1779,
+              92
+            ],
+            [
+              1859,
+              149
+            ],
+            [
+              1818,
+              208
+            ],
+            [
+              1923,
+              246
+            ],
+            [
+              1966,
+              241
+            ],
+            [
+              2049,
+              279
+            ],
+            [
+              2054,
+              395
+            ],
+            [
+              1802,
+              398
+            ],
+            [
+              1783,
+              308
+            ],
+            [
+              1730,
+              335
+            ],
+            [
+              1684,
+              311
+            ],
+            [
+              1701,
+              241
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "9"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "380 140 125 365 0 Informations sur les polders ?"
+            }
+          ],
+          "polygon": [
+            [
+              258,
+              162
+            ],
+            [
+              259,
+              246
+            ],
+            [
+              343,
+              254
+            ],
+            [
+              343,
+              159
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "320 110 125 365 0 Un autre moulin voyons !!??"
+            }
+          ],
+          "polygon": [
+            [
+              374,
+              209
+            ],
+            [
+              370,
+              254
+            ],
+            [
+              414,
+              267
+            ],
+            [
+              412,
+              212
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1120 90 125 365 0 Un artiste peintre"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "peintre1 = 1  then hotspot 9"
+            },
+            {
+              "type": 21,
+              "value": "peintre1 = 0 then playwav peintre3.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "peintre1 = 0 then pause 1000"
+            },
+            {
+              "type": 21,
+              "value": "peintre1 = 0  then playwav peintre2.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "peintre1 = 0  then set_var peintre1 1"
+            }
+          ],
+          "polygon": [
+            [
+              948,
+              389
+            ],
+            [
+              973,
+              375
+            ],
+            [
+              999,
+              353
+            ],
+            [
+              1001,
+              287
+            ],
+            [
+              1002,
+              257
+            ],
+            [
+              954,
+              171
+            ],
+            [
+              974,
+              157
+            ],
+            [
+              1013,
+              215
+            ],
+            [
+              1052,
+              179
+            ],
+            [
+              1039,
+              99
+            ],
+            [
+              1087,
+              85
+            ],
+            [
+              1104,
+              107
+            ],
+            [
+              1091,
+              148
+            ],
+            [
+              1091,
+              160
+            ],
+            [
+              1114,
+              174
+            ],
+            [
+              1108,
+              303
+            ],
+            [
+              1106,
+              372
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "850 30 125 365 0 Un tableau plein de couleurs"
+            }
+          ],
+          "polygon": [
+            [
+              874,
+              128
+            ],
+            [
+              1006,
+              274
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "seche = -1 then playwav peintre4.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then set_var bleu 1"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then set_var seche -1"
+            },
+            {
+              "type": 21,
+              "value": "seche != -1 then playwav peintre1.wav 0"
+            },
+            {
+              "type": 21,
+              "value": "bleu = 1 then scene 18"
+            }
+          ],
+          "polygon": [
+            [
+              869,
+              20
+            ],
+            [
+              910,
+              69
+            ]
+          ],
+          "flags": 4
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "fermier.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 102,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 39,
+              "value": "22 1 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "120 360 125 365 0 SORTIE"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              73,
+              84
+            ],
+            [
+              211,
+              323
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 22,
+              "value": "objetsfermier 0"
+            },
+            {
+              "type": 21,
+              "value": "clerouge = 0 then inc_var objetsfermier 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 0 then inc_var objetsfermier 1"
+            },
+            {
+              "type": 21,
+              "value": "bouteille = 0 then inc_var objetsfermier 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then inc_var objetsfermier 4"
+            },
+            {
+              "type": 21,
+              "value": "objetsfermier > 4 then playavi fermier2.avi 1 411 110 497 178"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 0 then playavi fermier1.avi 1 412 110 498 178"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 1 then playavi fermier1.avi 1 412 110 498 178"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then font 18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then playtext 350 60 125 365 0 Merci pour elle !"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then set_var dejachewing 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then set_var chewing -1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then defcursor fleche.cur"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "250 360 125 365 0 Un fermier sympa"
+            }
+          ],
+          "polygon": [
+            [
+              415,
+              92
+            ],
+            [
+              497,
+              382
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "180 360 125 365 0 Une valise à questions !!?"
+            },
+            {
+              "type": 21,
+              "value": "oeuf = 0 then scene 17"
+            }
+          ],
+          "polygon": [
+            [
+              234,
+              316
+            ],
+            [
+              259,
+              300
+            ],
+            [
+              285,
+              298
+            ],
+            [
+              310,
+              316
+            ],
+            [
+              306,
+              354
+            ],
+            [
+              235,
+              356
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 0 then playtext 480 360 125 365 0 Du papier cadeau"
+            },
+            {
+              "type": 21,
+              "value": "chewing != -1 then hotspot 2"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then if papiercado = 0 then set_var papiercado 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then addbmp cadeau rol\\cadeau.bmp 0 512 277"
+            }
+          ],
+          "polygon": [
+            [
+              516,
+              341
+            ],
+            [
+              510,
+              320
+            ],
+            [
+              626,
+              276
+            ],
+            [
+              635,
+              299
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "bouteille = 0 then playtext 250 10 125 365 0 Une bouteille vide"
+            },
+            {
+              "type": 21,
+              "value": "chewing != -1 then hotspot 2"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then if bouteille = 0 then set_var bouteille 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then addbmp bou rol\\boutvide.bmp 0 256 24"
+            }
+          ],
+          "polygon": [
+            [
+              257,
+              29
+            ],
+            [
+              283,
+              95
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "250 10 125 365 0 Un livre à indices"
+            },
+            {
+              "type": 6,
+              "value": "19"
+            }
+          ],
+          "polygon": [
+            [
+              321,
+              79
+            ],
+            [
+              381,
+              102
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "sac = -1 then delbmp sac"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 0 then playtext 320 260 125 365 0 Un sac"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 1  then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 1 then inc_var score 100"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 1 then set_var pognon -1"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 0 then set_var pognon 1"
+            },
+            {
+              "type": 21,
+              "value": "pognon = -1 then delbmp pog"
+            },
+            {
+              "type": 21,
+              "value": "pognon = 1 then addbmp pog rol\\sac.bmp 0 324 240"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            }
+          ],
+          "polygon": [
+            [
+              315,
+              221
+            ],
+            [
+              349,
+              267
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "clerouge != 0 then addbmp clerouge rol\\clerouge.bmp 0 13 369"
+            },
+            {
+              "type": 21,
+              "value": "bouteille != 0 then addbmp bou rol\\boutvide.bmp 0 256 24"
+            },
+            {
+              "type": 21,
+              "value": "papiercado != 0 then addbmp cadeau rol\\cadeau.bmp 0 512 277"
+            },
+            {
+              "type": 21,
+              "value": "dejachewing = 1 then set_var chewing -1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "clerouge = 0 then playtext 80 360 125 365 0 Une clé rouge"
+            },
+            {
+              "type": 21,
+              "value": "chewing != -1 then hotspot 2"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then if clerouge = 0 then set_var clerouge 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = -1 then addbmp clerouge rol\\clerouge.bmp 0 13 369"
+            }
+          ],
+          "polygon": [
+            [
+              13,
+              372
+            ],
+            [
+              79,
+              390
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "meuni.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 102,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 39,
+              "value": "22 1 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "125 320 125 365 0 SORTIE"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              142,
+              142
+            ],
+            [
+              240,
+              161
+            ],
+            [
+              243,
+              238
+            ],
+            [
+              238,
+              279
+            ],
+            [
+              207,
+              295
+            ],
+            [
+              132,
+              294
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "me_holl.avi 1 473 49 546 134"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "370 105 125 365 0 Le meilleur"
+            },
+            {
+              "type": 38,
+              "value": "370 125 125 365 0 meunier"
+            },
+            {
+              "type": 38,
+              "value": "370 145 125 365 0 de tout"
+            },
+            {
+              "type": 38,
+              "value": "370 165 125 365 0 le pays"
+            }
+          ],
+          "polygon": [
+            [
+              484,
+              26
+            ],
+            [
+              547,
+              31
+            ],
+            [
+              593,
+              170
+            ],
+            [
+              589,
+              229
+            ],
+            [
+              558,
+              326
+            ],
+            [
+              477,
+              315
+            ],
+            [
+              477,
+              278
+            ],
+            [
+              423,
+              214
+            ],
+            [
+              470,
+              143
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "hotte = 0 then addbmp hotte hotte.bmp 0 284 47"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 0 then playtext 360 120 125 365 0 Une hotte"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "hotte  = 0 then playtext 385 40 125 365 0 50 euros"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 0 then dec_var score 50"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 0 then set_var hotte 1"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 1 then delbmp hotte"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              285,
+              53
+            ],
+            [
+              351,
+              228
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "oeuf = 0 then addbmp oeuf oeuf.bmp 0 402 312"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "340 280 125 365 0 Un panier plein d'oeufs"
+            }
+          ],
+          "polygon": [
+            [
+              423,
+              397
+            ],
+            [
+              405,
+              368
+            ],
+            [
+              460,
+              318
+            ],
+            [
+              506,
+              364
+            ],
+            [
+              493,
+              397
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 0 then playtext 130 370 125 365 0 Un sabot"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 0 then playtext 390 40 125 365 0 2 euros"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 0 then dec_var score 2"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 0 then set_var sabot1 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 1 then delbmp sab"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 0 then addbmp sab rol\\sabot1.bmp 0 53 357"
+            }
+          ],
+          "polygon": [
+            [
+              55,
+              385
+            ],
+            [
+              53,
+              361
+            ],
+            [
+              91,
+              361
+            ],
+            [
+              119,
+              379
+            ],
+            [
+              106,
+              396
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              273,
+              399
+            ],
+            [
+              269,
+              362
+            ],
+            [
+              290,
+              364
+            ],
+            [
+              332,
+              252
+            ],
+            [
+              324,
+              242
+            ],
+            [
+              348,
+              236
+            ],
+            [
+              359,
+              257
+            ],
+            [
+              344,
+              260
+            ],
+            [
+              301,
+              369
+            ],
+            [
+              313,
+              377
+            ],
+            [
+              299,
+              396
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "40 220 125 365 0 Un tonneau vide"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "85 305 125 365 0 Non, c'est trop"
+            },
+            {
+              "type": 38,
+              "value": "85 325 125 365 0 lourd !"
+            }
+          ],
+          "polygon": [
+            [
+              33,
+              321
+            ],
+            [
+              66,
+              321
+            ],
+            [
+              75,
+              295
+            ],
+            [
+              70,
+              275
+            ],
+            [
+              27,
+              272
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "farine = 0 then addbmp farine ble.bmp 0 214 285"
+            },
+            {
+              "type": 21,
+              "value": "farine = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "farine = 0 then set_var farine 1"
+            },
+            {
+              "type": 21,
+              "value": "farine = 1 then delbmp farine"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "farine = 0 then playtext 100 320 125 365 0 Un sac de blé"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "farine  = 0 then playtext 382 40 125 365 0 10 euros"
+            }
+          ],
+          "polygon": [
+            [
+              228,
+              290
+            ],
+            [
+              266,
+              337
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "520 380 125 365 0 Un arrosoir"
+            }
+          ],
+          "polygon": [
+            [
+              497,
+              334
+            ],
+            [
+              583,
+              397
+            ]
+          ]
+        },
+        {
+          "commandType": 107,
+          "strings": [
+            {
+              "type": 21,
+              "value": "bonus19 = 0 then playwav ..\\..\\couleurs1\\digit\\bruit\\boing.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 0 then set_var bonus19 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 =  1 then scene 21"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 0 then playtext 120 360 125 365 0 Question bonus"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 2 then playtext 120 360 125 365 0 tu as déjà répondu"
+            }
+          ],
+          "polygon": [
+            [
+              5,
+              1
+            ],
+            [
+              114,
+              214
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        129
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_hol.wav",
+        "string4": "",
+        "resource": "amster.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        20,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "6"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "910 20 125 365 0 Aujourd'hui jour de marché"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              1108,
+              256
+            ],
+            [
+              1211,
+              257
+            ],
+            [
+              1231,
+              272
+            ],
+            [
+              1240,
+              400
+            ],
+            [
+              1114,
+              398
+            ]
+          ]
+        },
+        {
+          "commandType": 102,
+          "strings": [
+            {
+              "type": 6,
+              "value": "5"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "190 8 125 365 0 Un galerie de peinture"
+            }
+          ],
+          "polygon": [
+            [
+              190,
+              264
+            ],
+            [
+              316,
+              268
+            ],
+            [
+              306,
+              108
+            ],
+            [
+              269,
+              28
+            ],
+            [
+              224,
+              104
+            ]
+          ]
+        },
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "96 20 125 365 0 Vers les polders"
+            }
+          ],
+          "polygon": [
+            [
+              124,
+              393
+            ],
+            [
+              2,
+              392
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              130,
+              5
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "15"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "610 20 125 365 0 Des informations sur la bicyclette"
+            }
+          ],
+          "polygon": [
+            [
+              547,
+              393
+            ],
+            [
+              531,
+              315
+            ],
+            [
+              573,
+              274
+            ],
+            [
+              643,
+              201
+            ],
+            [
+              861,
+              147
+            ],
+            [
+              928,
+              299
+            ],
+            [
+              923,
+              391
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "velo.avi 1 1131 36 1221 118"
+            },
+            {
+              "type": 6,
+              "value": "14"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "910 20 125 365 0 Un jeune loueur de vélos"
+            }
+          ],
+          "polygon": [
+            [
+              1114,
+              250
+            ],
+            [
+              1232,
+              256
+            ],
+            [
+              1242,
+              237
+            ],
+            [
+              1232,
+              212
+            ],
+            [
+              1244,
+              162
+            ],
+            [
+              1213,
+              109
+            ],
+            [
+              1209,
+              18
+            ],
+            [
+              1175,
+              8
+            ],
+            [
+              1139,
+              24
+            ],
+            [
+              1135,
+              63
+            ],
+            [
+              1147,
+              92
+            ],
+            [
+              1089,
+              165
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "400 20 125 365 0 Les célèbres façades d'Amsterdam !"
+            }
+          ],
+          "polygon": [
+            [
+              354,
+              102
+            ],
+            [
+              358,
+              250
+            ],
+            [
+              498,
+              253
+            ],
+            [
+              498,
+              162
+            ],
+            [
+              590,
+              174
+            ],
+            [
+              575,
+              71
+            ],
+            [
+              515,
+              17
+            ],
+            [
+              429,
+              62
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_hol.wav",
+        "string4": "",
+        "resource": "galrie.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 104,
+          "strings": [
+            {
+              "type": 39,
+              "value": "26 1 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "40 320 125 365 0 SORTIE"
+            },
+            {
+              "type": 6,
+              "value": "4"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              4,
+              395
+            ],
+            [
+              2,
+              353
+            ],
+            [
+              253,
+              355
+            ],
+            [
+              273,
+              384
+            ],
+            [
+              358,
+              383
+            ],
+            [
+              367,
+              348
+            ],
+            [
+              633,
+              336
+            ],
+            [
+              635,
+              392
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "8"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "40 220 125 365 0 Un tableau ancien."
+            },
+            {
+              "type": 38,
+              "value": "40 260 125 365 0 Informations sur"
+            },
+            {
+              "type": 38,
+              "value": "40 280 125 365 0 Rembrandt"
+            }
+          ],
+          "polygon": [
+            [
+              47,
+              7
+            ],
+            [
+              186,
+              202
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 21,
+              "value": "palette = 0 then closewav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 0 then playavi galerie1.avi 1 290 105 340 156"
+            },
+            {
+              "type": 21,
+              "value": "palette = 0 then scene 12"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "370 20 125 365 0 Le responsable de la"
+            },
+            {
+              "type": 38,
+              "value": "370 40 125 365 0 galerie de peinture"
+            }
+          ],
+          "polygon": [
+            [
+              210,
+              210
+            ],
+            [
+              296,
+              140
+            ],
+            [
+              274,
+              108
+            ],
+            [
+              312,
+              51
+            ],
+            [
+              353,
+              119
+            ],
+            [
+              400,
+              206
+            ],
+            [
+              376,
+              339
+            ],
+            [
+              264,
+              334
+            ]
+          ]
+        },
+        {
+          "commandType": 107,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 0 then playtext 470 260 125 365 0 Question bonus"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 2 then playtext 470 260 125 365 0 tu as déjà répondu"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 0 then playwav ..\\..\\couleurs1\\digit\\bruit\\boing.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 0 then set_var bonus18 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 =  1 then scene 21"
+            }
+          ],
+          "polygon": [
+            [
+              427,
+              97
+            ],
+            [
+              629,
+              248
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "marche.wav",
+        "string4": "",
+        "resource": "froleg.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "4"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge != 0 then addbmp pv poivronrouge.bmp 0 484 323"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune != 0 then addbmp pvj poivronjaune.bmp 0 566 310"
+            },
+            {
+              "type": 21,
+              "value": "oignon != 0 then addbmp oignon oignon.bmp 0 436 236"
+            },
+            {
+              "type": 21,
+              "value": "ail != 0 then addbmp ail ail.bmp 0 392 294"
+            },
+            {
+              "type": 21,
+              "value": "fromage != 0 then addbmp fromage fromage.bmp 0 123 284"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              0,
+              5
+            ],
+            [
+              67,
+              6
+            ],
+            [
+              58,
+              53
+            ],
+            [
+              13,
+              200
+            ],
+            [
+              23,
+              274
+            ],
+            [
+              46,
+              279
+            ],
+            [
+              91,
+              397
+            ],
+            [
+              3,
+              398
+            ]
+          ]
+        },
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "7"
+            }
+          ],
+          "polygon": [
+            [
+              318,
+              375
+            ],
+            [
+              638,
+              398
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "ruban = 0 then delbmp ruban"
+            },
+            {
+              "type": 21,
+              "value": "ruban = 0 then set_var ruban 1"
+            },
+            {
+              "type": 21,
+              "value": "ruban != 0 then delbmp ruban else addbmp ruban rol\\ruban.bmp 0 63 153"
+            }
+          ],
+          "polygon": [
+            [
+              73,
+              157
+            ],
+            [
+              123,
+              202
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "fromage1.avi 1 76 89 131 138"
+            },
+            {
+              "type": 11,
+              "value": "marche.wav 2"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "140 20 225 65 0 Marchande de fromages"
+            }
+          ],
+          "polygon": [
+            [
+              15,
+              200
+            ],
+            [
+              72,
+              30
+            ],
+            [
+              117,
+              33
+            ],
+            [
+              146,
+              99
+            ],
+            [
+              132,
+              198
+            ],
+            [
+              155,
+              218
+            ],
+            [
+              162,
+              243
+            ],
+            [
+              30,
+              274
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "legumes1.avi 1 431 106 504 149"
+            },
+            {
+              "type": 11,
+              "value": "marche.wav 2"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "140 20 225 65 0 Marchande de fruits et légumes"
+            }
+          ],
+          "polygon": [
+            [
+              428,
+              36
+            ],
+            [
+              420,
+              83
+            ],
+            [
+              434,
+              100
+            ],
+            [
+              460,
+              134
+            ],
+            [
+              440,
+              146
+            ],
+            [
+              399,
+              216
+            ],
+            [
+              424,
+              208
+            ],
+            [
+              450,
+              218
+            ],
+            [
+              475,
+              239
+            ],
+            [
+              503,
+              239
+            ],
+            [
+              544,
+              238
+            ],
+            [
+              587,
+              201
+            ],
+            [
+              570,
+              170
+            ],
+            [
+              522,
+              137
+            ],
+            [
+              507,
+              121
+            ],
+            [
+              506,
+              99
+            ],
+            [
+              515,
+              67
+            ],
+            [
+              479,
+              31
+            ]
+          ]
+        },
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "7"
+            }
+          ],
+          "polygon": [
+            [
+              638,
+              2
+            ],
+            [
+              525,
+              1
+            ],
+            [
+              527,
+              117
+            ],
+            [
+              594,
+              194
+            ],
+            [
+              578,
+              243
+            ],
+            [
+              628,
+              291
+            ],
+            [
+              629,
+              365
+            ],
+            [
+              579,
+              393
+            ],
+            [
+              634,
+              395
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "poivjaune = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 0 then set_var poivjaune 1"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune != 0 then addbmp pvj poivronjaune.bmp 0 566 310"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 0 then playtext 395 370 225 65 0 Poivron jaune"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 0 then playtext 320 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              619,
+              316
+            ],
+            [
+              594,
+              318
+            ],
+            [
+              579,
+              332
+            ],
+            [
+              570,
+              351
+            ],
+            [
+              599,
+              365
+            ],
+            [
+              621,
+              360
+            ],
+            [
+              625,
+              339
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "poivrouge = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 0 then set_var poivrouge 1"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge != 0 then addbmp pv poivronrouge.bmp 0 484 323"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 0 then playtext 395 370 225 65 0 Poivron rouge"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 0 then playtext 320 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              486,
+              341
+            ],
+            [
+              533,
+              361
+            ],
+            [
+              556,
+              331
+            ],
+            [
+              525,
+              316
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "oignon = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "oignon = 0 then set_var oignon 1"
+            },
+            {
+              "type": 21,
+              "value": "oignon != 0 then addbmp oignon oignon.bmp 0 436 236"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "oignon = 0 then playtext 395 370 225 65 0 Oignons"
+            },
+            {
+              "type": 21,
+              "value": "oignon = 0 then playtext 320 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              455,
+              246
+            ],
+            [
+              446,
+              273
+            ],
+            [
+              491,
+              276
+            ],
+            [
+              547,
+              281
+            ],
+            [
+              563,
+              263
+            ],
+            [
+              536,
+              251
+            ],
+            [
+              494,
+              251
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "ail = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "ail = 0 then set_var ail 1"
+            },
+            {
+              "type": 21,
+              "value": "ail != 0 then addbmp ail ail.bmp 0 392 294"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "ail = 0 then playtext 395 370 225 65 0 Ail"
+            },
+            {
+              "type": 21,
+              "value": "ail = 0 then playtext 320 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              405,
+              304
+            ],
+            [
+              424,
+              318
+            ],
+            [
+              457,
+              321
+            ],
+            [
+              487,
+              305
+            ],
+            [
+              465,
+              301
+            ],
+            [
+              428,
+              301
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "fromage = 0 then dec_var score 20"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 0 then set_var fromage 1"
+            },
+            {
+              "type": 21,
+              "value": "fromage != 0 then addbmp fromage fromage.bmp 0 123 284"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 0 then playtext 70 368 225 65 0 Fromage"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 0 then playtext 255 368 225 65 0 20 E."
+            }
+          ],
+          "polygon": [
+            [
+              147,
+              325
+            ],
+            [
+              162,
+              354
+            ],
+            [
+              204,
+              359
+            ],
+            [
+              243,
+              335
+            ],
+            [
+              237,
+              308
+            ],
+            [
+              190,
+              293
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "frotext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Fromage"
+            },
+            {
+              "type": 38,
+              "value": "255 368 225 65 0 12 E."
+            }
+          ],
+          "polygon": [
+            [
+              53,
+              292
+            ],
+            [
+              62,
+              260
+            ],
+            [
+              125,
+              255
+            ],
+            [
+              155,
+              270
+            ],
+            [
+              157,
+              300
+            ],
+            [
+              121,
+              355
+            ],
+            [
+              53,
+              350
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "frotext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Gruyère"
+            },
+            {
+              "type": 38,
+              "value": "255 368 225 65 0 21 E."
+            }
+          ],
+          "polygon": [
+            [
+              170,
+              299
+            ],
+            [
+              150,
+              263
+            ],
+            [
+              167,
+              252
+            ],
+            [
+              226,
+              258
+            ],
+            [
+              248,
+              282
+            ],
+            [
+              243,
+              305
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "legtext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "395 370 225 65 0 Cerises"
+            },
+            {
+              "type": 38,
+              "value": "320 370 225 65 0 11 E."
+            }
+          ],
+          "polygon": [
+            [
+              338,
+              304
+            ],
+            [
+              325,
+              264
+            ],
+            [
+              383,
+              233
+            ],
+            [
+              401,
+              223
+            ],
+            [
+              443,
+              255
+            ],
+            [
+              428,
+              292
+            ],
+            [
+              385,
+              313
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "legtext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "395 370 225 65 0 Tomates"
+            },
+            {
+              "type": 38,
+              "value": "320 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              396,
+              373
+            ],
+            [
+              376,
+              351
+            ],
+            [
+              401,
+              324
+            ],
+            [
+              453,
+              335
+            ],
+            [
+              472,
+              362
+            ],
+            [
+              438,
+              370
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "legtext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "395 370 225 65 0 Pommes"
+            },
+            {
+              "type": 38,
+              "value": "320 370 225 65 0 15 E."
+            }
+          ],
+          "polygon": [
+            [
+              568,
+              308
+            ],
+            [
+              553,
+              284
+            ],
+            [
+              579,
+              270
+            ],
+            [
+              600,
+              273
+            ],
+            [
+              613,
+              284
+            ],
+            [
+              610,
+              311
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "marche.wav",
+        "string4": "",
+        "resource": "poitul.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "6"
+            },
+            {
+              "type": 21,
+              "value": "dorade != 0 then addbmp dorade dorade.bmp 0 0 294"
+            },
+            {
+              "type": 21,
+              "value": "moule != 0 then addbmp moule moule.bmp 0 51 268"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune != 0 then addbmp tulipej tulipejaune.bmp 0 494 215"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              82,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              390
+            ],
+            [
+              85,
+              393
+            ],
+            [
+              6,
+              336
+            ],
+            [
+              39,
+              302
+            ],
+            [
+              61,
+              242
+            ],
+            [
+              81,
+              153
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "11"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "350 250 20 125 365  Des informations sur les tulipes"
+            }
+          ],
+          "polygon": [
+            [
+              443,
+              300
+            ],
+            [
+              510,
+              353
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "fleuriste.avi 1 420 123 500 175"
+            },
+            {
+              "type": 11,
+              "value": "marche.wav 2"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "225 20 270 40 0 Marchande de tulipes"
+            }
+          ],
+          "polygon": [
+            [
+              435,
+              205
+            ],
+            [
+              443,
+              164
+            ],
+            [
+              416,
+              132
+            ],
+            [
+              407,
+              55
+            ],
+            [
+              475,
+              40
+            ],
+            [
+              509,
+              43
+            ],
+            [
+              519,
+              107
+            ],
+            [
+              492,
+              163
+            ],
+            [
+              508,
+              210
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "poisson.avi 1 114 58 180 146"
+            },
+            {
+              "type": 11,
+              "value": "marche.wav 2"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "225 20 270 40 0 Poissonnier"
+            }
+          ],
+          "polygon": [
+            [
+              74,
+              247
+            ],
+            [
+              77,
+              198
+            ],
+            [
+              118,
+              145
+            ],
+            [
+              108,
+              85
+            ],
+            [
+              116,
+              52
+            ],
+            [
+              171,
+              43
+            ],
+            [
+              182,
+              89
+            ],
+            [
+              173,
+              142
+            ],
+            [
+              226,
+              195
+            ],
+            [
+              238,
+              245
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "dorade = 0 then dec_var score 20"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 0 then set_var dorade 1"
+            },
+            {
+              "type": 21,
+              "value": "dorade != 0 then addbmp dorade dorade.bmp 0 0 294"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 0 then playtext 80 368 225 65 0 Dorade"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 0 then playtext 235 368 225 65 0 20 E."
+            }
+          ],
+          "polygon": [
+            [
+              11,
+              334
+            ],
+            [
+              48,
+              301
+            ],
+            [
+              87,
+              311
+            ],
+            [
+              139,
+              338
+            ],
+            [
+              128,
+              360
+            ],
+            [
+              55,
+              364
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "moule = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "moule  = 0 then set_var moule 1"
+            },
+            {
+              "type": 21,
+              "value": "moule != 0 then addbmp moule moule.bmp 0 51 268"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "moule = 0 then playtext 80 368 225 65 0 Moule"
+            },
+            {
+              "type": 21,
+              "value": "moule = 0 then playtext 235 368 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              57,
+              295
+            ],
+            [
+              115,
+              291
+            ],
+            [
+              168,
+              296
+            ],
+            [
+              183,
+              264
+            ],
+            [
+              67,
+              267
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then set_var tulipejaune 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune != 0 then addbmp tulipej tulipejaune.bmp 0 494 215"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then playtext 410 365 225 65 0 Tulipes jaune"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then playtext 340 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              505,
+              218
+            ],
+            [
+              507,
+              278
+            ],
+            [
+              549,
+              265
+            ],
+            [
+              567,
+              218
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "poitext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Sardines"
+            },
+            {
+              "type": 38,
+              "value": "235 368 225 65 0 20 E."
+            }
+          ],
+          "polygon": [
+            [
+              78,
+              314
+            ],
+            [
+              86,
+              295
+            ],
+            [
+              133,
+              290
+            ],
+            [
+              166,
+              303
+            ],
+            [
+              172,
+              327
+            ],
+            [
+              146,
+              334
+            ],
+            [
+              115,
+              334
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "poitext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Huitres"
+            },
+            {
+              "type": 38,
+              "value": "235 368 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              187,
+              303
+            ],
+            [
+              177,
+              281
+            ],
+            [
+              190,
+              261
+            ],
+            [
+              247,
+              263
+            ],
+            [
+              272,
+              302
+            ],
+            [
+              262,
+              320
+            ],
+            [
+              219,
+              313
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "poitext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Ecrevisses"
+            },
+            {
+              "type": 38,
+              "value": "235 368 225 65 0 20 E."
+            }
+          ],
+          "polygon": [
+            [
+              187,
+              357
+            ],
+            [
+              203,
+              310
+            ],
+            [
+              254,
+              296
+            ],
+            [
+              296,
+              290
+            ],
+            [
+              324,
+              311
+            ],
+            [
+              291,
+              365
+            ],
+            [
+              283,
+              347
+            ],
+            [
+              227,
+              359
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "poitext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "80 368 225 65 0 Coques"
+            },
+            {
+              "type": 38,
+              "value": "235 368 225 65 0 5 E."
+            }
+          ],
+          "polygon": [
+            [
+              135,
+              361
+            ],
+            [
+              122,
+              339
+            ],
+            [
+              141,
+              325
+            ],
+            [
+              190,
+              332
+            ],
+            [
+              197,
+              359
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "tultext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "410 365 225 65 0 Tulipes rose"
+            },
+            {
+              "type": 38,
+              "value": "340 370 225 65 0 9 E."
+            }
+          ],
+          "polygon": [
+            [
+              382,
+              261
+            ],
+            [
+              385,
+              222
+            ],
+            [
+              402,
+              214
+            ],
+            [
+              440,
+              221
+            ],
+            [
+              436,
+              243
+            ],
+            [
+              422,
+              270
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "tultext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "410 365 225 65 0 Tulipes violette"
+            },
+            {
+              "type": 38,
+              "value": "340 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              385,
+              354
+            ],
+            [
+              362,
+              320
+            ],
+            [
+              371,
+              269
+            ],
+            [
+              397,
+              260
+            ],
+            [
+              439,
+              274
+            ],
+            [
+              433,
+              323
+            ],
+            [
+              428,
+              349
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "tultext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "410 365 225 65 0 Tulipes rouge"
+            },
+            {
+              "type": 38,
+              "value": "340 370 225 65 0 8 E."
+            }
+          ],
+          "polygon": [
+            [
+              449,
+              292
+            ],
+            [
+              437,
+              265
+            ],
+            [
+              449,
+              217
+            ],
+            [
+              473,
+              215
+            ],
+            [
+              500,
+              217
+            ],
+            [
+              506,
+              291
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 10,
+              "value": "tultext.bmp 0 0 0"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then playtext 410 365 225 65 0 Tulipes orange"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 0 then playtext 340 370 225 65 0 10 E."
+            }
+          ],
+          "polygon": [
+            [
+              528,
+              354
+            ],
+            [
+              516,
+              324
+            ],
+            [
+              529,
+              282
+            ],
+            [
+              561,
+              266
+            ],
+            [
+              582,
+              273
+            ],
+            [
+              585,
+              314
+            ],
+            [
+              581,
+              356
+            ]
+          ]
+        },
+        {
+          "commandType": 107,
+          "strings": [
+            {
+              "type": 21,
+              "value": "bonus20 = 0 then playwav ..\\..\\couleurs1\\digit\\bruit\\boing.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 0 then set_var bonus20 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 =  1 then scene 21"
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 0 then playtext 270 20 125 365 0 Question bonus"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 2 then playtext 270 20 125 365 0 tu as déjà répondu"
+            }
+          ],
+          "polygon": [
+            [
+              223,
+              120
+            ],
+            [
+              273,
+              48
+            ],
+            [
+              339,
+              119
+            ],
+            [
+              338,
+              260
+            ],
+            [
+              251,
+              264
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papier.bmp",
+        "string6": "rembrand.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 350,
+        "top": 30,
+        "right": 630,
+        "bottom": 385
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "rem rem.bmp 0 0 40"
+            },
+            {
+              "type": 39,
+              "value": "20 1 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "445 420 125 365 0 Quitter"
+            },
+            {
+              "type": 11,
+              "value": "rem.wav"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              570,
+              461
+            ],
+            [
+              543,
+              441
+            ],
+            [
+              560,
+              391
+            ],
+            [
+              560,
+              379
+            ],
+            [
+              585,
+              375
+            ],
+            [
+              613,
+              449
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "polder.wav",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papier.bmp",
+        "string6": "polder.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 300,
+        "top": 30,
+        "right": 630,
+        "bottom": 345
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "moulin moulin.bmp 0 10 40"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              568,
+              385
+            ],
+            [
+              614,
+              419
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "name": "Intro",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 11,
+              "value": "a_hol.wav"
+            },
+            {
+              "type": 9,
+              "value": "paysbas.avi 1"
+            },
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 22,
+              "value": "paysbas 1"
+            },
+            {
+              "type": 21,
+              "value": "euroland = 1 then dec_var euroland 1"
+            },
+            {
+              "type": 21,
+              "value": "angleterre = 1 then dec_var angleterre 1"
+            },
+            {
+              "type": 21,
+              "value": "autriche = 1  then dec_var autriche 1"
+            },
+            {
+              "type": 21,
+              "value": "allemagne = 1  then dec_var allemagne 1"
+            },
+            {
+              "type": 21,
+              "value": "ecosse = 1  then dec_var ecosse 1"
+            },
+            {
+              "type": 21,
+              "value": "espagne = 1  then dec_var espagne 1"
+            },
+            {
+              "type": 21,
+              "value": "france = 1  then dec_var france 1"
+            },
+            {
+              "type": 21,
+              "value": "finlande = 1  then dec_var finlande 1"
+            },
+            {
+              "type": 21,
+              "value": "irlande = 1  then dec_var irlande 1"
+            },
+            {
+              "type": 21,
+              "value": "italie = 1  then dec_var italie 1"
+            },
+            {
+              "type": 21,
+              "value": "belgique = 1  then dec_var belgique 1"
+            },
+            {
+              "type": 21,
+              "value": "grece = 1  then dec_var grece 1"
+            },
+            {
+              "type": 21,
+              "value": "danemark = 1  then dec_var danemark 1"
+            },
+            {
+              "type": 21,
+              "value": "portugal = 1  then dec_var portugal 1"
+            },
+            {
+              "type": 21,
+              "value": "suede = 1  then dec_var suede 1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papier.bmp",
+        "string6": "les tulipes.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 10,
+        "top": 60,
+        "right": 300,
+        "bottom": 430
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "tulipe tulipe.bmp 0 310 70"
+            },
+            {
+              "type": 39,
+              "value": "18 1 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "470 400 125 365 0 Quitter"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              553,
+              465
+            ],
+            [
+              534,
+              431
+            ],
+            [
+              535,
+              385
+            ],
+            [
+              552,
+              361
+            ],
+            [
+              593,
+              361
+            ],
+            [
+              621,
+              390
+            ],
+            [
+              633,
+              463
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_hol.wav",
+        "string4": "",
+        "resource": "galrie.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 27,
+              "value": "questiong rol\\gouinon.bmp 0 340 54"
+            },
+            {
+              "type": 6,
+              "value": "5"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              547,
+              68
+            ],
+            [
+              601,
+              125
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 9,
+              "value": "galerie2.avi 1 290 105 340 156"
+            },
+            {
+              "type": 6,
+              "value": "13"
+            }
+          ],
+          "polygon": [
+            [
+              431,
+              75
+            ],
+            [
+              493,
+              128
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "jeu peintre.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "palette 0"
+            },
+            {
+              "type": 21,
+              "value": "palette = 0 then addbmp ok6 rol\\rembrandt.bmp 0 256 157"
+            },
+            {
+              "type": 21,
+              "value": "palette >= 6 then scene 5"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #0000ff Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "260 335 225 65 0 A la fin du jeu clique ici."
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              566,
+              346
+            ],
+            [
+              606,
+              382
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #0000ff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 35 225 65 0 Autriche"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 6 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 6 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 6 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 6 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 6 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 16,
+              "value": "1500"
+            }
+          ],
+          "polygon": [
+            [
+              5,
+              26
+            ],
+            [
+              43,
+              59
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #bb0000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 95 225 65 0 Grande-Bretagne"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 4 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 4 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              4,
+              86
+            ],
+            [
+              50,
+              123
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 145 225 65 0 Italie"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 2 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 2 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              5,
+              136
+            ],
+            [
+              49,
+              169
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #ff00bb Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 200 225 65 0 Espagne"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 3 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 3 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              4,
+              187
+            ],
+            [
+              50,
+              229
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #bbrrff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 265 225 65 0 Pays-Bas"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 1 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 1 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              2,
+              246
+            ],
+            [
+              47,
+              281
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #00ffrr Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 6 then playtext 60 320 225 65 0 France"
+            },
+            {
+              "type": 23,
+              "value": "palette 1"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok1 rol\\10euros.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 5 then addbmp okp rol\\perdu.bmp 0 256 225"
+            },
+            {
+              "type": 21,
+              "value": "palette != 5 then playwav cartoon.wav"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then playwav cling.wav"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 28,
+              "value": "ok0"
+            },
+            {
+              "type": 28,
+              "value": "okp"
+            },
+            {
+              "type": 28,
+              "value": "ok1"
+            },
+            {
+              "type": 28,
+              "value": "ok2"
+            },
+            {
+              "type": 28,
+              "value": "ok3"
+            },
+            {
+              "type": 28,
+              "value": "ok4"
+            },
+            {
+              "type": 28,
+              "value": "ok5"
+            },
+            {
+              "type": 28,
+              "value": "ok6"
+            },
+            {
+              "type": 21,
+              "value": "palette = 1 then addbmp ok6 rol\\vinci.bmp 0 226 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 2 then addbmp ok6 rol\\picasso.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 3 then addbmp ok6 rol\\turner.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 4 then addbmp ok6 rol\\delacroix.bmp 0 266 157"
+            },
+            {
+              "type": 21,
+              "value": "palette = 5 then addbmp ok6 rol\\klimt.bmp 0 266 157"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              1,
+              307
+            ],
+            [
+              44,
+              344
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 10 125 365 0 Pour jouer il te suffit de cliquer"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 30 125 365 0 sur le pays correspondant à la"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 50 125 365 0 nationalité du peintre indiqué dans"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 70 125 365 0 le petit encadré."
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 290 125 365 0  A chaques bonnes rèponses"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 150 310 125 365 0 Je te récompenserai de 10 euros"
+            },
+            {
+              "type": 39,
+              "value": "20 0 #0000ff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette <= 5 then playtext 100 350 225 65 0 A la fin de la partie clique sur le bouton retour"
+            }
+          ],
+          "polygon": [
+            [
+              417,
+              156
+            ],
+            [
+              436,
+              132
+            ],
+            [
+              514,
+              113
+            ],
+            [
+              502,
+              78
+            ],
+            [
+              504,
+              58
+            ],
+            [
+              519,
+              7
+            ],
+            [
+              559,
+              14
+            ],
+            [
+              575,
+              61
+            ],
+            [
+              564,
+              97
+            ],
+            [
+              612,
+              133
+            ],
+            [
+              611,
+              191
+            ],
+            [
+              603,
+              223
+            ],
+            [
+              585,
+              247
+            ],
+            [
+              600,
+              283
+            ],
+            [
+              562,
+              281
+            ],
+            [
+              551,
+              327
+            ],
+            [
+              517,
+              344
+            ],
+            [
+              486,
+              329
+            ],
+            [
+              510,
+              311
+            ],
+            [
+              493,
+              282
+            ],
+            [
+              506,
+              166
+            ],
+            [
+              475,
+              182
+            ],
+            [
+              434,
+              170
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "20 0 #0000ff Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "palette >= 6 then playtext 100 350 225 65 0 La partie est finie, clique sur le bouton retour"
+            }
+          ],
+          "polygon": [
+            [
+              1,
+              1
+            ],
+            [
+              639,
+              398
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        129
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_hol.wav",
+        "string4": "",
+        "resource": "amster2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "4"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              886,
+              47
+            ],
+            [
+              1016,
+              108
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 24,
+              "value": "score 30"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 9,
+              "value": "velo1.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\allem\\allem.vnp 7"
+            }
+          ],
+          "polygon": [
+            [
+              688,
+              39
+            ],
+            [
+              827,
+              135
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 24,
+              "value": "score 20"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 9,
+              "value": "velo1.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\belge\\belge.vnp 19"
+            }
+          ],
+          "polygon": [
+            [
+              498,
+              46
+            ],
+            [
+              626,
+              130
+            ]
+          ]
+        },
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "6"
+            }
+          ],
+          "polygon": [
+            [
+              1274,
+              3
+            ],
+            [
+              1213,
+              6
+            ],
+            [
+              1221,
+              101
+            ],
+            [
+              1249,
+              153
+            ],
+            [
+              1240,
+              216
+            ],
+            [
+              1215,
+              399
+            ],
+            [
+              1278,
+              398
+            ]
+          ]
+        },
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            }
+          ],
+          "polygon": [
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              395
+            ],
+            [
+              100,
+              395
+            ],
+            [
+              103,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papier.bmp",
+        "string6": "la bicycette.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 20,
+        "top": 100,
+        "right": 280,
+        "bottom": 410
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "velo velo.bmp 0 300 110"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              565,
+              385
+            ],
+            [
+              615,
+              423
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "name": "Toolbar",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 33,
+              "value": "..\\frontal\\vnoption.dll"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 27,
+              "value": "toolbar ..\\..\\barre\\images\\barre.bmp 6 0 400 640 480"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 1 then addbmp fiole ..\\..\\barre\\images\\f1.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 2 then addbmp fiole ..\\..\\barre\\images\\f2.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 3 then addbmp fiole ..\\..\\barre\\images\\f3.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 4 then addbmp fiole ..\\..\\barre\\images\\f4.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 5 then addbmp fiole ..\\..\\barre\\images\\f5.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 6 then addbmp fiole ..\\..\\barre\\images\\f6.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 7 then addbmp fiole ..\\..\\barre\\images\\f7.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 8 then addbmp fiole ..\\..\\barre\\images\\f8.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 9 then addbmp fiole ..\\..\\barre\\images\\f9.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 10 then addbmp fiole ..\\..\\barre\\images\\f10.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 11 then addbmp fiole ..\\..\\barre\\images\\f11.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 12 then addbmp fiole ..\\..\\barre\\images\\f12.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "suede = 1 then  addbmp info ..\\..\\barre\\images\\p_suede.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "portugal = 1 then  addbmp info ..\\..\\barre\\images\\p_port.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "allemagne = 1 then  addbmp info ..\\..\\barre\\images\\p_all.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "france = 1 then  addbmp info ..\\..\\barre\\images\\p_france.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "angleterre = 1 then  addbmp info ..\\..\\barre\\images\\p_angl.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "autriche = 1 then  addbmp info ..\\..\\barre\\images\\p_autriche.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "danemark = 1 then  addbmp info ..\\..\\barre\\images\\p_danemark.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "ecosse = 1 then  addbmp info ..\\..\\barre\\images\\p_ecosse.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "euroland = 1 then  addbmp info ..\\..\\barre\\images\\p_euroland.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "espagne = 1 then  addbmp info ..\\..\\barre\\images\\p_espagne.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "finlande = 1 then  addbmp info ..\\..\\barre\\images\\p_finland.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "grece = 1 then  addbmp info ..\\..\\barre\\images\\p_grece.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "irlande = 1 then  addbmp info ..\\..\\barre\\images\\p_irlande.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "italie = 1 then  addbmp info ..\\..\\barre\\images\\p_italie.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "belgique = 1 then  addbmp info ..\\..\\barre\\images\\p_belgique.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "paysbas = 1 then  addbmp info ..\\..\\barre\\images\\p_pays.bmp 6 452 400"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            },
+            {
+              "type": 27,
+              "value": "etoile ..\\..\\barre\\images\\ordi.bmp 6 564 400"
+            },
+            {
+              "type": 27,
+              "value": "etoile1 ..\\..\\barre\\images\\textetm.bmp 6 0 449"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              571,
+              419
+            ],
+            [
+              636,
+              475
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "calc = 1 then rundll ..\\barre\\euro32.dll"
+            },
+            {
+              "type": 28,
+              "value": "calc1"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp etoile ..\\..\\barre\\images\\calc2.bmp 6 249 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp etoile1 ..\\..\\barre\\images\\textetc.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              243,
+              414
+            ],
+            [
+              290,
+              451
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "sac"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp etoile ..\\..\\barre\\images\\sac2.bmp 6 385 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp etoile1 ..\\..\\barre\\images\\textes.bmp 6 0 454"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then rundll ..\\barre\\inv.dll"
+            }
+          ],
+          "polygon": [
+            [
+              393,
+              413
+            ],
+            [
+              447,
+              449
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 26,
+              "value": "0"
+            },
+            {
+              "type": 26,
+              "value": "fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "clerouge = 2 then dec_var clerouge 1"
+            },
+            {
+              "type": 21,
+              "value": "ballon1 = 2 then dec_var ballon1 1"
+            },
+            {
+              "type": 21,
+              "value": "bouee = 2 then dec_var bouee 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_plo = 2 then dec_var bout_plo 1"
+            },
+            {
+              "type": 21,
+              "value": "bus = 2 then dec_var bus 1"
+            },
+            {
+              "type": 21,
+              "value": "castagnette = 2 then dec_var castagnette 1"
+            },
+            {
+              "type": 21,
+              "value": "ciseaux = 2 then dec_var ciseaux 1"
+            },
+            {
+              "type": 21,
+              "value": "clejaune = 2 then dec_var clejaune 1"
+            },
+            {
+              "type": 21,
+              "value": "guitare = 2 then dec_var guitare 1"
+            },
+            {
+              "type": 21,
+              "value": "harpon = 2 then dec_var harpon 1"
+            },
+            {
+              "type": 21,
+              "value": "helice = 2 then dec_var helice 1"
+            },
+            {
+              "type": 21,
+              "value": "loupe = 2 then dec_var loupe 1"
+            },
+            {
+              "type": 21,
+              "value": "masque = 2 then dec_var masque 1"
+            },
+            {
+              "type": 21,
+              "value": "masse = 2 then dec_var masse 1"
+            },
+            {
+              "type": 21,
+              "value": "pain = 2 then dec_var pain 1"
+            },
+            {
+              "type": 21,
+              "value": "palme = 2 then dec_var palme 1"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then dec_var photo 1"
+            },
+            {
+              "type": 21,
+              "value": "piece = 2 then dec_var piece 1"
+            },
+            {
+              "type": 21,
+              "value": "pier_berlin = 2 then dec_var pier_berlin 1"
+            },
+            {
+              "type": 21,
+              "value": "raquette = 2 then dec_var raquette 1"
+            },
+            {
+              "type": 21,
+              "value": "ressort = 2 then dec_var ressort 1"
+            },
+            {
+              "type": 21,
+              "value": "cheval = 2 then dec_var cheval 1"
+            },
+            {
+              "type": 21,
+              "value": "riz = 2 then dec_var riz 1"
+            },
+            {
+              "type": 21,
+              "value": "ruban = 2 then dec_var ruban 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 2 then dec_var sabot1 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot2 = 2 then dec_var sabot2 1"
+            },
+            {
+              "type": 21,
+              "value": "scotch = 2 then dec_var scotch 1"
+            },
+            {
+              "type": 21,
+              "value": "taillepierre = 2 then dec_var taillepierre 1"
+            },
+            {
+              "type": 21,
+              "value": "ap_photo = 2 then dec_var ap_photo 1"
+            },
+            {
+              "type": 21,
+              "value": "houblon = 2 then dec_var houblon 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then dec_var chewing 1"
+            },
+            {
+              "type": 21,
+              "value": "cleverte = 2 then dec_var cleverte 1"
+            },
+            {
+              "type": 21,
+              "value": "partition = 2 then dec_var partition 1"
+            },
+            {
+              "type": 21,
+              "value": "laine = 2 then dec_var laine 1"
+            },
+            {
+              "type": 21,
+              "value": "tondeuse = 2 then dec_var tondeuse 1"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = 2 then dec_var tournevis 1"
+            },
+            {
+              "type": 21,
+              "value": "cire = 2 then dec_var cire 1"
+            },
+            {
+              "type": 21,
+              "value": "chianti = 2 then dec_var chianti 1"
+            },
+            {
+              "type": 21,
+              "value": "rouedent = 2 then dec_var rouedent 1"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = 2 then dec_var pierreor 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 2 then dec_var papiercado 1"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 2 then dec_var  hotte 1"
+            },
+            {
+              "type": 21,
+              "value": "levure = 2 then dec_var  levure 1"
+            },
+            {
+              "type": 21,
+              "value": "bouteille = 2 then dec_var bouteille 1"
+            },
+            {
+              "type": 21,
+              "value": "parfum = 2 then dec_var parfum 1"
+            },
+            {
+              "type": 21,
+              "value": "rouge = 2 then dec_var rouge 1"
+            },
+            {
+              "type": 21,
+              "value": "bisous = 2 then dec_var bisous 1"
+            },
+            {
+              "type": 21,
+              "value": "ap = 2 then dec_var api 1"
+            },
+            {
+              "type": 21,
+              "value": "pince = 2 then dec_var pince 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 2 then dec_var tulipejaune 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeorange = 2 then dec_var tulipeorange 1"
+            },
+            {
+              "type": 21,
+              "value": "tuliperouge = 2 then dec_var tuliperouge 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeverte = 2 then dec_var tulipeverte 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeviolet = 2 then dec_var tulipeviolet 1"
+            },
+            {
+              "type": 21,
+              "value": "farine = 2 then dec_var farine 1"
+            },
+            {
+              "type": 21,
+              "value": "saliere = 2 then dec_var saliere 1"
+            },
+            {
+              "type": 21,
+              "value": "bougie = 2 then dec_var bougie 1"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then dec_var seche 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_eau = 2 then dec_var bout_eau 1"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 2 then dec_var dorade 1"
+            },
+            {
+              "type": 21,
+              "value": "moule = 2 then dec_var moule 1"
+            },
+            {
+              "type": 21,
+              "value": "ail = 2 then dec_var ail 1"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 2 then dec_var poivrouge 1"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 2 then dec_var poivjaune 1"
+            },
+            {
+              "type": 21,
+              "value": "oignon = 2 then dec_var oignon 1"
+            },
+            {
+              "type": 21,
+              "value": "olive = 2 then dec_var olive 1"
+            },
+            {
+              "type": 21,
+              "value": "bouillon = 2 then dec_var bouillon 1"
+            },
+            {
+              "type": 21,
+              "value": "violon = 2 then dec_var violon 1"
+            },
+            {
+              "type": 21,
+              "value": "skate = 2 then dec_var skate 1"
+            },
+            {
+              "type": 21,
+              "value": "champagne = 2 then dec_var champagne 1"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 2 then dec_var fromage 1"
+            },
+            {
+              "type": 21,
+              "value": "bonnet = 2 then dec_var bonnet 1"
+            },
+            {
+              "type": 21,
+              "value": "huile = 2 then dec_var huile 1"
+            },
+            {
+              "type": 21,
+              "value": "orge = 2 then dec_var orge 1"
+            },
+            {
+              "type": 21,
+              "value": "burette = 2 then dec_var burette 1"
+            },
+            {
+              "type": 21,
+              "value": "allumette = 2 then dec_var allumette 1"
+            },
+            {
+              "type": 21,
+              "value": "chouetteor = 2 then dec_var chouetteor 1"
+            },
+            {
+              "type": 21,
+              "value": "chouette = 2 then dec_var chouette 1"
+            },
+            {
+              "type": 21,
+              "value": "sirop = 2 then dec_var sirop 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece = 2 then dec_var  fiolegrece 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece2 = 2 then dec_var  fiolegrece2 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleecosse = 2 then dec_var  fioleecosse 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleirlande = 2 then dec_var  fioleirlande 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne = 2 then dec_var  fioleespagne 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolesuede = 2 then dec_var  fiolesuede 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolefinlande = 2 then dec_var  fiolefinlande 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleautriche = 2 then dec_var  fioleautriche 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolepaysbas = 2 then dec_var  fiolepaysbas 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne2 = 2 then dec_var  fioleespagne2 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleitalie = 2 then dec_var  fioleitalie 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleangleterre = 2 then dec_var  fioleangleterre 1"
+            }
+          ],
+          "polygon": [
+            [
+              551,
+              463
+            ],
+            [
+              558,
+              470
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "active"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp etoile ..\\..\\barre\\images\\trans2.bmp 6 162 400"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp etoile1 ..\\..\\barre\\images\\textetr.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then closewav"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then closedll"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then playavi ..\\..\\couleurs1\\movie\\retour.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\couleurs1\\couleurs1.vnp 6"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then dec_var score 50"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              166,
+              413
+            ],
+            [
+              222,
+              454
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "telep"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp etoile ..\\..\\barre\\images\\telep2.bmp 6 317 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp etoile1 ..\\..\\barre\\images\\textet.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then closedll"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then runprj ..\\couleurs1\\couleurs1.vnp 4"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then dec_var score 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              322,
+              415
+            ],
+            [
+              369,
+              449
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              545,
+              419
+            ],
+            [
+              553,
+              425
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              146,
+              458
+            ],
+            [
+              518,
+              468
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 27,
+              "value": "etoile1 ..\\..\\barre\\images\\texteam.bmp 6 0 452"
+            }
+          ],
+          "polygon": [
+            [
+              17,
+              409
+            ],
+            [
+              90,
+              437
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 30,
+              "value": "etoile"
+            },
+            {
+              "type": 30,
+              "value": "etoile1"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              0,
+              407
+            ],
+            [
+              639,
+              478
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "papier.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 27,
+              "value": "fgh rol/message.bmp 0 0 0"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              581,
+              389
+            ],
+            [
+              557,
+              360
+            ],
+            [
+              571,
+              302
+            ],
+            [
+              590,
+              290
+            ],
+            [
+              633,
+              331
+            ],
+            [
+              632,
+              389
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "oeuf 1"
+            },
+            {
+              "type": 11,
+              "value": "cling.wav 1"
+            },
+            {
+              "type": 23,
+              "value": "score 150"
+            },
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #0000bb Comic sans M"
+            },
+            {
+              "type": 38,
+              "value": "20 230 125 365 0 30 oeufs à 39 francs francais"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            }
+          ],
+          "polygon": [
+            [
+              41,
+              353
+            ],
+            [
+              23,
+              321
+            ],
+            [
+              55,
+              305
+            ],
+            [
+              73,
+              270
+            ],
+            [
+              91,
+              276
+            ],
+            [
+              97,
+              302
+            ],
+            [
+              121,
+              314
+            ],
+            [
+              108,
+              349
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "oeuf 1"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav 1"
+            },
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ff0000 Comic sans M"
+            },
+            {
+              "type": 38,
+              "value": "140 240 125 365 0 40 oeufs à 14 euros"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            }
+          ],
+          "polygon": [
+            [
+              172,
+              387
+            ],
+            [
+              158,
+              355
+            ],
+            [
+              192,
+              342
+            ],
+            [
+              210,
+              307
+            ],
+            [
+              223,
+              313
+            ],
+            [
+              237,
+              340
+            ],
+            [
+              257,
+              351
+            ],
+            [
+              244,
+              391
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "oeuf 1"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav 1"
+            },
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000fff Comic sans M"
+            },
+            {
+              "type": 38,
+              "value": "240 240 125 365 0 15 oeufs à 9 euros"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            }
+          ],
+          "polygon": [
+            [
+              292,
+              341
+            ],
+            [
+              269,
+              314
+            ],
+            [
+              295,
+              295
+            ],
+            [
+              307,
+              282
+            ],
+            [
+              321,
+              257
+            ],
+            [
+              335,
+              264
+            ],
+            [
+              348,
+              292
+            ],
+            [
+              370,
+              307
+            ],
+            [
+              359,
+              342
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "oeuf 1"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav 1"
+            },
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ff0000 Comic sans M"
+            },
+            {
+              "type": 38,
+              "value": "360 240 125 365 0 100 oeufs à 299 francs francais"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            }
+          ],
+          "polygon": [
+            [
+              433,
+              385
+            ],
+            [
+              413,
+              356
+            ],
+            [
+              452,
+              338
+            ],
+            [
+              467,
+              304
+            ],
+            [
+              479,
+              310
+            ],
+            [
+              495,
+              338
+            ],
+            [
+              513,
+              353
+            ],
+            [
+              499,
+              384
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "100 20 125 365 0 La valise à questions peut te faire gagner"
+            },
+            {
+              "type": 38,
+              "value": "100 40 125 365 0 150 euros pour cela tu dois me dire dans quel"
+            },
+            {
+              "type": 38,
+              "value": "100 60 125 365 0 panier l'oeuf à l'unité est le moins cher."
+            },
+            {
+              "type": 38,
+              "value": "100 110 125 365 0 Attention tu n'as droit qu'a une seule réponse."
+            },
+            {
+              "type": 38,
+              "value": "100 130 125 365 0 bonne chance."
+            }
+          ],
+          "polygon": [
+            [
+              618,
+              3
+            ],
+            [
+              624,
+              10
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_hol.wav",
+        "string4": "",
+        "resource": "..\\..\\italie\\img24\\papierfiole2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 22,
+              "value": "fiolepaysbas 1"
+            },
+            {
+              "type": 23,
+              "value": "bleu 1"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\holl\\digit\\a_hol.wav"
+            },
+            {
+              "type": 9,
+              "value": "..\\..\\italie\\movie\\fiole.avi 2 340 94 580 400"
+            }
+          ],
+          "polygon": [
+            [
+              3,
+              2
+            ],
+            [
+              634,
+              394
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "livre.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              545,
+              314
+            ],
+            [
+              586,
+              343
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 20,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\couleurs1\\img24\\euroland\\bonus.bmp",
+        "string6": "..\\..\\couleurs1\\html\\bonus1.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 50,
+        "top": 100,
+        "right": 600,
+        "bottom": 400
+      },
+      "cmdList": {
+        "value": -11,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "60 360 125 365 0 Réponse N°1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then playwav ..\\..\\belge\\digit\\cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then scene 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then inc_var bonus16 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then inc_var bonus8 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then inc_var bonus15 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 16,
+              "value": "100"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then playhtml bonus15.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then playhtml bonus16.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "bonus6 = 1 then playhtml bonus6.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              86,
+              290
+            ],
+            [
+              160,
+              351
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "260 360 125 365 0 Réponse N°2"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then scene 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then inc_var bonus16 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then playwav ..\\..\\belge\\digit\\cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then inc_var bonus8 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then playwav ..\\..\\belge\\digit\\cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then inc_var bonus15 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              270,
+              292
+            ],
+            [
+              342,
+              352
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "410 360 125 365 0 Réponse N°3"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then playwav ..\\..\\belge\\digit\\cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then scene 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus16 = 1 then inc_var bonus16 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus8 = 1 then inc_var bonus8 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then playwav ..\\..\\belge\\digit\\cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then scene 2"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus15 = 1 then inc_var bonus15 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              433,
+              293
+            ],
+            [
+              499,
+              352
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 21,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\couleurs1\\img24\\euroland\\bonus.bmp",
+        "string6": "..\\..\\couleurs1\\html\\bonus1.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 50,
+        "top": 100,
+        "right": 600,
+        "bottom": 400
+      },
+      "cmdList": {
+        "value": -16,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "60 360 125 365 0 Réponse N°1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playhtml bonus18.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playhtml bonus19.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playhtml bonus20.htm 0 50 100 600 400"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then scene 3"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then inc_var bonus19 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then scene 7"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then inc_var bonus20 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus1.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then scene 5"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then inc_var bonus18 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              86,
+              290
+            ],
+            [
+              160,
+              351
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "260 360 125 365 0 Réponse N°2"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus1.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then scene 3"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then inc_var bonus19 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then scene 7"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then inc_var bonus20 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then scene 5"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then inc_var bonus18 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              270,
+              292
+            ],
+            [
+              342,
+              352
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "410 360 125 365 0 Réponse N°3"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then scene 3"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus19 = 1 then inc_var bonus19 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus1.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then playwav cling.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then scene 7"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then inc_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus20 = 1 then inc_var bonus20 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playavi ..\\..\\couleurs1\\movie\\bonus2.avi 1 421 70 630 290"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then playwav cartoon.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then scene 5"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then dec_var score 10"
+            },
+            {
+              "type": 21,
+              "value": "bonus18 = 1 then inc_var bonus18 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              433,
+              293
+            ],
+            [
+              499,
+              352
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 22,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 31,
+              "value": "..\\frontal\\start.vnp 3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

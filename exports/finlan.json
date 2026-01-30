@@ -1,0 +1,7375 @@
+{
+  "file": "finlan.vnd",
+  "fileSize": 45103,
+  "header": {
+    "magic": "VNFILE",
+    "version": "2.13",
+    "sceneCount": 20,
+    "projectName": "Europeo",
+    "editor": "Sopra Multimedia",
+    "serial": "5D51F233",
+    "projectIDStr": "",
+    "registry": "",
+    "width": 640,
+    "height": 480,
+    "depth": 16,
+    "flag": 1,
+    "u1": 11,
+    "u2": 20,
+    "reserved": 0,
+    "dllPath": "..\\VnStudio\\vnresmod.dll",
+    "varCount": 280,
+    "endPos": 138
+  },
+  "variableCount": 280,
+  "variables": [
+    "COMPTEUR1",
+    "COMPTEUR2",
+    "COMPTEUR3",
+    "PHOTO",
+    "SACADOS",
+    "JEU",
+    "BIDON",
+    "MILLEEURO",
+    "CALC",
+    "TELEPHONE",
+    "ACTIVE",
+    "FRANCS",
+    "DELPHITEST1",
+    "DELPHITEST2",
+    "CPAYS",
+    "CMENU1",
+    "CMENU2",
+    "CMENU3",
+    "RAQUETTE",
+    "REPONSEM",
+    "AFFICHEM",
+    "PIECE",
+    "DICO",
+    "BEETHOVEN",
+    "SCOTCH",
+    "QUESTION",
+    "REPONSE",
+    "NOTE",
+    "MAUVAISENOTE",
+    "TAILLEPIERRE",
+    "EXPO",
+    "CHEVAL",
+    "SABOT2",
+    "RIZ",
+    "CLE",
+    "NUMERO",
+    "CAPITALE",
+    "CISEAUX",
+    "MENU",
+    "PIZZA",
+    "COSTUME",
+    "LOUPE",
+    "PALME",
+    "BOUEE",
+    "RESSORT",
+    "SCORE",
+    "HARPON",
+    "MASQUE",
+    "BOUT_PLO",
+    "BALLON1",
+    "PLONGE",
+    "GRECQUESTION",
+    "GRECREPONSE",
+    "FIOLEGRECE",
+    "ORGUE",
+    "GUITARE",
+    "PIER_BERLIN",
+    "MASSE",
+    "JUSTEPRIXOBJ",
+    "JUSTEPRIXEURO",
+    "JUSTEPRIXCLIC",
+    "JUSTEPRIX1",
+    "JUSTEPRIX10",
+    "JUSTEPRIX15",
+    "JUSTEPRIX20",
+    "JUSTEPRIX25",
+    "JUSTEPRIX30",
+    "JUSTEPRIX50",
+    "JUSTEPRIX100",
+    "JUSTEPRIXSCORE",
+    "PAIN",
+    "HELICE",
+    "CARTETOUR",
+    "BUS",
+    "LEVRIERNUMERO",
+    "LEVRIERPARI",
+    "LEVRIERRESULTAT",
+    "PARFUM",
+    "PEPE",
+    "CASTAGNETTE",
+    "DANSE",
+    "TICKET",
+    "TICKET_A",
+    "RUBAN",
+    "MATH",
+    "CPHOTO",
+    "FIOLEGRECE2",
+    "FIOLEVASE",
+    "ROUEDENT",
+    "VIOLON",
+    "MARMOTTE",
+    "MUSIC",
+    "FIOLEAUTR",
+    "PARTITION",
+    "ORGE",
+    "TONDEUSE",
+    "PALETTE",
+    "PEINTRE",
+    "SCOREPEINTRE",
+    "HOTTE",
+    "CLEJAUNE",
+    "AP_PHOTO",
+    "POIVROUGE",
+    "AIL",
+    "BONNET",
+    "SKATE",
+    "FARINE",
+    "LEVURE",
+    "API",
+    "DORADE",
+    "TEMPSLAPIN",
+    "CHIANTI",
+    "FROG",
+    "SIROP",
+    "TRANS",
+    "ALLEMAGNE",
+    "FIOLE",
+    "FRANCE",
+    "ANGLETERRE",
+    "AUTRICHE",
+    "BELGIQUE",
+    "EUROLAND",
+    "DANEMARK",
+    "ECOSSE",
+    "ESPAGNE",
+    "FINLANDE",
+    "GRECE",
+    "PAYSBAS",
+    "IRLANDE",
+    "ITALIE",
+    "PORTUGAL",
+    "SUEDE",
+    "LAPINSORTIE",
+    "PAPIERCADO",
+    "TOURNEVIS",
+    "NAINOK",
+    "PINCE",
+    "FIOLEFINLANDE",
+    "PIERREOR",
+    "MACHINE",
+    "BURETTE",
+    "CIRE",
+    "BOUBOU",
+    "ALLUMETTE",
+    "FIOLESUEDE",
+    "HUILE",
+    "SOUSMARINOK",
+    "COLOMB",
+    "PASTEUR",
+    "PORTESECRETE",
+    "BOITE",
+    "CLEVERTE",
+    "CLEROUGE",
+    "PONPON",
+    "PONPONOR",
+    "FINIPONPON",
+    "CORNEMUSE",
+    "NESSIE",
+    "FIOLEECOSSE",
+    "FIOLEIRLANDE",
+    "FIOLEESPAGNE",
+    "FIOLEAUTRICHE",
+    "FIOLEPAYSBAS",
+    "FIOLEESPAGNE2",
+    "FIOLEITALIE",
+    "FIOLEANGLETERRE",
+    "OCCUPE1",
+    "OCCUPE2",
+    "OCCUPE3",
+    "OCCUPE4",
+    "OCCUPE5",
+    "OCCUPE6",
+    "OCCUPE7",
+    "OCCUPE8",
+    "OCCUPE9",
+    "OCCUPE10",
+    "OCCUPE11",
+    "OCCUPE12",
+    "OCCUPE",
+    "FIOLEOK",
+    "BOUTEILLE",
+    "SAC",
+    "CHEWING",
+    "SABOT1",
+    "TONO",
+    "OEUF",
+    "BONUS4",
+    "BONUS1",
+    "BONUS2",
+    "BONUS3",
+    "NUMPAYS",
+    "NUMPAYS2",
+    "NUMPAYSSCORE",
+    "BONUS6",
+    "BONUS9",
+    "CHAMPAGNE",
+    "BONUS5",
+    "TULIPEJAUNE",
+    "BONUS8",
+    "BONUS7",
+    "ROUGE",
+    "CHAMPAGNE2",
+    "PATE",
+    "SALIERE",
+    "BOUT_EAU",
+    "JUSTEPRIX",
+    "PUCE",
+    "LAINE",
+    "FROMAGE",
+    "POIVJAUNE",
+    "OIGNON",
+    "MOULE",
+    "PEINTRE1",
+    "SECHE",
+    "BLEU",
+    "GLO",
+    "EAUBIERE",
+    "HOUBLON",
+    "BIEREOK",
+    "SOUSMARINOK2",
+    "HARPEOK",
+    "PUBOK",
+    "ERREUR7OK",
+    "ERREUR7D1",
+    "ERREUR7D2",
+    "ERREUR7D3",
+    "ERREUR7D4",
+    "ERREUR7D5",
+    "ERREUR7D6",
+    "ERREUR7D7",
+    "BONUS14",
+    "VASE",
+    "NBINGR",
+    "INGROK",
+    "OLIVE",
+    "BOUILLON",
+    "BOTTE",
+    "BONUS26",
+    "BONUS25",
+    "BONUS24",
+    "BONUS23",
+    "OUTIL",
+    "OUTIL2",
+    "OUTIL3",
+    "CHOUETTE",
+    "CHOUETTEOR",
+    "ERREUR7OK2",
+    "PISE",
+    "BIERESO",
+    "BETAIL",
+    "CASTA",
+    "EAUPAIN",
+    "PAINOK",
+    "NON",
+    "VINCI",
+    "VA",
+    "VF",
+    "VE",
+    "BONUS29",
+    "BONUS22",
+    "BONUS30",
+    "MESP",
+    "MGRE",
+    "MGRA",
+    "MITA",
+    "MALL",
+    "MFRA",
+    "MARMOT",
+    "BOUCHE",
+    "LAPIN",
+    "BONUS15",
+    "BONUS16",
+    "BONUS18",
+    "BONUS19",
+    "BONUS20",
+    "JUSTEPRIXQUESTION",
+    "JUSTEPRIXREPONSE",
+    "JUSTEPRIXOK",
+    "PUNK",
+    "LOC"
+  ],
+  "sceneCount": 20,
+  "scenesParsed": 20,
+  "bytesRemaining": 0,
+  "errors": [],
+  "scenes": [
+    {
+      "index": 1,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        129
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "vent.wav",
+        "string4": "",
+        "resource": "scooter1.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 21,
+              "value": "photo = 0 then scene 7"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 0 then playtext 920 100 1 1 0 Le loueur ?"
+            },
+            {
+              "type": 21,
+              "value": "photo = 1 then playtext 920 100 1 1 0 Il n'a plus rien à te donner."
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              714,
+              116
+            ],
+            [
+              920,
+              386
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "9"
+            }
+          ],
+          "polygon": [
+            [
+              516,
+              203
+            ],
+            [
+              696,
+              304
+            ]
+          ]
+        },
+        {
+          "commandType": 102,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1400 340 1 1 0 Une maison perdue dans la forêt."
+            }
+          ],
+          "polygon": [
+            [
+              1376,
+              224
+            ],
+            [
+              1614,
+              326
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 11,
+              "value": "cerf.wav 1"
+            },
+            {
+              "type": 11,
+              "value": "vent.wav 2"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1600 360 1 1 0 Des rennes."
+            }
+          ],
+          "polygon": [
+            [
+              1641,
+              304
+            ],
+            [
+              1656,
+              265
+            ],
+            [
+              1725,
+              228
+            ],
+            [
+              1805,
+              233
+            ],
+            [
+              1849,
+              297
+            ],
+            [
+              1850,
+              389
+            ],
+            [
+              1714,
+              393
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "12"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "2200 20 1 1 0 Un panneau indicatif."
+            }
+          ],
+          "polygon": [
+            [
+              2339,
+              283
+            ],
+            [
+              2467,
+              328
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "13"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1000 370 1 1 0 Un panneau d'information."
+            }
+          ],
+          "polygon": [
+            [
+              1138,
+              306
+            ],
+            [
+              1202,
+              340
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "2150 365 1 1 0 Des lapins!"
+            },
+            {
+              "type": 21,
+              "value": "lapin = 0 then scene 16"
+            }
+          ],
+          "polygon": [
+            [
+              2056,
+              282
+            ],
+            [
+              2065,
+              380
+            ],
+            [
+              2313,
+              380
+            ],
+            [
+              2315,
+              305
+            ],
+            [
+              2212,
+              282
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "100 100 1 1 0 Plein de scooters des neiges!!"
+            }
+          ],
+          "polygon": [
+            [
+              47,
+              219
+            ],
+            [
+              22,
+              301
+            ],
+            [
+              257,
+              349
+            ],
+            [
+              469,
+              324
+            ],
+            [
+              467,
+              199
+            ],
+            [
+              279,
+              187
+            ],
+            [
+              149,
+              180
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "1300 360 1 1 0 Un bonhomme de neige."
+            }
+          ],
+          "polygon": [
+            [
+              1219,
+              217
+            ],
+            [
+              1245,
+              216
+            ],
+            [
+              1262,
+              276
+            ],
+            [
+              1285,
+              323
+            ],
+            [
+              1276,
+              372
+            ],
+            [
+              1242,
+              370
+            ],
+            [
+              1207,
+              351
+            ],
+            [
+              1209,
+              318
+            ],
+            [
+              1202,
+              293
+            ],
+            [
+              1217,
+              279
+            ],
+            [
+              1219,
+              243
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 38,
+              "value": "2200 20 1 1 0 Attention rennes!"
+            }
+          ],
+          "polygon": [
+            [
+              2396,
+              95
+            ],
+            [
+              2337,
+              205
+            ],
+            [
+              2341,
+              253
+            ],
+            [
+              2472,
+              256
+            ],
+            [
+              2473,
+              208
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        129
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_fin.wav",
+        "string4": "",
+        "resource": "noel.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "filo"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then set_var pierreor 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then playtext 120 220 1 1 0 La pierre"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then playtext 120 240 1 1 0 philosophale."
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then playtext 350 120 1 1 0 La pierre philosophale permet de"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then playtext 350 140 1 1 0 transformer le métal en or."
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              178,
+              200
+            ],
+            [
+              187,
+              163
+            ],
+            [
+              225,
+              155
+            ],
+            [
+              250,
+              182
+            ],
+            [
+              230,
+              215
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              155,
+              387
+            ],
+            [
+              179,
+              402
+            ]
+          ],
+          "flags": 4
+        },
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            }
+          ],
+          "polygon": [
+            [
+              7,
+              122
+            ],
+            [
+              127,
+              161
+            ]
+          ]
+        },
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 21,
+              "value": "fiolefinlande = 0 then scene 10"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "fiolefinlande = 1 then playtext 460 120 1 1 0 Les nains t'ont déjà"
+            },
+            {
+              "type": 21,
+              "value": "fiolefinlande = 1 then playtext 460 140 1 1 0 donné une fiole."
+            }
+          ],
+          "polygon": [
+            [
+              476,
+              49
+            ],
+            [
+              622,
+              92
+            ]
+          ]
+        },
+        {
+          "commandType": 106,
+          "strings": [
+            {
+              "type": 6,
+              "value": "14"
+            },
+            {
+              "type": 38,
+              "value": "175 20 1 1 0 Informations"
+            }
+          ],
+          "polygon": [
+            [
+              106,
+              5
+            ],
+            [
+              168,
+              80
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 38,
+              "value": "15 170 1 1 0 Ce n'est pas le"
+            },
+            {
+              "type": 38,
+              "value": "15 190 1 1 0  moment de se"
+            },
+            {
+              "type": 38,
+              "value": "15 210 1 1 0  reposer !"
+            }
+          ],
+          "polygon": [
+            [
+              52,
+              233
+            ],
+            [
+              105,
+              236
+            ],
+            [
+              111,
+              312
+            ],
+            [
+              122,
+              376
+            ],
+            [
+              83,
+              392
+            ],
+            [
+              26,
+              383
+            ],
+            [
+              23,
+              320
+            ],
+            [
+              52,
+              298
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              630,
+              132
+            ],
+            [
+              408,
+              132
+            ],
+            [
+              407,
+              386
+            ],
+            [
+              633,
+              390
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "nainok = 4 then playavi jouet1.avi 2 380 181 640 324"
+            },
+            {
+              "type": 22,
+              "value": "nainok 0"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "pince = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "scotch = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 32,
+              "value": ""
+            }
+          ],
+          "polygon": [
+            [
+              239,
+              15
+            ],
+            [
+              279,
+              52
+            ]
+          ],
+          "flags": 4
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 38,
+              "value": "220 20 1 1 0 Le Père Noël !"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 22,
+              "value": "non 0"
+            },
+            {
+              "type": 21,
+              "value": "clerouge = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ballon1 = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bouee = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_plo = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bus = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "castagnette = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ciseau = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "clejaune = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "guitare = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "harpon = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "helice = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "loupe = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "masque = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "masse = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "pain = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "palme = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "piece = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "pier_berlin = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "raquette = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ressort  = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "cheval  = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "riz = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ruban = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot2 = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "scotch = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "taillepierre = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ap_photo = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "houblon = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "cleverte = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "partition = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "laine = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tondeuse = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "cire = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "chianti = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "rouedent = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "levure = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bouteille = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "parfum = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "rouge = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bisous = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "api  = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "pince = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeorange = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tuliperouge = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeverte  = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeviolet = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "farine = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "saliere = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bougie = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_eau = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "moule = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "ail = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "oignon  = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "olive = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bouillon = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "violon = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "skate = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "champagne = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "bonnet = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "huile = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "orge = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "burette = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "allumette = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "chouetteor = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "chouette = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "sirop = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece2 = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleecosse = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleirlande = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolesuede = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolefinlande = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleautriche = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolepaysbas = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne2 = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleitalie = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleangleterre = 2 then inc_var non 1"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 2 then inc_var pierreor -2"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then addbmp filo filo.bmp 0 143 149"
+            },
+            {
+              "type": 21,
+              "value": "hotte = -1 then set_var non 4"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then inc_var non 2"
+            },
+            {
+              "type": 21,
+              "value": "non = 0 then playavi pere1.avi 1 237 91 324 184"
+            },
+            {
+              "type": 21,
+              "value": "non = 1 then playavi pere99.avi 1 237 91 324 184"
+            },
+            {
+              "type": 21,
+              "value": "non = 2 then playavi pere2.avi 1 237 91 324 184"
+            },
+            {
+              "type": 21,
+              "value": "non = 3 then playavi pere99.avi 1 237 91 324 184"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 2 then set_var hotte -1"
+            },
+            {
+              "type": 21,
+              "value": "hotte = -1 then addbmp hotte hotte.bmp 0 14 220"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "pierreor = -2 then addbmp filo filo.bmp 0 143 149"
+            },
+            {
+              "type": 21,
+              "value": "hotte = -1 then addbmp hotte hotte.bmp 0 14 220"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              151,
+              214
+            ],
+            [
+              152,
+              173
+            ],
+            [
+              238,
+              119
+            ],
+            [
+              264,
+              68
+            ],
+            [
+              299,
+              62
+            ],
+            [
+              334,
+              152
+            ],
+            [
+              397,
+              167
+            ],
+            [
+              386,
+              210
+            ],
+            [
+              350,
+              225
+            ],
+            [
+              339,
+              210
+            ],
+            [
+              316,
+              234
+            ],
+            [
+              340,
+              302
+            ],
+            [
+              345,
+              348
+            ],
+            [
+              384,
+              371
+            ],
+            [
+              385,
+              389
+            ],
+            [
+              211,
+              384
+            ],
+            [
+              213,
+              366
+            ],
+            [
+              243,
+              352
+            ],
+            [
+              243,
+              329
+            ],
+            [
+              229,
+              322
+            ],
+            [
+              246,
+              235
+            ],
+            [
+              230,
+              208
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "photo.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 27,
+              "value": "foto ndph.bmp 0 277 8"
+            },
+            {
+              "type": 9,
+              "value": "scot2.avi 1 103 225 195 319"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              319,
+              61
+            ],
+            [
+              518,
+              145
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then addbmp foto mlph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 2 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 2 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              235,
+              207
+            ],
+            [
+              418,
+              236
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 6 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 6 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 6 then addbmp foto acph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 6 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 6 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 6 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              237,
+              256
+            ],
+            [
+              418,
+              288
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 7 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 7 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 7 then scene 5"
+            },
+            {
+              "type": 21,
+              "value": "photo != 7 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 7 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 7 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              234,
+              310
+            ],
+            [
+              418,
+              338
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 0 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 0 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 0 then addbmp foto ldph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 0 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 0 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 0 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              238,
+              362
+            ],
+            [
+              418,
+              391
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 4 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 4 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 4 then addbmp photo irph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 4 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 4 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 4 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              449,
+              203
+            ],
+            [
+              634,
+              237
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 3 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 3 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 3 then addbmp foto beph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 3 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 3 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 3 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              451,
+              258
+            ],
+            [
+              633,
+              292
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 1 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 1 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 1 then addbmp foto egph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 1 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 1 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 1 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              449,
+              312
+            ],
+            [
+              633,
+              342
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 39,
+              "value": "58 0 #00ff00 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "photo = 5 then playtext 350 90 1 1 0 OUI ! else playtext 350 90 1 1 0 NON..."
+            },
+            {
+              "type": 21,
+              "value": "photo = 5 then delbmp foto"
+            },
+            {
+              "type": 21,
+              "value": "photo = 5 then addbmp foto coph.bmp 0 277 08"
+            },
+            {
+              "type": 21,
+              "value": "photo != 5 then dec_var score 1"
+            },
+            {
+              "type": 21,
+              "value": "photo != 5 then playwav cartoon.wav else playwav cling.wav 1"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 41,
+              "value": "score 6 25 410 160 470 0 <score>"
+            },
+            {
+              "type": 21,
+              "value": "photo = 5 then inc_var photo 1"
+            }
+          ],
+          "polygon": [
+            [
+              452,
+              361
+            ],
+            [
+              633,
+              391
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "photo 0"
+            },
+            {
+              "type": 6,
+              "value": "1"
+            }
+          ],
+          "polygon": [
+            [
+              15,
+              300
+            ],
+            [
+              80,
+              399
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "photo2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              531,
+              330
+            ],
+            [
+              621,
+              384
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "photo 0"
+            },
+            {
+              "type": 6,
+              "value": "3"
+            }
+          ],
+          "polygon": [
+            [
+              333,
+              309
+            ],
+            [
+              440,
+              387
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "solus1.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "6"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              532,
+              347
+            ],
+            [
+              638,
+              397
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "solus2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 101,
+          "strings": [
+            {
+              "type": 6,
+              "value": "8"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              532,
+              355
+            ],
+            [
+              636,
+              396
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "scotman.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 9,
+              "value": "scot.avi 1 103 225 195 319"
+            },
+            {
+              "type": 6,
+              "value": "4"
+            },
+            {
+              "type": 16,
+              "value": "500"
+            },
+            {
+              "type": 9,
+              "value": "scot.avi 1 103 225 195 319 1"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54 else scene 4"
+            }
+          ],
+          "polygon": [
+            [
+              86,
+              106
+            ],
+            [
+              231,
+              315
+            ]
+          ],
+          "flags": 4
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "scotman.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "ok peli.bmp 0 358 133"
+            },
+            {
+              "type": 9,
+              "value": "scot3.avi 1 103 225 195 319"
+            },
+            {
+              "type": 27,
+              "value": "ok peli.bmp 0 358 133"
+            },
+            {
+              "type": 16,
+              "value": "2000"
+            },
+            {
+              "type": 22,
+              "value": "photo 1"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54 else scene 1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "prix.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 24,
+              "value": "score 55"
+            },
+            {
+              "type": 11,
+              "value": "Scooter.wav"
+            },
+            {
+              "type": 9,
+              "value": "skoot.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\autr\\autr.vnp 12"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              10,
+              87
+            ],
+            [
+              218,
+              148
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 24,
+              "value": "score 35"
+            },
+            {
+              "type": 11,
+              "value": "Scooter.wav"
+            },
+            {
+              "type": 9,
+              "value": "skoot.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\suede\\suede.vnp 12"
+            }
+          ],
+          "polygon": [
+            [
+              7,
+              193
+            ],
+            [
+              161,
+              242
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 24,
+              "value": "score 40"
+            },
+            {
+              "type": 11,
+              "value": "Scooter.wav"
+            },
+            {
+              "type": 9,
+              "value": "skoot.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\danem\\danem.vnp 10"
+            }
+          ],
+          "polygon": [
+            [
+              37,
+              305
+            ],
+            [
+              154,
+              360
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            }
+          ],
+          "polygon": [
+            [
+              295,
+              320
+            ],
+            [
+              396,
+              385
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "a_fin.wav",
+        "string4": "",
+        "resource": "noel2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        2,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              562,
+              379
+            ],
+            [
+              601,
+              388
+            ]
+          ]
+        },
+        {
+          "commandType": 103,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            }
+          ],
+          "polygon": [
+            [
+              116,
+              29
+            ],
+            [
+              234,
+              65
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "papiercado != -1 then playtext 150 90 1 1 0 Un autre nain."
+            },
+            {
+              "type": 21,
+              "value": "papiercado = -1 then playtext 150 90 1 1 0 Laissons le travailler"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 2 then set_var papiercado -1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado != -1 then playavi roux1.avi 1 241 189 289 210"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = -1 then playavi roux2.avi 1 241 189 289 210"
+            },
+            {
+              "type": 11,
+              "value": "a_fin.wav 2"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              208,
+              95
+            ],
+            [
+              331,
+              230
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "tournevis != -1 then playtext 410 90 1 1 0 Encore un."
+            },
+            {
+              "type": 21,
+              "value": "tournevis = -1 then playtext 410 90 1 1 0 Laissons le travailler"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "tournevis = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = 2 then set_var tournevis -1"
+            },
+            {
+              "type": 21,
+              "value": "tournevis != -1 then playavi brun1.avi 1 416 203 469 228"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = -1 then playavi brun2.avi 1 416 203 468 228"
+            },
+            {
+              "type": 11,
+              "value": "a_fin.wav 2"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              380,
+              110
+            ],
+            [
+              510,
+              230
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "scotch != -1 then playtext 120 90 1 1 0 Un nain."
+            },
+            {
+              "type": 21,
+              "value": "scotch = -1 then playtext 120 90 1 1 0 Il a déjà ce qu'il lui faut."
+            },
+            {
+              "type": 39,
+              "value": "18 0 #fffffff Comic sans MS"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "scotch = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "scotch = 2 then set_var scotch -1"
+            },
+            {
+              "type": 21,
+              "value": "scotch != -1 then playavi blond.avi 1 35 185 90 218"
+            },
+            {
+              "type": 21,
+              "value": "scotch = -1 then playavi blond2.avi 1 35 186 88 219"
+            },
+            {
+              "type": 11,
+              "value": "a_fin.wav 2"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              5,
+              95
+            ],
+            [
+              123,
+              230
+            ]
+          ]
+        },
+        {
+          "commandType": 108,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #000000 Comic sans MS"
+            },
+            {
+              "type": 21,
+              "value": "pince != -1 then playtext 490 90 1 1 0 Et encore un !"
+            },
+            {
+              "type": 21,
+              "value": "pince = -1 then playtext 490 90 1 1 0 Laissons le travailler"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #fffffff Comic sans MS"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "pince = 2 then defcursor fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "pince = 2 then set_var pince -1"
+            },
+            {
+              "type": 21,
+              "value": "pince != -1 then playavi noir.avi 1 567 190 625 240"
+            },
+            {
+              "type": 21,
+              "value": "pince = -1 then playavi noir2.avi 1 567 192 622 240"
+            },
+            {
+              "type": 11,
+              "value": "a_fin.wav 2"
+            },
+            {
+              "type": 7,
+              "value": "8"
+            }
+          ],
+          "polygon": [
+            [
+              545,
+              110
+            ],
+            [
+              640,
+              230
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              7,
+              236
+            ],
+            [
+              633,
+              390
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 22,
+              "value": "nainok 0"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "pince = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "scotch = -1 then inc_var nainok 1"
+            },
+            {
+              "type": 21,
+              "value": "nainok = 4 then playavi jouet3.avi 1 0 142 638 304"
+            },
+            {
+              "type": 21,
+              "value": "nainok = 4 then playwav nains.wav 1"
+            },
+            {
+              "type": 21,
+              "value": "nainok = 4 then scene 19"
+            }
+          ],
+          "polygon": [
+            [
+              379,
+              20
+            ],
+            [
+              412,
+              48
+            ]
+          ],
+          "flags": 4
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "sacados 1"
+            },
+            {
+              "type": 22,
+              "value": "score 10000"
+            },
+            {
+              "type": 22,
+              "value": "tournevis 1"
+            },
+            {
+              "type": 22,
+              "value": "papiercado 1"
+            },
+            {
+              "type": 22,
+              "value": "pince 1"
+            },
+            {
+              "type": 22,
+              "value": "scotch 1"
+            },
+            {
+              "type": 22,
+              "value": "nainok 0"
+            },
+            {
+              "type": 6,
+              "value": "10"
+            }
+          ],
+          "polygon": [
+            [
+              465,
+              22
+            ],
+            [
+              501,
+              52
+            ]
+          ],
+          "flags": 4
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "name": "Intro",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 11,
+              "value": "a_fin.wav"
+            },
+            {
+              "type": 9,
+              "value": "finlande.avi 1"
+            },
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 22,
+              "value": "finlande 1"
+            },
+            {
+              "type": 21,
+              "value": "euroland = 1 then dec_var euroland 1"
+            },
+            {
+              "type": 21,
+              "value": "angleterre = 1 then dec_var angleterre 1"
+            },
+            {
+              "type": 21,
+              "value": "autriche = 1  then dec_var autriche 1"
+            },
+            {
+              "type": 21,
+              "value": "allemagne = 1  then dec_var allemagne 1"
+            },
+            {
+              "type": 21,
+              "value": "ecosse = 1  then dec_var ecosse 1"
+            },
+            {
+              "type": 21,
+              "value": "espagne = 1  then dec_var espagne 1"
+            },
+            {
+              "type": 21,
+              "value": "france = 1  then dec_var france 1"
+            },
+            {
+              "type": 21,
+              "value": "belgique = 1  then dec_var belgique 1"
+            },
+            {
+              "type": 21,
+              "value": "irlande = 1  then dec_var irlande 1"
+            },
+            {
+              "type": 21,
+              "value": "italie = 1  then dec_var italie 1"
+            },
+            {
+              "type": 21,
+              "value": "paysbas = 1  then dec_var paysbas 1"
+            },
+            {
+              "type": 21,
+              "value": "grece = 1  then dec_var grece 1"
+            },
+            {
+              "type": 21,
+              "value": "danemark = 1  then dec_var danemark 1"
+            },
+            {
+              "type": 21,
+              "value": "portugal = 1  then dec_var portugal 1"
+            },
+            {
+              "type": 21,
+              "value": "suede = 1  then dec_var suede 1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papierbleu.bmp",
+        "string6": "traineau.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 20,
+        "top": 10,
+        "right": 330,
+        "bottom": 470
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "chien chien.bmp 0 350 80"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              540,
+              360
+            ],
+            [
+              600,
+              450
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papier.bmp",
+        "string6": "oursbrun.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 20,
+        "top": 10,
+        "right": 280,
+        "bottom": 470
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "ours ours.bmp 0 300 70"
+            },
+            {
+              "type": 25,
+              "value": ""
+            },
+            {
+              "type": 32,
+              "value": ""
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              550,
+              360
+            ],
+            [
+              610,
+              460
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\ecosse\\img24\\papierbleu.bmp",
+        "string6": "sauna.htm"
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rect": {
+        "left": 20,
+        "top": 10,
+        "right": 320,
+        "bottom": 470
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 3,
+              "value": ""
+            },
+            {
+              "type": 27,
+              "value": "sauna sauna.bmp 0 340 110"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              540,
+              360
+            ],
+            [
+              600,
+              450
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "vent.wav",
+        "string4": "",
+        "resource": "lapin3.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        14
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "hotspot": {
+        "timer": 1000,
+        "objects": [
+          {
+            "type": 24,
+            "string": "tempslapin 1"
+          },
+          {
+            "type": 41,
+            "string": "temps 6   1 1 100 20 0 <tempslapin>"
+          },
+          {
+            "type": 25,
+            "string": "1 1 100 20"
+          },
+          {
+            "type": 32,
+            "string": ""
+          },
+          {
+            "type": 21,
+            "string": "tempslapin <= 0 then scene 16"
+          }
+        ]
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 22,
+              "value": "tempslapin 45"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              0,
+              63
+            ],
+            [
+              35,
+              63
+            ],
+            [
+              37,
+              106
+            ],
+            [
+              31,
+              124
+            ],
+            [
+              19,
+              140
+            ],
+            [
+              8,
+              156
+            ],
+            [
+              9,
+              180
+            ],
+            [
+              10,
+              342
+            ],
+            [
+              16,
+              368
+            ],
+            [
+              26,
+              383
+            ],
+            [
+              72,
+              384
+            ],
+            [
+              73,
+              398
+            ],
+            [
+              1,
+              398
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              72,
+              383
+            ],
+            [
+              189,
+              381
+            ],
+            [
+              193,
+              362
+            ],
+            [
+              177,
+              360
+            ],
+            [
+              176,
+              351
+            ],
+            [
+              187,
+              351
+            ],
+            [
+              204,
+              354
+            ],
+            [
+              219,
+              355
+            ],
+            [
+              238,
+              356
+            ],
+            [
+              250,
+              353
+            ],
+            [
+              254,
+              344
+            ],
+            [
+              247,
+              337
+            ],
+            [
+              211,
+              334
+            ],
+            [
+              190,
+              330
+            ],
+            [
+              164,
+              329
+            ],
+            [
+              133,
+              328
+            ],
+            [
+              115,
+              329
+            ],
+            [
+              102,
+              337
+            ],
+            [
+              108,
+              346
+            ],
+            [
+              126,
+              347
+            ],
+            [
+              151,
+              349
+            ],
+            [
+              151,
+              361
+            ],
+            [
+              125,
+              359
+            ],
+            [
+              95,
+              358
+            ],
+            [
+              88,
+              344
+            ],
+            [
+              88,
+              323
+            ],
+            [
+              68,
+              322
+            ],
+            [
+              66,
+              338
+            ],
+            [
+              71,
+              361
+            ],
+            [
+              36,
+              360
+            ],
+            [
+              32,
+              331
+            ],
+            [
+              32,
+              281
+            ],
+            [
+              30,
+              255
+            ],
+            [
+              30,
+              222
+            ],
+            [
+              42,
+              229
+            ],
+            [
+              54,
+              247
+            ],
+            [
+              63,
+              301
+            ],
+            [
+              83,
+              300
+            ],
+            [
+              84,
+              287
+            ],
+            [
+              95,
+              285
+            ],
+            [
+              96,
+              305
+            ],
+            [
+              107,
+              314
+            ],
+            [
+              124,
+              319
+            ],
+            [
+              151,
+              321
+            ],
+            [
+              196,
+              322
+            ],
+            [
+              228,
+              324
+            ],
+            [
+              274,
+              326
+            ],
+            [
+              276,
+              367
+            ],
+            [
+              215,
+              362
+            ],
+            [
+              210,
+              381
+            ],
+            [
+              209,
+              397
+            ],
+            [
+              79,
+              397
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              209,
+              382
+            ],
+            [
+              243,
+              386
+            ],
+            [
+              261,
+              389
+            ],
+            [
+              338,
+              390
+            ],
+            [
+              354,
+              390
+            ],
+            [
+              386,
+              390
+            ],
+            [
+              406,
+              393
+            ],
+            [
+              535,
+              390
+            ],
+            [
+              534,
+              349
+            ],
+            [
+              522,
+              345
+            ],
+            [
+              466,
+              345
+            ],
+            [
+              455,
+              342
+            ],
+            [
+              453,
+              328
+            ],
+            [
+              521,
+              332
+            ],
+            [
+              550,
+              333
+            ],
+            [
+              561,
+              333
+            ],
+            [
+              570,
+              335
+            ],
+            [
+              572,
+              399
+            ],
+            [
+              209,
+              397
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              366,
+              360
+            ],
+            [
+              365,
+              369
+            ],
+            [
+              403,
+              370
+            ],
+            [
+              419,
+              372
+            ],
+            [
+              516,
+              372
+            ],
+            [
+              514,
+              366
+            ],
+            [
+              458,
+              365
+            ],
+            [
+              443,
+              361
+            ],
+            [
+              401,
+              360
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              345,
+              358
+            ],
+            [
+              345,
+              367
+            ],
+            [
+              298,
+              366
+            ],
+            [
+              296,
+              325
+            ],
+            [
+              377,
+              325
+            ],
+            [
+              407,
+              328
+            ],
+            [
+              430,
+              330
+            ],
+            [
+              430,
+              339
+            ],
+            [
+              396,
+              340
+            ],
+            [
+              366,
+              339
+            ],
+            [
+              333,
+              336
+            ],
+            [
+              313,
+              336
+            ],
+            [
+              307,
+              345
+            ],
+            [
+              311,
+              354
+            ],
+            [
+              326,
+              357
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              118,
+              283
+            ],
+            [
+              119,
+              296
+            ],
+            [
+              132,
+              300
+            ],
+            [
+              153,
+              302
+            ],
+            [
+              198,
+              303
+            ],
+            [
+              233,
+              304
+            ],
+            [
+              234,
+              294
+            ],
+            [
+              198,
+              291
+            ],
+            [
+              155,
+              286
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              53,
+              245
+            ],
+            [
+              72,
+              236
+            ],
+            [
+              84,
+              263
+            ],
+            [
+              98,
+              263
+            ],
+            [
+              101,
+              239
+            ],
+            [
+              104,
+              227
+            ],
+            [
+              114,
+              224
+            ],
+            [
+              136,
+              226
+            ],
+            [
+              157,
+              229
+            ],
+            [
+              163,
+              230
+            ],
+            [
+              159,
+              248
+            ],
+            [
+              121,
+              244
+            ],
+            [
+              121,
+              262
+            ],
+            [
+              156,
+              266
+            ],
+            [
+              179,
+              267
+            ],
+            [
+              182,
+              250
+            ],
+            [
+              185,
+              231
+            ],
+            [
+              186,
+              203
+            ],
+            [
+              166,
+              197
+            ],
+            [
+              156,
+              216
+            ],
+            [
+              139,
+              216
+            ],
+            [
+              114,
+              211
+            ],
+            [
+              101,
+              200
+            ],
+            [
+              78,
+              193
+            ],
+            [
+              35,
+              193
+            ],
+            [
+              57,
+              219
+            ],
+            [
+              44,
+              228
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              72,
+              0
+            ],
+            [
+              70,
+              24
+            ],
+            [
+              69,
+              51
+            ],
+            [
+              58,
+              62
+            ],
+            [
+              59,
+              106
+            ],
+            [
+              51,
+              131
+            ],
+            [
+              34,
+              155
+            ],
+            [
+              33,
+              170
+            ],
+            [
+              46,
+              172
+            ],
+            [
+              62,
+              156
+            ],
+            [
+              67,
+              128
+            ],
+            [
+              70,
+              109
+            ],
+            [
+              78,
+              95
+            ],
+            [
+              96,
+              84
+            ],
+            [
+              95,
+              69
+            ],
+            [
+              88,
+              47
+            ],
+            [
+              88,
+              21
+            ],
+            [
+              99,
+              9
+            ],
+            [
+              120,
+              7
+            ],
+            [
+              168,
+              9
+            ],
+            [
+              195,
+              13
+            ],
+            [
+              190,
+              33
+            ],
+            [
+              158,
+              30
+            ],
+            [
+              109,
+              30
+            ],
+            [
+              110,
+              47
+            ],
+            [
+              135,
+              49
+            ],
+            [
+              180,
+              52
+            ],
+            [
+              206,
+              55
+            ],
+            [
+              238,
+              55
+            ],
+            [
+              240,
+              36
+            ],
+            [
+              210,
+              31
+            ],
+            [
+              211,
+              12
+            ],
+            [
+              253,
+              13
+            ],
+            [
+              364,
+              14
+            ],
+            [
+              545,
+              14
+            ],
+            [
+              568,
+              16
+            ],
+            [
+              605,
+              15
+            ],
+            [
+              612,
+              19
+            ],
+            [
+              616,
+              41
+            ],
+            [
+              625,
+              48
+            ],
+            [
+              631,
+              63
+            ],
+            [
+              629,
+              109
+            ],
+            [
+              626,
+              147
+            ],
+            [
+              626,
+              188
+            ],
+            [
+              621,
+              214
+            ],
+            [
+              622,
+              315
+            ],
+            [
+              639,
+              315
+            ],
+            [
+              639,
+              0
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              79,
+              170
+            ],
+            [
+              91,
+              172
+            ],
+            [
+              105,
+              179
+            ],
+            [
+              112,
+              149
+            ],
+            [
+              112,
+              120
+            ],
+            [
+              101,
+              109
+            ],
+            [
+              92,
+              121
+            ],
+            [
+              87,
+              145
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              117,
+              69
+            ],
+            [
+              119,
+              85
+            ],
+            [
+              133,
+              110
+            ],
+            [
+              136,
+              147
+            ],
+            [
+              127,
+              191
+            ],
+            [
+              141,
+              195
+            ],
+            [
+              151,
+              166
+            ],
+            [
+              157,
+              129
+            ],
+            [
+              156,
+              93
+            ],
+            [
+              141,
+              74
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              173,
+              74
+            ],
+            [
+              181,
+              90
+            ],
+            [
+              177,
+              106
+            ],
+            [
+              208,
+              105
+            ],
+            [
+              236,
+              108
+            ],
+            [
+              238,
+              77
+            ],
+            [
+              204,
+              77
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              179,
+              127
+            ],
+            [
+              173,
+              175
+            ],
+            [
+              187,
+              180
+            ],
+            [
+              188,
+              149
+            ],
+            [
+              189,
+              136
+            ],
+            [
+              193,
+              128
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              236,
+              130
+            ],
+            [
+              217,
+              129
+            ],
+            [
+              212,
+              142
+            ],
+            [
+              210,
+              183
+            ],
+            [
+              210,
+              231
+            ],
+            [
+              259,
+              237
+            ],
+            [
+              272,
+              231
+            ],
+            [
+              264,
+              212
+            ],
+            [
+              241,
+              204
+            ],
+            [
+              220,
+              194
+            ],
+            [
+              213,
+              181
+            ],
+            [
+              213,
+              161
+            ],
+            [
+              223,
+              144
+            ],
+            [
+              235,
+              141
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              181,
+              252
+            ],
+            [
+              208,
+              255
+            ],
+            [
+              241,
+              260
+            ],
+            [
+              275,
+              260
+            ],
+            [
+              308,
+              258
+            ],
+            [
+              325,
+              249
+            ],
+            [
+              330,
+              223
+            ],
+            [
+              320,
+              187
+            ],
+            [
+              313,
+              168
+            ],
+            [
+              292,
+              157
+            ],
+            [
+              274,
+              149
+            ],
+            [
+              259,
+              142
+            ],
+            [
+              258,
+              127
+            ],
+            [
+              288,
+              129
+            ],
+            [
+              295,
+              110
+            ],
+            [
+              278,
+              105
+            ],
+            [
+              259,
+              105
+            ],
+            [
+              260,
+              78
+            ],
+            [
+              283,
+              80
+            ],
+            [
+              326,
+              82
+            ],
+            [
+              327,
+              112
+            ],
+            [
+              314,
+              110
+            ],
+            [
+              306,
+              131
+            ],
+            [
+              326,
+              136
+            ],
+            [
+              327,
+              182
+            ],
+            [
+              329,
+              210
+            ],
+            [
+              335,
+              244
+            ],
+            [
+              340,
+              267
+            ],
+            [
+              311,
+              271
+            ],
+            [
+              273,
+              271
+            ],
+            [
+              219,
+              271
+            ],
+            [
+              184,
+              268
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              295,
+              237
+            ],
+            [
+              304,
+              235
+            ],
+            [
+              307,
+              224
+            ],
+            [
+              299,
+              196
+            ],
+            [
+              297,
+              187
+            ],
+            [
+              249,
+              164
+            ],
+            [
+              240,
+              164
+            ],
+            [
+              237,
+              172
+            ],
+            [
+              241,
+              181
+            ],
+            [
+              267,
+              187
+            ],
+            [
+              281,
+              195
+            ],
+            [
+              293,
+              212
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              261,
+              56
+            ],
+            [
+              261,
+              36
+            ],
+            [
+              327,
+              35
+            ],
+            [
+              326,
+              60
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              351,
+              35
+            ],
+            [
+              349,
+              58
+            ],
+            [
+              369,
+              61
+            ],
+            [
+              385,
+              69
+            ],
+            [
+              389,
+              80
+            ],
+            [
+              389,
+              157
+            ],
+            [
+              388,
+              200
+            ],
+            [
+              367,
+              203
+            ],
+            [
+              367,
+              148
+            ],
+            [
+              367,
+              88
+            ],
+            [
+              351,
+              83
+            ],
+            [
+              351,
+              149
+            ],
+            [
+              354,
+              217
+            ],
+            [
+              364,
+              267
+            ],
+            [
+              364,
+              281
+            ],
+            [
+              357,
+              289
+            ],
+            [
+              320,
+              292
+            ],
+            [
+              291,
+              293
+            ],
+            [
+              257,
+              293
+            ],
+            [
+              257,
+              304
+            ],
+            [
+              298,
+              304
+            ],
+            [
+              366,
+              304
+            ],
+            [
+              418,
+              306
+            ],
+            [
+              468,
+              306
+            ],
+            [
+              490,
+              284
+            ],
+            [
+              503,
+              251
+            ],
+            [
+              508,
+              226
+            ],
+            [
+              509,
+              197
+            ],
+            [
+              483,
+              184
+            ],
+            [
+              453,
+              172
+            ],
+            [
+              448,
+              146
+            ],
+            [
+              448,
+              112
+            ],
+            [
+              454,
+              94
+            ],
+            [
+              471,
+              89
+            ],
+            [
+              503,
+              89
+            ],
+            [
+              526,
+              88
+            ],
+            [
+              571,
+              88
+            ],
+            [
+              579,
+              73
+            ],
+            [
+              581,
+              50
+            ],
+            [
+              587,
+              45
+            ],
+            [
+              593,
+              45
+            ],
+            [
+              593,
+              37
+            ],
+            [
+              570,
+              36
+            ],
+            [
+              568,
+              17
+            ],
+            [
+              551,
+              15
+            ],
+            [
+              550,
+              34
+            ],
+            [
+              525,
+              37
+            ],
+            [
+              504,
+              34
+            ],
+            [
+              505,
+              53
+            ],
+            [
+              529,
+              56
+            ],
+            [
+              549,
+              56
+            ],
+            [
+              568,
+              57
+            ],
+            [
+              574,
+              65
+            ],
+            [
+              569,
+              75
+            ],
+            [
+              555,
+              79
+            ],
+            [
+              517,
+              76
+            ],
+            [
+              490,
+              77
+            ],
+            [
+              451,
+              77
+            ],
+            [
+              427,
+              74
+            ],
+            [
+              427,
+              91
+            ],
+            [
+              423,
+              113
+            ],
+            [
+              423,
+              158
+            ],
+            [
+              425,
+              169
+            ],
+            [
+              447,
+              186
+            ],
+            [
+              484,
+              201
+            ],
+            [
+              499,
+              209
+            ],
+            [
+              505,
+              217
+            ],
+            [
+              500,
+              227
+            ],
+            [
+              489,
+              231
+            ],
+            [
+              471,
+              220
+            ],
+            [
+              473,
+              235
+            ],
+            [
+              467,
+              257
+            ],
+            [
+              451,
+              268
+            ],
+            [
+              451,
+              281
+            ],
+            [
+              447,
+              292
+            ],
+            [
+              434,
+              301
+            ],
+            [
+              424,
+              293
+            ],
+            [
+              426,
+              285
+            ],
+            [
+              428,
+              273
+            ],
+            [
+              408,
+              271
+            ],
+            [
+              390,
+              264
+            ],
+            [
+              375,
+              245
+            ],
+            [
+              367,
+              224
+            ],
+            [
+              389,
+              221
+            ],
+            [
+              398,
+              240
+            ],
+            [
+              419,
+              249
+            ],
+            [
+              441,
+              247
+            ],
+            [
+              449,
+              235
+            ],
+            [
+              448,
+              223
+            ],
+            [
+              433,
+              204
+            ],
+            [
+              412,
+              190
+            ],
+            [
+              399,
+              166
+            ],
+            [
+              399,
+              133
+            ],
+            [
+              400,
+              109
+            ],
+            [
+              404,
+              83
+            ],
+            [
+              403,
+              58
+            ],
+            [
+              412,
+              51
+            ],
+            [
+              428,
+              50
+            ],
+            [
+              448,
+              53
+            ],
+            [
+              474,
+              54
+            ],
+            [
+              481,
+              55
+            ],
+            [
+              481,
+              37
+            ],
+            [
+              454,
+              36
+            ],
+            [
+              413,
+              36
+            ],
+            [
+              373,
+              35
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              601,
+              67
+            ],
+            [
+              594,
+              94
+            ],
+            [
+              589,
+              106
+            ],
+            [
+              578,
+              111
+            ],
+            [
+              472,
+              111
+            ],
+            [
+              471,
+              155
+            ],
+            [
+              488,
+              162
+            ],
+            [
+              508,
+              171
+            ],
+            [
+              503,
+              157
+            ],
+            [
+              498,
+              142
+            ],
+            [
+              498,
+              131
+            ],
+            [
+              513,
+              127
+            ],
+            [
+              532,
+              126
+            ],
+            [
+              555,
+              125
+            ],
+            [
+              583,
+              124
+            ],
+            [
+              592,
+              129
+            ],
+            [
+              592,
+              138
+            ],
+            [
+              585,
+              153
+            ],
+            [
+              583,
+              176
+            ],
+            [
+              604,
+              177
+            ],
+            [
+              605,
+              132
+            ],
+            [
+              607,
+              111
+            ],
+            [
+              607,
+              87
+            ],
+            [
+              609,
+              67
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              526,
+              149
+            ],
+            [
+              544,
+              147
+            ],
+            [
+              556,
+              146
+            ],
+            [
+              566,
+              144
+            ],
+            [
+              562,
+              161
+            ],
+            [
+              558,
+              180
+            ],
+            [
+              557,
+              204
+            ],
+            [
+              559,
+              230
+            ],
+            [
+              568,
+              235
+            ],
+            [
+              576,
+              234
+            ],
+            [
+              581,
+              228
+            ],
+            [
+              581,
+              200
+            ],
+            [
+              602,
+              200
+            ],
+            [
+              598,
+              215
+            ],
+            [
+              598,
+              226
+            ],
+            [
+              598,
+              235
+            ],
+            [
+              596,
+              240
+            ],
+            [
+              580,
+              243
+            ],
+            [
+              582,
+              253
+            ],
+            [
+              586,
+              264
+            ],
+            [
+              598,
+              261
+            ],
+            [
+              599,
+              290
+            ],
+            [
+              600,
+              317
+            ],
+            [
+              585,
+              319
+            ],
+            [
+              576,
+              327
+            ],
+            [
+              568,
+              337
+            ],
+            [
+              563,
+              332
+            ],
+            [
+              569,
+              323
+            ],
+            [
+              572,
+              301
+            ],
+            [
+              572,
+              272
+            ],
+            [
+              570,
+              252
+            ],
+            [
+              564,
+              248
+            ],
+            [
+              551,
+              244
+            ],
+            [
+              528,
+              244
+            ],
+            [
+              531,
+              230
+            ],
+            [
+              532,
+              213
+            ],
+            [
+              531,
+              190
+            ],
+            [
+              531,
+              171
+            ],
+            [
+              526,
+              159
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              525,
+              266
+            ],
+            [
+              516,
+              288
+            ],
+            [
+              502,
+              308
+            ],
+            [
+              520,
+              308
+            ],
+            [
+              539,
+              309
+            ],
+            [
+              550,
+              310
+            ],
+            [
+              550,
+              292
+            ],
+            [
+              551,
+              266
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            },
+            {
+              "type": 23,
+              "value": "lapinsortie 1"
+            },
+            {
+              "type": 39,
+              "value": "88 0 #0000ff Comic sans Ms"
+            },
+            {
+              "type": 38,
+              "value": "100 150 1 1 0 Attention !!"
+            },
+            {
+              "type": 21,
+              "value": "lapinsortie = 4 then scene 16"
+            },
+            {
+              "type": 11,
+              "value": "cartoon.wav"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #00ff00 Comic sans Ms"
+            }
+          ],
+          "polygon": [
+            [
+              3,
+              392
+            ],
+            [
+              1,
+              477
+            ],
+            [
+              637,
+              479
+            ],
+            [
+              637,
+              401
+            ],
+            [
+              565,
+              395
+            ],
+            [
+              218,
+              396
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 11,
+              "value": "applaud.wav 1"
+            },
+            {
+              "type": 22,
+              "value": "lapin 1"
+            },
+            {
+              "type": 6,
+              "value": "17"
+            }
+          ],
+          "polygon": [
+            [
+              630,
+              331
+            ],
+            [
+              588,
+              328
+            ],
+            [
+              579,
+              339
+            ],
+            [
+              583,
+              385
+            ],
+            [
+              633,
+              391
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "lapin3in.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "lapinsortie 0"
+            },
+            {
+              "type": 6,
+              "value": "15"
+            },
+            {
+              "type": 21,
+              "value": "score < 0 then runprj ..\\couleurs1\\couleurs1.vnp 54"
+            }
+          ],
+          "polygon": [
+            [
+              2,
+              24
+            ],
+            [
+              28,
+              50
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            }
+          ],
+          "polygon": [
+            [
+              580,
+              320
+            ],
+            [
+              639,
+              399
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "lapin3out.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 11,
+              "value": "cling.wav 1"
+            },
+            {
+              "type": 23,
+              "value": "score 100"
+            }
+          ],
+          "polygon": [
+            [
+              1,
+              1
+            ],
+            [
+              639,
+              399
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "name": "Toolbar",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 33,
+              "value": "..\\frontal\\vnoption.dll"
+            },
+            {
+              "type": 39,
+              "value": "18 0 #ffffff Comic sans MS"
+            },
+            {
+              "type": 27,
+              "value": "toolbar ..\\..\\barre\\images\\barre.bmp 6 0 400 640 480"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 1 then addbmp fiole ..\\..\\barre\\images\\f1.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 2 then addbmp fiole ..\\..\\barre\\images\\f2.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 3 then addbmp fiole ..\\..\\barre\\images\\f3.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 4 then addbmp fiole ..\\..\\barre\\images\\f4.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 5 then addbmp fiole ..\\..\\barre\\images\\f5.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 6 then addbmp fiole ..\\..\\barre\\images\\f6.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 7 then addbmp fiole ..\\..\\barre\\images\\f7.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 8 then addbmp fiole ..\\..\\barre\\images\\f8.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 9 then addbmp fiole ..\\..\\barre\\images\\f9.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 10 then addbmp fiole ..\\..\\barre\\images\\f10.bmp 6 197 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 11 then addbmp fiole ..\\..\\barre\\images\\f11.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "fiole = 12 then addbmp fiole ..\\..\\barre\\images\\f12.bmp 6 196 461"
+            },
+            {
+              "type": 21,
+              "value": "suede = 1 then  addbmp info ..\\..\\barre\\images\\p_suede.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "portugal = 1 then  addbmp info ..\\..\\barre\\images\\p_port.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "allemagne = 1 then  addbmp info ..\\..\\barre\\images\\p_all.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "france = 1 then  addbmp info ..\\..\\barre\\images\\p_france.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "angleterre = 1 then  addbmp info ..\\..\\barre\\images\\p_angl.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "autriche = 1 then  addbmp info ..\\..\\barre\\images\\p_autriche.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "danemark = 1 then  addbmp info ..\\..\\barre\\images\\p_danemark.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "ecosse = 1 then  addbmp info ..\\..\\barre\\images\\p_ecosse.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "euroland = 1 then  addbmp info ..\\..\\barre\\images\\p_euroland.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "espagne = 1 then  addbmp info ..\\..\\barre\\images\\p_espagne.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "finlande = 1 then  addbmp info ..\\..\\barre\\images\\p_finland.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "grece = 1 then  addbmp info ..\\..\\barre\\images\\p_grece.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "irlande = 1 then  addbmp info ..\\..\\barre\\images\\p_irlande.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "italie = 1 then  addbmp info ..\\..\\barre\\images\\p_italie.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "belgique = 1 then  addbmp info ..\\..\\barre\\images\\p_belgique.bmp 6 452 400"
+            },
+            {
+              "type": 21,
+              "value": "paysbas = 1 then  addbmp info ..\\..\\barre\\images\\p_pays.bmp 6 452 400"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            },
+            {
+              "type": 27,
+              "value": "etoile ..\\..\\barre\\images\\ordi.bmp 6 564 400"
+            },
+            {
+              "type": 27,
+              "value": "etoile1 ..\\..\\barre\\images\\textetm.bmp 6 0 449"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              571,
+              419
+            ],
+            [
+              636,
+              475
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "calc = 1 then rundll ..\\barre\\euro32.dll"
+            },
+            {
+              "type": 28,
+              "value": "calc1"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp etoile ..\\..\\barre\\images\\calc2.bmp 6 249 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp etoile1 ..\\..\\barre\\images\\textetc.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              243,
+              414
+            ],
+            [
+              290,
+              451
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "sac"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp etoile ..\\..\\barre\\images\\sac2.bmp 6 385 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp etoile1 ..\\..\\barre\\images\\textes.bmp 6 0 454"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then rundll ..\\barre\\inv.dll"
+            }
+          ],
+          "polygon": [
+            [
+              393,
+              413
+            ],
+            [
+              447,
+              449
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 26,
+              "value": "0"
+            },
+            {
+              "type": 26,
+              "value": "fleche.cur"
+            },
+            {
+              "type": 21,
+              "value": "clerouge = 2 then dec_var clerouge 1"
+            },
+            {
+              "type": 21,
+              "value": "ballon1 = 2 then dec_var ballon1 1"
+            },
+            {
+              "type": 21,
+              "value": "bouee = 2 then dec_var bouee 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_plo = 2 then dec_var bout_plo 1"
+            },
+            {
+              "type": 21,
+              "value": "bus = 2 then dec_var bus 1"
+            },
+            {
+              "type": 21,
+              "value": "castagnette = 2 then dec_var castagnette 1"
+            },
+            {
+              "type": 21,
+              "value": "ciseaux = 2 then dec_var ciseaux 1"
+            },
+            {
+              "type": 21,
+              "value": "clejaune = 2 then dec_var clejaune 1"
+            },
+            {
+              "type": 21,
+              "value": "guitare = 2 then dec_var guitare 1"
+            },
+            {
+              "type": 21,
+              "value": "harpon = 2 then dec_var harpon 1"
+            },
+            {
+              "type": 21,
+              "value": "helice = 2 then dec_var helice 1"
+            },
+            {
+              "type": 21,
+              "value": "loupe = 2 then dec_var loupe 1"
+            },
+            {
+              "type": 21,
+              "value": "masque = 2 then dec_var masque 1"
+            },
+            {
+              "type": 21,
+              "value": "masse = 2 then dec_var masse 1"
+            },
+            {
+              "type": 21,
+              "value": "pain = 2 then dec_var pain 1"
+            },
+            {
+              "type": 21,
+              "value": "palme = 2 then dec_var palme 1"
+            },
+            {
+              "type": 21,
+              "value": "photo = 2 then dec_var photo 1"
+            },
+            {
+              "type": 21,
+              "value": "piece = 2 then dec_var piece 1"
+            },
+            {
+              "type": 21,
+              "value": "pier_berlin = 2 then dec_var pier_berlin 1"
+            },
+            {
+              "type": 21,
+              "value": "raquette = 2 then dec_var raquette 1"
+            },
+            {
+              "type": 21,
+              "value": "ressort = 2 then dec_var ressort 1"
+            },
+            {
+              "type": 21,
+              "value": "cheval = 2 then dec_var cheval 1"
+            },
+            {
+              "type": 21,
+              "value": "riz = 2 then dec_var riz 1"
+            },
+            {
+              "type": 21,
+              "value": "ruban = 2 then dec_var ruban 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot1 = 2 then dec_var sabot1 1"
+            },
+            {
+              "type": 21,
+              "value": "sabot2 = 2 then dec_var sabot2 1"
+            },
+            {
+              "type": 21,
+              "value": "scotch = 2 then dec_var scotch 1"
+            },
+            {
+              "type": 21,
+              "value": "taillepierre = 2 then dec_var taillepierre 1"
+            },
+            {
+              "type": 21,
+              "value": "ap_photo = 2 then dec_var ap_photo 1"
+            },
+            {
+              "type": 21,
+              "value": "houblon = 2 then dec_var houblon 1"
+            },
+            {
+              "type": 21,
+              "value": "chewing = 2 then dec_var chewing 1"
+            },
+            {
+              "type": 21,
+              "value": "cleverte = 2 then dec_var cleverte 1"
+            },
+            {
+              "type": 21,
+              "value": "partition = 2 then dec_var partition 1"
+            },
+            {
+              "type": 21,
+              "value": "laine = 2 then dec_var laine 1"
+            },
+            {
+              "type": 21,
+              "value": "tondeuse = 2 then dec_var tondeuse 1"
+            },
+            {
+              "type": 21,
+              "value": "tournevis = 2 then dec_var tournevis 1"
+            },
+            {
+              "type": 21,
+              "value": "cire = 2 then dec_var cire 1"
+            },
+            {
+              "type": 21,
+              "value": "chianti = 2 then dec_var chianti 1"
+            },
+            {
+              "type": 21,
+              "value": "rouedent = 2 then dec_var rouedent 1"
+            },
+            {
+              "type": 21,
+              "value": "pierreor = 2 then dec_var pierreor 1"
+            },
+            {
+              "type": 21,
+              "value": "papiercado = 2 then dec_var papiercado 1"
+            },
+            {
+              "type": 21,
+              "value": "hotte = 2 then dec_var  hotte 1"
+            },
+            {
+              "type": 21,
+              "value": "levure = 2 then dec_var  levure 1"
+            },
+            {
+              "type": 21,
+              "value": "bouteille = 2 then dec_var bouteille 1"
+            },
+            {
+              "type": 21,
+              "value": "parfum = 2 then dec_var parfum 1"
+            },
+            {
+              "type": 21,
+              "value": "rouge = 2 then dec_var rouge 1"
+            },
+            {
+              "type": 21,
+              "value": "bisous = 2 then dec_var bisous 1"
+            },
+            {
+              "type": 21,
+              "value": "ap = 2 then dec_var api 1"
+            },
+            {
+              "type": 21,
+              "value": "pince = 2 then dec_var pince 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipejaune = 2 then dec_var tulipejaune 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeorange = 2 then dec_var tulipeorange 1"
+            },
+            {
+              "type": 21,
+              "value": "tuliperouge = 2 then dec_var tuliperouge 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeverte = 2 then dec_var tulipeverte 1"
+            },
+            {
+              "type": 21,
+              "value": "tulipeviolet = 2 then dec_var tulipeviolet 1"
+            },
+            {
+              "type": 21,
+              "value": "farine = 2 then dec_var farine 1"
+            },
+            {
+              "type": 21,
+              "value": "saliere = 2 then dec_var saliere 1"
+            },
+            {
+              "type": 21,
+              "value": "bougie = 2 then dec_var bougie 1"
+            },
+            {
+              "type": 21,
+              "value": "seche = 2 then dec_var seche 1"
+            },
+            {
+              "type": 21,
+              "value": "bout_eau = 2 then dec_var bout_eau 1"
+            },
+            {
+              "type": 21,
+              "value": "dorade = 2 then dec_var dorade 1"
+            },
+            {
+              "type": 21,
+              "value": "moule = 2 then dec_var moule 1"
+            },
+            {
+              "type": 21,
+              "value": "ail = 2 then dec_var ail 1"
+            },
+            {
+              "type": 21,
+              "value": "poivrouge = 2 then dec_var poivrouge 1"
+            },
+            {
+              "type": 21,
+              "value": "poivjaune = 2 then dec_var poivjaune 1"
+            },
+            {
+              "type": 21,
+              "value": "oignon = 2 then dec_var oignon 1"
+            },
+            {
+              "type": 21,
+              "value": "olive = 2 then dec_var olive 1"
+            },
+            {
+              "type": 21,
+              "value": "bouillon = 2 then dec_var bouillon 1"
+            },
+            {
+              "type": 21,
+              "value": "violon = 2 then dec_var violon 1"
+            },
+            {
+              "type": 21,
+              "value": "skate = 2 then dec_var skate 1"
+            },
+            {
+              "type": 21,
+              "value": "champagne = 2 then dec_var champagne 1"
+            },
+            {
+              "type": 21,
+              "value": "fromage = 2 then dec_var fromage 1"
+            },
+            {
+              "type": 21,
+              "value": "bonnet = 2 then dec_var bonnet 1"
+            },
+            {
+              "type": 21,
+              "value": "huile = 2 then dec_var huile 1"
+            },
+            {
+              "type": 21,
+              "value": "orge = 2 then dec_var orge 1"
+            },
+            {
+              "type": 21,
+              "value": "burette = 2 then dec_var burette 1"
+            },
+            {
+              "type": 21,
+              "value": "allumette = 2 then dec_var allumette 1"
+            },
+            {
+              "type": 21,
+              "value": "chouetteor = 2 then dec_var chouetteor 1"
+            },
+            {
+              "type": 21,
+              "value": "chouette = 2 then dec_var chouette 1"
+            },
+            {
+              "type": 21,
+              "value": "sirop = 2 then dec_var sirop 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece = 2 then dec_var  fiolegrece 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolegrece2 = 2 then dec_var  fiolegrece2 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleecosse = 2 then dec_var  fioleecosse 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleirlande = 2 then dec_var  fioleirlande 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne = 2 then dec_var  fioleespagne 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolesuede = 2 then dec_var  fiolesuede 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolefinlande = 2 then dec_var  fiolefinlande 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleautriche = 2 then dec_var  fioleautriche 1"
+            },
+            {
+              "type": 21,
+              "value": "fiolepaysbas = 2 then dec_var  fiolepaysbas 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleespagne2 = 2 then dec_var  fioleespagne2 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleitalie = 2 then dec_var  fioleitalie 1"
+            },
+            {
+              "type": 21,
+              "value": "fioleangleterre = 2 then dec_var  fioleangleterre 1"
+            }
+          ],
+          "polygon": [
+            [
+              551,
+              463
+            ],
+            [
+              558,
+              470
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 21,
+              "value": "trans = 1 then closewav"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then closedll"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then playavi ..\\..\\couleurs1\\movie\\retour.avi 1"
+            },
+            {
+              "type": 31,
+              "value": "..\\couleurs1\\couleurs1.vnp 6"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then dec_var score 50"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            },
+            {
+              "type": 28,
+              "value": "active"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp etoile ..\\..\\barre\\images\\trans2.bmp 6 162 400"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp etoile1 ..\\..\\barre\\images\\textetr.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              166,
+              413
+            ],
+            [
+              222,
+              454
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 28,
+              "value": "telep"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp etoile ..\\..\\barre\\images\\telep2.bmp 6 317 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp etoile1 ..\\..\\barre\\images\\textet.bmp 6 0 450"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then closedll"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then runprj ..\\couleurs1\\couleurs1.vnp 4"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then dec_var score 1"
+            },
+            {
+              "type": 41,
+              "value": "score 6 15 415 160 470 0 <score>"
+            }
+          ],
+          "polygon": [
+            [
+              322,
+              415
+            ],
+            [
+              369,
+              449
+            ]
+          ],
+          "flags": 3
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              545,
+              419
+            ],
+            [
+              553,
+              425
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [],
+          "polygon": [
+            [
+              146,
+              458
+            ],
+            [
+              518,
+              468
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 27,
+              "value": "etoile1 ..\\..\\barre\\images\\texteam.bmp 6 0 452"
+            }
+          ],
+          "polygon": [
+            [
+              17,
+              409
+            ],
+            [
+              90,
+              437
+            ]
+          ]
+        },
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 30,
+              "value": "etoile"
+            },
+            {
+              "type": 30,
+              "value": "etoile1"
+            },
+            {
+              "type": 21,
+              "value": "trans = 1 then addbmp active  ..\\..\\barre\\images\\trans.bmp 6 163 400"
+            },
+            {
+              "type": 21,
+              "value": "calc = 1 then addbmp calc1  ..\\..\\barre\\images\\calc1.bmp 6 246 400"
+            },
+            {
+              "type": 21,
+              "value": "telephone = 1 then addbmp telep  ..\\..\\barre\\images\\telep.bmp 6 316 400"
+            },
+            {
+              "type": 21,
+              "value": "sacados = 1 then addbmp sac  ..\\..\\barre\\images\\sac.bmp 6 384 400"
+            }
+          ],
+          "polygon": [
+            [
+              0,
+              407
+            ],
+            [
+              639,
+              478
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        1
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "..\\..\\italie\\img24\\papierfiole2.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "cmdList": {
+        "value": -18,
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 22,
+              "value": "fiolefinlande 1"
+            },
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 16,
+              "value": "1000"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\holl\\digit\\a_hol.wav"
+            },
+            {
+              "type": 9,
+              "value": "..\\..\\italie\\movie\\fiole.avi 2 340 94 580 400"
+            }
+          ],
+          "polygon": [
+            [
+              2,
+              6
+            ],
+            [
+              632,
+              395
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 20,
+      "name": "(empty)",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 31,
+              "value": "..\\frontal\\start.vnp 3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

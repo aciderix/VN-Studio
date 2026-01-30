@@ -741,7 +741,99 @@ function executeRunPrj(runPrjStr) {
   });
 }
 
-// --- PLAYTEXT ---
+// --- VARIABLES ---
+var gameVars = {}; // variable store: { name: value }
+
+function getVar(name) {
+  return gameVars[name.toLowerCase()] || 0;
+}
+
+function setVar(name, val) {
+  gameVars[name.toLowerCase()] = val;
+  console.log('SET_VAR:', name, '=', val);
+}
+
+// --- IF EVALUATOR ---
+// Format: "variable op value then action [else action]"
+// Actions: "runprj path sceneIdx", "scene idx", "dec_var name val", "inc_var name val",
+//          "playavi path flags", "set_var name val"
+function evaluateIf(ifStr) {
+  // Split on " then " to get condition and actions
+  var thenIdx = ifStr.indexOf(' then ');
+  if (thenIdx < 0) return null;
+
+  var condStr = ifStr.substring(0, thenIdx).trim();
+  var rest = ifStr.substring(thenIdx + 6).trim();
+
+  // Parse condition: "variable op value"
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  if (!condMatch) return null;
+
+  var varName = condMatch[1];
+  var op = condMatch[2];
+  var val = parseInt(condMatch[3]);
+  var actual = getVar(varName);
+
+  var result = false;
+  switch (op) {
+    case '=': result = (actual === val); break;
+    case '<': result = (actual < val); break;
+    case '>': result = (actual > val); break;
+    case '>=': result = (actual >= val); break;
+    case '<=': result = (actual <= val); break;
+    case '!=': case '<>': result = (actual !== val); break;
+  }
+
+  // Split on " else " — careful: "else" can appear in action strings
+  // Look for " else " that's followed by a known command keyword
+  var elseIdx = -1;
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp)\s/i);
+  if (elseMatch) {
+    elseIdx = rest.indexOf(elseMatch[0]);
+  } else {
+    // Try simple " else " split
+    var simpleElse = rest.indexOf(' else ');
+    if (simpleElse >= 0) elseIdx = simpleElse;
+  }
+
+  var thenAction, elseAction;
+  if (elseIdx >= 0) {
+    thenAction = rest.substring(0, elseIdx).trim();
+    elseAction = rest.substring(elseIdx + 6).trim();
+  } else {
+    thenAction = rest.trim();
+    elseAction = null;
+  }
+
+  console.log('IF:', varName, op, val, '(actual=' + actual + ') →', result ? 'THEN' : 'ELSE');
+  return result ? thenAction : elseAction;
+}
+
+// Execute an action string (from IF then/else branch)
+function executeAction(action) {
+  if (!action) return;
+  var parts = action.trim().split(/\s+/);
+  var cmd = parts[0].toLowerCase();
+
+  if (cmd === 'runprj') {
+    executeRunPrj(parts.slice(1).join(' '));
+  } else if (cmd === 'scene') {
+    var idx = parseInt(parts[1]);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
+    }
+  } else if (cmd === 'set_var') {
+    setVar(parts[1], parseInt(parts[2]) || 0);
+  } else if (cmd === 'inc_var') {
+    setVar(parts[1], getVar(parts[1]) + (parseInt(parts[2]) || 1));
+  } else if (cmd === 'dec_var') {
+    setVar(parts[1], getVar(parts[1]) - (parseInt(parts[2]) || 1));
+  } else {
+    console.log('Unhandled action:', action);
+  }
+}
+
+// --- SCENE COMMANDS ---
 // Exécuter les commandes non-interactives d'une scène (au chargement)
 function executeSceneCommands(scene) {
   scene.commands.forEach(function(cmd) {
@@ -750,7 +842,33 @@ function executeSceneCommands(scene) {
     if (wavStr && wavStr.string) {
       playWav(wavStr.string);
     }
+    // SET_VAR (type 22): "name value"
+    var setStr = cmd.strings.find(function(s) { return s.type === 22; });
+    if (setStr && setStr.string) {
+      var sp = setStr.string.trim().split(/\s+/);
+      if (sp.length >= 2) setVar(sp[0], parseInt(sp[1]) || 0);
+    }
+    // INC_VAR (type 23): "name value"
+    var incStr = cmd.strings.find(function(s) { return s.type === 23; });
+    if (incStr && incStr.string) {
+      var ip = incStr.string.trim().split(/\s+/);
+      if (ip.length >= 2) setVar(ip[0], getVar(ip[0]) + (parseInt(ip[1]) || 1));
+    }
+    // DEC_VAR (type 24): "name value"
+    var decStr = cmd.strings.find(function(s) { return s.type === 24; });
+    if (decStr && decStr.string) {
+      var dp = decStr.string.trim().split(/\s+/);
+      if (dp.length >= 2) setVar(dp[0], getVar(dp[0]) - (parseInt(dp[1]) || 1));
+    }
   });
+  // Init variables from VND header
+  if (project && project.variables) {
+    project.variables.forEach(function(v) {
+      if (gameVars[v.name.toLowerCase()] === undefined) {
+        gameVars[v.name.toLowerCase()] = v.value;
+      }
+    });
+  }
 }
 
 // =============================================================================
@@ -840,7 +958,18 @@ canvas.addEventListener('mousemove', function(e) {
 function handleCommandClick(cmd) {
   console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
 
-  // Chercher une action SCENE (type 6)
+  // IF condition (type 21) — évaluer d'abord car peut contenir runprj/scene
+  var ifStr = cmd.strings.find(function(s) { return s.type === 21; });
+  if (ifStr && ifStr.string) {
+    var action = evaluateIf(ifStr.string);
+    if (action) {
+      executeAction(action);
+      return;
+    }
+    // Si IF évalué à null (pas de else), continuer avec les autres actions
+  }
+
+  // SCENE (type 6)
   var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
   if (sceneStr && sceneStr.string) {
     var idx = parseInt(sceneStr.string, 10);
@@ -857,11 +986,17 @@ function handleCommandClick(cmd) {
     }
   }
 
-  // RUNPRJ (type 31)
+  // RUNPRJ direct (type 31)
   var runPrj = cmd.strings.find(function(s) { return s.type === 31; });
   if (runPrj && runPrj.string) {
     executeRunPrj(runPrj.string);
     return;
+  }
+
+  // PLAYWAV au clic (type 11)
+  var wavStr = cmd.strings.find(function(s) { return s.type === 11; });
+  if (wavStr && wavStr.string) {
+    playWav(wavStr.string);
   }
 }
 
@@ -880,6 +1015,7 @@ function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
   scrollX = 0;
+  stopAllAudio();
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
   updateUI();
@@ -910,6 +1046,14 @@ function loadVNDFile(arrayBuffer, fileName) {
   try {
     project = parseVND(arrayBuffer);
     console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
+
+    // Init variables from VND header
+    if (project.variables) {
+      project.variables.forEach(function(v) {
+        gameVars[v.name.toLowerCase()] = v.value;
+      });
+      console.log('Variables:', JSON.stringify(gameVars));
+    }
 
     // Setup canvas internal size
     canvas.width = project.header.width;
@@ -1027,6 +1171,7 @@ VND_LIST.forEach(function(entry, i) {
 
 // Charger un VND depuis le serveur
 function loadFromServer(entry) {
+  stopAllAudio();
   currentBasePath = entry.base;
   // Charger le VNP d'abord pour les paths
   fetch('/game-data/' + entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
@@ -1231,11 +1376,13 @@ window.addEventListener('mousemove', function(e) {
 
 window.addEventListener('mouseup', function() { isDragging = false; });
 
-// Touch pour mobile : scroll + tap
+// Touch pour mobile : scroll + tap + long-press
 var touchStartX = 0;
 var touchStartY = 0;
 var touchStartScroll = 0;
 var touchMoved = false;
+var longPressTimer = null;
+var longPressTriggered = false;
 
 canvas.addEventListener('touchstart', function(e) {
   e.preventDefault();
@@ -1244,12 +1391,33 @@ canvas.addEventListener('touchstart', function(e) {
   touchStartY = e.touches[0].clientY;
   touchStartScroll = scrollX;
   touchMoved = false;
+  longPressTriggered = false;
+
+  // Long-press : afficher le texte rollover après 400ms
+  clearTimeout(longPressTimer);
+  var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+  longPressTimer = setTimeout(function() {
+    if (touchMoved) return;
+    longPressTriggered = true;
+    var pos = screenToGame(tx, ty);
+    var cmd = findCommandAtPoint(pos.x, pos.y);
+    if (cmd !== hoveredCmd) {
+      hoveredCmd = cmd;
+      render();
+    }
+  }, 400);
 }, { passive: false });
 
 canvas.addEventListener('touchmove', function(e) {
   e.preventDefault();
   if (!project || currentSceneIndex < 0) return;
-  touchMoved = true;
+  var dx = Math.abs(e.touches[0].clientX - touchStartX);
+  var dy = Math.abs(e.touches[0].clientY - touchStartY);
+  if (dx > 8 || dy > 8) {
+    touchMoved = true;
+    clearTimeout(longPressTimer);
+  }
+  // Scroll horizontal
   var scene = project.scenes[currentSceneIndex];
   var sceneW = getSceneWidth(scene);
   var gameW = project.header.width;
@@ -1263,6 +1431,15 @@ canvas.addEventListener('touchmove', function(e) {
 
 canvas.addEventListener('touchend', function(e) {
   e.preventDefault();
+  clearTimeout(longPressTimer);
+
+  // Si long-press actif, juste masquer le hover
+  if (longPressTriggered) {
+    hoveredCmd = null;
+    render();
+    return;
+  }
+
   if (touchMoved || !project || currentSceneIndex < 0) return;
   // Tap = clic
   var touch = e.changedTouches[0];

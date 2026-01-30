@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VN-Studio Demo - Virtual Navigator Renderer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Barre du haut */
+    #toolbar {
+      background: #16213e;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #0f3460;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+    #toolbar h1 {
+      font-size: 14px;
+      color: #e94560;
+      margin-right: 8px;
+    }
+    #toolbar button, #toolbar select {
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #toolbar button:hover { background: #533483; }
+    #toolbar label {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #toolbar input[type="checkbox"] { accent-color: #e94560; }
+    #scene-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Zone de rendu - remplit tout l'espace restant */
+    #canvas-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    #game-canvas {
+      image-rendering: auto;
+      cursor: default;
+    }
+
+    /* Fullscreen */
+    body.fullscreen #toolbar { display: none; }
+    body.fullscreen #canvas-container { height: 100vh; }
+
+    /* Panneau latéral scènes */
+    #scene-list {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 220px;
+      background: rgba(22, 33, 62, 0.95);
+      overflow-y: auto;
+      font-size: 11px;
+      z-index: 5;
+      border-right: 1px solid #0f3460;
+      display: none;
+    }
+    #scene-list.visible { display: block; }
+    #scene-list .scene-item {
+      padding: 6px 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #0f3460;
+    }
+    #scene-list .scene-item:hover { background: #0f3460; }
+    #scene-list .scene-item.active { background: #533483; color: #fff; }
+    #scene-list .scene-item .scene-name { font-weight: bold; }
+    #scene-list .scene-item .scene-meta { color: #888; font-size: 10px; }
+
+    /* Info tooltip */
+    #tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      pointer-events: none;
+      display: none;
+      z-index: 20;
+      max-width: 300px;
+      font-family: monospace;
+    }
+
+    /* Drop zone */
+    #dropzone {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      background: rgba(26, 26, 46, 0.95);
+    }
+    #dropzone.hidden { display: none; }
+    #dropzone h2 { color: #e94560; margin-bottom: 16px; }
+    #dropzone p { color: #888; margin: 4px 0; font-size: 14px; }
+    #dropzone .drop-area {
+      border: 2px dashed #533483;
+      border-radius: 12px;
+      padding: 40px 60px;
+      text-align: center;
+      cursor: pointer;
+    }
+    #dropzone .drop-area:hover { border-color: #e94560; }
+    #dropzone .drop-area.dragover { background: rgba(83, 52, 131, 0.3); border-color: #e94560; }
+  </style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h1>VN-Studio</h1>
+  <button id="btn-load">Charger VND</button>
+  <button id="btn-load-res">Charger ressources</button>
+  <button id="btn-scenes">Scènes</button>
+  <button id="btn-prev">&larr;</button>
+  <select id="scene-select"></select>
+  <button id="btn-next">&rarr;</button>
+  <label><input type="checkbox" id="chk-polygons" checked> Polygones</label>
+  <label><input type="checkbox" id="chk-labels" checked> Labels</label>
+  <label><input type="checkbox" id="chk-fill"> Remplir</label>
+  <button id="btn-fullscreen">Plein écran</button>
+  <span id="scene-info"></span>
+</div>
+
+<div id="canvas-container">
+  <canvas id="game-canvas" width="640" height="480"></canvas>
+  <div id="scene-list"></div>
+  <div id="tooltip"></div>
+  <div id="dropzone">
+    <div class="drop-area" id="drop-area">
+      <h2>VN-Studio Demo</h2>
+      <p>Glissez un fichier .vnd ici</p>
+      <p>ou cliquez pour sélectionner</p>
+      <p style="margin-top:16px;font-size:11px;color:#666">
+        Optionnel: glissez aussi un dossier de ressources (BMP, WAV)
+      </p>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".vnd" style="display:none">
+<input type="file" id="res-input" webkitdirectory style="display:none">
+
+<script>
+// =============================================================================
+// VND PARSER (inline, exact copy of parse-vnd-universal.js logic)
+// =============================================================================
+
+function readBS(buf, o) {
+  if (o + 4 > buf.byteLength) return null;
+  var view = new DataView(buf);
+  var len = view.getUint32(o, true);
+  if (len === 0) return { s: '', l: 4 };
+  if (len > 100000 || o + 4 + len > buf.byteLength) return null;
+  var bytes = new Uint8Array(buf, o + 4, len);
+  var s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return { s: s, l: 4 + len };
+}
+
+function readObject(buf, view, p) {
+  var type = view.getUint32(p, true); p += 4;
+  var bs = readBS(buf, p);
+  var str = bs ? bs.s : '';
+  p += bs ? bs.l : 4;
+  return { type: type, string: str, endPos: p };
+}
+
+function readStringCollection(buf, view, p) {
+  var count = view.getUint32(p, true); p += 4;
+  var items = [];
+  for (var i = 0; i < count; i++) {
+    var subIndex = view.getUint32(p, true); p += 4;
+    var obj = readObject(buf, view, p);
+    items.push({ subIndex: subIndex, type: obj.type, string: obj.string });
+    p = obj.endPos;
+  }
+  return { items: items, endPos: p };
+}
+
+function readCommand(buf, view, p, streamVersion) {
+  var strCol = readStringCollection(buf, view, p);
+  p = strCol.endPos;
+  var commandType = view.getUint32(p, true); p += 4;
+  var paramPairCount = view.getUint32(p, true); p += 4;
+  var paramPairs = [];
+  if (paramPairCount > 0 && paramPairCount < 10000) {
+    for (var i = 0; i < paramPairCount; i++) {
+      var a = view.getInt32(p, true); p += 4;
+      var b = view.getInt32(p, true); p += 4;
+      paramPairs.push({ a: a, b: b });
+    }
+  }
+  var flags = 0;
+  if (streamVersion >= 0x2000c) {
+    flags = view.getUint32(p, true); p += 4;
+  }
+  return { strings: strCol.items, commandType: commandType, paramPairCount: paramPairCount, paramPairs: paramPairs, flags: flags, endPos: p };
+}
+
+function readContentCollection(buf, view, p, sv) {
+  var count = view.getUint32(p, true); p += 4;
+  var cmds = [];
+  for (var i = 0; i < count; i++) {
+    var cmd = readCommand(buf, view, p, sv);
+    cmds.push(cmd); p = cmd.endPos;
+  }
+  return { commands: cmds, endPos: p };
+}
+
+function readScene(buf, view, p, sv) {
+  var nameBS = readBS(buf, p); if (!nameBS) return null; p += nameBS.l;
+  var flagBytes = []; for (var fb = 0; fb < 4; fb++) flagBytes.push(new Uint8Array(buf)[p + fb]); p += 4;
+  var prop1 = view.getUint32(p, true); p += 4;
+  var prop2 = view.getUint32(p, true); p += 4;
+  var prop3 = view.getUint32(p, true); p += 4;
+
+  var s1 = readBS(buf, p); p += s1 ? s1.l : 4;
+  var s2 = readBS(buf, p); p += s2 ? s2.l : 4;
+  var val1 = view.getUint32(p, true); p += 4;
+  var s3 = readBS(buf, p); p += s3 ? s3.l : 4;
+  var val2 = view.getUint32(p, true); p += 4;
+  var s4 = readBS(buf, p); p += s4 ? s4.l : 4;
+  var val3 = view.getUint32(p, true); p += 4;
+  var s5 = readBS(buf, p); p += s5 ? s5.l : 4;
+  var val4 = view.getUint32(p, true); p += 4;
+  var s6 = readBS(buf, p); p += s6 ? s6.l : 4;
+  var val5 = view.getUint32(p, true); p += 4;
+
+  var rect = {
+    left: view.getInt32(p, true), top: view.getInt32(p+4, true),
+    right: view.getInt32(p+8, true), bottom: view.getInt32(p+12, true)
+  }; p += 16;
+
+  view.getUint32(p, true); p += 4; // val6
+
+  var hotspotCount = view.getUint32(p, true); p += 4;
+  var hotspot = null;
+  if (hotspotCount > 0) {
+    var timerValue = view.getUint32(p, true); p += 4;
+    var collCount = view.getUint32(p, true); p += 4;
+    var objects = [];
+    for (var hi = 0; hi < collCount; hi++) {
+      var obj = readObject(buf, view, p);
+      objects.push({ type: obj.type, string: obj.string });
+      p = obj.endPos;
+    }
+    hotspot = { timerValue: timerValue, objects: objects };
+  }
+
+  var cmdListValue = view.getInt32(p, true); p += 4;
+  var cmdListData = [];
+  if (cmdListValue !== 0) {
+    for (var ci = 0; ci < 5; ci++) { cmdListData.push(view.getUint32(p, true)); p += 4; }
+  }
+
+  var contentCol = readContentCollection(buf, view, p, sv);
+  p = contentCol.endPos;
+
+  return {
+    name: nameBS.s, flagBytes: flagBytes, prop1: prop1, prop2: prop2, prop3: prop3,
+    fields: {
+      string1: s1 ? s1.s : '', string2: s2 ? s2.s : '', val1: val1,
+      string3: s3 ? s3.s : '', val2: val2, string4: s4 ? s4.s : '', val3: val3,
+      resource: s5 ? s5.s : '', val4: val4, string6: s6 ? s6.s : '', val5: val5
+    },
+    rect: rect, hotspotCount: hotspotCount, hotspot: hotspot,
+    cmdListValue: cmdListValue, cmdListData: cmdListData,
+    commands: contentCol.commands, endPos: p
+  };
+}
+
+function parseVND(arrayBuffer) {
+  var buf = arrayBuffer;
+  var view = new DataView(buf);
+  var p = 5; // skip stream header
+
+  var magic = readBS(buf, p); p += magic.l;
+  if (magic.s !== 'VNFILE') throw new Error('Invalid magic: ' + magic.s);
+  var version = readBS(buf, p); p += version.l;
+  var sceneCount = view.getUint32(p, true); p += 4;
+  var projectName = readBS(buf, p); p += projectName.l;
+  var editor = readBS(buf, p); p += editor.l;
+  var serial = readBS(buf, p); p += serial.l;
+  var projectIDStr = readBS(buf, p); p += projectIDStr.l;
+  var registry = readBS(buf, p); p += registry.l;
+  var width = view.getUint32(p, true); p += 4;
+  var height = view.getUint32(p, true); p += 4;
+  var depth = view.getUint32(p, true); p += 4;
+  var flag = view.getUint32(p, true); p += 4;
+  var u1 = view.getUint32(p, true); p += 4;
+  var u2 = view.getUint32(p, true); p += 4;
+  var reserved = view.getUint32(p, true); p += 4;
+  var dllPath = readBS(buf, p); p += dllPath.l;
+  var varCount = view.getUint32(p, true); p += 4;
+
+  var vars = [];
+  for (var vi = 0; vi < varCount; vi++) {
+    var vname = readBS(buf, p); p += vname.l;
+    var vval = view.getUint32(p, true); p += 4;
+    vars.push({ name: vname.s, value: vval });
+  }
+
+  var vp = version.s.split('.');
+  var sv = (parseInt(vp[0]) << 16) | parseInt(vp[1] || '0');
+
+  var scenes = [];
+  for (var si = 0; si < sceneCount; si++) {
+    var scene = readScene(buf, view, p, sv);
+    if (!scene) break;
+    scenes.push(scene); p = scene.endPos;
+  }
+
+  return {
+    header: {
+      magic: magic.s, version: version.s, sceneCount: sceneCount,
+      projectName: projectName.s, editor: editor.s,
+      width: width, height: height, depth: depth
+    },
+    variables: vars, scenes: scenes,
+    bytesRemaining: buf.byteLength - p
+  };
+}
+
+// =============================================================================
+// COMMANDE TYPES
+// =============================================================================
+
+var CMD_NAMES = {
+  0:'QUIT', 1:'ABOUT', 2:'PREFS', 3:'PREV', 4:'NEXT', 5:'ZOOM',
+  6:'SCENE', 7:'HOTSPOT', 8:'TIPTEXT', 9:'PLAYAVI', 10:'PLAYBMP',
+  11:'PLAYWAV', 12:'PLAYMID', 13:'PLAYHTML', 14:'ZOOMIN', 15:'ZOOMOUT',
+  16:'PAUSE', 17:'EXEC', 18:'EXPLORE', 19:'PLAYCDA', 20:'PLAYSEQ',
+  21:'IF', 22:'SET_VAR', 23:'INC_VAR', 24:'DEC_VAR', 25:'INVALIDATE',
+  26:'DEFCURSOR', 27:'ADDBMP', 28:'DELBMP', 29:'SHOWBMP', 30:'HIDEBMP',
+  31:'RUNPRJ', 32:'UPDATE', 33:'RUNDLL', 34:'MSGBOX', 35:'PLAYCMD',
+  36:'CLOSEWAV', 37:'CLOSEDLL', 38:'PLAYTEXT', 39:'FONT', 40:'REM',
+  41:'ADDTEXT', 42:'DELOBJ', 43:'SHOWOBJ', 44:'HIDEOBJ',
+  45:'LOAD', 46:'SAVE', 47:'CLOSEAVI', 48:'CLOSEMID', 105:'POLYGON'
+};
+
+// Couleurs de polygones par type de commande
+var POLY_COLORS = {
+  100: 'rgba(255,100,100,0.4)',
+  101: 'rgba(100,255,100,0.4)',
+  103: 'rgba(255,255,100,0.4)',
+  105: 'rgba(100,150,255,0.4)',
+  106: 'rgba(255,150,100,0.4)',
+  107: 'rgba(150,100,255,0.4)',
+  108: 'rgba(100,255,200,0.4)',
+};
+var POLY_STROKE = {
+  100: '#ff6464',
+  101: '#64ff64',
+  103: '#ffff64',
+  105: '#6496ff',
+  106: '#ff9664',
+  107: '#9664ff',
+  108: '#64ffc8',
+};
+
+// =============================================================================
+// APP STATE
+// =============================================================================
+
+var project = null;
+var currentSceneIndex = -1;
+var resources = {}; // path -> Image
+var showPolygons = true;
+var showLabels = true;
+var fillPolygons = false;
+var hoveredCmd = null;
+
+var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+var container = document.getElementById('canvas-container');
+
+// =============================================================================
+// CANVAS SCALING (640x480 interne, CSS plein conteneur)
+// =============================================================================
+
+function resizeCanvas() {
+  var cw = container.clientWidth;
+  var ch = container.clientHeight;
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scale = Math.min(cw / gameW, ch / gameH);
+  var dispW = Math.floor(gameW * scale);
+  var dispH = Math.floor(gameH * scale);
+  canvas.style.width = dispW + 'px';
+  canvas.style.height = dispH + 'px';
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+// Convertir coordonnées écran -> coordonnées jeu
+function screenToGame(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = gameW / rect.width;
+  var scaleY = gameH / rect.height;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+// =============================================================================
+// RENDU
+// =============================================================================
+
+function render() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var w = project.header.width;
+  var h = project.header.height;
+
+  // Fond
+  ctx.fillStyle = '#2a2a4a';
+  ctx.fillRect(0, 0, w, h);
+
+  // Image de fond si disponible
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  if (resources[resKey]) {
+    ctx.drawImage(resources[resKey], 0, 0, w, h);
+  } else if (scene.fields.resource) {
+    // Fond placeholder avec nom de ressource
+    ctx.fillStyle = '#1a1a3a';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#444';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Resource: ' + scene.fields.resource, w/2, h/2);
+    ctx.textAlign = 'start';
+  }
+
+  // Polygones
+  if (showPolygons) {
+    scene.commands.forEach(function(cmd, idx) {
+      if (cmd.paramPairs.length < 3) return;
+      var color = POLY_COLORS[cmd.commandType] || 'rgba(200,200,200,0.3)';
+      var stroke = POLY_STROKE[cmd.commandType] || '#ccc';
+
+      ctx.beginPath();
+      ctx.moveTo(cmd.paramPairs[0].a, cmd.paramPairs[0].b);
+      for (var i = 1; i < cmd.paramPairs.length; i++) {
+        ctx.lineTo(cmd.paramPairs[i].a, cmd.paramPairs[i].b);
+      }
+      ctx.closePath();
+
+      if (fillPolygons || cmd === hoveredCmd) {
+        ctx.fillStyle = cmd === hoveredCmd ? 'rgba(255,255,255,0.3)' : color;
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = cmd === hoveredCmd ? '#fff' : stroke;
+      ctx.lineWidth = cmd === hoveredCmd ? 2.5 : 1.5;
+      ctx.stroke();
+
+      // Labels
+      if (showLabels) {
+        var cx = 0, cy = 0;
+        cmd.paramPairs.forEach(function(p) { cx += p.a; cy += p.b; });
+        cx /= cmd.paramPairs.length;
+        cy /= cmd.paramPairs.length;
+
+        var label = CMD_NAMES[cmd.commandType] || ('CMD_' + cmd.commandType);
+        // Extraire le nom de scène si SCENE string
+        var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
+        if (sceneStr) label = sceneStr.string;
+
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        var tw = ctx.measureText(label).width;
+        ctx.fillRect(cx - tw/2 - 2, cy - 6, tw + 4, 14);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, cx, cy + 4);
+        ctx.textAlign = 'start';
+      }
+    });
+  }
+
+  // Info scène
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, 0, w, 22);
+  ctx.font = '12px monospace';
+  ctx.fillStyle = '#e94560';
+  ctx.fillText('Scene ' + currentSceneIndex + '/' + (project.scenes.length - 1) + ': "' + scene.name + '"', 8, 15);
+  var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
+  if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
+  ctx.fillStyle = '#888';
+  ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+}
+
+// =============================================================================
+// HIT TESTING
+// =============================================================================
+
+function pointInPolygon(x, y, pairs) {
+  if (pairs.length < 3) return false;
+  var inside = false;
+  for (var i = 0, j = pairs.length - 1; i < pairs.length; j = i++) {
+    var xi = pairs[i].a, yi = pairs[i].b;
+    var xj = pairs[j].a, yj = pairs[j].b;
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function findCommandAtPoint(x, y) {
+  if (!project || currentSceneIndex < 0) return null;
+  var scene = project.scenes[currentSceneIndex];
+  for (var i = scene.commands.length - 1; i >= 0; i--) {
+    var cmd = scene.commands[i];
+    if (cmd.paramPairs.length >= 3 && pointInPolygon(x, y, cmd.paramPairs)) {
+      return cmd;
+    }
+  }
+  return null;
+}
+
+// =============================================================================
+// INTERACTIONS
+// =============================================================================
+
+canvas.addEventListener('mousemove', function(e) {
+  var pos = screenToGame(e.clientX, e.clientY);
+  var cmd = findCommandAtPoint(pos.x, pos.y);
+
+  if (cmd !== hoveredCmd) {
+    hoveredCmd = cmd;
+    canvas.style.cursor = cmd ? 'pointer' : 'default';
+    render();
+  }
+
+  // Tooltip
+  var tooltip = document.getElementById('tooltip');
+  if (cmd) {
+    var lines = [CMD_NAMES[cmd.commandType] || 'CMD_' + cmd.commandType];
+    cmd.strings.forEach(function(s) {
+      lines.push('  [' + s.type + '] ' + s.string);
+    });
+    if (cmd.flags) lines.push('  flags=' + cmd.flags);
+    tooltip.textContent = lines.join('\n');
+    tooltip.style.whiteSpace = 'pre';
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY + 12) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+canvas.addEventListener('click', function(e) {
+  var pos = screenToGame(e.clientX, e.clientY);
+  var cmd = findCommandAtPoint(pos.x, pos.y);
+  if (!cmd) return;
+
+  console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
+
+  // Chercher une action SCENE dans les strings
+  var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
+  if (sceneStr && sceneStr.string) {
+    var targetScene = project.scenes.findIndex(function(s) {
+      return s.name.toLowerCase() === sceneStr.string.toLowerCase();
+    });
+    if (targetScene >= 0) {
+      goToScene(targetScene);
+      return;
+    }
+  }
+
+  // Chercher un RUNPRJ
+  var runPrj = cmd.strings.find(function(s) { return s.type === 31; });
+  if (runPrj && runPrj.string) {
+    console.log('RUNPRJ:', runPrj.string);
+    // Pourrait charger un autre VND
+  }
+});
+
+// =============================================================================
+// NAVIGATION
+// =============================================================================
+
+function goToScene(index) {
+  if (!project || index < 0 || index >= project.scenes.length) return;
+  currentSceneIndex = index;
+  updateUI();
+  render();
+}
+
+function updateUI() {
+  if (!project) return;
+  var scene = project.scenes[currentSceneIndex];
+  var select = document.getElementById('scene-select');
+  select.value = currentSceneIndex;
+
+  document.getElementById('scene-info').textContent =
+    project.header.projectName + ' - ' + project.header.width + 'x' + project.header.height;
+
+  // Scene list
+  var items = document.querySelectorAll('#scene-list .scene-item');
+  items.forEach(function(el, i) {
+    el.classList.toggle('active', i === currentSceneIndex);
+  });
+}
+
+// =============================================================================
+// CHARGEMENT VND
+// =============================================================================
+
+function loadVNDFile(arrayBuffer, fileName) {
+  try {
+    project = parseVND(arrayBuffer);
+    console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
+
+    // Setup canvas internal size
+    canvas.width = project.header.width;
+    canvas.height = project.header.height;
+    resizeCanvas();
+
+    // Scene select
+    var select = document.getElementById('scene-select');
+    select.innerHTML = '';
+    project.scenes.forEach(function(s, i) {
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = i + ': ' + (s.name || '(vide)');
+      select.appendChild(opt);
+    });
+
+    // Scene list
+    var list = document.getElementById('scene-list');
+    list.innerHTML = '';
+    project.scenes.forEach(function(s, i) {
+      var div = document.createElement('div');
+      div.className = 'scene-item';
+      var cmdCount = s.commands.length;
+      var polyCount = s.commands.filter(function(c) { return c.paramPairs.length > 0; }).length;
+      div.innerHTML = '<div class="scene-name">' + i + ': ' + (s.name || '(vide)') + '</div>' +
+        '<div class="scene-meta">' + cmdCount + ' cmds, ' + polyCount + ' polys' +
+        (s.fields.resource ? ', res: ' + s.fields.resource : '') +
+        (s.hotspot ? ', hotspot t=' + s.hotspot.timerValue : '') + '</div>';
+      div.onclick = function() { goToScene(i); };
+      list.appendChild(div);
+    });
+
+    // Cacher la dropzone
+    document.getElementById('dropzone').classList.add('hidden');
+
+    // Aller à la première scène
+    goToScene(0);
+
+  } catch (e) {
+    alert('Erreur de chargement: ' + e.message);
+    console.error(e);
+  }
+}
+
+// =============================================================================
+// CHARGEMENT RESSOURCES
+// =============================================================================
+
+function loadResourceFiles(fileList) {
+  Array.from(fileList).forEach(function(file) {
+    var name = file.name.toLowerCase();
+    if (!name.endsWith('.bmp') && !name.endsWith('.jpg') && !name.endsWith('.png')) return;
+
+    var path = (file.webkitRelativePath || file.name).toLowerCase().replace(/\\/g, '/');
+    // Garder le chemin relatif (ex: "interface/jeu.bmp")
+    var parts = path.split('/');
+    // Stocker sous différentes clés pour maximiser les chances de match
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        // Clé = nom du fichier
+        resources[name] = img;
+        // Clé = chemin relatif depuis le dernier dossier connu
+        for (var i = 0; i < parts.length; i++) {
+          resources[parts.slice(i).join('/')] = img;
+        }
+        console.log('Loaded resource:', path);
+        render(); // Re-render si on est déjà sur une scène
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// =============================================================================
+// EVENT HANDLERS
+// =============================================================================
+
+// File input
+document.getElementById('file-input').addEventListener('change', function(e) {
+  if (e.target.files.length > 0) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev) { loadVNDFile(ev.target.result, file.name); };
+    reader.readAsArrayBuffer(file);
+  }
+});
+
+document.getElementById('res-input').addEventListener('change', function(e) {
+  if (e.target.files.length > 0) loadResourceFiles(e.target.files);
+});
+
+// Buttons
+document.getElementById('btn-load').onclick = function() { document.getElementById('file-input').click(); };
+document.getElementById('btn-load-res').onclick = function() { document.getElementById('res-input').click(); };
+document.getElementById('btn-prev').onclick = function() { if (currentSceneIndex > 0) goToScene(currentSceneIndex - 1); };
+document.getElementById('btn-next').onclick = function() { if (project && currentSceneIndex < project.scenes.length - 1) goToScene(currentSceneIndex + 1); };
+document.getElementById('scene-select').onchange = function(e) { goToScene(parseInt(e.target.value)); };
+
+document.getElementById('btn-scenes').onclick = function() {
+  document.getElementById('scene-list').classList.toggle('visible');
+};
+
+document.getElementById('chk-polygons').onchange = function(e) { showPolygons = e.target.checked; render(); };
+document.getElementById('chk-labels').onchange = function(e) { showLabels = e.target.checked; render(); };
+document.getElementById('chk-fill').onchange = function(e) { fillPolygons = e.target.checked; render(); };
+
+// Fullscreen
+document.getElementById('btn-fullscreen').onclick = function() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen();
+  }
+};
+document.addEventListener('fullscreenchange', function() {
+  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
+  setTimeout(resizeCanvas, 100);
+});
+
+// Drag & drop
+var dropArea = document.getElementById('drop-area');
+dropArea.onclick = function() { document.getElementById('file-input').click(); };
+
+['dragenter', 'dragover'].forEach(function(ev) {
+  document.body.addEventListener(ev, function(e) {
+    e.preventDefault();
+    dropArea.classList.add('dragover');
+  });
+});
+['dragleave', 'drop'].forEach(function(ev) {
+  document.body.addEventListener(ev, function(e) {
+    e.preventDefault();
+    dropArea.classList.remove('dragover');
+  });
+});
+document.body.addEventListener('drop', function(e) {
+  e.preventDefault();
+  var files = e.dataTransfer.files;
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].name.toLowerCase().endsWith('.vnd')) {
+      var reader = new FileReader();
+      var file = files[i];
+      reader.onload = function(ev) { loadVNDFile(ev.target.result, file.name); };
+      reader.readAsArrayBuffer(file);
+    }
+  }
+});
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (!project) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (currentSceneIndex > 0) goToScene(currentSceneIndex - 1);
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (currentSceneIndex < project.scenes.length - 1) goToScene(currentSceneIndex + 1);
+    e.preventDefault();
+  } else if (e.key === 'f' || e.key === 'F') {
+    document.getElementById('btn-fullscreen').click();
+  } else if (e.key === 'p' || e.key === 'P') {
+    document.getElementById('chk-polygons').click();
+  } else if (e.key === 'l' || e.key === 'L') {
+    document.getElementById('chk-labels').click();
+  }
+});
+
+// Initial resize
+resizeCanvas();
+</script>
+</body>
+</html>

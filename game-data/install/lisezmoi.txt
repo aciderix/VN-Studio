@@ -1,0 +1,145 @@
+LISEZMOI.TXT / EUROPEO
+
+---------------------------------------------------------------------------
+SOMMAIRE
+---------------------------------------------------------------------------
+- CONFIGURATION MINIMALE
+- LANCER L’INSTALLATION
+- LES DIFFERENTS TYPES D’INSTALLATIONS 
+- L’INSTALLATION MANUELLE DE Microsoft DirectX 6
+- LANCEMENT MANUEL DE "Europeo"
+- QUESTIONS / REPONSES
+
+
+---------------------------------------------------------------------------
+CONFIGURATION MINIMALE
+---------------------------------------------------------------------------
+La configuration minimale de l'ordinateur pour que fonctionne 
+"Europeo", doit être la suivante :
+
+Système d'exploitation :   Windows 95/98 ou ultérieur
+Processeur :               Pentium 90 MHz
+Mémoire :                  16 Mo de mémoire RAM
+CD-Rom. :                  Lecteur de CD-ROM quadruple vitesse
+Carte graphique :          Carte graphique PCI en milliers de couleurs
+Carte sonore :             Carte sonore 16 bits
+Disque dur :               40 Mo d'espace libre
+
+
+---------------------------------------------------------------------------
+LANCER L’INSTALLATION
+---------------------------------------------------------------------------
+Insérez le cédérom "Europeo" dans le lecteur de cédéroms. 
+La procédure d'installation devrait démarrer automatiquement.
+
+1. Ferme toutes les fenêtres ouvertes sur ton bureau et quitte toutes les 
+applications en cours d'exécution.
+
+2. Insère le CD "Europeo" dans le lecteur de cédéroms.
+
+3. Le programme d'installation démarre automatiquement. Suis attentivement 
+les indications affichées à l'écran. Si le programme d'installation ne se 
+lance pas automatiquement, ouvre le poste de travail et double-clique sur 
+l'icone de ton lecteur de cédéroms puis sur le programme d'installation 
+(setup.exe).
+
+4. Trois types d'installation sont proposés, l'installation minimale, 
+personnalisée et complète. L'installation minimale nécessite peu d'espace 
+libre sur ton disque dur mais elle offre de moins bonnes performances 
+qu'une installation complète, beaucoup plus gourmande en espace disque. 
+Si tu es connaisseur, utilise l'installation personnalisée, elle te 
+permet de choisir les éléments à installer sur ton disque dur. Vérifie 
+qu'il reste suffisamment d'espace libre sur ton disque dur, l'espace 
+nécessaire et l'espace libre de ton disque dur sont indiqués dans le 
+programme d'installation.
+
+5. Le programme propose d'installer DirectX 6 pour le fonctionnement du 
+jeu, si tu ne possèdes pas cette version, installe-la sur ton ordinateur. 
+Windows 98 2ème édition et Windows 2000 possèdent DirectX 6, il est donc 
+inutile de l'installer.
+
+6. Te voilà prêt à partir dans le monde de "Europeo". L’installation 
+terminée, une icône "Europeo" est créée sur le bureau de Windows. Il 
+suffit alors de cliquer sur cette icône pour lancer le jeu "Europeo".
+
+Si le lancement automatique de l’installation ne se fait pas, placez 
+vous à la racine du cédérom et double-cliquez sur le fichier SETUP.EXE
+Suivez les informations affichées à l'écran.
+
+Remarque importante : Le jeu "Europeo" ne se lance que si le cédérom 
+original est présent dans le lecteur ceci quelque soit le type 
+d’installation effectuée.
+
+
+---------------------------------------------------------------------------
+L’INSTALLATION MANUELLE DE Microsoft DirectX 6
+---------------------------------------------------------------------------
+
+A la fin de l’installation, le programme vous demande s’il faut ajouter
+Microsoft DirectX 6. Microsoft DirectX 6 est un programme particulier qui 
+permet d’optimiser l’affichage de "Europeo" . Acceptez l’installation de 
+Microsoft DirectX 6 sur votre machine s’il ne s’y trouve déjà ou si votre 
+version est plus ancienne. 
+
+Si pour différentes raisons, vous êtes dans l’obligation de réinstaller 
+Microsoft DirectX 6, suivez la procédure manuelle suivante : placez-vous
+dans le répertoire INSTALL du cédérom et double-cliquez sur le fichier 
+DX61FRN.EXE
+
+Suivez les informations affichées à l'écran.
+
+Windows 98 2ème édition et Windows 2000 possèdent déjà DirectX 6, il est 
+donc inutile de l'installer pour faire fonctionner "Europeo".
+
+
+---------------------------------------------------------------------------
+LANCEMENT MANUEL DE "Europeo"
+---------------------------------------------------------------------------
+Pour lancer manuellement "Europeo", placez vous sur le cédérom ou dans le 
+répertoire d'installation puis dans le répertoire FRONTAL. Double-cliquez 
+alors sur le fichier EUROPEO.EXE.
+
+
+---------------------------------------------------------------------------
+QUESTIONS / REPONSES
+---------------------------------------------------------------------------
+Une connaissance imparfaite de votre ordinateur peut occasionner certains 
+petits tracas. Ces problèmes souvent liés au matériel peuvent être résolus 
+très rapidement.
+
+« Je n’entends aucun son durant le jeu. »
+
+Assurez-vous que les hauts parleurs sont bien branchés et alimentés en 
+courant. Si la carte a été bien installée et que le problème persiste, le 
+réglage du volume est peut-être en cause. Le réglage du volume général de 
+l’ordinateur est accessible :
+1 - en appuyant sur le haut parleur de la barre des tâches de Windows
+2 - en utilisant le curseur de réglage du volume de "Europeo" accessible 
+    par l’icône "ordinateur" de la barre de navigation.
+
+
+« Les textes affichés sont coupés et parfois trop gros. »
+
+Certaines cartes graphiques mal configurées affichent parfois des
+informations déformées ou mal alignées. Si les textes sont mal affichés,
+vérifiez que l’option "Grandes polices" de votre système n’est pas
+sélectionnée. Si c’est le cas, changez la configuration de votre carte
+graphique et utilisez l'option "Petites polices". Pour changer la taille
+des caractères avec Windows 95 ou 98 (passage de grands caractères à de
+petits caractères) utilisez le menu "Démarrer", choisissez  "Paramètres",
+puis "Panneau de configuration". La fenêtre "Panneau de configuration"
+s'affiche, double-cliquez sur l'icône "Affichage". La fenêtre
+"Propriétés de l'affichage" s'affiche, cliquez sur l'onglet
+"Configuration" ou "Paramètres". Dans certains cas cliquez sur le bouton
+"Avancé". Choisissez dans la liste "Taille de la police", l'élément
+"Petites polices". Validez votre choix en cliquant sur le bouton OK.
+
+« J’ai installé "Europeo" dans sa version complète sur disque, les vidéos 
+sont saccadées. »
+
+D’autres applications s’exécutant simultanément sous Windows peuvent 
+requérir des ressources importantes : il est donc conseillé de fermer 
+toutes ces applications quand vous jouez à "Europeo".
+
+
+Toutes les marques citées sont déposées par leurs propriétaires respectifs.

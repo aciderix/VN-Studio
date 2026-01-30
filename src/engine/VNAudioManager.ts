@@ -9,7 +9,8 @@
  * Utilise Web Audio API pour le rendu moderne
  */
 
-import { VNEventType, VNEvent } from '../types/vn.types';
+// Types VN disponibles si nécessaire pour les événements
+// import { VNEventType } from '../types/vn.types';
 
 // Types de média
 export enum MediaType {
@@ -466,7 +467,6 @@ export class VNAudioManager {
       this.currentCdaAudio.volume = 1.0;
 
       let loaded = false;
-      let loadedPath = '';
 
       for (const name of possibleNames) {
         try {
@@ -482,7 +482,6 @@ export class VNAudioManager {
             setTimeout(() => reject(new Error('Timeout')), 2000);
           });
           loaded = true;
-          loadedPath = path;
           break;
         } catch {
           continue;

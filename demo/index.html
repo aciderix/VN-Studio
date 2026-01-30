@@ -63,7 +63,7 @@
       justify-content: center;
       background: #000;
       position: relative;
-      overflow: hidden;
+      overflow: auto;
     }
     #game-canvas {
       image-rendering: auto;
@@ -371,6 +371,19 @@ var CMD_NAMES = {
   45:'LOAD', 46:'SAVE', 47:'CLOSEAVI', 48:'CLOSEMID', 105:'POLYGON'
 };
 
+// Convertir 2 paires (rect top-left/bottom-right) en 4 coins
+function expandRect(pairs) {
+  if (pairs.length === 2) {
+    return [
+      { a: pairs[0].a, b: pairs[0].b },
+      { a: pairs[1].a, b: pairs[0].b },
+      { a: pairs[1].a, b: pairs[1].b },
+      { a: pairs[0].a, b: pairs[1].b }
+    ];
+  }
+  return pairs;
+}
+
 // Couleurs de polygones par type de commande
 var POLY_COLORS = {
   100: 'rgba(255,100,100,0.4)',
@@ -470,14 +483,15 @@ function render() {
   // Polygones
   if (showPolygons) {
     scene.commands.forEach(function(cmd, idx) {
-      if (cmd.paramPairs.length < 3) return;
+      if (cmd.paramPairs.length < 2) return;
+      var pts = expandRect(cmd.paramPairs);
       var color = POLY_COLORS[cmd.commandType] || 'rgba(200,200,200,0.3)';
       var stroke = POLY_STROKE[cmd.commandType] || '#ccc';
 
       ctx.beginPath();
-      ctx.moveTo(cmd.paramPairs[0].a, cmd.paramPairs[0].b);
-      for (var i = 1; i < cmd.paramPairs.length; i++) {
-        ctx.lineTo(cmd.paramPairs[i].a, cmd.paramPairs[i].b);
+      ctx.moveTo(pts[0].a, pts[0].b);
+      for (var i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].a, pts[i].b);
       }
       ctx.closePath();
 
@@ -493,9 +507,9 @@ function render() {
       // Labels
       if (showLabels) {
         var cx = 0, cy = 0;
-        cmd.paramPairs.forEach(function(p) { cx += p.a; cy += p.b; });
-        cx /= cmd.paramPairs.length;
-        cy /= cmd.paramPairs.length;
+        pts.forEach(function(p) { cx += p.a; cy += p.b; });
+        cx /= pts.length;
+        cy /= pts.length;
 
         var label = CMD_NAMES[cmd.commandType] || ('CMD_' + cmd.commandType);
         // Extraire le nom de scène si SCENE string
@@ -548,7 +562,7 @@ function findCommandAtPoint(x, y) {
   var scene = project.scenes[currentSceneIndex];
   for (var i = scene.commands.length - 1; i >= 0; i--) {
     var cmd = scene.commands[i];
-    if (cmd.paramPairs.length >= 3 && pointInPolygon(x, y, cmd.paramPairs)) {
+    if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
       return cmd;
     }
   }

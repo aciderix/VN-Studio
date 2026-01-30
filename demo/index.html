@@ -63,7 +63,7 @@
       justify-content: center;
       background: #000;
       position: relative;
-      overflow: auto;
+      overflow: hidden;
     }
     #game-canvas {
       image-rendering: auto;
@@ -952,6 +952,33 @@ window.addEventListener('mousemove', function(e) {
 });
 
 window.addEventListener('mouseup', function() { isDragging = false; });
+
+// Touch scroll pour mobile
+var touchStartX = 0;
+var touchStartScroll = 0;
+
+canvas.addEventListener('touchstart', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  if (getSceneWidth(scene) <= project.header.width) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartScroll = scrollX;
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+  var gameW = project.header.width;
+  if (sceneW <= gameW) return;
+  e.preventDefault();
+  var rect = canvas.getBoundingClientRect();
+  var scale = gameW / rect.width;
+  scrollX = touchStartScroll - (e.touches[0].clientX - touchStartX) * scale;
+  scrollX = Math.max(0, Math.min(scrollX, sceneW - gameW));
+  render();
+}, { passive: false });
 
 // Initial resize
 resizeCanvas();

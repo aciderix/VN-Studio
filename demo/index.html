@@ -575,6 +575,42 @@ function render() {
     });
   }
 
+  // PLAYTEXT overlay pour la commande survolée
+  if (hoveredCmd) {
+    var textStr = hoveredCmd.strings.find(function(s) { return s.type === 38; });
+    var fontStr = hoveredCmd.strings.find(function(s) { return s.type === 39; });
+    if (textStr && textStr.string) {
+      // Format type 38: "x y width height flags text"
+      var tp = textStr.string.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+(.+)$/);
+      if (tp) {
+        var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
+        var tw = parseInt(tp[3]) - tx, th = parseInt(tp[4]) - ty;
+        var text = tp[5];
+
+        // Font: "size flags color fontname"
+        var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
+        if (fontStr && fontStr.string) {
+          var fp = fontStr.string.match(/^(\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+          if (fp) {
+            fontSize = parseInt(fp[1]);
+            fontColor = fp[2];
+            fontName = fp[3];
+          }
+        }
+
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillRect(tx, ty, tw > 0 ? tw : 300, th > 0 ? th : fontSize + 8);
+
+        // Text
+        ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+        ctx.fillStyle = fontColor;
+        ctx.textAlign = 'start';
+        ctx.fillText(text, tx + 4, ty + fontSize + 2);
+      }
+    }
+  }
+
   ctx.restore(); // fin du scroll
 
   // Info scène (fixe, pas scrollée)
@@ -600,6 +636,121 @@ function render() {
     ctx.fillStyle = 'rgba(233,69,96,0.7)';
     ctx.fillRect(barX, barY, barW, barH);
   }
+}
+
+// =============================================================================
+// COMMAND EXECUTION ENGINE
+// =============================================================================
+
+// --- AUDIO ---
+var audioElements = {}; // key -> HTMLAudioElement
+
+function resolveWavPath(wavRef) {
+  var normalized = wavRef.toLowerCase().replace(/\\/g, '/');
+  var wavDir = 'digit/'; // default
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['WAV'] || '';
+    wavDir = dir.replace(/\\/g, '/');
+    if (wavDir && !wavDir.endsWith('/')) wavDir += '/';
+  }
+  return '/game-data/' + currentBasePath + wavDir + normalized;
+}
+
+function playWav(wavStr) {
+  // Format: "filename loop_count" ex: "music.wav 2"
+  var parts = wavStr.trim().split(/\s+/);
+  var file = parts[0];
+  var loops = parseInt(parts[1]) || 1;
+  var url = resolveWavPath(file);
+  var key = file.toLowerCase();
+
+  // Stopper si déjà en cours
+  if (audioElements[key]) {
+    audioElements[key].pause();
+    audioElements[key].currentTime = 0;
+  }
+
+  var audio = new Audio(url);
+  audio.loop = (loops > 1 || loops === 0); // 0 = infinite
+  audioElements[key] = audio;
+  audio.play().catch(function(e) { console.warn('Audio play failed:', url, e.message); });
+  console.log('PLAYWAV:', file, 'loops:', loops);
+}
+
+function stopAllAudio() {
+  Object.keys(audioElements).forEach(function(key) {
+    audioElements[key].pause();
+    audioElements[key].currentTime = 0;
+  });
+}
+
+// --- RUNPRJ ---
+// Map VNP path to VND_LIST entry
+// Input: "..\france\france.vnp 18" -> { entry, sceneIndex }
+function parseRunPrj(runPrjStr) {
+  var parts = runPrjStr.trim().split(/\s+/);
+  var vnpPath = parts[0].toLowerCase().replace(/\\/g, '/');
+  var sceneIdx = parseInt(parts[1]) || 1;
+
+  // Extract folder/name from path like "../france/france.vnp"
+  var match = vnpPath.match(/([^/]+)\/([^/]+)\.vnp$/);
+  if (!match) return null;
+
+  var folder = match[1];
+  var name = match[2];
+
+  // Find in VND_LIST
+  var entry = VND_LIST.find(function(e) {
+    return e.base.replace(/\/$/, '').toLowerCase() === folder ||
+           e.vnd.toLowerCase().indexOf(name + '.vnd') >= 0;
+  });
+
+  return entry ? { entry: entry, sceneIndex: sceneIdx } : null;
+}
+
+function executeRunPrj(runPrjStr) {
+  var parsed = parseRunPrj(runPrjStr);
+  if (!parsed) {
+    console.warn('RUNPRJ: cannot resolve', runPrjStr);
+    return;
+  }
+  console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
+  stopAllAudio();
+
+  // Load VNP config first
+  currentBasePath = parsed.entry.base;
+  fetch('/game-data/' + parsed.entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
+    currentVNPConfig = parseVNP(text);
+  }).catch(function() { currentVNPConfig = null; });
+
+  // Load VND then go to scene
+  var targetScene = parsed.sceneIndex;
+  fetch('/game-data/' + parsed.entry.vnd).then(function(r) {
+    return r.arrayBuffer();
+  }).then(function(buf) {
+    loadVNDFile(buf, parsed.entry.vnd);
+    // Scene index is 1-based
+    if (targetScene >= 1 && (targetScene - 1) < project.scenes.length) {
+      goToScene(targetScene - 1);
+    }
+    // Update VND selector
+    var vndIdx = VND_LIST.indexOf(parsed.entry);
+    if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
+  }).catch(function(e) {
+    console.error('RUNPRJ load failed:', e);
+  });
+}
+
+// --- PLAYTEXT ---
+// Exécuter les commandes non-interactives d'une scène (au chargement)
+function executeSceneCommands(scene) {
+  scene.commands.forEach(function(cmd) {
+    // PLAYWAV (type 11 in strings)
+    var wavStr = cmd.strings.find(function(s) { return s.type === 11; });
+    if (wavStr && wavStr.string) {
+      playWav(wavStr.string);
+    }
+  });
 }
 
 // =============================================================================
@@ -685,23 +836,18 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
-canvas.addEventListener('click', function(e) {
-  var pos = screenToGame(e.clientX, e.clientY);
-  var cmd = findClickableCommandAtPoint(pos.x, pos.y);
-  if (!cmd) return;
-
+// Action commune clic / tap
+function handleCommandClick(cmd) {
   console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
 
-  // Chercher une action SCENE dans les strings (type 6 = scène cible)
+  // Chercher une action SCENE (type 6)
   var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
   if (sceneStr && sceneStr.string) {
-    // Index 1-based dans le format VND → convertir en 0-based
     var idx = parseInt(sceneStr.string, 10);
     if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
       goToScene(idx - 1);
       return;
     }
-    // Sinon essayer par nom
     var targetScene = project.scenes.findIndex(function(s) {
       return s.name.toLowerCase() === sceneStr.string.toLowerCase();
     });
@@ -711,12 +857,19 @@ canvas.addEventListener('click', function(e) {
     }
   }
 
-  // Chercher un RUNPRJ
+  // RUNPRJ (type 31)
   var runPrj = cmd.strings.find(function(s) { return s.type === 31; });
   if (runPrj && runPrj.string) {
-    console.log('RUNPRJ:', runPrj.string);
-    // Pourrait charger un autre VND
+    executeRunPrj(runPrj.string);
+    return;
   }
+}
+
+canvas.addEventListener('click', function(e) {
+  var pos = screenToGame(e.clientX, e.clientY);
+  var cmd = findClickableCommandAtPoint(pos.x, pos.y);
+  if (!cmd) return;
+  handleCommandClick(cmd);
 });
 
 // =============================================================================
@@ -728,6 +881,7 @@ function goToScene(index) {
   currentSceneIndex = index;
   scrollX = 0;
   loadSceneBackground(project.scenes[index]);
+  executeSceneCommands(project.scenes[index]);
   updateUI();
   resizeCanvas();
 }
@@ -1115,18 +1269,7 @@ canvas.addEventListener('touchend', function(e) {
   var pos = screenToGame(touch.clientX, touch.clientY);
   var cmd = findClickableCommandAtPoint(pos.x, pos.y);
   if (!cmd) return;
-  var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
-  if (sceneStr && sceneStr.string) {
-    var idx = parseInt(sceneStr.string, 10);
-    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
-      goToScene(idx - 1);
-      return;
-    }
-    var targetScene = project.scenes.findIndex(function(s) {
-      return s.name.toLowerCase() === sceneStr.string.toLowerCase();
-    });
-    if (targetScene >= 0) goToScene(targetScene);
-  }
+  handleCommandClick(cmd);
 }, { passive: false });
 
 // Initial resize

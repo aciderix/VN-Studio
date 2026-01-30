@@ -56,4 +56,3 @@ export {
   vnFileLoader,
   VNFileError,
 } from './VNFileLoader';
-export type { VNDataFile, VNResource, VNSaveData } from './VNFileLoader';

@@ -147,8 +147,9 @@
 
 <div id="toolbar">
   <h1>VN-Studio</h1>
-  <button id="btn-load">Charger VND</button>
-  <button id="btn-load-res">Charger ressources</button>
+  <select id="vnd-select"><option value="">-- Charger VND --</option></select>
+  <button id="btn-load">Fichier local</button>
+  <button id="btn-load-res">Ressources locales</button>
   <button id="btn-scenes">Scènes</button>
   <button id="btn-prev">&larr;</button>
   <select id="scene-select"></select>
@@ -435,6 +436,12 @@ var container = document.getElementById('canvas-container');
 function getSceneWidth(scene) {
   var w = project ? project.header.width : 640;
   if (!scene) return w;
+  // Utiliser la largeur de l'image de fond si chargée
+  var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
+  if (resources[resKey] && resources[resKey].naturalWidth > w) {
+    w = resources[resKey].naturalWidth;
+  }
+  // Fallback: max X des polygones
   scene.commands.forEach(function(cmd) {
     cmd.paramPairs.forEach(function(p) {
       if (p.a > w) w = p.a + 1;
@@ -501,7 +508,7 @@ function render() {
   // Image de fond si disponible
   var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
   if (resources[resKey]) {
-    ctx.drawImage(resources[resKey], 0, 0, w, h);
+    ctx.drawImage(resources[resKey], 0, 0);
   } else if (scene.fields.resource) {
     // Fond placeholder avec nom de ressource
     ctx.fillStyle = '#1a1a3a';
@@ -719,7 +726,8 @@ canvas.addEventListener('click', function(e) {
 function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
-  scrollX = 0; // reset scroll on scene change
+  scrollX = 0;
+  loadSceneBackground(project.scenes[index]);
   updateUI();
   resizeCanvas();
 }
@@ -823,6 +831,116 @@ function loadResourceFiles(fileList) {
     reader.readAsDataURL(file);
   });
 }
+
+// =============================================================================
+// SERVER-BASED LOADING
+// =============================================================================
+
+// Liste des VND disponibles sur le serveur
+var VND_LIST = [
+  { name: 'couleurs1', vnd: 'couleurs1/couleurs1.vnd', vnp: 'couleurs1/couleurs1.vnp', base: 'couleurs1/' },
+  { name: 'start', vnd: 'frontal/start.vnd', vnp: 'frontal/start.vnp', base: 'frontal/' },
+  { name: 'barre', vnd: 'barre/barre.vnd', vnp: 'barre/barre.vnp', base: 'barre/' },
+  { name: 'allem', vnd: 'allem/allem.vnd', vnp: 'allem/allem.vnp', base: 'allem/' },
+  { name: 'angleterre', vnd: 'angl/angleterre.vnd', vnp: 'angl/angleterre.vnp', base: 'angl/' },
+  { name: 'autriche', vnd: 'autr/autr.vnd', vnp: 'autr/autr.vnp', base: 'autr/' },
+  { name: 'belgique', vnd: 'belge/belge.vnd', vnp: 'belge/belge.vnp', base: 'belge/' },
+  { name: 'biblio', vnd: 'biblio/biblio.vnd', vnp: 'biblio/biblio.vnp', base: 'biblio/' },
+  { name: 'danemark', vnd: 'danem/danem.vnd', vnp: 'danem/danem.vnp', base: 'danem/' },
+  { name: 'ecosse', vnd: 'ecosse/ecosse.vnd', vnp: 'ecosse/ecosse.vnp', base: 'ecosse/' },
+  { name: 'espagne', vnd: 'espa/espa.vnd', vnp: 'espa/espa.vnp', base: 'espa/' },
+  { name: 'finlande', vnd: 'finlan/finlan.vnd', vnp: 'finlan/finlan.vnp', base: 'finlan/' },
+  { name: 'france', vnd: 'france/france.vnd', vnp: 'france/france.vnp', base: 'france/' },
+  { name: 'grece', vnd: 'grece/grece.vnd', vnp: 'grece/grece.vnp', base: 'grece/' },
+  { name: 'hollande', vnd: 'holl/holl.vnd', vnp: 'holl/holl.vnp', base: 'holl/' },
+  { name: 'irlande', vnd: 'irland/irland.vnd', vnp: 'irland/irland.vnp', base: 'irland/' },
+  { name: 'italie', vnd: 'italie/italie.vnd', vnp: 'italie/italie.vnp', base: 'italie/' },
+  { name: 'portugal', vnd: 'portu/portu.vnd', vnp: 'portu/portu.vnp', base: 'portu/' },
+  { name: 'suede', vnd: 'suede/suede.vnd', vnp: 'suede/suede.vnp', base: 'suede/' },
+];
+
+var currentVNPConfig = null; // parsed VNP config
+var currentBasePath = ''; // ex: 'couleurs1/'
+
+// Populer le select VND
+var vndSelect = document.getElementById('vnd-select');
+VND_LIST.forEach(function(entry, i) {
+  var opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = entry.name;
+  vndSelect.appendChild(opt);
+});
+
+// Charger un VND depuis le serveur
+function loadFromServer(entry) {
+  currentBasePath = entry.base;
+  // Charger le VNP d'abord pour les paths
+  fetch('/game-data/' + entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
+    currentVNPConfig = parseVNP(text);
+    console.log('VNP config:', currentVNPConfig);
+  }).catch(function() { currentVNPConfig = null; });
+
+  // Charger le VND
+  fetch('/game-data/' + entry.vnd).then(function(r) {
+    return r.arrayBuffer();
+  }).then(function(buf) {
+    loadVNDFile(buf, entry.vnd);
+  }).catch(function(e) {
+    alert('Erreur chargement: ' + e.message);
+  });
+}
+
+// Parser un VNP (format INI simple)
+function parseVNP(text) {
+  var config = {};
+  text.split('\n').forEach(function(line) {
+    line = line.trim();
+    if (!line || line.startsWith('[') || line.startsWith(';')) return;
+    var eq = line.indexOf('=');
+    if (eq < 0) return;
+    config[line.substring(0, eq).trim().toUpperCase()] = line.substring(eq + 1).trim();
+  });
+  return config;
+}
+
+// Résoudre le chemin d'une ressource BMP
+// VND ref: "euroland\bureaubanquier.bmp" -> /game-data/couleurs1/img24/euroland/bureaubanquier.bmp
+function resolveResourcePath(resRef) {
+  var normalized = resRef.toLowerCase().replace(/\\/g, '/');
+  var imgDir = 'img24/'; // default
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['IMG24'] || currentVNPConfig['IMG8'] || '';
+    imgDir = dir.replace(/\\/g, '/');
+    if (imgDir && !imgDir.endsWith('/')) imgDir += '/';
+  }
+  return '/game-data/' + currentBasePath + imgDir + normalized;
+}
+
+// Charger automatiquement l'image de fond d'une scène
+function loadSceneBackground(scene) {
+  if (!scene.fields.resource) return;
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  if (resources[resKey]) return; // déjà chargé
+
+  var url = resolveResourcePath(scene.fields.resource);
+  var img = new Image();
+  img.onload = function() {
+    resources[resKey] = img;
+    console.log('Loaded BMP:', resKey, img.width + 'x' + img.height);
+    render();
+  };
+  img.onerror = function() {
+    console.warn('Failed to load:', url);
+  };
+  img.src = url;
+}
+
+vndSelect.onchange = function() {
+  var idx = parseInt(vndSelect.value);
+  if (!isNaN(idx) && VND_LIST[idx]) {
+    loadFromServer(VND_LIST[idx]);
+  }
+};
 
 // =============================================================================
 // EVENT HANDLERS

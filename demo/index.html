@@ -516,8 +516,8 @@ function render() {
         var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
         if (sceneStr) {
           var si = parseInt(sceneStr.string, 10);
-          if (!isNaN(si) && project && si >= 0 && si < project.scenes.length && project.scenes[si].name) {
-            label = si + ': ' + project.scenes[si].name;
+          if (!isNaN(si) && project && si >= 1 && (si - 1) < project.scenes.length && project.scenes[si - 1].name) {
+            label = si + ': ' + project.scenes[si - 1].name;
           } else {
             label = sceneStr.string;
           }
@@ -540,7 +540,7 @@ function render() {
   ctx.fillRect(0, 0, w, 22);
   ctx.font = '12px monospace';
   ctx.fillStyle = '#e94560';
-  ctx.fillText('Scene ' + currentSceneIndex + '/' + (project.scenes.length - 1) + ': "' + scene.name + '"', 8, 15);
+  ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
   var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
   if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
   ctx.fillStyle = '#888';
@@ -618,10 +618,10 @@ canvas.addEventListener('click', function(e) {
   // Chercher une action SCENE dans les strings (type 6 = scène cible)
   var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
   if (sceneStr && sceneStr.string) {
-    // D'abord essayer comme index numérique
+    // Index 1-based dans le format VND → convertir en 0-based
     var idx = parseInt(sceneStr.string, 10);
-    if (!isNaN(idx) && idx >= 0 && idx < project.scenes.length) {
-      goToScene(idx);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
       return;
     }
     // Sinon essayer par nom
@@ -689,7 +689,7 @@ function loadVNDFile(arrayBuffer, fileName) {
     project.scenes.forEach(function(s, i) {
       var opt = document.createElement('option');
       opt.value = i;
-      opt.textContent = i + ': ' + (s.name || '(vide)');
+      opt.textContent = (i + 1) + ': ' + (s.name || '(vide)');
       select.appendChild(opt);
     });
 
@@ -701,7 +701,7 @@ function loadVNDFile(arrayBuffer, fileName) {
       div.className = 'scene-item';
       var cmdCount = s.commands.length;
       var polyCount = s.commands.filter(function(c) { return c.paramPairs.length > 0; }).length;
-      div.innerHTML = '<div class="scene-name">' + i + ': ' + (s.name || '(vide)') + '</div>' +
+      div.innerHTML = '<div class="scene-name">' + (i + 1) + ': ' + (s.name || '(vide)') + '</div>' +
         '<div class="scene-meta">' + cmdCount + ' cmds, ' + polyCount + ' polys' +
         (s.fields.resource ? ', res: ' + s.fields.resource : '') +
         (s.hotspot ? ', hotspot t=' + s.hotspot.timerValue : '') + '</div>';

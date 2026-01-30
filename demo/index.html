@@ -512,9 +512,16 @@ function render() {
         cy /= pts.length;
 
         var label = CMD_NAMES[cmd.commandType] || ('CMD_' + cmd.commandType);
-        // Extraire le nom de scène si SCENE string
+        // Extraire la cible scène si string type 6
         var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
-        if (sceneStr) label = sceneStr.string;
+        if (sceneStr) {
+          var si = parseInt(sceneStr.string, 10);
+          if (!isNaN(si) && project && si >= 0 && si < project.scenes.length && project.scenes[si].name) {
+            label = si + ': ' + project.scenes[si].name;
+          } else {
+            label = sceneStr.string;
+          }
+        }
 
         ctx.font = '10px monospace';
         ctx.textAlign = 'center';
@@ -608,9 +615,16 @@ canvas.addEventListener('click', function(e) {
 
   console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
 
-  // Chercher une action SCENE dans les strings
+  // Chercher une action SCENE dans les strings (type 6 = scène cible)
   var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
   if (sceneStr && sceneStr.string) {
+    // D'abord essayer comme index numérique
+    var idx = parseInt(sceneStr.string, 10);
+    if (!isNaN(idx) && idx >= 0 && idx < project.scenes.length) {
+      goToScene(idx);
+      return;
+    }
+    // Sinon essayer par nom
     var targetScene = project.scenes.findIndex(function(s) {
       return s.name.toLowerCase() === sceneStr.string.toLowerCase();
     });

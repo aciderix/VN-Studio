@@ -424,16 +424,36 @@ var container = document.getElementById('canvas-container');
 // CANVAS SCALING (640x480 interne, CSS plein conteneur)
 // =============================================================================
 
+// Calculer la largeur réelle d'une scène (max X des polygones ou header)
+function getSceneWidth(scene) {
+  var w = project ? project.header.width : 640;
+  if (!scene) return w;
+  scene.commands.forEach(function(cmd) {
+    cmd.paramPairs.forEach(function(p) {
+      if (p.a > w) w = p.a + 1;
+    });
+  });
+  return w;
+}
+
 function resizeCanvas() {
-  var cw = container.clientWidth;
   var ch = container.clientHeight;
-  var gameW = project ? project.header.width : 640;
   var gameH = project ? project.header.height : 480;
-  var scale = Math.min(cw / gameW, ch / gameH);
+  var scene = (project && currentSceneIndex >= 0) ? project.scenes[currentSceneIndex] : null;
+  var gameW = getSceneWidth(scene);
+
+  // Adapter le canvas interne à la taille de la scène
+  canvas.width = gameW;
+  canvas.height = gameH;
+
+  // Scale basé sur la hauteur du conteneur
+  var scale = ch / gameH;
   var dispW = Math.floor(gameW * scale);
   var dispH = Math.floor(gameH * scale);
   canvas.style.width = dispW + 'px';
   canvas.style.height = dispH + 'px';
+
+  render();
 }
 
 window.addEventListener('resize', resizeCanvas);
@@ -441,8 +461,8 @@ window.addEventListener('resize', resizeCanvas);
 // Convertir coordonnées écran -> coordonnées jeu
 function screenToGame(clientX, clientY) {
   var rect = canvas.getBoundingClientRect();
-  var gameW = project ? project.header.width : 640;
-  var gameH = project ? project.header.height : 480;
+  var gameW = canvas.width;
+  var gameH = canvas.height;
   var scaleX = gameW / rect.width;
   var scaleY = gameH / rect.height;
   return {
@@ -458,7 +478,7 @@ function screenToGame(clientX, clientY) {
 function render() {
   if (!project || currentSceneIndex < 0) return;
   var scene = project.scenes[currentSceneIndex];
-  var w = project.header.width;
+  var w = getSceneWidth(scene);
   var h = project.header.height;
 
   // Fond
@@ -576,6 +596,28 @@ function findCommandAtPoint(x, y) {
   return null;
 }
 
+// Pour le clic : priorité aux commandes navigables (avec string type 6)
+// Un rollover plein écran ne doit pas bloquer un polygone de navigation en dessous
+function findClickableCommandAtPoint(x, y) {
+  if (!project || currentSceneIndex < 0) return null;
+  var scene = project.scenes[currentSceneIndex];
+  var navigable = null;
+  var fallback = null;
+  for (var i = scene.commands.length - 1; i >= 0; i--) {
+    var cmd = scene.commands[i];
+    if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+      var hasScene = cmd.strings.some(function(s) { return s.type === 6; });
+      if (hasScene && !navigable) {
+        navigable = cmd;
+      }
+      if (!fallback) {
+        fallback = cmd;
+      }
+    }
+  }
+  return navigable || fallback;
+}
+
 // =============================================================================
 // INTERACTIONS
 // =============================================================================
@@ -610,7 +652,7 @@ canvas.addEventListener('mousemove', function(e) {
 
 canvas.addEventListener('click', function(e) {
   var pos = screenToGame(e.clientX, e.clientY);
-  var cmd = findCommandAtPoint(pos.x, pos.y);
+  var cmd = findClickableCommandAtPoint(pos.x, pos.y);
   if (!cmd) return;
 
   console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
@@ -650,7 +692,7 @@ function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
   updateUI();
-  render();
+  resizeCanvas(); // recalcule la taille du canvas (appelle render)
 }
 
 function updateUI() {

@@ -6,12 +6,17 @@
   <title>VN-Studio Demo - Virtual Navigator Renderer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
+    html, body {
       background: #1a1a2e;
       color: #e0e0e0;
       font-family: 'Segoe UI', sans-serif;
       overflow: hidden;
-      height: 100vh;
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      touch-action: none;
+    }
+    body {
       display: flex;
       flex-direction: column;
     }
@@ -68,6 +73,7 @@
     #game-canvas {
       image-rendering: auto;
       cursor: default;
+      touch-action: none;
     }
 
     /* Fullscreen */
@@ -953,31 +959,56 @@ window.addEventListener('mousemove', function(e) {
 
 window.addEventListener('mouseup', function() { isDragging = false; });
 
-// Touch scroll pour mobile
+// Touch pour mobile : scroll + tap
 var touchStartX = 0;
+var touchStartY = 0;
 var touchStartScroll = 0;
+var touchMoved = false;
 
 canvas.addEventListener('touchstart', function(e) {
-  if (!project || currentSceneIndex < 0) return;
-  var scene = project.scenes[currentSceneIndex];
-  if (getSceneWidth(scene) <= project.header.width) return;
-  touchStartX = e.touches[0].clientX;
-  touchStartScroll = scrollX;
   e.preventDefault();
+  if (!project || currentSceneIndex < 0) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchStartScroll = scrollX;
+  touchMoved = false;
 }, { passive: false });
 
 canvas.addEventListener('touchmove', function(e) {
+  e.preventDefault();
   if (!project || currentSceneIndex < 0) return;
+  touchMoved = true;
   var scene = project.scenes[currentSceneIndex];
   var sceneW = getSceneWidth(scene);
   var gameW = project.header.width;
   if (sceneW <= gameW) return;
-  e.preventDefault();
   var rect = canvas.getBoundingClientRect();
   var scale = gameW / rect.width;
   scrollX = touchStartScroll - (e.touches[0].clientX - touchStartX) * scale;
   scrollX = Math.max(0, Math.min(scrollX, sceneW - gameW));
   render();
+}, { passive: false });
+
+canvas.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  if (touchMoved || !project || currentSceneIndex < 0) return;
+  // Tap = clic
+  var touch = e.changedTouches[0];
+  var pos = screenToGame(touch.clientX, touch.clientY);
+  var cmd = findClickableCommandAtPoint(pos.x, pos.y);
+  if (!cmd) return;
+  var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
+  if (sceneStr && sceneStr.string) {
+    var idx = parseInt(sceneStr.string, 10);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
+      return;
+    }
+    var targetScene = project.scenes.findIndex(function(s) {
+      return s.name.toLowerCase() === sceneStr.string.toLowerCase();
+    });
+    if (targetScene >= 0) goToScene(targetScene);
+  }
 }, { passive: false });
 
 // Initial resize

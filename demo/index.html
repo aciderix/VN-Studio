@@ -158,7 +158,22 @@
   <label><input type="checkbox" id="chk-labels" checked> Labels</label>
   <label><input type="checkbox" id="chk-fill"> Remplir</label>
   <button id="btn-fullscreen">Plein écran</button>
+  <button id="btn-debug">Debug</button>
   <span id="scene-info"></span>
+</div>
+
+<!-- Debug panel -->
+<div id="debug-panel" style="display:none;position:fixed;right:0;top:0;bottom:0;width:360px;background:rgba(0,0,0,0.92);color:#0f0;font:11px monospace;z-index:50;overflow:auto;padding:8px;border-left:2px solid #333;">
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+    <button onclick="debugClearLog()" style="font-size:10px;padding:2px 6px;">Clear</button>
+    <button onclick="debugDumpVars()" style="font-size:10px;padding:2px 6px;">Vars</button>
+    <button onclick="debugDumpScene()" style="font-size:10px;padding:2px 6px;">Scene</button>
+    <button onclick="debugDumpCmds()" style="font-size:10px;padding:2px 6px;">Cmds</button>
+    <input id="debug-var-name" placeholder="var" style="width:60px;font-size:10px;padding:2px;">
+    <input id="debug-var-val" placeholder="val" style="width:40px;font-size:10px;padding:2px;">
+    <button onclick="debugSetVar()" style="font-size:10px;padding:2px 6px;">Set</button>
+  </div>
+  <div id="debug-log" style="white-space:pre-wrap;word-break:break-all;"></div>
 </div>
 
 <div id="canvas-container">
@@ -520,6 +535,14 @@ function render() {
     ctx.textAlign = 'start';
   }
 
+  // Overlay images (ADDBMP)
+  Object.keys(overlayImages).forEach(function(name) {
+    var ov = overlayImages[name];
+    if (ov.visible && ov.img.complete) {
+      ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+    }
+  });
+
   // Polygones
   if (showPolygons) {
     scene.commands.forEach(function(cmd, idx) {
@@ -831,9 +854,21 @@ function executeAction(action) {
   } else if (cmd === 'playwav') {
     playWav(parts.slice(1).join(' '));
   } else if (cmd === 'playavi') {
-    console.log('PLAYAVI (not yet implemented):', parts.slice(1).join(' '));
+    console.log('PLAYAVI:', parts.slice(1).join(' '));
   } else if (cmd === 'playbmp') {
-    console.log('PLAYBMP (not yet implemented):', parts.slice(1).join(' '));
+    addBmpOverlay('_play_' + Date.now() + ' ' + parts.slice(1).join(' '));
+  } else if (cmd === 'addbmp') {
+    addBmpOverlay(parts.slice(1).join(' '));
+  } else if (cmd === 'delbmp') {
+    delBmpOverlay(parts[1] || '');
+  } else if (cmd === 'showbmp') {
+    showBmpOverlay(parts[1] || '');
+  } else if (cmd === 'hidebmp') {
+    hideBmpOverlay(parts[1] || '');
+  } else if (cmd === 'closewav') {
+    stopAllAudio();
+  } else if (cmd === 'invalidate' || cmd === 'update') {
+    render();
   } else if (cmd === 'if') {
     // Nested IF: "if var op val then action"
     var nestedAction = evaluateIf(parts.slice(1).join(' '));
@@ -843,35 +878,180 @@ function executeAction(action) {
   }
 }
 
+// --- OVERLAY BMP ---
+var overlayImages = {}; // name -> { img, x, y, w, h, visible }
+
+function resolveOverlayPath(bmpRef) {
+  // Could be relative like "rollover\all.bmp" or absolute path
+  var normalized = bmpRef.toLowerCase().replace(/\\/g, '/');
+  var imgDir = 'img24/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['IMG24'] || currentVNPConfig['IMG8'] || '';
+    imgDir = dir.replace(/\\/g, '/');
+    if (imgDir && !imgDir.endsWith('/')) imgDir += '/';
+  }
+  // Also try with ../ paths for cross-module resources
+  if (normalized.indexOf('..') >= 0) {
+    // "../barre/images/barre.bmp" -> resolve relative to game-data
+    var parts = normalized.split('/');
+    var resolved = [];
+    // Start from current base
+    var baseParts = currentBasePath.replace(/\/$/, '').split('/');
+    resolved = baseParts.slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + imgDir + normalized;
+}
+
+function addBmpOverlay(addbmpStr) {
+  // Format: "name path flags x y [w h]"
+  // Ex: "toolbar ..\..\barre\images\barre.bmp 6 0 400 640 480"
+  // Ex: "anu  euroland\rollover\annule.bmp 0 220 280"
+  var parts = addbmpStr.trim().split(/\s+/);
+  if (parts.length < 4) return;
+  var name = parts[0].toLowerCase();
+  var path = parts[1];
+  // Skip flags (parts[2])
+  var x = parseInt(parts[3]) || 0;
+  var y = parseInt(parts[4]) || 0;
+  var w = parts.length > 5 ? parseInt(parts[5]) : 0;
+  var h = parts.length > 6 ? parseInt(parts[6]) : 0;
+
+  var url = resolveOverlayPath(path);
+  var img = new Image();
+  img.onload = function() {
+    overlayImages[name] = { img: img, x: x, y: y, w: w || img.width, h: h || img.height, visible: true };
+    console.log('ADDBMP:', name, url, x, y);
+    render();
+  };
+  img.onerror = function() { console.warn('ADDBMP failed:', url); };
+  img.src = url;
+}
+
+function delBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  if (overlayImages[name]) {
+    delete overlayImages[name];
+    console.log('DELBMP:', name);
+    render();
+  }
+}
+
+function showBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  if (overlayImages[name]) { overlayImages[name].visible = true; render(); }
+}
+
+function hideBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
+}
+
 // --- SCENE COMMANDS ---
-// Exécuter les commandes non-interactives d'une scène (au chargement)
-function executeSceneCommands(scene) {
-  scene.commands.forEach(function(cmd) {
-    // PLAYWAV (type 11 in strings)
-    var wavStr = cmd.strings.find(function(s) { return s.type === 11; });
-    if (wavStr && wavStr.string) {
-      playWav(wavStr.string);
-    }
-    // SET_VAR (type 22): "name value"
-    var setStr = cmd.strings.find(function(s) { return s.type === 22; });
-    if (setStr && setStr.string) {
-      var sp = setStr.string.trim().split(/\s+/);
+// Execute all string sub-commands of a VND command
+function executeStringCommand(strType, strValue) {
+  var val = (strValue || '').trim();
+  if (!val && strType !== 25 && strType !== 36) return;
+
+  switch (strType) {
+    case 11: // PLAYWAV
+      playWav(val);
+      break;
+    case 22: // SET_VAR: "name value"
+      var sp = val.split(/\s+/);
       if (sp.length >= 2) setVar(sp[0], parseInt(sp[1]) || 0);
-    }
-    // INC_VAR (type 23): "name value"
-    var incStr = cmd.strings.find(function(s) { return s.type === 23; });
-    if (incStr && incStr.string) {
-      var ip = incStr.string.trim().split(/\s+/);
+      break;
+    case 23: // INC_VAR: "name value"
+      var ip = val.split(/\s+/);
       if (ip.length >= 2) setVar(ip[0], getVar(ip[0]) + (parseInt(ip[1]) || 1));
-    }
-    // DEC_VAR (type 24): "name value"
-    var decStr = cmd.strings.find(function(s) { return s.type === 24; });
-    if (decStr && decStr.string) {
-      var dp = decStr.string.trim().split(/\s+/);
+      break;
+    case 24: // DEC_VAR: "name value"
+      var dp = val.split(/\s+/);
       if (dp.length >= 2) setVar(dp[0], getVar(dp[0]) - (parseInt(dp[1]) || 1));
-    }
+      break;
+    case 27: // ADDBMP
+      addBmpOverlay(val);
+      break;
+    case 28: // DELBMP
+      delBmpOverlay(val);
+      break;
+    case 29: // SHOWBMP
+      showBmpOverlay(val);
+      break;
+    case 30: // HIDEBMP
+      hideBmpOverlay(val);
+      break;
+    case 36: // CLOSEWAV
+      stopAllAudio();
+      break;
+    case 16: // PAUSE
+      // TODO: implement actual pause/delay
+      break;
+    case 25: // INVALIDATE
+      render();
+      break;
+    case 26: // DEFCURSOR
+      // Could set cursor style, ignore for now
+      break;
+    case 32: // UPDATE
+      render();
+      break;
+    case 33: // RUNDLL
+      console.log('RUNDLL (not implemented):', val);
+      break;
+    case 40: // REM (comment)
+      break;
+    case 9: // PLAYAVI
+      console.log('PLAYAVI:', val);
+      // TODO: implement video playback
+      break;
+    case 10: // PLAYBMP (direct, not named overlay)
+      // Format: "path flags x y" — similar to ADDBMP but unnamed
+      var bp = val.split(/\s+/);
+      if (bp.length >= 1) {
+        addBmpOverlay('_playbmp_' + Date.now() + ' ' + val);
+      }
+      break;
+    case 41: // ADDTEXT: "varname flags x y w h flags <varname>"
+      // Display variable value as text - parse and render
+      console.log('ADDTEXT:', val);
+      break;
+    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 39 (FONT), 3 (PREV), 7 (HOTSPOT)
+    default:
+      break;
+  }
+}
+
+// Execute non-interactive commands of a scene (on scene enter)
+function executeSceneCommands(scene) {
+  // Clear overlays from previous scene
+  overlayImages = {};
+
+  scene.commands.forEach(function(cmd) {
+    // Only execute commands without polygons (auto-execute on scene load)
+    // Commands with polygons are interactive (click/hover)
+    if (cmd.paramPairs.length > 0) return;
+
+    cmd.strings.forEach(function(s) {
+      // Skip types handled interactively
+      if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
+
+      if (s.type === 21) {
+        // IF - evaluate and execute
+        var action = evaluateIf(s.string);
+        if (action) executeAction(action);
+        return;
+      }
+
+      executeStringCommand(s.type, s.string);
+    });
   });
-  // Init variables from VND header
+
+  // Init variables from VND header (only if not already set)
   if (project && project.variables) {
     project.variables.forEach(function(v) {
       if (gameVars[v.name.toLowerCase()] === undefined) {
@@ -966,48 +1146,45 @@ canvas.addEventListener('mousemove', function(e) {
 
 // Action commune clic / tap
 function handleCommandClick(cmd) {
-  console.log('Clicked:', CMD_NAMES[cmd.commandType], cmd.strings);
+  console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
 
-  // IF condition (type 21) — évaluer d'abord car peut contenir runprj/scene
-  var ifStr = cmd.strings.find(function(s) { return s.type === 21; });
-  if (ifStr && ifStr.string) {
-    var action = evaluateIf(ifStr.string);
-    if (action) {
-      executeAction(action);
-      return;
+  var navigated = false;
+
+  // Process all strings in order
+  cmd.strings.forEach(function(s) {
+    if (navigated) return; // stop if we already navigated
+
+    if (s.type === 21) {
+      // IF condition
+      var action = evaluateIf(s.string);
+      if (action) {
+        executeAction(action);
+        // Check if action caused navigation
+        if (action.match(/^(runprj|scene)\s/i)) navigated = true;
+      }
+    } else if (s.type === 6) {
+      // SCENE
+      var idx = parseInt(s.string, 10);
+      if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+        goToScene(idx - 1);
+        navigated = true;
+      } else {
+        var target = project.scenes.findIndex(function(sc) {
+          return sc.name.toLowerCase() === s.string.toLowerCase();
+        });
+        if (target >= 0) { goToScene(target); navigated = true; }
+      }
+    } else if (s.type === 31) {
+      // RUNPRJ
+      executeRunPrj(s.string);
+      navigated = true;
+    } else if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) {
+      // PLAYTEXT, FONT, PREV, HOTSPOT - handled in render or ignored
+    } else {
+      // All other string types
+      executeStringCommand(s.type, s.string);
     }
-    // Si IF évalué à null (pas de else), continuer avec les autres actions
-  }
-
-  // SCENE (type 6)
-  var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
-  if (sceneStr && sceneStr.string) {
-    var idx = parseInt(sceneStr.string, 10);
-    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
-      goToScene(idx - 1);
-      return;
-    }
-    var targetScene = project.scenes.findIndex(function(s) {
-      return s.name.toLowerCase() === sceneStr.string.toLowerCase();
-    });
-    if (targetScene >= 0) {
-      goToScene(targetScene);
-      return;
-    }
-  }
-
-  // RUNPRJ direct (type 31)
-  var runPrj = cmd.strings.find(function(s) { return s.type === 31; });
-  if (runPrj && runPrj.string) {
-    executeRunPrj(runPrj.string);
-    return;
-  }
-
-  // PLAYWAV au clic (type 11)
-  var wavStr = cmd.strings.find(function(s) { return s.type === 11; });
-  if (wavStr && wavStr.string) {
-    playWav(wavStr.string);
-  }
+  });
 }
 
 canvas.addEventListener('click', function(e) {
@@ -1458,6 +1635,80 @@ canvas.addEventListener('touchend', function(e) {
   if (!cmd) return;
   handleCommandClick(cmd);
 }, { passive: false });
+
+// =============================================================================
+// DEBUG PANEL
+// =============================================================================
+
+var debugVisible = false;
+document.getElementById('btn-debug').onclick = function() {
+  debugVisible = !debugVisible;
+  document.getElementById('debug-panel').style.display = debugVisible ? 'block' : 'none';
+};
+
+var debugLogEl = document.getElementById('debug-log');
+var _origLog = console.log;
+var _origWarn = console.warn;
+var _origError = console.error;
+
+function debugLog(color, args) {
+  var text = Array.from(args).map(function(a) {
+    if (typeof a === 'object') return JSON.stringify(a, null, 1);
+    return String(a);
+  }).join(' ');
+  var line = document.createElement('div');
+  line.style.color = color;
+  line.style.borderBottom = '1px solid #222';
+  line.style.padding = '1px 0';
+  line.textContent = text;
+  debugLogEl.appendChild(line);
+  // Keep max 200 lines
+  while (debugLogEl.children.length > 200) debugLogEl.removeChild(debugLogEl.firstChild);
+  debugLogEl.scrollTop = debugLogEl.scrollHeight;
+}
+
+console.log = function() { _origLog.apply(console, arguments); debugLog('#0f0', arguments); };
+console.warn = function() { _origWarn.apply(console, arguments); debugLog('#ff0', arguments); };
+console.error = function() { _origError.apply(console, arguments); debugLog('#f44', arguments); };
+
+function debugClearLog() { debugLogEl.innerHTML = ''; }
+
+function debugDumpVars() {
+  var nonZero = {};
+  Object.keys(gameVars).forEach(function(k) { if (gameVars[k] !== 0) nonZero[k] = gameVars[k]; });
+  console.log('=== VARIABLES (non-zero) ===');
+  console.log(nonZero);
+  console.log('Total vars:', Object.keys(gameVars).length, ', non-zero:', Object.keys(nonZero).length);
+}
+
+function debugDumpScene() {
+  if (!project || currentSceneIndex < 0) return;
+  var s = project.scenes[currentSceneIndex];
+  console.log('=== SCENE', currentSceneIndex + 1, ':', s.name, '===');
+  console.log('Resource:', s.fields.resource);
+  console.log('Rect:', s.rect);
+  console.log('Commands:', s.commands.length);
+  console.log('Hotspot:', s.hotspot);
+}
+
+function debugDumpCmds() {
+  if (!project || currentSceneIndex < 0) return;
+  var s = project.scenes[currentSceneIndex];
+  console.log('=== COMMANDS for scene', currentSceneIndex + 1, '===');
+  s.commands.forEach(function(c, i) {
+    var strDesc = c.strings.map(function(s) { return '[' + s.type + '] ' + s.string; }).join(' | ');
+    console.log('#' + i + ' type=' + c.commandType + ' poly=' + c.paramPairs.length + 'pts: ' + strDesc);
+  });
+}
+
+function debugSetVar() {
+  var name = document.getElementById('debug-var-name').value;
+  var val = parseInt(document.getElementById('debug-var-val').value) || 0;
+  if (name) {
+    setVar(name, val);
+    console.log('DEBUG SET:', name, '=', val);
+  }
+}
 
 // Initial resize
 resizeCanvas();

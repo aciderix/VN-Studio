@@ -667,33 +667,60 @@ function render() {
     var textStr = hoveredCmd.strings.find(function(s) { return s.type === 38; });
     var fontStr = hoveredCmd.strings.find(function(s) { return s.type === 39; });
     if (textStr && textStr.string) {
-      // Format type 38: "x y width height flags text"
-      var tp = textStr.string.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+(.+)$/);
+      // Format type 38: "x1 y1 x2 y2 flags text" (x2,y2 = bottom-right of box)
+      var tp = textStr.string.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
       if (tp) {
         var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
-        var tw = parseInt(tp[3]) - tx, th = parseInt(tp[4]) - ty;
+        var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
+        var tw = tx2 - tx, th = ty2 - ty;
         var text = tp[5];
+        if (tw <= 0) tw = 300;
+        if (th <= 0) th = 40;
 
         // Font: "size flags color fontname"
         var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
         if (fontStr && fontStr.string) {
-          var fp = fontStr.string.match(/^(\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+          var fp = fontStr.string.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
           if (fp) {
-            fontSize = parseInt(fp[1]);
+            fontSize = Math.abs(parseInt(fp[1]));
             fontColor = fp[2];
             fontName = fp[3];
           }
         }
+        if (fontSize < 6) fontSize = 12;
+
+        ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+
+        // Word-wrap text into lines
+        var words = text.split(' ');
+        var lines = [];
+        var line = '';
+        var maxW = tw - 8;
+        for (var wi = 0; wi < words.length; wi++) {
+          var test = line ? line + ' ' + words[wi] : words[wi];
+          if (ctx.measureText(test).width > maxW && line) {
+            lines.push(line);
+            line = words[wi];
+          } else {
+            line = test;
+          }
+        }
+        if (line) lines.push(line);
+
+        var lineH = fontSize + 4;
+        var textH = lines.length * lineH;
+        var boxH = Math.max(th, textH + 8);
 
         // Background
         ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(tx, ty, tw > 0 ? tw : 300, th > 0 ? th : fontSize + 8);
+        ctx.fillRect(tx, ty, tw, boxH);
 
-        // Text
-        ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+        // Text lines
         ctx.fillStyle = fontColor;
         ctx.textAlign = 'start';
-        ctx.fillText(text, tx + 4, ty + fontSize + 2);
+        for (var li = 0; li < lines.length; li++) {
+          ctx.fillText(lines[li], tx + 4, ty + fontSize + 2 + li * lineH);
+        }
       }
     }
   }
@@ -751,10 +778,9 @@ function playWav(wavStr) {
   var url = resolveWavPath(file);
   var key = file.toLowerCase();
 
-  // Stopper si déjà en cours
-  if (audioElements[key]) {
-    audioElements[key].pause();
-    audioElements[key].currentTime = 0;
+  // If same sound is already playing, don't restart
+  if (audioElements[key] && !audioElements[key].paused && !audioElements[key].ended) {
+    return;
   }
 
   var audio = new Audio(url);
@@ -768,6 +794,32 @@ function stopAllAudio() {
   Object.keys(audioElements).forEach(function(key) {
     audioElements[key].pause();
     audioElements[key].currentTime = 0;
+  });
+  audioElements = {};
+}
+
+// Collect WAV keys that a scene will play on enter (auto-execute commands)
+function getSceneAutoWavKeys(scene) {
+  var keys = {};
+  scene.commands.forEach(function(cmd) {
+    if (cmd.paramPairs.length > 0) return; // interactive, skip
+    cmd.strings.forEach(function(s) {
+      if (s.type === 11 && s.string) {
+        keys[s.string.trim().split(/\s+/)[0].toLowerCase()] = true;
+      }
+    });
+  });
+  return keys;
+}
+
+// Stop audio except keys that the next scene will play
+function stopAudioExcept(keepKeys) {
+  Object.keys(audioElements).forEach(function(key) {
+    if (!keepKeys[key]) {
+      audioElements[key].pause();
+      audioElements[key].currentTime = 0;
+      delete audioElements[key];
+    }
   });
 }
 
@@ -921,7 +973,9 @@ function executeAction(action) {
   } else if (cmd === 'playwav') {
     playWav(parts.slice(1).join(' '));
   } else if (cmd === 'playavi') {
-    console.log('PLAYAVI:', parts.slice(1).join(' '));
+    playAvi(parts.slice(1).join(' '));
+  } else if (cmd === 'playhtml') {
+    playHtml(parts.slice(1).join(' '));
   } else if (cmd === 'playbmp') {
     addBmpOverlay('_play_' + Date.now() + ' ' + parts.slice(1).join(' '));
   } else if (cmd === 'addbmp') {
@@ -1082,6 +1136,91 @@ function closeHtmlOverlay() {
   document.getElementById('html-overlay').style.display = 'none';
 }
 
+// --- PLAYAVI ---
+var currentVideo = null;
+
+function resolveAviPath(aviRef) {
+  var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
+  var aviDir = 'movie/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['AVI'] || '';
+    aviDir = dir.replace(/\\/g, '/');
+    if (aviDir && !aviDir.endsWith('/')) aviDir += '/';
+  }
+  if (normalized.indexOf('..') >= 0) {
+    var parts = normalized.split('/');
+    var resolved = currentBasePath.replace(/\/$/, '').split('/').slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + aviDir + normalized;
+}
+
+function playAvi(aviStr) {
+  // Format: "filename flags [x y w h]"
+  var parts = aviStr.trim().split(/\s+/);
+  if (parts.length < 1) return;
+  var file = parts[0];
+  var flags = parseInt(parts[1]) || 0;
+  var x = parseInt(parts[2]) || 0;
+  var y = parseInt(parts[3]) || 0;
+  var w = parseInt(parts[4]) || 0;
+  var h = parseInt(parts[5]) || 0;
+
+  var url = resolveAviPath(file);
+  console.log('PLAYAVI:', file, 'at', x, y, w, h);
+
+  closeVideo();
+
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = rect.width / gameW;
+  var scaleY = rect.height / gameH;
+
+  var video = document.createElement('video');
+  video.src = url;
+  video.autoplay = true;
+  video.style.position = 'absolute';
+  video.style.zIndex = '16';
+  video.style.background = '#000';
+
+  var contRect = container.getBoundingClientRect();
+  if (w > 0 && h > 0) {
+    video.style.left = (rect.left - contRect.left + x * scaleX) + 'px';
+    video.style.top = (rect.top - contRect.top + y * scaleY) + 'px';
+    video.style.width = (w * scaleX) + 'px';
+    video.style.height = (h * scaleY) + 'px';
+  } else {
+    // Fullscreen over canvas
+    video.style.left = (rect.left - contRect.left) + 'px';
+    video.style.top = (rect.top - contRect.top) + 'px';
+    video.style.width = rect.width + 'px';
+    video.style.height = rect.height + 'px';
+  }
+
+  video.addEventListener('ended', function() { closeVideo(); });
+  video.addEventListener('error', function() {
+    console.warn('AVI playback failed (codec not supported):', url);
+    closeVideo();
+  });
+  video.addEventListener('click', function() { closeVideo(); });
+
+  container.appendChild(video);
+  currentVideo = video;
+}
+
+function closeVideo() {
+  if (currentVideo) {
+    currentVideo.pause();
+    if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
+    currentVideo = null;
+  }
+}
+
 // --- SCENE COMMANDS ---
 // Execute all string sub-commands of a VND command
 function executeStringCommand(strType, strValue) {
@@ -1140,8 +1279,7 @@ function executeStringCommand(strType, strValue) {
       playHtml(val);
       break;
     case 9: // PLAYAVI
-      console.log('PLAYAVI:', val);
-      // TODO: implement video playback
+      playAvi(val);
       break;
     case 10: // PLAYBMP (direct, not named overlay)
       // Format: "path flags x y" — similar to ADDBMP but unnamed
@@ -1339,8 +1477,11 @@ function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
   scrollX = 0;
-  stopAllAudio();
+  // Smart audio: keep sounds that the new scene will also play
+  var keepKeys = getSceneAutoWavKeys(project.scenes[index]);
+  stopAudioExcept(keepKeys);
   closeHtmlOverlay();
+  closeVideo();
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
   updateUI();

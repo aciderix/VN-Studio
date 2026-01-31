@@ -118,6 +118,68 @@
       font-family: monospace;
     }
 
+    /* PLAYHTML overlay */
+    #html-overlay {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #333;
+      z-index: 15;
+      display: none;
+      overflow: auto;
+    }
+    #html-overlay .html-close {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #333;
+      z-index: 1;
+      background: rgba(255,255,255,0.8);
+      padding: 0 4px;
+    }
+    #html-overlay .html-content {
+      padding: 8px;
+      font-family: 'Comic Sans MS', sans-serif;
+      font-size: 12px;
+      color: #000;
+      overflow: auto;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Loading screen overlay */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #loading-overlay.visible { display: flex; }
+    #loading-bar-bg {
+      width: 300px;
+      height: 12px;
+      background: #333;
+      border: 1px solid #555;
+      margin-top: 20px;
+    }
+    #loading-bar-fill {
+      height: 100%;
+      background: #e94560;
+      width: 0%;
+      transition: width 0.1s;
+    }
+    #loading-text {
+      color: #888;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
     /* Drop zone */
     #dropzone {
       position: absolute;
@@ -180,6 +242,8 @@
   <canvas id="game-canvas" width="640" height="480"></canvas>
   <div id="scene-list"></div>
   <div id="tooltip"></div>
+  <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
+  <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
     <div class="drop-area" id="drop-area">
       <h2>VN-Studio Demo</h2>
@@ -746,19 +810,22 @@ function executeRunPrj(runPrjStr) {
     currentVNPConfig = parseVNP(text);
   }).catch(function() { currentVNPConfig = null; });
 
-  // Load VND then go to scene
+  // Load VND then preload then go to scene
   var targetScene = parsed.sceneIndex;
   fetch('/game-data/' + parsed.entry.vnd).then(function(r) {
     return r.arrayBuffer();
   }).then(function(buf) {
-    loadVNDFile(buf, parsed.entry.vnd);
-    // Scene index is 1-based
-    if (targetScene >= 1 && (targetScene - 1) < project.scenes.length) {
-      goToScene(targetScene - 1);
-    }
+    loadVNDFile(buf, parsed.entry.vnd, true);
     // Update VND selector
     var vndIdx = VND_LIST.indexOf(parsed.entry);
     if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
+    preloadResources(function() {
+      if (targetScene >= 1 && (targetScene - 1) < project.scenes.length) {
+        goToScene(targetScene - 1);
+      } else {
+        goToScene(0);
+      }
+    });
   }).catch(function(e) {
     console.error('RUNPRJ load failed:', e);
   });
@@ -951,6 +1018,70 @@ function hideBmpOverlay(name) {
   if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
 }
 
+// --- PLAYHTML ---
+function resolveHtmlPath(htmlRef) {
+  var normalized = htmlRef.toLowerCase().replace(/\\/g, '/');
+  var htmlDir = 'html/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['TXT'] || '';
+    htmlDir = dir.replace(/\\/g, '/');
+    if (htmlDir && !htmlDir.endsWith('/')) htmlDir += '/';
+  }
+  if (normalized.indexOf('..') >= 0) {
+    var parts = normalized.split('/');
+    var resolved = currentBasePath.replace(/\/$/, '').split('/').slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + htmlDir + normalized;
+}
+
+function playHtml(htmlStr) {
+  // Format: "filename flags x y w h"
+  var parts = htmlStr.trim().split(/\s+/);
+  if (parts.length < 1) return;
+  var file = parts[0];
+  var flags = parseInt(parts[1]) || 0;
+  var x = parseInt(parts[2]) || 0;
+  var y = parseInt(parts[3]) || 0;
+  var w = parseInt(parts[4]) || 500;
+  var h = parseInt(parts[5]) || 350;
+
+  var url = resolveHtmlPath(file);
+  console.log('PLAYHTML:', file, 'at', x, y, w, h);
+
+  // Position overlay relative to canvas
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = rect.width / gameW;
+  var scaleY = rect.height / gameH;
+
+  var overlay = document.getElementById('html-overlay');
+  var content = overlay.querySelector('.html-content');
+
+  overlay.style.left = (rect.left - container.getBoundingClientRect().left + x * scaleX) + 'px';
+  overlay.style.top = (rect.top - container.getBoundingClientRect().top + y * scaleY) + 'px';
+  overlay.style.width = (w * scaleX) + 'px';
+  overlay.style.height = (h * scaleY) + 'px';
+  overlay.style.display = 'block';
+
+  fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+    // Strip <html>/<head>/<body> wrappers, keep inner content
+    var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    content.innerHTML = bodyMatch ? bodyMatch[1] : html;
+  }).catch(function(e) {
+    content.innerHTML = '<p style="color:red">Erreur: ' + e.message + '</p>';
+  });
+}
+
+function closeHtmlOverlay() {
+  document.getElementById('html-overlay').style.display = 'none';
+}
+
 // --- SCENE COMMANDS ---
 // Execute all string sub-commands of a VND command
 function executeStringCommand(strType, strValue) {
@@ -1004,6 +1135,9 @@ function executeStringCommand(strType, strValue) {
       console.log('RUNDLL (not implemented):', val);
       break;
     case 40: // REM (comment)
+      break;
+    case 13: // PLAYHTML
+      playHtml(val);
       break;
     case 9: // PLAYAVI
       console.log('PLAYAVI:', val);
@@ -1178,6 +1312,9 @@ function handleCommandClick(cmd) {
       // RUNPRJ
       executeRunPrj(s.string);
       navigated = true;
+    } else if (s.type === 13) {
+      // PLAYHTML
+      playHtml(s.string);
     } else if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) {
       // PLAYTEXT, FONT, PREV, HOTSPOT - handled in render or ignored
     } else {
@@ -1203,6 +1340,7 @@ function goToScene(index) {
   currentSceneIndex = index;
   scrollX = 0;
   stopAllAudio();
+  closeHtmlOverlay();
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
   updateUI();
@@ -1229,15 +1367,17 @@ function updateUI() {
 // CHARGEMENT VND
 // =============================================================================
 
-function loadVNDFile(arrayBuffer, fileName) {
+function loadVNDFile(arrayBuffer, fileName, skipFirstScene) {
   try {
     project = parseVND(arrayBuffer);
     console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
 
-    // Init variables from VND header
+    // Init variables from VND header (only set if not already defined — preserves cross-module vars)
     if (project.variables) {
       project.variables.forEach(function(v) {
-        gameVars[v.name.toLowerCase()] = v.value;
+        if (gameVars[v.name.toLowerCase()] === undefined) {
+          gameVars[v.name.toLowerCase()] = v.value;
+        }
       });
       console.log('Variables:', JSON.stringify(gameVars));
     }
@@ -1276,8 +1416,8 @@ function loadVNDFile(arrayBuffer, fileName) {
     // Cacher la dropzone
     document.getElementById('dropzone').classList.add('hidden');
 
-    // Aller à la première scène
-    goToScene(0);
+    // Aller à la première scène (sauf si preloading)
+    if (!skipFirstScene) goToScene(0);
 
   } catch (e) {
     alert('Erreur de chargement: ' + e.message);
@@ -1370,7 +1510,10 @@ function loadFromServer(entry) {
   fetch('/game-data/' + entry.vnd).then(function(r) {
     return r.arrayBuffer();
   }).then(function(buf) {
-    loadVNDFile(buf, entry.vnd);
+    loadVNDFile(buf, entry.vnd, true); // skipFirstScene=true
+    preloadResources(function() {
+      goToScene(0);
+    });
   }).catch(function(e) {
     alert('Erreur chargement: ' + e.message);
   });
@@ -1419,6 +1562,88 @@ function loadSceneBackground(scene) {
     console.warn('Failed to load:', url);
   };
   img.src = url;
+}
+
+// =============================================================================
+// PRE-LOADING / CACHE
+// =============================================================================
+
+var preloadCache = {}; // url -> Image (persistent across scenes)
+
+function collectAllResourceUrls() {
+  if (!project) return [];
+  var urls = {};
+
+  project.scenes.forEach(function(scene) {
+    // Background BMP
+    if (scene.fields.resource) {
+      var url = resolveResourcePath(scene.fields.resource);
+      urls[url] = true;
+    }
+    // Scan commands for ADDBMP, PLAYBMP, etc.
+    scene.commands.forEach(function(cmd) {
+      cmd.strings.forEach(function(s) {
+        if (s.type === 27) { // ADDBMP: "name path flags x y [w h]"
+          var parts = s.string.trim().split(/\s+/);
+          if (parts.length >= 2) urls[resolveOverlayPath(parts[1])] = true;
+        } else if (s.type === 10) { // PLAYBMP: "path flags x y"
+          var parts = s.string.trim().split(/\s+/);
+          if (parts.length >= 1) urls[resolveOverlayPath(parts[0])] = true;
+        }
+      });
+    });
+  });
+
+  return Object.keys(urls);
+}
+
+function preloadResources(onComplete) {
+  var urls = collectAllResourceUrls();
+  if (urls.length === 0) { onComplete(); return; }
+
+  var overlay = document.getElementById('loading-overlay');
+  var barFill = document.getElementById('loading-bar-fill');
+  var loadingText = document.getElementById('loading-text');
+  overlay.classList.add('visible');
+
+  // Try to load noir.bmp as background
+  var noirUrl = '/game-data/' + currentBasePath + (currentVNPConfig ? (currentVNPConfig['IMG24'] || 'img24').replace(/\\/g, '/') : 'img24') + '/interface/noir.bmp';
+  var bgCanvas = document.getElementById('loading-bg');
+  var bgCtx = bgCanvas.getContext('2d');
+  bgCtx.fillStyle = '#000';
+  bgCtx.fillRect(0, 0, 640, 480);
+
+  var noirImg = new Image();
+  noirImg.onload = function() { bgCtx.drawImage(noirImg, 0, 0, 640, 480); };
+  noirImg.src = noirUrl;
+
+  var loaded = 0;
+  var total = urls.length;
+
+  function tick() {
+    loaded++;
+    var pct = Math.round(loaded / total * 100);
+    barFill.style.width = pct + '%';
+    loadingText.textContent = loaded + '/' + total + ' ressources';
+    if (loaded >= total) {
+      overlay.classList.remove('visible');
+      onComplete();
+    }
+  }
+
+  urls.forEach(function(url) {
+    if (preloadCache[url]) { tick(); return; }
+    var img = new Image();
+    img.onload = function() {
+      preloadCache[url] = img;
+      // Also store in resources dict by key
+      var resKey = url.replace(/^\/game-data\/[^/]+\/(?:img24|img8)\//i, '').toLowerCase();
+      resources[resKey] = img;
+      tick();
+    };
+    img.onerror = function() { tick(); }; // count failures too
+    img.src = url;
+  });
 }
 
 vndSelect.onchange = function() {

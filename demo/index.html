@@ -828,6 +828,16 @@ function executeAction(action) {
     setVar(parts[1], getVar(parts[1]) + (parseInt(parts[2]) || 1));
   } else if (cmd === 'dec_var') {
     setVar(parts[1], getVar(parts[1]) - (parseInt(parts[2]) || 1));
+  } else if (cmd === 'playwav') {
+    playWav(parts.slice(1).join(' '));
+  } else if (cmd === 'playavi') {
+    console.log('PLAYAVI (not yet implemented):', parts.slice(1).join(' '));
+  } else if (cmd === 'playbmp') {
+    console.log('PLAYBMP (not yet implemented):', parts.slice(1).join(' '));
+  } else if (cmd === 'if') {
+    // Nested IF: "if var op val then action"
+    var nestedAction = evaluateIf(parts.slice(1).join(' '));
+    if (nestedAction) executeAction(nestedAction);
   } else {
     console.log('Unhandled action:', action);
   }

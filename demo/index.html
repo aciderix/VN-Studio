@@ -605,25 +605,12 @@ function render() {
     ctx.textAlign = 'start';
   }
 
-  // Overlay images (ADDBMP)
+  // Overlay images (ADDBMP) — scene overlays only (not toolbar zone)
   Object.keys(overlayImages).forEach(function(name) {
     var ov = overlayImages[name];
-    if (ov.visible && ov.img.complete) {
+    if (ov.visible && ov.img.complete && ov.y < 400) {
       ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
     }
-  });
-
-  // Overlay texts (ADDTEXT) - render variable values like score
-  Object.keys(overlayTexts).forEach(function(name) {
-    var ot = overlayTexts[name];
-    // Re-evaluate variable references for live updates
-    var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
-      return String(getVar(vname));
-    });
-    ctx.font = 'bold ' + ot.fontSize + 'px "Comic Sans MS", sans-serif';
-    ctx.fillStyle = ot.color;
-    ctx.textAlign = 'start';
-    ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
   });
 
   // Polygones
@@ -759,6 +746,29 @@ function render() {
   }
 
   ctx.restore(); // fin du scroll
+
+  // Toolbar overlays (fixed, not scrolled)
+  if (isToolbarVisible()) {
+    {
+      Object.keys(overlayImages).forEach(function(name) {
+        var ov = overlayImages[name];
+        if (ov.visible && ov.img.complete && ov.y >= 400) {
+          ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+        }
+      });
+      // Toolbar texts (ADDTEXT)
+      Object.keys(overlayTexts).forEach(function(name) {
+        var ot = overlayTexts[name];
+        var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
+          return String(getVar(vname));
+        });
+        ctx.font = 'bold ' + ot.fontSize + 'px "Comic Sans MS", sans-serif';
+        ctx.fillStyle = ot.color;
+        ctx.textAlign = 'start';
+        ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
+      });
+    }
+  }
 
   // Info scène (fixe, pas scrollée)
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -1110,9 +1120,9 @@ function resolveOverlayPath(bmpRef) {
 }
 
 function addBmpOverlay(addbmpStr) {
-  // Format: "name path flags x y [w h]"
-  // Ex: "toolbar ..\..\barre\images\barre.bmp 6 0 400 640 480"
-  // Ex: "anu  euroland\rollover\annule.bmp 0 220 280"
+  // Format: "name path flags x y [x2 y2]"
+  // When 7 parts: x,y = top-left, x2,y2 = bottom-right (coordinates, not width/height)
+  // When 5 parts: x,y = position, size from image
   var parts = addbmpStr.trim().split(/\s+/);
   if (parts.length < 4) return;
   var name = parts[0].toLowerCase();
@@ -1120,14 +1130,20 @@ function addBmpOverlay(addbmpStr) {
   // Skip flags (parts[2])
   var x = parseInt(parts[3]) || 0;
   var y = parseInt(parts[4]) || 0;
-  var w = parts.length > 5 ? parseInt(parts[5]) : 0;
-  var h = parts.length > 6 ? parseInt(parts[6]) : 0;
+  var x2 = parts.length > 5 ? parseInt(parts[5]) : 0;
+  var y2 = parts.length > 6 ? parseInt(parts[6]) : 0;
 
   var url = resolveOverlayPath(path);
   var img = new Image();
   img.onload = function() {
-    overlayImages[name] = { img: img, x: x, y: y, w: w || img.width, h: h || img.height, visible: true };
-    console.log('ADDBMP:', name, url, x, y);
+    var w, h;
+    if (x2 > x && y2 > y) {
+      w = x2 - x; h = y2 - y;
+    } else {
+      w = img.width; h = img.height;
+    }
+    overlayImages[name] = { img: img, x: x, y: y, w: w, h: h, visible: true };
+    console.log('ADDBMP:', name, url, x, y, w, h);
     render();
   };
   img.onerror = function() { console.warn('ADDBMP failed:', url); };
@@ -1502,6 +1518,14 @@ function executeSceneCommands(scene) {
   }
 }
 
+function isToolbarVisible() {
+  if (toolbarSceneIndex < 0 || !project || currentSceneIndex === toolbarSceneIndex) return false;
+  var scene = project.scenes[currentSceneIndex];
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var bgImg = resources[resKey];
+  return !(bgImg && bgImg.height >= 480);
+}
+
 function executeToolbar() {
   // Execute the toolbar scene's C0 command strings to add barre overlay + conditional icons
   if (toolbarSceneIndex < 0 || !project) return;
@@ -1548,7 +1572,7 @@ function findCommandAtPoint(x, y) {
     }
   }
   // Check toolbar commands for hover
-  if (toolbarSceneIndex >= 0 && currentSceneIndex !== toolbarSceneIndex) {
+  if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];
@@ -1592,8 +1616,8 @@ function findAllCommandsAtPoint(x, y) {
       result.push(cmd);
     }
   }
-  // Also check toolbar scene commands if toolbar is active
-  if (toolbarSceneIndex >= 0 && currentSceneIndex !== toolbarSceneIndex) {
+  // Also check toolbar scene commands if toolbar is visible
+  if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];

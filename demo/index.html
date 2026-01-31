@@ -243,6 +243,7 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
+  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:auto;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
     <div class="drop-area" id="drop-area">
@@ -1177,6 +1178,41 @@ function playHtml(htmlStr) {
   });
 }
 
+// --- SCENE HTML (string6 auto-loaded HTM) ---
+function loadSceneHtml(htmFile, rect) {
+  var url = resolveHtmlPath(htmFile);
+  console.log('Scene HTM:', htmFile, 'rect:', rect);
+
+  var el = document.getElementById('scene-html');
+  var content = el.querySelector('.scene-html-content');
+
+  // Position relative to canvas
+  var canvasRect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = canvasRect.width / gameW;
+  var scaleY = canvasRect.height / gameH;
+
+  el.style.left = (canvasRect.left - contRect.left + rect.left * scaleX) + 'px';
+  el.style.top = (canvasRect.top - contRect.top + rect.top * scaleY) + 'px';
+  el.style.width = ((rect.right - rect.left) * scaleX) + 'px';
+  el.style.height = ((rect.bottom - rect.top) * scaleY) + 'px';
+  el.style.display = 'block';
+
+  fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+    var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    content.innerHTML = bodyMatch ? bodyMatch[1] : html;
+  }).catch(function(e) {
+    console.warn('Scene HTM load failed:', url, e.message);
+    el.style.display = 'none';
+  });
+}
+
+function closeSceneHtml() {
+  document.getElementById('scene-html').style.display = 'none';
+}
+
 var pendingAfterHtml = null; // command to resume after HTML overlay closed
 
 function closeHtmlOverlay() {
@@ -1393,6 +1429,11 @@ function executeSceneCommands(scene) {
         gameVars[v.name.toLowerCase()] = v.value;
       }
     });
+  }
+
+  // Auto-load HTM from scene string6 field (positioned in scene rect)
+  if (scene.fields.string6 && scene.fields.string6.toLowerCase().endsWith('.htm')) {
+    loadSceneHtml(scene.fields.string6, scene.rect);
   }
 }
 
@@ -1622,6 +1663,7 @@ function goToScene(index) {
   var keepKeys = getSceneAutoWavKeys(project.scenes[index]);
   stopAudioExcept(keepKeys);
   closeHtmlOverlay();
+  closeSceneHtml();
   closeVideo();
   activePlayText = null;
   activePlayTextFont = null;

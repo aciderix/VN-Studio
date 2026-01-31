@@ -1135,7 +1135,9 @@ function addBmpOverlay(addbmpStr) {
 
   var url = resolveOverlayPath(path);
   var img = new Image();
+  var gen = overlayGeneration;
   img.onload = function() {
+    if (gen !== overlayGeneration) return; // scene changed, discard stale overlay
     var w, h;
     if (x2 > x && y2 > y) {
       w = x2 - x; h = y2 - y;
@@ -1479,9 +1481,11 @@ function executeStringCommand(strType, strValue) {
 }
 
 // Execute non-interactive commands of a scene (on scene enter)
+var overlayGeneration = 0; // incremented on scene change to cancel stale async loads
 function executeSceneCommands(scene) {
   // Clear overlays from previous scene
   overlayImages = {};
+  overlayGeneration++;
 
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
@@ -1562,12 +1566,22 @@ function pointInPolygon(x, y, pairs) {
   return inside;
 }
 
+function isPolygonInBounds(pairs, sceneW) {
+  // Check if at least part of the polygon is within the scene image
+  var minX = Infinity;
+  for (var i = 0; i < pairs.length; i++) {
+    if (pairs[i].a < minX) minX = pairs[i].a;
+  }
+  return minX < sceneW;
+}
+
 function findCommandAtPoint(x, y) {
   if (!project || currentSceneIndex < 0) return null;
   var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
   for (var i = scene.commands.length - 1; i >= 0; i--) {
     var cmd = scene.commands[i];
-    if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+    if (cmd.paramPairs.length >= 2 && isPolygonInBounds(cmd.paramPairs, sceneW) && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
       return cmd;
     }
   }
@@ -1609,10 +1623,11 @@ function findClickableCommandAtPoint(x, y) {
 function findAllCommandsAtPoint(x, y) {
   if (!project || currentSceneIndex < 0) return [];
   var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
   var result = [];
   for (var i = scene.commands.length - 1; i >= 0; i--) {
     var cmd = scene.commands[i];
-    if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+    if (cmd.paramPairs.length >= 2 && isPolygonInBounds(cmd.paramPairs, sceneW) && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
       result.push(cmd);
     }
   }

@@ -504,6 +504,7 @@ var hoveredCmd = null;
 var scrollX = 0; // offset de scroll horizontal pour scènes larges
 var activePlayText = null; // text from IF-triggered playtext actions
 var activePlayTextFont = null; // font for activePlayText
+var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -727,7 +728,10 @@ function render() {
     }
   }
 
-  // IF-triggered playtext
+  // IF-triggered playtext (from hover evaluation or executeAction)
+  activePlayTexts.forEach(function(pt) {
+    renderPlayTextBox(pt.text, pt.font);
+  });
   if (activePlayText) {
     renderPlayTextBox(activePlayText, activePlayTextFont);
   }
@@ -810,6 +814,7 @@ function playWav(wavStr) {
   var audio = new Audio(url);
   audio.loop = (loops > 1 || loops === 0); // 0 = infinite
   audioElements[key] = audio;
+  recentlyStartedAudio[key] = true;
   audio.play().catch(function(e) {
     if (e.name === 'NotAllowedError') {
       console.warn('Audio blocked (waiting for user gesture):', file);
@@ -843,15 +848,18 @@ function getSceneAutoWavKeys(scene) {
   return keys;
 }
 
-// Stop audio except keys that the next scene will play
+var recentlyStartedAudio = {}; // keys started in current click cycle
+
+// Stop audio except keys that the next scene will play or were just started
 function stopAudioExcept(keepKeys) {
   Object.keys(audioElements).forEach(function(key) {
-    if (!keepKeys[key]) {
+    if (!keepKeys[key] && !recentlyStartedAudio[key]) {
       audioElements[key].pause();
       audioElements[key].currentTime = 0;
       delete audioElements[key];
     }
   });
+  recentlyStartedAudio = {};
 }
 
 // --- RUNPRJ ---
@@ -1169,8 +1177,16 @@ function playHtml(htmlStr) {
   });
 }
 
+var pendingAfterHtml = null; // command to resume after HTML overlay closed
+
 function closeHtmlOverlay() {
   document.getElementById('html-overlay').style.display = 'none';
+  // Resume pending command processing
+  if (pendingAfterHtml) {
+    var pending = pendingAfterHtml;
+    pendingAfterHtml = null;
+    resumeCommandProcessing(pending.cmd, pending.startIdx);
+  }
 }
 
 // --- PLAYAVI ---
@@ -1197,20 +1213,19 @@ function resolveAviPath(aviRef) {
 }
 
 function playAvi(aviStr) {
-  // Format: "filename flags [x y w h]"
+  // Format: "filename flags [x1 y1 x2 y2]"
   var parts = aviStr.trim().split(/\s+/);
   if (parts.length < 1) return;
   var file = parts[0];
   var flags = parseInt(parts[1]) || 0;
-  var x = parseInt(parts[2]) || 0;
-  var y = parseInt(parts[3]) || 0;
-  var w = parseInt(parts[4]) || 0;
-  var h = parseInt(parts[5]) || 0;
+  var x1 = parseInt(parts[2]) || 0;
+  var y1 = parseInt(parts[3]) || 0;
+  var x2 = parseInt(parts[4]) || 0;
+  var y2 = parseInt(parts[5]) || 0;
 
   var url = resolveAviPath(file);
-  // Use converted .webm version
   var webmUrl = url.replace(/\.avi$/i, '.webm');
-  console.log('PLAYAVI:', file, 'at', x, y, w, h);
+  console.log('PLAYAVI:', file, 'pos:', x1, y1, x2, y2);
 
   closeVideo();
 
@@ -1223,7 +1238,6 @@ function playAvi(aviStr) {
   var video = document.createElement('video');
   video.autoplay = true;
   video.playsInline = true;
-  // Try WebM first (converted), fallback to AVI
   var srcWebm = document.createElement('source');
   srcWebm.src = webmUrl;
   srcWebm.type = 'video/webm';
@@ -1237,11 +1251,12 @@ function playAvi(aviStr) {
   video.style.background = '#000';
 
   var contRect = container.getBoundingClientRect();
-  if (w > 0 && h > 0) {
-    video.style.left = (rect.left - contRect.left + x * scaleX) + 'px';
-    video.style.top = (rect.top - contRect.top + y * scaleY) + 'px';
-    video.style.width = (w * scaleX) + 'px';
-    video.style.height = (h * scaleY) + 'px';
+  if (x2 > x1 && y2 > y1) {
+    // Positioned overlay: x1,y1 = top-left, x2,y2 = bottom-right in game coords
+    video.style.left = (rect.left - contRect.left + x1 * scaleX) + 'px';
+    video.style.top = (rect.top - contRect.top + y1 * scaleY) + 'px';
+    video.style.width = ((x2 - x1) * scaleX) + 'px';
+    video.style.height = ((y2 - y1) * scaleY) + 'px';
   } else {
     // Fullscreen over canvas
     video.style.left = (rect.left - contRect.left) + 'px';
@@ -1442,7 +1457,9 @@ canvas.addEventListener('mousemove', function(e) {
 
   if (cmd !== hoveredCmd) {
     hoveredCmd = cmd;
+    activePlayTexts = [];
     canvas.style.cursor = cmd ? 'pointer' : 'default';
+    if (cmd) evaluateHoverEffects(cmd);
     render();
   }
 
@@ -1464,26 +1481,103 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
+// Evaluate IF conditions on a command for HOVER (non-destructive: only playtext + addbmp)
+function evaluateHoverEffects(cmd) {
+  activePlayTexts = [];
+  // Get font from command
+  var fontStr = cmd.strings.find(function(s) { return s.type === 39; });
+  var font = fontStr ? fontStr.string : null;
+
+  cmd.strings.forEach(function(s) {
+    if (s.type === 21) {
+      var action = evaluateIfReadOnly(s.string);
+      if (!action) return;
+      var parts = action.trim().split(/\s+/);
+      var act = parts[0].toLowerCase();
+      if (act === 'playtext') {
+        activePlayTexts.push({ text: parts.slice(1).join(' '), font: font });
+      } else if (act === 'addbmp') {
+        addBmpOverlay(parts.slice(1).join(' '));
+      }
+    }
+  });
+}
+
+// Read-only IF evaluator (same as evaluateIf but doesn't log)
+function evaluateIfReadOnly(ifStr) {
+  var thenIdx = ifStr.indexOf(' then ');
+  if (thenIdx < 0) return null;
+
+  var condStr = ifStr.substring(0, thenIdx).trim();
+  var rest = ifStr.substring(thenIdx + 6).trim();
+
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  if (!condMatch) return null;
+
+  var varName = condMatch[1];
+  var op = condMatch[2];
+  var val = parseInt(condMatch[3]);
+  var actual = getVar(varName);
+
+  var result = false;
+  switch (op) {
+    case '=': result = (actual === val); break;
+    case '<': result = (actual < val); break;
+    case '>': result = (actual > val); break;
+    case '>=': result = (actual >= val); break;
+    case '<=': result = (actual <= val); break;
+    case '!=': case '<>': result = (actual !== val); break;
+  }
+
+  var elseIdx = -1;
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
+  if (elseMatch) {
+    elseIdx = rest.indexOf(elseMatch[0]);
+  } else {
+    var simpleElse = rest.indexOf(' else ');
+    if (simpleElse >= 0) elseIdx = simpleElse;
+  }
+
+  var thenAction, elseAction;
+  if (elseIdx >= 0) {
+    thenAction = rest.substring(0, elseIdx).trim();
+    elseAction = rest.substring(elseIdx + 6).trim();
+  } else {
+    thenAction = rest.trim();
+    elseAction = null;
+  }
+
+  return result ? thenAction : elseAction;
+}
+
 // Action commune clic / tap
 function handleCommandClick(cmd) {
   console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
+  resumeCommandProcessing(cmd, 0);
+}
 
+function resumeCommandProcessing(cmd, startIdx) {
   var navigated = false;
+  var htmlShown = false;
 
-  // Process all strings in order
-  cmd.strings.forEach(function(s) {
-    if (navigated) return; // stop if we already navigated
+  for (var si = startIdx; si < cmd.strings.length; si++) {
+    if (navigated || htmlShown) break;
+    var s = cmd.strings[si];
 
     if (s.type === 21) {
-      // IF condition
       var action = evaluateIf(s.string);
       if (action) {
-        executeAction(action);
-        // Check if action caused navigation
-        if (action.match(/^(runprj|scene)\s/i)) navigated = true;
+        var actCmd = action.trim().split(/\s+/)[0].toLowerCase();
+        if (actCmd === 'playhtml') {
+          playHtml(action.trim().split(/\s+/).slice(1).join(' '));
+          pendingAfterHtml = { cmd: cmd, startIdx: si + 1 };
+          htmlShown = true;
+        } else {
+          executeAction(action);
+          if (action.match(/^(runprj|scene)\s/i)) navigated = true;
+        }
       }
     } else if (s.type === 6) {
-      // SCENE
       var idx = parseInt(s.string, 10);
       if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
         goToScene(idx - 1);
@@ -1495,19 +1589,18 @@ function handleCommandClick(cmd) {
         if (target >= 0) { goToScene(target); navigated = true; }
       }
     } else if (s.type === 31) {
-      // RUNPRJ
       executeRunPrj(s.string);
       navigated = true;
     } else if (s.type === 13) {
-      // PLAYHTML
       playHtml(s.string);
+      pendingAfterHtml = { cmd: cmd, startIdx: si + 1 };
+      htmlShown = true;
     } else if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) {
       // PLAYTEXT, FONT, PREV, HOTSPOT - handled in render or ignored
     } else {
-      // All other string types
       executeStringCommand(s.type, s.string);
     }
-  });
+  }
 }
 
 canvas.addEventListener('click', function(e) {
@@ -1532,6 +1625,7 @@ function goToScene(index) {
   closeVideo();
   activePlayText = null;
   activePlayTextFont = null;
+  activePlayTexts = [];
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
   updateUI();
@@ -2006,6 +2100,8 @@ canvas.addEventListener('touchstart', function(e) {
     var cmd = findCommandAtPoint(pos.x, pos.y);
     if (cmd !== hoveredCmd) {
       hoveredCmd = cmd;
+      activePlayTexts = [];
+      if (cmd) evaluateHoverEffects(cmd);
       render();
     }
   }, 400);

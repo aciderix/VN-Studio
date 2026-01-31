@@ -506,6 +506,8 @@ var scrollX = 0; // offset de scroll horizontal pour scènes larges
 var activePlayText = null; // text from IF-triggered playtext actions
 var activePlayTextFont = null; // font for activePlayText
 var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
+var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color }
+var toolbarSceneIndex = -1; // index of the "Toolbar" scene
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -609,6 +611,19 @@ function render() {
     if (ov.visible && ov.img.complete) {
       ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
     }
+  });
+
+  // Overlay texts (ADDTEXT) - render variable values like score
+  Object.keys(overlayTexts).forEach(function(name) {
+    var ot = overlayTexts[name];
+    // Re-evaluate variable references for live updates
+    var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
+      return String(getVar(vname));
+    });
+    ctx.font = 'bold ' + ot.fontSize + 'px "Comic Sans MS", sans-serif';
+    ctx.fillStyle = ot.color;
+    ctx.textAlign = 'start';
+    ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
   });
 
   // Polygones
@@ -1043,6 +1058,13 @@ function executeAction(action) {
     hideBmpOverlay(parts[1] || '');
   } else if (cmd === 'closewav') {
     stopAllAudio();
+  } else if (cmd === 'addtext') {
+    addTextOverlay(parts.slice(1).join(' '));
+  } else if (cmd === 'closedll') {
+    // DLL not supported, ignore
+  } else if (cmd === 'font') {
+    // Font change from IF action - store for next playtext
+    activePlayTextFont = parts.slice(1).join(' ');
   } else if (cmd === 'invalidate' || cmd === 'update') {
     render();
   } else if (cmd === 'playtext') {
@@ -1129,6 +1151,23 @@ function showBmpOverlay(name) {
 function hideBmpOverlay(name) {
   name = name.trim().toLowerCase();
   if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
+}
+
+function addTextOverlay(val) {
+  // Format: "name fontSize x y w h flags <varname>" or "name fontSize x y w h flags text"
+  var parts = val.trim().split(/\s+/);
+  if (parts.length < 7) return;
+  var name = parts[0].toLowerCase();
+  var fontSize = parseInt(parts[1]) || 14;
+  var x = parseInt(parts[2]) || 0;
+  var y = parseInt(parts[3]) || 0;
+  var w = parseInt(parts[4]) || 200;
+  var h = parseInt(parts[5]) || 30;
+  // parts[6] = flags
+  var textPart = parts.slice(7).join(' ');
+  overlayTexts[name] = { text: textPart, fontSize: fontSize, x: x, y: y, w: w, h: h, color: '#ffffff' };
+  console.log('ADDTEXT:', name, '=', displayText, 'at', x, y);
+  render();
 }
 
 // --- PLAYHTML ---
@@ -1240,11 +1279,15 @@ var pendingAfterHtml = null; // command to resume after HTML overlay closed
 
 function closeHtmlOverlay() {
   document.getElementById('html-overlay').style.display = 'none';
-  // Resume pending command processing
+  // Resume pending command processing or navigation
   if (pendingAfterHtml) {
     var pending = pendingAfterHtml;
     pendingAfterHtml = null;
-    resumeCommandProcessing(pending.cmd, pending.startIdx);
+    if (pending.nav) {
+      doNavigation(pending.nav);
+    } else if (pending.cmd) {
+      resumeCommandProcessing(pending.cmd, pending.startIdx);
+    }
   }
 }
 
@@ -1410,9 +1453,8 @@ function executeStringCommand(strType, strValue) {
         addBmpOverlay('_playbmp_' + Date.now() + ' ' + val);
       }
       break;
-    case 41: // ADDTEXT: "varname flags x y w h flags <varname>"
-      // Display variable value as text - parse and render
-      console.log('ADDTEXT:', val);
+    case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"
+      addTextOverlay(val);
       break;
     // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 39 (FONT), 3 (PREV), 7 (HOTSPOT)
     default:
@@ -1460,6 +1502,25 @@ function executeSceneCommands(scene) {
   }
 }
 
+function executeToolbar() {
+  // Execute the toolbar scene's C0 command strings to add barre overlay + conditional icons
+  if (toolbarSceneIndex < 0 || !project) return;
+  var tbScene = project.scenes[toolbarSceneIndex];
+  if (!tbScene || !tbScene.commands.length) return;
+  var cmd = tbScene.commands[0]; // C0 is the main toolbar setup command
+  cmd.strings.forEach(function(s) {
+    if (s.type === 39 || s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      if (action) executeAction(action);
+    } else if (s.type === 33) {
+      // RUNDLL - skip
+    } else {
+      executeStringCommand(s.type, s.string);
+    }
+  });
+}
+
 // =============================================================================
 // HIT TESTING
 // =============================================================================
@@ -1484,6 +1545,16 @@ function findCommandAtPoint(x, y) {
     var cmd = scene.commands[i];
     if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
       return cmd;
+    }
+  }
+  // Check toolbar commands for hover
+  if (toolbarSceneIndex >= 0 && currentSceneIndex !== toolbarSceneIndex) {
+    var tbScene = project.scenes[toolbarSceneIndex];
+    for (var j = tbScene.commands.length - 1; j >= 0; j--) {
+      var tbCmd = tbScene.commands[j];
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+        return tbCmd;
+      }
     }
   }
   return null;
@@ -1519,6 +1590,16 @@ function findAllCommandsAtPoint(x, y) {
     var cmd = scene.commands[i];
     if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
       result.push(cmd);
+    }
+  }
+  // Also check toolbar scene commands if toolbar is active
+  if (toolbarSceneIndex >= 0 && currentSceneIndex !== toolbarSceneIndex) {
+    var tbScene = project.scenes[toolbarSceneIndex];
+    for (var j = tbScene.commands.length - 1; j >= 0; j--) {
+      var tbCmd = tbScene.commands[j];
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+        result.push(tbCmd);
+      }
     }
   }
   return result;
@@ -1634,61 +1715,39 @@ function handleCommandClick(cmd) {
 }
 
 function resumeCommandProcessing(cmd, startIdx) {
-  var navigated = false;
-  var htmlShown = false;
+  // Two-pass: execute ALL side-effects first, then navigate/show HTML last.
+  // This ensures SET_VAR, INC_VAR, ADDBMP etc. run even when followed by SCENE.
+  var deferredNav = null;   // { type:'scene'|'runprj', value:string }
+  var deferredHtml = null;  // { value:string, idx:number }
   var videoPlaying = false;
-  var pendingNavigation = null; // deferred scene/runprj after video
 
   for (var si = startIdx; si < cmd.strings.length; si++) {
-    if (navigated || htmlShown) break;
     var s = cmd.strings[si];
 
     if (s.type === 21) {
       var action = evaluateIf(s.string);
       if (action) {
-        var actCmd = action.trim().split(/\s+/)[0].toLowerCase();
+        var actParts = action.trim().split(/\s+/);
+        var actCmd = actParts[0].toLowerCase();
         if (actCmd === 'playhtml') {
-          playHtml(action.trim().split(/\s+/).slice(1).join(' '));
-          pendingAfterHtml = { cmd: cmd, startIdx: si + 1 };
-          htmlShown = true;
+          if (!deferredHtml) deferredHtml = { value: actParts.slice(1).join(' '), idx: si };
+        } else if (actCmd === 'scene') {
+          if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
+        } else if (actCmd === 'runprj') {
+          if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
         } else {
           executeAction(action);
-          if (action.match(/^(runprj|scene)\s/i)) navigated = true;
         }
       }
     } else if (s.type === 9) {
-      // PLAYAVI - check if followed by navigation, defer if so
       playAvi(s.string);
       videoPlaying = true;
     } else if (s.type === 6) {
-      if (videoPlaying && currentVideo) {
-        // Defer navigation until video ends
-        pendingNavigation = { type: 'scene', value: s.string };
-        navigated = true; // stop processing further commands
-      } else {
-        var idx = parseInt(s.string, 10);
-        if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
-          goToScene(idx - 1);
-          navigated = true;
-        } else {
-          var target = project.scenes.findIndex(function(sc) {
-            return sc.name.toLowerCase() === s.string.toLowerCase();
-          });
-          if (target >= 0) { goToScene(target); navigated = true; }
-        }
-      }
+      if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
     } else if (s.type === 31) {
-      if (videoPlaying && currentVideo) {
-        pendingNavigation = { type: 'runprj', value: s.string };
-        navigated = true;
-      } else {
-        executeRunPrj(s.string);
-        navigated = true;
-      }
+      if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
     } else if (s.type === 13) {
-      playHtml(s.string);
-      pendingAfterHtml = { cmd: cmd, startIdx: si + 1 };
-      htmlShown = true;
+      if (!deferredHtml) deferredHtml = { value: s.string, idx: si };
     } else if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) {
       // PLAYTEXT, FONT, PREV, HOTSPOT - handled in render or ignored
     } else {
@@ -1696,27 +1755,49 @@ function resumeCommandProcessing(cmd, startIdx) {
     }
   }
 
-  // If video is playing with deferred navigation, navigate when video ends
-  if (pendingNavigation && currentVideo) {
-    var nav = pendingNavigation;
-    var vid = currentVideo;
-    function onVideoEnd() {
-      vid.removeEventListener('ended', onVideoEnd);
-      vid.removeEventListener('error', onVideoEnd);
-      vid.removeEventListener('click', onVideoEnd);
-      closeVideo();
-      if (nav.type === 'scene') {
-        var idx = parseInt(nav.value, 10);
-        if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
-          goToScene(idx - 1);
-        }
-      } else if (nav.type === 'runprj') {
-        executeRunPrj(nav.value);
-      }
+  // Now execute deferred HTML and/or navigation
+  if (deferredHtml) {
+    playHtml(deferredHtml.value);
+    if (deferredNav) {
+      // HTML shown + navigation pending: navigate when HTML is closed
+      pendingAfterHtml = { nav: deferredNav };
+    } else {
+      pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
     }
-    vid.addEventListener('ended', onVideoEnd);
-    vid.addEventListener('error', onVideoEnd);
-    vid.addEventListener('click', onVideoEnd);
+  } else if (deferredNav) {
+    if (videoPlaying && currentVideo) {
+      // Defer navigation until video ends
+      var nav = deferredNav;
+      var vid = currentVideo;
+      function onVideoEnd() {
+        vid.removeEventListener('ended', onVideoEnd);
+        vid.removeEventListener('error', onVideoEnd);
+        vid.removeEventListener('click', onVideoEnd);
+        closeVideo();
+        doNavigation(nav);
+      }
+      vid.addEventListener('ended', onVideoEnd);
+      vid.addEventListener('error', onVideoEnd);
+      vid.addEventListener('click', onVideoEnd);
+    } else {
+      doNavigation(deferredNav);
+    }
+  }
+}
+
+function doNavigation(nav) {
+  if (nav.type === 'scene') {
+    var idx = parseInt(nav.value, 10);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
+    } else if (project) {
+      var target = project.scenes.findIndex(function(sc) {
+        return sc.name.toLowerCase() === nav.value.toLowerCase();
+      });
+      if (target >= 0) goToScene(target);
+    }
+  } else if (nav.type === 'runprj') {
+    executeRunPrj(nav.value);
   }
 }
 
@@ -1757,8 +1838,13 @@ function goToScene(index) {
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];
+  overlayTexts = {};
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
+  // Load toolbar overlay if available and not navigating to toolbar itself
+  if (toolbarSceneIndex >= 0 && index !== toolbarSceneIndex) {
+    executeToolbar();
+  }
   updateUI();
   resizeCanvas();
 }
@@ -1828,6 +1914,16 @@ function loadVNDFile(arrayBuffer, fileName, skipFirstScene) {
       div.onclick = function() { goToScene(i); };
       list.appendChild(div);
     });
+
+    // Detect toolbar scene
+    toolbarSceneIndex = -1;
+    for (var ti = 0; ti < project.scenes.length; ti++) {
+      if (project.scenes[ti].name && project.scenes[ti].name.toLowerCase() === 'toolbar') {
+        toolbarSceneIndex = ti;
+        console.log('Toolbar scene found at index', ti);
+        break;
+      }
+    }
 
     // Cacher la dropzone
     document.getElementById('dropzone').classList.add('hidden');

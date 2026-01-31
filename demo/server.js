@@ -19,6 +19,8 @@ var MIME = {
   '.png': 'image/png',
   '.wav': 'audio/wav',
   '.avi': 'video/x-msvideo',
+  '.webm': 'video/webm',
+  '.htm': 'text/html',
   '.ico': 'image/x-icon',
 };
 
@@ -28,6 +30,11 @@ var server = http.createServer(function(req, res) {
   // Route /main/ -> demo/index.html
   if (url === '/' || url === '/main/' || url === '/main') {
     url = '/demo/index.html';
+  }
+
+  // game-data is now inside demo/
+  if (url.startsWith('/game-data/')) {
+    url = '/demo' + url;
   }
 
   var filePath = path.join(ROOT, url);
@@ -62,5 +69,5 @@ var server = http.createServer(function(req, res) {
 server.listen(PORT, function() {
   console.log('VN-Studio demo server running at http://localhost:' + PORT);
   console.log('Open http://localhost:' + PORT + '/main/');
-  console.log('Game data served from: ' + path.join(ROOT, 'game-data'));
+  console.log('Game data served from: ' + path.join(ROOT, 'demo', 'game-data'));
 });

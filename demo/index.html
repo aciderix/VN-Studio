@@ -502,6 +502,8 @@ var showLabels = true;
 var fillPolygons = false;
 var hoveredCmd = null;
 var scrollX = 0; // offset de scroll horizontal pour scènes larges
+var activePlayText = null; // text from IF-triggered playtext actions
+var activePlayTextFont = null; // font for activePlayText
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -662,67 +664,72 @@ function render() {
     });
   }
 
+  // Render a PLAYTEXT string on the canvas
+  // textVal: "x1 y1 x2 y2 flags text", fontVal: "size flags color fontname" (optional)
+  function renderPlayTextBox(textVal, fontVal) {
+    var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
+    if (!tp) return;
+    var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
+    var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
+    var tw = tx2 - tx, th = ty2 - ty;
+    var text = tp[5];
+    if (tw <= 0) tw = 300;
+    if (th <= 0) th = 40;
+
+    var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
+    if (fontVal) {
+      var fp = fontVal.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+      if (fp) {
+        fontSize = Math.abs(parseInt(fp[1]));
+        fontColor = fp[2];
+        fontName = fp[3];
+      }
+    }
+    if (fontSize < 6) fontSize = 12;
+
+    ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+
+    // Word-wrap text into lines
+    var words = text.split(' ');
+    var lines = [];
+    var line = '';
+    var maxW = tw - 8;
+    for (var wi = 0; wi < words.length; wi++) {
+      var test = line ? line + ' ' + words[wi] : words[wi];
+      if (ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = words[wi];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+
+    var lineH = fontSize + 4;
+    var textH = lines.length * lineH;
+    var boxH = Math.max(th, textH + 8);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(tx, ty, tw, boxH);
+    ctx.fillStyle = fontColor;
+    ctx.textAlign = 'start';
+    for (var li = 0; li < lines.length; li++) {
+      ctx.fillText(lines[li], tx + 4, ty + fontSize + 2 + li * lineH);
+    }
+  }
+
   // PLAYTEXT overlay pour la commande survolée
   if (hoveredCmd) {
     var textStr = hoveredCmd.strings.find(function(s) { return s.type === 38; });
     var fontStr = hoveredCmd.strings.find(function(s) { return s.type === 39; });
     if (textStr && textStr.string) {
-      // Format type 38: "x1 y1 x2 y2 flags text" (x2,y2 = bottom-right of box)
-      var tp = textStr.string.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
-      if (tp) {
-        var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
-        var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
-        var tw = tx2 - tx, th = ty2 - ty;
-        var text = tp[5];
-        if (tw <= 0) tw = 300;
-        if (th <= 0) th = 40;
-
-        // Font: "size flags color fontname"
-        var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
-        if (fontStr && fontStr.string) {
-          var fp = fontStr.string.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
-          if (fp) {
-            fontSize = Math.abs(parseInt(fp[1]));
-            fontColor = fp[2];
-            fontName = fp[3];
-          }
-        }
-        if (fontSize < 6) fontSize = 12;
-
-        ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
-
-        // Word-wrap text into lines
-        var words = text.split(' ');
-        var lines = [];
-        var line = '';
-        var maxW = tw - 8;
-        for (var wi = 0; wi < words.length; wi++) {
-          var test = line ? line + ' ' + words[wi] : words[wi];
-          if (ctx.measureText(test).width > maxW && line) {
-            lines.push(line);
-            line = words[wi];
-          } else {
-            line = test;
-          }
-        }
-        if (line) lines.push(line);
-
-        var lineH = fontSize + 4;
-        var textH = lines.length * lineH;
-        var boxH = Math.max(th, textH + 8);
-
-        // Background
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(tx, ty, tw, boxH);
-
-        // Text lines
-        ctx.fillStyle = fontColor;
-        ctx.textAlign = 'start';
-        for (var li = 0; li < lines.length; li++) {
-          ctx.fillText(lines[li], tx + 4, ty + fontSize + 2 + li * lineH);
-        }
-      }
+      renderPlayTextBox(textStr.string, fontStr ? fontStr.string : null);
     }
+  }
+
+  // IF-triggered playtext
+  if (activePlayText) {
+    renderPlayTextBox(activePlayText, activePlayTextFont);
   }
 
   ctx.restore(); // fin du scroll
@@ -758,6 +765,23 @@ function render() {
 
 // --- AUDIO ---
 var audioElements = {}; // key -> HTMLAudioElement
+var audioUnlocked = false;
+var pendingAudioPlays = []; // audio elements waiting for user gesture
+
+// Unlock audio on first user interaction
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  // Replay any pending audio
+  pendingAudioPlays.forEach(function(audio) {
+    audio.play().catch(function() {});
+  });
+  pendingAudioPlays = [];
+}
+
+['click', 'touchstart', 'keydown'].forEach(function(evt) {
+  document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+});
 
 function resolveWavPath(wavRef) {
   var normalized = wavRef.toLowerCase().replace(/\\/g, '/');
@@ -786,7 +810,14 @@ function playWav(wavStr) {
   var audio = new Audio(url);
   audio.loop = (loops > 1 || loops === 0); // 0 = infinite
   audioElements[key] = audio;
-  audio.play().catch(function(e) { console.warn('Audio play failed:', url, e.message); });
+  audio.play().catch(function(e) {
+    if (e.name === 'NotAllowedError') {
+      console.warn('Audio blocked (waiting for user gesture):', file);
+      pendingAudioPlays.push(audio);
+    } else {
+      console.warn('Audio play failed:', url, e.message);
+    }
+  });
   console.log('PLAYWAV:', file, 'loops:', loops);
 }
 
@@ -929,7 +960,7 @@ function evaluateIf(ifStr) {
   // Split on " else " — careful: "else" can appear in action strings
   // Look for " else " that's followed by a known command keyword
   var elseIdx = -1;
-  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp)\s/i);
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
   if (elseMatch) {
     elseIdx = rest.indexOf(elseMatch[0]);
   } else {
@@ -989,6 +1020,10 @@ function executeAction(action) {
   } else if (cmd === 'closewav') {
     stopAllAudio();
   } else if (cmd === 'invalidate' || cmd === 'update') {
+    render();
+  } else if (cmd === 'playtext') {
+    // playtext x1 y1 x2 y2 flags text
+    activePlayText = parts.slice(1).join(' ');
     render();
   } else if (cmd === 'if') {
     // Nested IF: "if var op val then action"
@@ -1094,15 +1129,17 @@ function resolveHtmlPath(htmlRef) {
 }
 
 function playHtml(htmlStr) {
-  // Format: "filename flags x y w h"
+  // Format: "filename [flags x y w h]" or just "filename"
   var parts = htmlStr.trim().split(/\s+/);
   if (parts.length < 1) return;
   var file = parts[0];
-  var flags = parseInt(parts[1]) || 0;
-  var x = parseInt(parts[2]) || 0;
-  var y = parseInt(parts[3]) || 0;
-  var w = parseInt(parts[4]) || 500;
-  var h = parseInt(parts[5]) || 350;
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var flags = parts.length > 1 ? parseInt(parts[1]) || 0 : 0;
+  var x = parts.length > 2 ? parseInt(parts[2]) || 0 : 0;
+  var y = parts.length > 3 ? parseInt(parts[3]) || 0 : 0;
+  var w = parts.length > 4 ? parseInt(parts[4]) || gameW : gameW;
+  var h = parts.length > 5 ? parseInt(parts[5]) || gameH : gameH;
 
   var url = resolveHtmlPath(file);
   console.log('PLAYHTML:', file, 'at', x, y, w, h);
@@ -1171,6 +1208,8 @@ function playAvi(aviStr) {
   var h = parseInt(parts[5]) || 0;
 
   var url = resolveAviPath(file);
+  // Use converted .webm version
+  var webmUrl = url.replace(/\.avi$/i, '.webm');
   console.log('PLAYAVI:', file, 'at', x, y, w, h);
 
   closeVideo();
@@ -1182,8 +1221,17 @@ function playAvi(aviStr) {
   var scaleY = rect.height / gameH;
 
   var video = document.createElement('video');
-  video.src = url;
   video.autoplay = true;
+  video.playsInline = true;
+  // Try WebM first (converted), fallback to AVI
+  var srcWebm = document.createElement('source');
+  srcWebm.src = webmUrl;
+  srcWebm.type = 'video/webm';
+  var srcAvi = document.createElement('source');
+  srcAvi.src = url;
+  srcAvi.type = 'video/avi';
+  video.appendChild(srcWebm);
+  video.appendChild(srcAvi);
   video.style.position = 'absolute';
   video.style.zIndex = '16';
   video.style.background = '#000';
@@ -1482,6 +1530,8 @@ function goToScene(index) {
   stopAudioExcept(keepKeys);
   closeHtmlOverlay();
   closeVideo();
+  activePlayText = null;
+  activePlayTextFont = null;
   loadSceneBackground(project.scenes[index]);
   executeSceneCommands(project.scenes[index]);
   updateUI();

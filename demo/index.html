@@ -1223,6 +1223,9 @@ function playHtml(htmlStr) {
     return;
   }
 
+  // Mark that playhtml was triggered (prevents string6 default HTM from loading)
+  playhtmlTriggered = true;
+
   var gameW = project ? project.header.width : 640;
   var gameH = project ? project.header.height : 480;
   var flags = parts.length > 1 ? parseInt(parts[1]) || 0 : 0;
@@ -1488,10 +1491,13 @@ function executeStringCommand(strType, strValue) {
 
 // Execute non-interactive commands of a scene (on scene enter)
 var overlayGeneration = 0; // incremented on scene change to cancel stale async loads
+var playhtmlTriggered = false; // track if playhtml was called during scene load
+
 function executeSceneCommands(scene) {
   // Clear overlays from previous scene
   overlayImages = {};
   overlayGeneration++;
+  playhtmlTriggered = false; // reset for new scene
 
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
@@ -1522,9 +1528,14 @@ function executeSceneCommands(scene) {
     });
   }
 
-  // Auto-load HTM from scene string6 field (positioned in scene rect)
+  // Auto-load HTM from scene string6 field ONLY if no playhtml was triggered
+  // This allows conditional playhtml (like bonus questions) to override the default
   if (scene.fields.string6 && scene.fields.string6.toLowerCase().endsWith('.htm')) {
-    loadSceneHtml(scene.fields.string6, scene.rect);
+    if (!playhtmlTriggered) {
+      loadSceneHtml(scene.fields.string6, scene.rect);
+    } else {
+      console.log('Skipping string6 HTM (playhtml already triggered):', scene.fields.string6);
+    }
   }
 }
 

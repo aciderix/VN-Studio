@@ -1214,6 +1214,15 @@ function playHtml(htmlStr) {
   var parts = htmlStr.trim().split(/\s+/);
   if (parts.length < 1) return;
   var file = parts[0];
+
+  // Don't overwrite an already visible HTML overlay (first playhtml wins)
+  // This fixes bonus questions showing wrong HTM when multiple bonusX=1
+  var overlay = document.getElementById('html-overlay');
+  if (overlay.style.display === 'block') {
+    console.log('PLAYHTML skipped (overlay already visible):', file);
+    return;
+  }
+
   var gameW = project ? project.header.width : 640;
   var gameH = project ? project.header.height : 480;
   var flags = parts.length > 1 ? parseInt(parts[1]) || 0 : 0;
@@ -1227,12 +1236,9 @@ function playHtml(htmlStr) {
 
   // Position overlay relative to canvas
   var rect = canvas.getBoundingClientRect();
-  var gameW = project ? project.header.width : 640;
-  var gameH = project ? project.header.height : 480;
   var scaleX = rect.width / gameW;
   var scaleY = rect.height / gameH;
 
-  var overlay = document.getElementById('html-overlay');
   var content = overlay.querySelector('.html-content');
 
   overlay.style.left = (rect.left - container.getBoundingClientRect().left + x * scaleX) + 'px';

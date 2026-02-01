@@ -1678,7 +1678,7 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
-// Evaluate IF conditions on a command for HOVER (non-destructive: only playtext + addbmp)
+// Evaluate IF conditions on a command for HOVER (visual effects only: playtext, addbmp, delbmp, showbmp, hidebmp)
 function evaluateHoverEffects(cmd) {
   activePlayTexts = [];
   // Get font from command
@@ -1695,6 +1695,12 @@ function evaluateHoverEffects(cmd) {
         activePlayTexts.push({ text: parts.slice(1).join(' '), font: font });
       } else if (act === 'addbmp') {
         addBmpOverlay(parts.slice(1).join(' '));
+      } else if (act === 'delbmp') {
+        delBmpOverlay(parts[1] || '');
+      } else if (act === 'showbmp') {
+        showBmpOverlay(parts[1] || '');
+      } else if (act === 'hidebmp') {
+        hideBmpOverlay(parts[1] || '');
       }
     }
   });

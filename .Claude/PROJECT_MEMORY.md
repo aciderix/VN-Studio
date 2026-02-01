@@ -1,7 +1,7 @@
 # VN-Studio - Mémoire Complète du Projet
 
-**Dernière mise à jour:** 2026-01-30
-**Branche de travail:** claude/review-vn-studio-context-OEujj
+**Dernière mise à jour:** 2026-02-01
+**Branche de travail:** claude/review-docs-html-demo-oFkzQ
 
 ---
 
@@ -175,44 +175,43 @@ Chaque paire (a, b) = (x, y) d'un vertex du polygone.
 ### 3.1 Structure des fichiers
 
 ```
-src/
+demo/                          # MOTEUR WEB FONCTIONNEL
+├── index.html                 # ~2500 lignes - moteur complet vanilla JS
+├── server.js                  # Serveur Node.js statique
+└── game-data/                 # ~592MB ressources jeu (19 modules)
+    ├── couleurs1/             # Module principal (hub, toolbar, bonus)
+    ├── france/, allem/, angl/ # Modules pays
+    └── ...
+
+src/                           # Code React/TypeScript (en pause)
 ├── engine/
-│   ├── VNEngine.ts           # Moteur principal
-│   ├── VNFileLoader.ts       # Parser VND/VNP (~1800 lignes, à refaire)
-│   ├── VNSceneManager.ts     # Gestion des scènes
-│   ├── VNCommandProcessor.ts # Exécution des commandes
-│   ├── VNRenderer.ts         # Rendu Canvas 2D
-│   ├── VNAudioManager.ts     # Audio Web Audio API
-│   ├── VNTimerManager.ts     # Timers et effets
-│   ├── VNVariableStore.ts    # Variables
-│   └── index.ts
+│   ├── VNEngine.ts
+│   ├── VNFileLoader.ts       # Parser obsolète (voir demo/index.html)
+│   └── ...
 ├── components/
-│   ├── GameContainer.tsx
-│   └── index.ts
 ├── hooks/
-│   ├── useVNEngine.ts
-│   └── index.ts
-├── types/
-│   └── vn.types.ts           # Types TS (627 lignes)
-├── examples/
-│   └── ExampleProject.ts
-└── index.ts
+└── types/
 
 scripts/
-├── parse-vnd-universal.js    # Parser VND validé (19/19 fichiers, 0 bytes remaining)
-├── debug-vnd.ts              # Parser debug ancien
-└── parse-hotspots.ts         # Parser hotspots ancien
+├── debug-vnd.ts              # Parser debug TypeScript
+└── parse-hotspots.ts         # Parser hotspots
 
-VNP-VND/                      # 19 fichiers .vnd + .vnp
+VNP-VND/                      # 19 fichiers .vnd + .vnp (copies)
 ```
 
-### 3.2 Parser validé: parse-vnd-universal.js
+### 3.2 Moteur Web (demo/index.html)
 
-- Parse les 19 fichiers VND avec 0 bytes remaining
-- Basé sur le reverse-engineering de europeo.exe via radare2
-- Format unique (pas de TYPE_A/TYPE_B)
-- Supporte: header, variables, scènes, hotspots, commandes, polygones
-- CLI: `node scripts/parse-vnd-universal.js [-v] [fichiers...]`
+**Fonctions principales:**
+- `parseVND(arrayBuffer)` - Parse fichier VND complet
+- `readScene(buf, view, p, sv)` - Parse une scène
+- `readCommand(buf, view, p, sv)` - Parse une commande
+- `goToScene(index)` - Navigation
+- `executeStringCommand(type, value)` - Exécution commande
+- `evaluateIf(ifStr)` - Évaluateur conditionnel
+- `playWav/playAvi/playHtml()` - Lecture média
+- `addBmpOverlay/delBmpOverlay()` - Gestion overlays
+- `pointInPolygon(x, y, pairs)` - Hit testing
+- `preloadResources(callback)` - Préchargement
 
 ---
 
@@ -236,20 +235,45 @@ VNP-VND/                      # 19 fichiers .vnd + .vnp
 
 ---
 
-## 5. PROCHAINES ÉTAPES
+## 5. ÉTAT ACTUEL - DEMO HTML FONCTIONNELLE
 
-### Priorité haute
-1. **Porter parse-vnd-universal.js → VNFileLoader.ts** avec les types corrects
-2. **Corriger VNFileLoader.ts** pour utiliser le nouveau format
-3. **Build TypeScript sans erreurs**
+### demo/index.html (~2500 lignes)
+Le moteur de jeu complet est implémenté en vanilla JavaScript dans `demo/index.html`.
 
-### Priorité moyenne
-4. **Implémenter le rendu React** - Charger BMP, dessiner polygones, gérer clics
-5. **Implémenter les commandes** - SET_VAR, SCENE, PLAYWAV, RUNPRJ, IF, etc.
+**Pour lancer:**
+```bash
+cd demo && node server.js
+# Ouvrir http://localhost:8080
+```
 
-### Priorité basse
-6. **Optimisations** - Cache ressources, préchargement
-7. **Support VNP** - Parser les fichiers .vnp (INI-like)
+### Fonctionnalités implémentées
+- ✅ Parser VND complet (parseVND, readScene, readCommand...)
+- ✅ Parser VNP (format INI)
+- ✅ Rendu Canvas 2D avec scroll panoramique
+- ✅ 40+ types de commandes (SCENE, PLAYWAV, IF, SET_VAR, ADDBMP...)
+- ✅ Système de variables avec persistance cross-module
+- ✅ Hit testing polygones (clic + hover)
+- ✅ Audio WAV avec auto-unlock
+- ✅ Vidéo WebM (conversion AVI→WebM)
+- ✅ Overlays HTML, BMP, texte
+- ✅ Toolbar conditionnel
+- ✅ Préchargement ressources avec barre de progression
+- ✅ Navigation entre 19 modules de pays
+- ✅ Support tactile (tap, long-press, drag)
+
+### Fonctionnalités manquantes
+- ❌ PAUSE (type 16) - délai entre commandes
+- ❌ RUNDLL (type 33) - euro32.dll (calculatrice), inv.dll (inventaire)
+- ❌ DEFCURSOR (type 26)
+- ❌ PLAYMID (type 12) - MIDI
+- ❌ SAVE/LOAD (types 45/46)
+- ❌ Système de timer hotspot
+
+### Prochaines étapes suggérées
+1. Implémenter PAUSE pour les séquences d'activation toolbar
+2. Recréer le système d'inventaire (sacados) en HTML/JS
+3. Recréer la calculatrice de conversion euro
+4. Ajouter la persistence de l'état (localStorage)
 
 ---
 

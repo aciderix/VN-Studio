@@ -1499,20 +1499,7 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
-  // First pass: Execute playhtml conditions from ALL commands (even those with polygons)
-  // This is needed because bonus question scenes have playhtml conditions in polygon commands
-  scene.commands.forEach(function(cmd) {
-    cmd.strings.forEach(function(s) {
-      if (s.type === 21 && s.string.toLowerCase().includes('playhtml')) {
-        var action = evaluateIf(s.string);
-        if (action && action.toLowerCase().startsWith('playhtml')) {
-          executeAction(action);
-        }
-      }
-    });
-  });
-
-  // Second pass: Execute other non-interactive commands (without polygons)
+  // Execute non-interactive commands (without polygons)
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
@@ -1523,11 +1510,9 @@ function executeSceneCommands(scene) {
       if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
 
       if (s.type === 21) {
-        // IF - evaluate and execute (skip playhtml, already handled in first pass)
+        // IF - evaluate and execute
         var action = evaluateIf(s.string);
-        if (action && !action.toLowerCase().startsWith('playhtml')) {
-          executeAction(action);
-        }
+        if (action) executeAction(action);
         return;
       }
 
@@ -1548,7 +1533,22 @@ function executeSceneCommands(scene) {
   // This allows conditional playhtml (like bonus questions) to override the default
   if (scene.fields.string6 && scene.fields.string6.toLowerCase().endsWith('.htm')) {
     if (!playhtmlTriggered) {
-      loadSceneHtml(scene.fields.string6, scene.rect);
+      var htmToLoad = scene.fields.string6;
+
+      // WORKAROUND: Fix for bonus question scenes with incorrect VND conditions
+      // The VND has wrong mappings (e.g., scene expects bonus1,5,4 but navigations use bonus1,2,3)
+      // Auto-detect which bonusX=1 and load the corresponding bonusX.htm
+      if (htmToLoad.toLowerCase() === 'bonus1.htm') {
+        for (var bi = 1; bi <= 12; bi++) {
+          if (getVar('bonus' + bi) === 1) {
+            htmToLoad = 'bonus' + bi + '.htm';
+            console.log('Bonus question workaround: bonus' + bi + '=1, loading', htmToLoad);
+            break;
+          }
+        }
+      }
+
+      loadSceneHtml(htmToLoad, scene.rect);
     } else {
       console.log('Skipping string6 HTM (playhtml already triggered):', scene.fields.string6);
     }

@@ -1499,6 +1499,20 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
+  // First pass: Execute playhtml conditions from ALL commands (even those with polygons)
+  // This is needed because bonus question scenes have playhtml conditions in polygon commands
+  scene.commands.forEach(function(cmd) {
+    cmd.strings.forEach(function(s) {
+      if (s.type === 21 && s.string.toLowerCase().includes('playhtml')) {
+        var action = evaluateIf(s.string);
+        if (action && action.toLowerCase().startsWith('playhtml')) {
+          executeAction(action);
+        }
+      }
+    });
+  });
+
+  // Second pass: Execute other non-interactive commands (without polygons)
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
@@ -1509,9 +1523,11 @@ function executeSceneCommands(scene) {
       if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
 
       if (s.type === 21) {
-        // IF - evaluate and execute
+        // IF - evaluate and execute (skip playhtml, already handled in first pass)
         var action = evaluateIf(s.string);
-        if (action) executeAction(action);
+        if (action && !action.toLowerCase().startsWith('playhtml')) {
+          executeAction(action);
+        }
         return;
       }
 

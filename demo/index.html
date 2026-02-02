@@ -499,6 +499,7 @@ var project = null;
 var currentSceneIndex = -1;
 var currentVNDEntry = null; // Current VND_LIST entry for cross-project navigation
 var sceneHistory = []; // Stack for PREV navigation - stores {entry, sceneIndex} for cross-project support
+var waitingForVideoEnd = false; // Block clicks while video plays with deferred navigation
 var resources = {}; // path -> Image
 var showPolygons = true;
 var showLabels = true;
@@ -1491,6 +1492,7 @@ function closeVideo() {
   }
   pendingVideoPlay = null;
   pendingVideoNav = null;
+  waitingForVideoEnd = false; // Re-enable clicks
 }
 
 // --- SCENE COMMANDS ---
@@ -1969,12 +1971,14 @@ function resumeCommandProcessing(cmd, startIdx) {
     if (videoPlaying) {
       if (currentVideo) {
         // Video is playing in DOM - wait for it to end
+        waitingForVideoEnd = true; // Block clicks while video plays
         var nav = deferredNav;
         var vid = currentVideo;
         function onVideoEnd() {
           vid.removeEventListener('ended', onVideoEnd);
           vid.removeEventListener('error', onVideoEnd);
           vid.removeEventListener('click', onVideoEnd);
+          waitingForVideoEnd = false; // Re-enable clicks
           closeVideo();
           doNavigation(nav);
         }
@@ -1983,6 +1987,7 @@ function resumeCommandProcessing(cmd, startIdx) {
         vid.addEventListener('click', onVideoEnd);
       } else if (pendingVideoPlay) {
         // Video autoplay was blocked - store nav for when video plays via unlock
+        waitingForVideoEnd = true;
         pendingVideoNav = deferredNav;
       } else {
         // No video actually playing/pending, navigate now
@@ -2039,6 +2044,7 @@ function doNavigation(nav) {
 
 // Load a VND entry and go to a specific scene (for cross-project PREV)
 function loadVNDEntryAndGoToScene(entry, sceneIndex) {
+  waitingForVideoEnd = true; // Block clicks during cross-project loading
   stopAllAudio();
   currentBasePath = entry.base;
   // Load VNP config
@@ -2055,14 +2061,21 @@ function loadVNDEntryAndGoToScene(entry, sceneIndex) {
     var vndIdx = VND_LIST.indexOf(entry);
     if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
     preloadResources(function() {
+      waitingForVideoEnd = false; // Re-enable clicks
       goToScene(sceneIndex);
     });
   }).catch(function(e) {
     console.error('PREV cross-project load failed:', e);
+    waitingForVideoEnd = false; // Re-enable clicks on error
   });
 }
 
 canvas.addEventListener('click', function(e) {
+  // Block clicks while waiting for video to end
+  if (waitingForVideoEnd) {
+    console.log('Click blocked: waiting for video to end');
+    return;
+  }
   var pos = screenToGame(e.clientX, e.clientY);
   // Find ALL commands at click point, execute side effects for all
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);

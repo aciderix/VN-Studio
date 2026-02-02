@@ -2,704 +2,622 @@
 /**
  * VND Debug CLI - Virtual Navigator Debug Tool
  * Analyse, inspect and debug VND game files without GUI
- *
- * Usage:
- *   node vnd-debug.js <command> [options]
- *
- * Commands:
- *   info <file.vnd>              - Show VND file info (header, scene count, variables)
- *   scenes <file.vnd>            - List all scenes with summary
- *   scene <file.vnd> <n>         - Show detailed scene info (1-indexed)
- *   cmd <file.vnd> <scene> <cmd> - Show command details
- *   vars <file.vnd>              - List all variables
- *   search <file.vnd> <pattern>  - Search in commands/strings
- *   simulate <file.vnd> <scene>  - Simulate scene load and show what happens
- *   trace <file.vnd> <scene>     - Trace all possible interactions
- *   videos <file.vnd>            - Find all video references
- *   conditions <file.vnd>        - List all IF conditions
  */
 
 const fs = require('fs');
 const path = require('path');
 
 // =============================================================================
-// VND PARSER (ported from browser JS)
+// VND PARSER
 // =============================================================================
 
 function readBS(buf, p) {
   if (p + 4 > buf.length) return null;
-  var len = buf.readUInt32LE(p);
-  if (len === 0 || len > 10000 || p + 4 + len > buf.length) {
-    return { s: '', l: 4 };
-  }
-  var str = buf.slice(p + 4, p + 4 + len).toString('latin1');
-  return { s: str, l: 4 + len };
+  const len = buf.readUInt32LE(p);
+  if (len === 0 || len > 10000 || p + 4 + len > buf.length) return { s: '', l: 4 };
+  return { s: buf.slice(p + 4, p + 4 + len).toString('latin1'), l: 4 + len };
 }
 
 function readObject(buf, p) {
-  var type = buf.readUInt32LE(p); p += 4;
-  var bs = readBS(buf, p);
-  var str = bs ? bs.s : '';
-  p += bs ? bs.l : 4;
-  return { type: type, string: str, endPos: p };
+  const type = buf.readUInt32LE(p); p += 4;
+  const bs = readBS(buf, p);
+  return { type, string: bs ? bs.s : '', endPos: p + (bs ? bs.l : 4) };
 }
 
 function readStringCollection(buf, p) {
-  var count = buf.readUInt32LE(p); p += 4;
-  var items = [];
-  for (var i = 0; i < count; i++) {
-    var subIndex = buf.readUInt32LE(p); p += 4;
-    var obj = readObject(buf, p);
-    items.push({ subIndex: subIndex, type: obj.type, string: obj.string });
+  const count = buf.readUInt32LE(p); p += 4;
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const subIndex = buf.readUInt32LE(p); p += 4;
+    const obj = readObject(buf, p);
+    items.push({ subIndex, type: obj.type, string: obj.string });
     p = obj.endPos;
   }
-  return { items: items, endPos: p };
+  return { items, endPos: p };
 }
 
-function readCommand(buf, p, streamVersion) {
-  var strCol = readStringCollection(buf, p);
-  p = strCol.endPos;
-  var commandType = buf.readUInt32LE(p); p += 4;
-  var paramPairCount = buf.readUInt32LE(p); p += 4;
-  var paramPairs = [];
+function readCommand(buf, p, sv) {
+  const strCol = readStringCollection(buf, p); p = strCol.endPos;
+  const commandType = buf.readUInt32LE(p); p += 4;
+  const paramPairCount = buf.readUInt32LE(p); p += 4;
+  const paramPairs = [];
   if (paramPairCount > 0 && paramPairCount < 10000) {
-    for (var i = 0; i < paramPairCount; i++) {
-      var a = buf.readInt32LE(p); p += 4;
-      var b = buf.readInt32LE(p); p += 4;
-      paramPairs.push({ a: a, b: b });
+    for (let i = 0; i < paramPairCount; i++) {
+      paramPairs.push({ a: buf.readInt32LE(p), b: buf.readInt32LE(p + 4) }); p += 8;
     }
   }
-  var flags = 0;
-  if (streamVersion >= 0x2000c) {
-    flags = buf.readUInt32LE(p); p += 4;
-  }
-  return { strings: strCol.items, commandType: commandType, paramPairCount: paramPairCount, paramPairs: paramPairs, flags: flags, endPos: p };
+  let flags = 0;
+  if (sv >= 0x2000c) { flags = buf.readUInt32LE(p); p += 4; }
+  return { strings: strCol.items, commandType, paramPairCount, paramPairs, flags, endPos: p };
 }
 
 function readContentCollection(buf, p, sv) {
-  var count = buf.readUInt32LE(p); p += 4;
-  var cmds = [];
-  for (var i = 0; i < count; i++) {
-    var cmd = readCommand(buf, p, sv);
+  const count = buf.readUInt32LE(p); p += 4;
+  const cmds = [];
+  for (let i = 0; i < count; i++) {
+    const cmd = readCommand(buf, p, sv);
     cmds.push(cmd); p = cmd.endPos;
   }
   return { commands: cmds, endPos: p };
 }
 
 function readScene(buf, p, sv) {
-  var nameBS = readBS(buf, p); if (!nameBS) return null; p += nameBS.l;
-  var flagBytes = []; for (var fb = 0; fb < 4; fb++) flagBytes.push(buf[p + fb]); p += 4;
-  var prop1 = buf.readUInt32LE(p); p += 4;
-  var prop2 = buf.readUInt32LE(p); p += 4;
-  var prop3 = buf.readUInt32LE(p); p += 4;
-
-  var s1 = readBS(buf, p); p += s1 ? s1.l : 4;
-  var s2 = readBS(buf, p); p += s2 ? s2.l : 4;
-  var val1 = buf.readUInt32LE(p); p += 4;
-  var s3 = readBS(buf, p); p += s3 ? s3.l : 4;
-  var val2 = buf.readUInt32LE(p); p += 4;
-  var s4 = readBS(buf, p); p += s4 ? s4.l : 4;
-  var val3 = buf.readUInt32LE(p); p += 4;
-  var s5 = readBS(buf, p); p += s5 ? s5.l : 4;
-  var val4 = buf.readUInt32LE(p); p += 4;
-  var s6 = readBS(buf, p); p += s6 ? s6.l : 4;
-  var val5 = buf.readUInt32LE(p); p += 4;
-
-  var rect = {
-    left: buf.readInt32LE(p), top: buf.readInt32LE(p+4),
-    right: buf.readInt32LE(p+8), bottom: buf.readInt32LE(p+12)
-  }; p += 16;
-
-  buf.readUInt32LE(p); p += 4; // val6
-
-  var hotspotCount = buf.readUInt32LE(p); p += 4;
-  var hotspot = null;
+  const nameBS = readBS(buf, p); if (!nameBS) return null; p += nameBS.l;
+  const flagBytes = [buf[p], buf[p+1], buf[p+2], buf[p+3]]; p += 4;
+  const prop1 = buf.readUInt32LE(p); p += 4;
+  const prop2 = buf.readUInt32LE(p); p += 4;
+  const prop3 = buf.readUInt32LE(p); p += 4;
+  const s1 = readBS(buf, p); p += s1 ? s1.l : 4;
+  const s2 = readBS(buf, p); p += s2 ? s2.l : 4;
+  const val1 = buf.readUInt32LE(p); p += 4;
+  const s3 = readBS(buf, p); p += s3 ? s3.l : 4;
+  const val2 = buf.readUInt32LE(p); p += 4;
+  const s4 = readBS(buf, p); p += s4 ? s4.l : 4;
+  const val3 = buf.readUInt32LE(p); p += 4;
+  const s5 = readBS(buf, p); p += s5 ? s5.l : 4;
+  const val4 = buf.readUInt32LE(p); p += 4;
+  const s6 = readBS(buf, p); p += s6 ? s6.l : 4;
+  const val5 = buf.readUInt32LE(p); p += 4;
+  const rect = { left: buf.readInt32LE(p), top: buf.readInt32LE(p+4), right: buf.readInt32LE(p+8), bottom: buf.readInt32LE(p+12) }; p += 16;
+  p += 4; // val6
+  const hotspotCount = buf.readUInt32LE(p); p += 4;
+  let hotspot = null;
   if (hotspotCount > 0) {
-    var timerValue = buf.readUInt32LE(p); p += 4;
-    var collCount = buf.readUInt32LE(p); p += 4;
-    var objects = [];
-    for (var hi = 0; hi < collCount; hi++) {
-      var obj = readObject(buf, p);
+    const timerValue = buf.readUInt32LE(p); p += 4;
+    const collCount = buf.readUInt32LE(p); p += 4;
+    const objects = [];
+    for (let hi = 0; hi < collCount; hi++) {
+      const obj = readObject(buf, p);
       objects.push({ type: obj.type, string: obj.string });
       p = obj.endPos;
     }
-    hotspot = { timerValue: timerValue, objects: objects };
+    hotspot = { timerValue, objects };
   }
-
-  var cmdListValue = buf.readInt32LE(p); p += 4;
-  var cmdListData = [];
-  if (cmdListValue !== 0) {
-    for (var ci = 0; ci < 5; ci++) { cmdListData.push(buf.readUInt32LE(p)); p += 4; }
-  }
-
-  var contentCol = readContentCollection(buf, p, sv);
+  const cmdListValue = buf.readInt32LE(p); p += 4;
+  if (cmdListValue !== 0) p += 20;
+  const contentCol = readContentCollection(buf, p, sv);
   p = contentCol.endPos;
-
   return {
-    name: nameBS.s, flagBytes: flagBytes, prop1: prop1, prop2: prop2, prop3: prop3,
+    name: nameBS.s, flagBytes, prop1, prop2, prop3,
     fields: {
-      string1: s1 ? s1.s : '', string2: s2 ? s2.s : '', val1: val1,
-      string3: s3 ? s3.s : '', val2: val2, string4: s4 ? s4.s : '', val3: val3,
-      resource: s5 ? s5.s : '', val4: val4, string6: s6 ? s6.s : '', val5: val5
+      string1: s1?.s || '', string2: s2?.s || '', val1,
+      string3: s3?.s || '', val2, string4: s4?.s || '', val3,
+      resource: s5?.s || '', val4, string6: s6?.s || '', val5
     },
-    rect: rect, hotspotCount: hotspotCount, hotspot: hotspot,
-    cmdListValue: cmdListValue, cmdListData: cmdListData,
-    commands: contentCol.commands, endPos: p
+    rect, hotspotCount, hotspot, commands: contentCol.commands, endPos: p
   };
 }
 
 function parseVND(buf) {
-  var p = 5; // skip stream header
-
-  var magic = readBS(buf, p); p += magic.l;
+  let p = 5;
+  const magic = readBS(buf, p); p += magic.l;
   if (magic.s !== 'VNFILE') throw new Error('Invalid magic: ' + magic.s);
-  var version = readBS(buf, p); p += version.l;
-  var sceneCount = buf.readUInt32LE(p); p += 4;
-  var projectName = readBS(buf, p); p += projectName.l;
-  var editor = readBS(buf, p); p += editor.l;
-  var serial = readBS(buf, p); p += serial.l;
-  var projectIDStr = readBS(buf, p); p += projectIDStr.l;
-  var registry = readBS(buf, p); p += registry.l;
-  var width = buf.readUInt32LE(p); p += 4;
-  var height = buf.readUInt32LE(p); p += 4;
-  var depth = buf.readUInt32LE(p); p += 4;
-  var flag = buf.readUInt32LE(p); p += 4;
-  var u1 = buf.readUInt32LE(p); p += 4;
-  var u2 = buf.readUInt32LE(p); p += 4;
-  var reserved = buf.readUInt32LE(p); p += 4;
-  var dllPath = readBS(buf, p); p += dllPath.l;
-  var varCount = buf.readUInt32LE(p); p += 4;
-
-  var vars = [];
-  for (var vi = 0; vi < varCount; vi++) {
-    var vname = readBS(buf, p); p += vname.l;
-    var vval = buf.readUInt32LE(p); p += 4;
+  const version = readBS(buf, p); p += version.l;
+  const sceneCount = buf.readUInt32LE(p); p += 4;
+  const projectName = readBS(buf, p); p += projectName.l;
+  const editor = readBS(buf, p); p += editor.l;
+  const serial = readBS(buf, p); p += serial.l;
+  const projectIDStr = readBS(buf, p); p += projectIDStr.l;
+  const registry = readBS(buf, p); p += registry.l;
+  const width = buf.readUInt32LE(p); p += 4;
+  const height = buf.readUInt32LE(p); p += 4;
+  const depth = buf.readUInt32LE(p); p += 4;
+  p += 16; // flags + reserved
+  const dllPath = readBS(buf, p); p += dllPath.l;
+  const varCount = buf.readUInt32LE(p); p += 4;
+  const vars = [];
+  for (let vi = 0; vi < varCount; vi++) {
+    const vname = readBS(buf, p); p += vname.l;
+    const vval = buf.readUInt32LE(p); p += 4;
     vars.push({ name: vname.s, value: vval });
   }
-
-  var vp = version.s.split('.');
-  var sv = (parseInt(vp[0]) << 16) | parseInt(vp[1] || '0');
-
-  var scenes = [];
-  for (var si = 0; si < sceneCount; si++) {
-    var scene = readScene(buf, p, sv);
+  const vp = version.s.split('.');
+  const sv = (parseInt(vp[0]) << 16) | parseInt(vp[1] || '0');
+  const scenes = [];
+  for (let si = 0; si < sceneCount; si++) {
+    const scene = readScene(buf, p, sv);
     if (!scene) break;
     scenes.push(scene); p = scene.endPos;
   }
-
-  return {
-    header: {
-      magic: magic.s, version: version.s, sceneCount: sceneCount,
-      projectName: projectName.s, editor: editor.s,
-      width: width, height: height, depth: depth
-    },
-    variables: vars, scenes: scenes,
-    bytesRemaining: buf.length - p
-  };
+  return { header: { magic: magic.s, version: version.s, sceneCount, projectName: projectName.s, editor: editor.s, width, height, depth }, variables: vars, scenes, bytesRemaining: buf.length - p };
 }
 
 // =============================================================================
-// COMMAND TYPE NAMES
+// COMMAND TYPES
 // =============================================================================
 
 const CMD_NAMES = {
-  0:'QUIT', 1:'ABOUT', 2:'PREFS', 3:'PREV', 4:'NEXT', 5:'ZOOM',
-  6:'SCENE', 7:'HOTSPOT', 8:'TIPTEXT', 9:'PLAYAVI', 10:'PLAYBMP',
-  11:'PLAYWAV', 12:'PLAYMID', 13:'PLAYHTML', 14:'ZOOMIN', 15:'ZOOMOUT',
-  16:'PAUSE', 17:'EXEC', 18:'EXPLORE', 19:'PLAYCDA', 20:'PLAYSEQ',
-  21:'IF', 22:'SET_VAR', 23:'INC_VAR', 24:'DEC_VAR', 25:'INVALIDATE',
-  26:'DEFCURSOR', 27:'ADDBMP', 28:'DELBMP', 29:'SHOWBMP', 30:'HIDEBMP',
-  31:'RUNPRJ', 32:'UPDATE', 33:'RUNDLL', 34:'MSGBOX', 35:'PLAYCMD',
-  36:'CLOSEWAV', 37:'CLOSEDLL', 38:'PLAYTEXT', 39:'FONT', 40:'REM',
-  41:'ADDTEXT', 42:'DELOBJ', 43:'SHOWOBJ', 44:'HIDEOBJ',
-  45:'LOAD', 46:'SAVE', 47:'CLOSEAVI', 48:'CLOSEMID', 105:'POLYGON'
+  0:'QUIT', 1:'ABOUT', 2:'PREFS', 3:'PREV', 4:'NEXT', 5:'ZOOM', 6:'SCENE', 7:'HOTSPOT',
+  8:'TIPTEXT', 9:'PLAYAVI', 10:'PLAYBMP', 11:'PLAYWAV', 12:'PLAYMID', 13:'PLAYHTML',
+  14:'ZOOMIN', 15:'ZOOMOUT', 16:'PAUSE', 17:'EXEC', 18:'EXPLORE', 19:'PLAYCDA',
+  20:'PLAYSEQ', 21:'IF', 22:'SET_VAR', 23:'INC_VAR', 24:'DEC_VAR', 25:'INVALIDATE',
+  26:'DEFCURSOR', 27:'ADDBMP', 28:'DELBMP', 29:'SHOWBMP', 30:'HIDEBMP', 31:'RUNPRJ',
+  32:'UPDATE', 33:'RUNDLL', 34:'MSGBOX', 35:'PLAYCMD', 36:'CLOSEWAV', 37:'CLOSEDLL',
+  38:'PLAYTEXT', 39:'FONT', 40:'REM', 41:'ADDTEXT', 42:'DELOBJ', 43:'SHOWOBJ',
+  44:'HIDEOBJ', 45:'LOAD', 46:'SAVE', 47:'CLOSEAVI', 48:'CLOSEMID', 105:'POLYGON'
 };
 
-function getTypeName(type) {
-  return CMD_NAMES[type] || `UNKNOWN_${type}`;
-}
+const typeName = t => CMD_NAMES[t] || `UNK_${t}`;
 
 // =============================================================================
-// OUTPUT FORMATTING
+// GAME STATE SIMULATOR
 // =============================================================================
 
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  gray: '\x1b[90m'
-};
-
-function c(color, text) {
-  return colors[color] + text + colors.reset;
-}
-
-function formatPolygon(pairs) {
-  if (pairs.length === 0) return c('gray', '(no polygon)');
-  if (pairs.length === 2) {
-    return c('cyan', `rect(${pairs[0].a},${pairs[0].b} -> ${pairs[1].a},${pairs[1].b})`);
+class GameState {
+  constructor(vnd) {
+    this.vnd = vnd;
+    this.vars = {};
+    this.sceneHistory = [];
+    this.currentScene = -1;
+    this.logs = [];
+    vnd.variables.forEach(v => { this.vars[v.name.toLowerCase()] = v.value; });
   }
-  return c('cyan', `poly(${pairs.length} points)`);
-}
 
-function formatString(s) {
-  const typeName = getTypeName(s.type);
-  let color = 'white';
-  if (s.type === 6) color = 'green';      // SCENE
-  if (s.type === 9) color = 'magenta';    // PLAYAVI
-  if (s.type === 11) color = 'blue';      // PLAYWAV
-  if (s.type === 13) color = 'yellow';    // PLAYHTML
-  if (s.type === 21) color = 'cyan';      // IF
-  if (s.type === 22 || s.type === 23 || s.type === 24) color = 'yellow'; // SET/INC/DEC_VAR
-  if (s.type === 27 || s.type === 28) color = 'blue'; // ADDBMP/DELBMP
-  if (s.type === 38) color = 'gray';      // PLAYTEXT
+  log(msg) { this.logs.push(msg); }
+  getVar(name) { return this.vars[name.toLowerCase()] || 0; }
+  setVar(name, val) {
+    const old = this.getVar(name);
+    this.vars[name.toLowerCase()] = val;
+    if (old !== val) this.log(`  VAR ${name}: ${old} -> ${val}`);
+  }
 
-  return `[${c(color, typeName.padEnd(10))}] ${s.string}`;
+  evalCondition(cond) {
+    const m = cond.match(/(\w+)\s*([<>=!]+)\s*(\d+)/);
+    if (!m) return false;
+    const [, varName, op, valStr] = m;
+    const varVal = this.getVar(varName);
+    const val = parseInt(valStr);
+    switch (op) {
+      case '=': case '==': return varVal === val;
+      case '<': return varVal < val;
+      case '>': return varVal > val;
+      case '<=': return varVal <= val;
+      case '>=': return varVal >= val;
+      case '!=': case '<>': return varVal !== val;
+      default: return false;
+    }
+  }
+
+  parseIf(str) {
+    const m = str.match(/^if\s+(.+?)\s+then\s+(.+?)(?:\s+else\s+(.+))?$/i);
+    if (!m) return null;
+    return { condition: m[1], thenAction: m[2], elseAction: m[3] || null };
+  }
+
+  executeAction(action) {
+    const parts = action.trim().split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    if (cmd === 'set_var') this.setVar(parts[1], parseInt(parts[2]) || 0);
+    else if (cmd === 'inc_var') this.setVar(parts[1], this.getVar(parts[1]) + (parseInt(parts[2]) || 1));
+    else if (cmd === 'dec_var') this.setVar(parts[1], this.getVar(parts[1]) - (parseInt(parts[2]) || 1));
+    else if (cmd === 'scene') return { nav: 'scene', target: parts[1] };
+    else if (cmd === 'runprj') return { nav: 'runprj', target: parts.slice(1).join(' ') };
+    else if (cmd === 'prev') return { nav: 'prev' };
+    else if (cmd === 'playavi') this.log(`  PLAY VIDEO: ${parts.slice(1).join(' ')}`);
+    else if (cmd === 'playwav') this.log(`  PLAY AUDIO: ${parts.slice(1).join(' ')}`);
+    else if (cmd === 'playhtml') this.log(`  SHOW HTML: ${parts.slice(1).join(' ')}`);
+    else if (cmd === 'addbmp') this.log(`  ADD IMAGE: ${parts.slice(1).join(' ')}`);
+    else if (cmd === 'delbmp') this.log(`  DEL IMAGE: ${parts[1]}`);
+    return null;
+  }
+
+  goToScene(idx) {
+    if (idx < 0 || idx >= this.vnd.scenes.length) return;
+    this.sceneHistory.push(this.currentScene);
+    this.currentScene = idx;
+    const scene = this.vnd.scenes[idx];
+    this.log(`\n=== ENTER SCENE ${idx + 1}: ${scene.name} ===`);
+    if (scene.fields.resource) this.log(`  LOAD BG: ${scene.fields.resource}`);
+    if (scene.fields.string3) this.log(`  PLAY WAV: ${scene.fields.string3} (loops=${scene.fields.val2})`);
+    if (scene.fields.string6) this.log(`  LOAD HTM: ${scene.fields.string6}`);
+
+    // Execute auto commands
+    scene.commands.forEach((cmd, ci) => {
+      if (cmd.paramPairs.length > 0) return;
+      cmd.strings.forEach(s => {
+        if ([6, 38, 39, 3, 7].includes(s.type)) return;
+        if (s.type === 21) {
+          const parsed = this.parseIf(s.string);
+          if (parsed && this.evalCondition(parsed.condition)) {
+            this.log(`  IF ${parsed.condition} -> TRUE`);
+            this.executeAction(parsed.thenAction);
+          }
+        } else if (s.type === 11) this.log(`  PLAY WAV: ${s.string}`);
+        else if (s.type === 9) this.log(`  PLAY AVI: ${s.string}`);
+        else if (s.type === 27) this.log(`  ADD BMP: ${s.string}`);
+        else if (s.type === 22) { const p = s.string.split(/\s+/); this.setVar(p[0], parseInt(p[1]) || 0); }
+        else if (s.type === 23) { const p = s.string.split(/\s+/); this.setVar(p[0], this.getVar(p[0]) + (parseInt(p[1]) || 1)); }
+        else if (s.type === 24) { const p = s.string.split(/\s+/); this.setVar(p[0], this.getVar(p[0]) - (parseInt(p[1]) || 1)); }
+      });
+    });
+  }
+
+  simulateClick(cmdIdx) {
+    const scene = this.vnd.scenes[this.currentScene];
+    if (!scene || cmdIdx >= scene.commands.length) return null;
+    const cmd = scene.commands[cmdIdx];
+    if (cmd.paramPairs.length === 0) return null;
+
+    this.log(`\n>>> CLICK on C${cmdIdx}`);
+    let navigation = null;
+
+    cmd.strings.forEach(s => {
+      if (s.type === 21) {
+        const parsed = this.parseIf(s.string);
+        if (parsed && this.evalCondition(parsed.condition)) {
+          this.log(`  IF ${parsed.condition} -> TRUE`);
+          const result = this.executeAction(parsed.thenAction);
+          if (result) navigation = result;
+        }
+      } else if (s.type === 6) navigation = { nav: 'scene', target: s.string };
+      else if (s.type === 3) navigation = { nav: 'prev' };
+      else if (s.type === 31) navigation = { nav: 'runprj', target: s.string };
+      else if (s.type === 9) this.log(`  PLAY AVI: ${s.string}`);
+      else if (s.type === 11) this.log(`  PLAY WAV: ${s.string}`);
+      else if (s.type === 22) { const p = s.string.split(/\s+/); this.setVar(p[0], parseInt(p[1]) || 0); }
+      else if (s.type === 23) { const p = s.string.split(/\s+/); this.setVar(p[0], this.getVar(p[0]) + (parseInt(p[1]) || 1)); }
+      else if (s.type === 24) { const p = s.string.split(/\s+/); this.setVar(p[0], this.getVar(p[0]) - (parseInt(p[1]) || 1)); }
+      else if (s.type === 27) this.log(`  ADD BMP: ${s.string}`);
+      else if (s.type === 28) this.log(`  DEL BMP: ${s.string}`);
+    });
+
+    if (navigation) {
+      this.log(`  NAVIGATE: ${navigation.nav} ${navigation.target || ''}`);
+      if (navigation.nav === 'scene') {
+        const idx = parseInt(navigation.target) - 1;
+        if (!isNaN(idx)) this.goToScene(idx);
+      } else if (navigation.nav === 'prev' && this.sceneHistory.length > 0) {
+        this.goToScene(this.sceneHistory.pop());
+      }
+    }
+    return navigation;
+  }
 }
 
 // =============================================================================
-// COMMANDS
+// CLI COMMANDS
 // =============================================================================
 
 function loadVND(filePath) {
-  if (!fs.existsSync(filePath)) {
-    console.error(c('red', `Error: File not found: ${filePath}`));
-    process.exit(1);
-  }
-  const buf = fs.readFileSync(filePath);
-  try {
-    return parseVND(buf);
-  } catch (e) {
-    console.error(c('red', `Error parsing VND: ${e.message}`));
-    process.exit(1);
-  }
+  if (!fs.existsSync(filePath)) { console.error(`Error: File not found: ${filePath}`); process.exit(1); }
+  try { return parseVND(fs.readFileSync(filePath)); }
+  catch (e) { console.error(`Error parsing VND: ${e.message}`); process.exit(1); }
 }
 
-function cmdInfo(filePath) {
-  const vnd = loadVND(filePath);
-  console.log(c('bright', '═══════════════════════════════════════════════════════════════'));
-  console.log(c('bright', ` VND FILE INFO: ${path.basename(filePath)}`));
-  console.log(c('bright', '═══════════════════════════════════════════════════════════════'));
-  console.log(`  Project:    ${c('cyan', vnd.header.projectName)}`);
-  console.log(`  Version:    ${vnd.header.version}`);
-  console.log(`  Editor:     ${vnd.header.editor}`);
-  console.log(`  Resolution: ${vnd.header.width}x${vnd.header.height}`);
-  console.log(`  Scenes:     ${c('green', vnd.scenes.length)}`);
-  console.log(`  Variables:  ${c('yellow', vnd.variables.length)}`);
-  console.log(`  Remaining:  ${vnd.bytesRemaining} bytes`);
-  console.log();
+function cmdInfo(file, json) {
+  const vnd = loadVND(file);
+  const info = {
+    file: path.basename(file),
+    project: vnd.header.projectName,
+    version: vnd.header.version,
+    resolution: `${vnd.header.width}x${vnd.header.height}`,
+    scenes: vnd.scenes.length,
+    variables: vnd.variables.length,
+    bytesRemaining: vnd.bytesRemaining
+  };
+  if (json) { console.log(JSON.stringify(info, null, 2)); return; }
+  console.log(`FILE: ${info.file}`);
+  console.log(`PROJECT: ${info.project}`);
+  console.log(`VERSION: ${info.version}`);
+  console.log(`RESOLUTION: ${info.resolution}`);
+  console.log(`SCENES: ${info.scenes}`);
+  console.log(`VARIABLES: ${info.variables}`);
 }
 
-function cmdScenes(filePath) {
-  const vnd = loadVND(filePath);
-  console.log(c('bright', `\nSCENES IN ${path.basename(filePath)} (${vnd.scenes.length} total)\n`));
-
-  vnd.scenes.forEach((scene, i) => {
-    const cmdCount = scene.commands.length;
-    const polyCount = scene.commands.filter(c => c.paramPairs.length > 0).length;
-    const hasVideo = scene.commands.some(c => c.strings.some(s => s.type === 9)) ||
-                     (scene.fields.string4 && scene.fields.string4.toLowerCase().includes('.avi'));
-    const hasHotspot = scene.hotspot !== null;
-
-    let flags = [];
-    if (hasVideo) flags.push(c('magenta', 'VIDEO'));
-    if (hasHotspot) flags.push(c('yellow', 'HOTSPOT'));
-    if (scene.fields.string6) flags.push(c('cyan', 'HTM'));
-
-    console.log(`${c('gray', String(i+1).padStart(3))}. ${c('bright', scene.name.padEnd(25))} ` +
-                `${c('gray', cmdCount + ' cmds')} ${c('gray', polyCount + ' polys')} ` +
-                `${flags.join(' ')}`);
+function cmdScenes(file, json) {
+  const vnd = loadVND(file);
+  const scenes = vnd.scenes.map((s, i) => ({
+    id: i + 1,
+    name: s.name,
+    commands: s.commands.length,
+    polygons: s.commands.filter(c => c.paramPairs.length > 0).length,
+    hasVideo: s.commands.some(c => c.strings.some(st => st.type === 9)) || (s.fields.string4 || '').toLowerCase().includes('.avi'),
+    hasHotspot: s.hotspot !== null,
+    hasHtml: !!s.fields.string6,
+    resource: s.fields.resource
+  }));
+  if (json) { console.log(JSON.stringify(scenes, null, 2)); return; }
+  scenes.forEach(s => {
+    const flags = [s.hasVideo ? 'VIDEO' : '', s.hasHotspot ? 'HOTSPOT' : '', s.hasHtml ? 'HTM' : ''].filter(Boolean).join(',');
+    console.log(`${String(s.id).padStart(3)}. ${s.name.padEnd(25)} cmds=${s.commands} polys=${s.polygons} ${flags ? `[${flags}]` : ''}`);
   });
-  console.log();
 }
 
-function cmdScene(filePath, sceneNum) {
-  const vnd = loadVND(filePath);
+function cmdScene(file, sceneNum, json) {
+  const vnd = loadVND(file);
   const idx = parseInt(sceneNum) - 1;
-
-  if (idx < 0 || idx >= vnd.scenes.length) {
-    console.error(c('red', `Error: Scene ${sceneNum} not found (1-${vnd.scenes.length})`));
-    process.exit(1);
-  }
-
+  if (idx < 0 || idx >= vnd.scenes.length) { console.error(`Scene ${sceneNum} not found`); process.exit(1); }
   const scene = vnd.scenes[idx];
 
-  console.log(c('bright', '\n═══════════════════════════════════════════════════════════════'));
-  console.log(c('bright', ` SCENE ${sceneNum}: ${scene.name}`));
-  console.log(c('bright', '═══════════════════════════════════════════════════════════════\n'));
+  const data = {
+    id: idx + 1,
+    name: scene.name,
+    fields: scene.fields,
+    rect: scene.rect,
+    hotspot: scene.hotspot,
+    commands: scene.commands.map((cmd, ci) => ({
+      id: `C${ci}`,
+      type: cmd.commandType,
+      interactive: cmd.paramPairs.length > 0,
+      polygon: cmd.paramPairs.length > 0 ? (cmd.paramPairs.length === 2 ?
+        `rect(${cmd.paramPairs[0].a},${cmd.paramPairs[0].b}->${cmd.paramPairs[1].a},${cmd.paramPairs[1].b})` :
+        `poly(${cmd.paramPairs.length}pts)`) : null,
+      strings: cmd.strings.map(s => ({ type: s.type, typeName: typeName(s.type), value: s.string }))
+    }))
+  };
 
-  // Fields
-  console.log(c('yellow', '▸ FIELDS:'));
-  if (scene.fields.resource) console.log(`    resource: ${c('cyan', scene.fields.resource)}`);
-  if (scene.fields.string1) console.log(`    string1:  ${scene.fields.string1}`);
-  if (scene.fields.string2) console.log(`    string2:  ${scene.fields.string2}`);
-  if (scene.fields.string3) console.log(`    string3 (WAV): ${c('blue', scene.fields.string3)} loops=${scene.fields.val2}`);
-  if (scene.fields.string4) console.log(`    string4 (AVI): ${c('magenta', scene.fields.string4)} flags=${scene.fields.val3}`);
-  if (scene.fields.string6) console.log(`    string6 (HTM): ${c('cyan', scene.fields.string6)}`);
-  console.log(`    rect: ${scene.rect.left},${scene.rect.top} -> ${scene.rect.right},${scene.rect.bottom}`);
+  if (json) { console.log(JSON.stringify(data, null, 2)); return; }
 
-  // Hotspot
+  console.log(`\n=== SCENE ${data.id}: ${data.name} ===\n`);
+  console.log('FIELDS:');
+  if (scene.fields.resource) console.log(`  resource: ${scene.fields.resource}`);
+  if (scene.fields.string3) console.log(`  string3 (WAV): ${scene.fields.string3} loops=${scene.fields.val2}`);
+  if (scene.fields.string4) console.log(`  string4 (AVI): ${scene.fields.string4} flags=${scene.fields.val3}`);
+  if (scene.fields.string6) console.log(`  string6 (HTM): ${scene.fields.string6}`);
+  console.log(`  rect: ${scene.rect.left},${scene.rect.top} -> ${scene.rect.right},${scene.rect.bottom}`);
+
   if (scene.hotspot) {
-    console.log(c('yellow', '\n▸ HOTSPOT:') + ` timer=${scene.hotspot.timerValue}ms`);
-    scene.hotspot.objects.forEach((obj, i) => {
-      console.log(`    ${formatString(obj)}`);
-    });
+    console.log(`\nHOTSPOT (timer=${scene.hotspot.timerValue}ms):`);
+    scene.hotspot.objects.forEach(obj => console.log(`  [${typeName(obj.type)}] ${obj.string}`));
   }
 
-  // Commands
-  console.log(c('yellow', `\n▸ COMMANDS (${scene.commands.length}):`));
-  scene.commands.forEach((cmd, ci) => {
-    const hasPolygon = cmd.paramPairs.length > 0;
-    const polyLabel = hasPolygon ? c('green', ' [INTERACTIVE]') : c('gray', ' [AUTO]');
-
-    console.log(`\n  ${c('bright', 'C' + ci)} type=${cmd.commandType}${polyLabel} ${formatPolygon(cmd.paramPairs)}`);
-
-    cmd.strings.forEach((s, si) => {
-      console.log(`      ${formatString(s)}`);
-    });
+  console.log(`\nCOMMANDS (${scene.commands.length}):`);
+  data.commands.forEach(cmd => {
+    const mode = cmd.interactive ? 'INTERACTIVE' : 'AUTO';
+    console.log(`\n${cmd.id} [${mode}] ${cmd.polygon || ''}`);
+    cmd.strings.forEach(s => console.log(`  [${s.typeName.padEnd(10)}] ${s.value}`));
   });
-
-  console.log();
 }
 
-function cmdVars(filePath) {
-  const vnd = loadVND(filePath);
-  console.log(c('bright', `\nVARIABLES IN ${path.basename(filePath)} (${vnd.variables.length} total)\n`));
-
-  vnd.variables.forEach((v, i) => {
-    console.log(`  ${c('yellow', v.name.padEnd(20))} = ${v.value}`);
-  });
-  console.log();
+function cmdVars(file, json) {
+  const vnd = loadVND(file);
+  if (json) { console.log(JSON.stringify(vnd.variables, null, 2)); return; }
+  console.log(`VARIABLES (${vnd.variables.length}):`);
+  vnd.variables.forEach(v => console.log(`  ${v.name.padEnd(20)} = ${v.value}`));
 }
 
-function cmdSearch(filePath, pattern) {
-  const vnd = loadVND(filePath);
+function cmdSearch(file, pattern, json) {
+  const vnd = loadVND(file);
   const regex = new RegExp(pattern, 'i');
-  let found = 0;
-
-  console.log(c('bright', `\nSEARCHING FOR "${pattern}" IN ${path.basename(filePath)}\n`));
+  const results = [];
 
   vnd.scenes.forEach((scene, si) => {
-    // Search in fields
-    const fields = [scene.fields.string1, scene.fields.string2, scene.fields.string3,
-                    scene.fields.string4, scene.fields.resource, scene.fields.string6];
-    fields.forEach((f, fi) => {
-      if (f && regex.test(f)) {
-        console.log(`${c('green', `Scene ${si+1}`)} ${scene.name} - ${c('yellow', 'field')}: ${f}`);
-        found++;
+    const check = (source, value) => {
+      if (value && regex.test(value)) results.push({ scene: si + 1, sceneName: scene.name, source, value });
+    };
+    check('field:resource', scene.fields.resource);
+    check('field:string3', scene.fields.string3);
+    check('field:string4', scene.fields.string4);
+    check('field:string6', scene.fields.string6);
+    scene.hotspot?.objects.forEach((obj, i) => check(`hotspot:${i}`, obj.string));
+    scene.commands.forEach((cmd, ci) => {
+      cmd.strings.forEach((s, si) => check(`C${ci}:${typeName(s.type)}`, s.string));
+    });
+  });
+
+  if (json) { console.log(JSON.stringify(results, null, 2)); return; }
+  console.log(`SEARCH "${pattern}" - ${results.length} results:\n`);
+  results.forEach(r => console.log(`Scene ${r.scene} (${r.sceneName}) [${r.source}]: ${r.value}`));
+}
+
+function cmdResources(file, type, json) {
+  const vnd = loadVND(file);
+  const resources = { images: [], sounds: [], videos: [], html: [] };
+
+  vnd.scenes.forEach((scene, si) => {
+    const add = (cat, file, source) => {
+      if (file && !resources[cat].find(r => r.file.toLowerCase() === file.toLowerCase())) {
+        resources[cat].push({ file, scene: si + 1, source });
       }
-    });
+    };
+    if (scene.fields.resource) add('images', scene.fields.resource, 'field:resource');
+    if (scene.fields.string3) add('sounds', scene.fields.string3, 'field:string3');
+    if (scene.fields.string4 && scene.fields.string4.toLowerCase().includes('.avi')) add('videos', scene.fields.string4, 'field:string4');
+    if (scene.fields.string6) add('html', scene.fields.string6, 'field:string6');
 
-    // Search in hotspot
-    if (scene.hotspot) {
-      scene.hotspot.objects.forEach((obj, oi) => {
-        if (regex.test(obj.string)) {
-          console.log(`${c('green', `Scene ${si+1}`)} ${scene.name} - ${c('yellow', 'hotspot')}: ${obj.string}`);
-          found++;
-        }
-      });
-    }
-
-    // Search in commands
     scene.commands.forEach((cmd, ci) => {
-      cmd.strings.forEach((s, sti) => {
-        if (regex.test(s.string)) {
-          const hasPolygon = cmd.paramPairs.length > 0;
-          const polyLabel = hasPolygon ? '[INTERACTIVE]' : '[AUTO]';
-          console.log(`${c('green', `Scene ${si+1}`)} ${scene.name} - C${ci} ${c('gray', polyLabel)}`);
-          console.log(`      ${formatString(s)}`);
-          found++;
+      cmd.strings.forEach(s => {
+        if (s.type === 11) add('sounds', s.string.split(/\s+/)[0], `C${ci}`);
+        if (s.type === 9) add('videos', s.string.split(/\s+/)[0], `C${ci}`);
+        if (s.type === 13) add('html', s.string.split(/\s+/)[0], `C${ci}`);
+        if (s.type === 27 || s.type === 10) add('images', s.string.split(/\s+/)[1] || s.string.split(/\s+/)[0], `C${ci}`);
+        if (s.type === 21) {
+          const str = s.string.toLowerCase();
+          if (str.includes('playwav')) { const m = s.string.match(/playwav\s+(\S+)/i); if (m) add('sounds', m[1], `C${ci}:IF`); }
+          if (str.includes('playavi')) { const m = s.string.match(/playavi\s+(\S+)/i); if (m) add('videos', m[1], `C${ci}:IF`); }
+          if (str.includes('playhtml')) { const m = s.string.match(/playhtml\s+(\S+)/i); if (m) add('html', m[1], `C${ci}:IF`); }
+          if (str.includes('addbmp')) { const m = s.string.match(/addbmp\s+\S+\s+(\S+)/i); if (m) add('images', m[1], `C${ci}:IF`); }
         }
       });
     });
   });
 
-  console.log(c('bright', `\nFound ${found} matches\n`));
-}
+  if (type) {
+    const filtered = resources[type] || [];
+    if (json) { console.log(JSON.stringify(filtered, null, 2)); return; }
+    console.log(`${type.toUpperCase()} (${filtered.length}):`);
+    filtered.forEach(r => console.log(`  ${r.file} [Scene ${r.scene}, ${r.source}]`));
+    return;
+  }
 
-function cmdVideos(filePath) {
-  const vnd = loadVND(filePath);
-  console.log(c('bright', `\nVIDEOS IN ${path.basename(filePath)}\n`));
-
-  vnd.scenes.forEach((scene, si) => {
-    let videos = [];
-
-    // Check string4 field
-    if (scene.fields.string4 && scene.fields.string4.toLowerCase().includes('.avi')) {
-      videos.push({
-        source: 'field:string4',
-        file: scene.fields.string4,
-        trigger: 'SCENE_LOAD',
-        polygon: false
-      });
-    }
-
-    // Check commands
-    scene.commands.forEach((cmd, ci) => {
-      cmd.strings.forEach((s) => {
-        if (s.type === 9) { // PLAYAVI
-          videos.push({
-            source: `C${ci}`,
-            file: s.string,
-            trigger: cmd.paramPairs.length > 0 ? 'CLICK' : 'AUTO',
-            polygon: cmd.paramPairs.length > 0
-          });
-        }
-        if (s.type === 21 && s.string.toLowerCase().includes('playavi')) { // IF with playavi
-          const match = s.string.match(/playavi\s+(\S+)/i);
-          videos.push({
-            source: `C${ci}:IF`,
-            file: match ? match[1] : '(conditional)',
-            trigger: cmd.paramPairs.length > 0 ? 'CLICK+CONDITION' : 'AUTO+CONDITION',
-            polygon: cmd.paramPairs.length > 0,
-            condition: s.string
-          });
-        }
-      });
-    });
-
-    // Check hotspot
-    if (scene.hotspot) {
-      scene.hotspot.objects.forEach((obj) => {
-        if (obj.type === 9) {
-          videos.push({
-            source: 'hotspot',
-            file: obj.string,
-            trigger: 'TIMER',
-            polygon: false
-          });
-        }
-        if (obj.type === 21 && obj.string.toLowerCase().includes('playavi')) {
-          const match = obj.string.match(/playavi\s+(\S+)/i);
-          videos.push({
-            source: 'hotspot:IF',
-            file: match ? match[1] : '(conditional)',
-            trigger: 'TIMER+CONDITION',
-            polygon: false,
-            condition: obj.string
-          });
-        }
-      });
-    }
-
-    if (videos.length > 0) {
-      console.log(c('green', `Scene ${si+1}: ${scene.name}`));
-      videos.forEach(v => {
-        const triggerColor = v.trigger.includes('AUTO') ? 'yellow' :
-                            v.trigger.includes('CLICK') ? 'cyan' : 'magenta';
-        console.log(`    ${c('magenta', v.file.padEnd(25))} ${c(triggerColor, v.trigger.padEnd(20))} [${v.source}]`);
-        if (v.condition) {
-          console.log(`      ${c('gray', 'IF: ' + v.condition.substring(0, 70))}`);
-        }
-      });
-    }
+  if (json) { console.log(JSON.stringify(resources, null, 2)); return; }
+  Object.entries(resources).forEach(([cat, items]) => {
+    console.log(`\n${cat.toUpperCase()} (${items.length}):`);
+    items.forEach(r => console.log(`  ${r.file}`));
   });
-  console.log();
 }
 
-function cmdConditions(filePath) {
-  const vnd = loadVND(filePath);
-  console.log(c('bright', `\nIF CONDITIONS IN ${path.basename(filePath)}\n`));
+function cmdVideos(file, json) { cmdResources(file, 'videos', json); }
+
+function cmdConditions(file, sceneFilter, json) {
+  const vnd = loadVND(file);
+  const conditions = [];
 
   vnd.scenes.forEach((scene, si) => {
-    let conditions = [];
-
+    if (sceneFilter && (si + 1) !== parseInt(sceneFilter)) return;
     scene.commands.forEach((cmd, ci) => {
-      cmd.strings.forEach((s) => {
+      cmd.strings.forEach(s => {
         if (s.type === 21) {
           conditions.push({
-            source: `C${ci}`,
-            condition: s.string,
-            polygon: cmd.paramPairs.length > 0
+            scene: si + 1, sceneName: scene.name, command: `C${ci}`,
+            interactive: cmd.paramPairs.length > 0, condition: s.string
           });
         }
       });
     });
-
-    if (scene.hotspot) {
-      scene.hotspot.objects.forEach((obj) => {
-        if (obj.type === 21) {
-          conditions.push({
-            source: 'hotspot',
-            condition: obj.string,
-            polygon: false
-          });
-        }
-      });
-    }
-
-    if (conditions.length > 0) {
-      console.log(c('green', `Scene ${si+1}: ${scene.name}`));
-      conditions.forEach(cond => {
-        const polyLabel = cond.polygon ? c('cyan', '[CLICK]') : c('yellow', '[AUTO]');
-        console.log(`    ${polyLabel} [${cond.source}] ${c('cyan', cond.condition)}`);
-      });
-    }
+    scene.hotspot?.objects.forEach(obj => {
+      if (obj.type === 21) {
+        conditions.push({ scene: si + 1, sceneName: scene.name, command: 'hotspot', interactive: false, condition: obj.string });
+      }
+    });
   });
-  console.log();
+
+  if (json) { console.log(JSON.stringify(conditions, null, 2)); return; }
+  console.log(`IF CONDITIONS (${conditions.length}):\n`);
+  conditions.forEach(c => {
+    const mode = c.interactive ? 'CLICK' : 'AUTO';
+    console.log(`Scene ${c.scene} ${c.command} [${mode}]: ${c.condition}`);
+  });
 }
 
-function cmdSimulate(filePath, sceneNum) {
-  const vnd = loadVND(filePath);
-  const idx = parseInt(sceneNum) - 1;
+function cmdSimulate(file, sceneNum, json) {
+  const vnd = loadVND(file);
+  const state = new GameState(vnd);
+  state.goToScene(parseInt(sceneNum) - 1);
 
-  if (idx < 0 || idx >= vnd.scenes.length) {
-    console.error(c('red', `Error: Scene ${sceneNum} not found`));
-    process.exit(1);
+  if (json) {
+    console.log(JSON.stringify({ logs: state.logs, vars: state.vars, scene: state.currentScene + 1 }, null, 2));
+    return;
   }
-
-  const scene = vnd.scenes[idx];
-  const vars = {};
-  vnd.variables.forEach(v => { vars[v.name.toLowerCase()] = v.value; });
-
-  console.log(c('bright', `\n═══════════════════════════════════════════════════════════════`));
-  console.log(c('bright', ` SIMULATING SCENE ${sceneNum}: ${scene.name}`));
-  console.log(c('bright', `═══════════════════════════════════════════════════════════════\n`));
-
-  console.log(c('yellow', '▸ ON SCENE LOAD:'));
-
-  // Background
-  if (scene.fields.resource) {
-    console.log(`  ${c('green', '✓')} Load background: ${scene.fields.resource}`);
-  }
-
-  // Auto WAV
-  if (scene.fields.string3) {
-    console.log(`  ${c('green', '✓')} Play WAV: ${scene.fields.string3} (loops=${scene.fields.val2})`);
-  }
-
-  // Auto AVI from field
-  if (scene.fields.string4 && scene.fields.string4.toLowerCase().includes('.avi')) {
-    console.log(`  ${c('magenta', '?')} string4 AVI: ${scene.fields.string4} (MAY NOT AUTO-PLAY)`);
-  }
-
-  // Auto HTM
-  if (scene.fields.string6) {
-    console.log(`  ${c('green', '✓')} Load HTM: ${scene.fields.string6}`);
-  }
-
-  // Execute auto commands (no polygon)
-  console.log(c('yellow', '\n▸ AUTO-EXECUTE COMMANDS (no polygon):'));
-  scene.commands.forEach((cmd, ci) => {
-    if (cmd.paramPairs.length > 0) return; // Skip interactive
-
-    cmd.strings.forEach((s) => {
-      if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
-
-      if (s.type === 21) {
-        console.log(`  ${c('cyan', '→')} C${ci} IF: ${s.string}`);
-        // Simple condition evaluation display
-        const match = s.string.match(/if\s+(\w+)\s*([<>=!]+)\s*(\d+)/i);
-        if (match) {
-          const varName = match[1].toLowerCase();
-          const op = match[2];
-          const val = parseInt(match[3]);
-          const current = vars[varName] || 0;
-          console.log(`      ${c('gray', `(${varName}=${current} ${op} ${val})`)} → would execute action if true`);
-        }
-      } else {
-        console.log(`  ${c('green', '✓')} C${ci} [${getTypeName(s.type)}] ${s.string}`);
-      }
-    });
-  });
-
-  // Interactive commands
-  console.log(c('yellow', '\n▸ INTERACTIVE COMMANDS (with polygon):'));
-  scene.commands.forEach((cmd, ci) => {
-    if (cmd.paramPairs.length === 0) return;
-
-    console.log(`\n  ${c('bright', 'C' + ci)} ${formatPolygon(cmd.paramPairs)}`);
-    console.log(c('gray', '    On CLICK:'));
-
-    cmd.strings.forEach((s) => {
-      if (s.type === 38 || s.type === 39) {
-        console.log(`    ${c('gray', '  (hover)')} [${getTypeName(s.type)}] ${s.string.substring(0, 50)}`);
-      } else {
-        console.log(`      [${c('cyan', getTypeName(s.type).padEnd(10))}] ${s.string}`);
-      }
-    });
-  });
-
-  // Hotspot
-  if (scene.hotspot) {
-    console.log(c('yellow', `\n▸ HOTSPOT (timer=${scene.hotspot.timerValue}ms):`));
-    scene.hotspot.objects.forEach((obj) => {
-      console.log(`    [${c('magenta', getTypeName(obj.type).padEnd(10))}] ${obj.string}`);
-    });
-  }
-
-  console.log();
+  state.logs.forEach(l => console.log(l));
+  console.log('\nVARIABLES AFTER LOAD:');
+  Object.entries(state.vars).filter(([k,v]) => v !== 0).forEach(([k,v]) => console.log(`  ${k} = ${v}`));
 }
 
-function cmdTrace(filePath, sceneNum) {
-  const vnd = loadVND(filePath);
+function cmdTrace(file, sceneNum, cmdFilter, json) {
+  const vnd = loadVND(file);
   const idx = parseInt(sceneNum) - 1;
-
-  if (idx < 0 || idx >= vnd.scenes.length) {
-    console.error(c('red', `Error: Scene ${sceneNum} not found`));
-    process.exit(1);
-  }
-
+  if (idx < 0 || idx >= vnd.scenes.length) { console.error(`Scene ${sceneNum} not found`); process.exit(1); }
   const scene = vnd.scenes[idx];
 
-  console.log(c('bright', `\n═══════════════════════════════════════════════════════════════`));
-  console.log(c('bright', ` INTERACTION TRACE: Scene ${sceneNum} - ${scene.name}`));
-  console.log(c('bright', `═══════════════════════════════════════════════════════════════\n`));
+  const interactions = scene.commands
+    .map((cmd, ci) => {
+      if (cmd.paramPairs.length === 0) return null;
+      if (cmdFilter && ci !== parseInt(cmdFilter)) return null;
+      return {
+        command: `C${ci}`,
+        polygon: cmd.paramPairs.length === 2 ?
+          `rect(${cmd.paramPairs[0].a},${cmd.paramPairs[0].b}->${cmd.paramPairs[1].a},${cmd.paramPairs[1].b})` :
+          `poly(${cmd.paramPairs.length}pts)`,
+        hoverText: cmd.strings.find(s => s.type === 38)?.string.match(/\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(.+)/)?.[1] || null,
+        actions: cmd.strings.filter(s => ![38, 39].includes(s.type)).map(s => ({
+          type: typeName(s.type), value: s.string,
+          isNav: [3, 6, 31].includes(s.type) || (s.type === 21 && /\b(scene|runprj|prev)\b/i.test(s.string)),
+          isVideo: s.type === 9 || (s.type === 21 && /playavi/i.test(s.string)),
+          isConditional: s.type === 21
+        }))
+      };
+    })
+    .filter(Boolean);
 
-  scene.commands.forEach((cmd, ci) => {
-    if (cmd.paramPairs.length === 0) return;
+  if (json) { console.log(JSON.stringify(interactions, null, 2)); return; }
 
-    console.log(c('yellow', `▸ CLICK on C${ci}`) + ` ${formatPolygon(cmd.paramPairs)}`);
-
-    let hasVideo = false;
-    let hasNav = false;
-    let navTarget = null;
-    let videoFile = null;
-
-    cmd.strings.forEach((s) => {
-      if (s.type === 9) { hasVideo = true; videoFile = s.string; }
-      if (s.type === 6) { hasNav = true; navTarget = s.string; }
-      if (s.type === 21) {
-        if (s.string.toLowerCase().includes('playavi')) hasVideo = true;
-        if (s.string.toLowerCase().includes('scene')) hasNav = true;
-      }
+  console.log(`\nINTERACTIONS IN SCENE ${sceneNum} (${scene.name}):\n`);
+  interactions.forEach(int => {
+    console.log(`${int.command} ${int.polygon}${int.hoverText ? ` "${int.hoverText}"` : ''}`);
+    console.log('  On click:');
+    int.actions.forEach((a, i) => {
+      const flags = [a.isVideo ? 'VIDEO' : '', a.isNav ? 'NAV' : '', a.isConditional ? 'COND' : ''].filter(Boolean).join(',');
+      console.log(`    ${i + 1}. [${a.type}]${flags ? ` {${flags}}` : ''} ${a.value}`);
     });
-
-    console.log(c('gray', '    Sequence:'));
-    let step = 1;
-
-    cmd.strings.forEach((s) => {
-      if (s.type === 38 || s.type === 39) return; // Skip hover stuff
-
-      if (s.type === 9) {
-        console.log(`    ${step++}. ${c('magenta', 'PLAY VIDEO')}: ${s.string}`);
-        if (hasNav) {
-          console.log(`       ${c('yellow', '→ Navigation will wait for video to end')}`);
-        }
-      } else if (s.type === 6) {
-        console.log(`    ${step++}. ${c('green', 'NAVIGATE')}: Scene ${s.string}`);
-      } else if (s.type === 21) {
-        console.log(`    ${step++}. ${c('cyan', 'IF')}: ${s.string}`);
-      } else if (s.type === 22 || s.type === 23 || s.type === 24) {
-        console.log(`    ${step++}. ${c('yellow', 'SET VAR')}: ${s.string}`);
-      } else if (s.type === 11) {
-        console.log(`    ${step++}. ${c('blue', 'PLAY SOUND')}: ${s.string}`);
-      } else if (s.type === 27 || s.type === 28) {
-        console.log(`    ${step++}. ${c('blue', getTypeName(s.type))}: ${s.string}`);
-      } else {
-        console.log(`    ${step++}. [${getTypeName(s.type)}]: ${s.string}`);
-      }
-    });
-
-    console.log();
+    console.log('');
   });
+}
+
+function cmdFlow(file, startScene, json) {
+  const vnd = loadVND(file);
+  const start = parseInt(startScene) - 1;
+  if (start < 0 || start >= vnd.scenes.length) { console.error(`Scene ${startScene} not found`); process.exit(1); }
+
+  const visited = new Set();
+  const edges = [];
+
+  function analyzeScene(idx) {
+    if (visited.has(idx)) return;
+    visited.add(idx);
+    const scene = vnd.scenes[idx];
+
+    scene.commands.forEach((cmd, ci) => {
+      cmd.strings.forEach(s => {
+        let target = null;
+        if (s.type === 6) target = parseInt(s.string) - 1;
+        if (s.type === 21 && /scene\s+(\d+)/i.test(s.string)) {
+          const m = s.string.match(/scene\s+(\d+)/i);
+          if (m) target = parseInt(m[1]) - 1;
+        }
+        if (target !== null && target >= 0 && target < vnd.scenes.length) {
+          edges.push({ from: idx + 1, to: target + 1, command: `C${ci}`, interactive: cmd.paramPairs.length > 0 });
+          analyzeScene(target);
+        }
+      });
+    });
+  }
+
+  analyzeScene(start);
+
+  if (json) { console.log(JSON.stringify({ visited: [...visited].map(i => i + 1), edges }, null, 2)); return; }
+
+  console.log(`FLOW FROM SCENE ${startScene}:\n`);
+  console.log(`Reachable scenes: ${[...visited].map(i => i + 1).join(', ')}\n`);
+  console.log('Transitions:');
+  edges.forEach(e => {
+    const mode = e.interactive ? 'click' : 'auto';
+    console.log(`  ${e.from} -> ${e.to} [${e.command}, ${mode}]`);
+  });
+}
+
+function cmdRun(file, startScene, actions) {
+  const vnd = loadVND(file);
+  const state = new GameState(vnd);
+  state.goToScene(parseInt(startScene) - 1);
+
+  if (actions) {
+    actions.split(',').forEach(a => {
+      const [type, val] = a.split(':');
+      if (type === 'click' || type === 'c') {
+        state.simulateClick(parseInt(val));
+      } else if (type === 'set' || type === 's') {
+        const [varName, varVal] = val.split('=');
+        state.setVar(varName, parseInt(varVal));
+      }
+    });
+  }
+
+  state.logs.forEach(l => console.log(l));
+  console.log('\nFINAL STATE:');
+  console.log(`  Scene: ${state.currentScene + 1} (${vnd.scenes[state.currentScene]?.name || 'unknown'})`);
+  console.log('  Variables (non-zero):');
+  Object.entries(state.vars).filter(([k,v]) => v !== 0).forEach(([k,v]) => console.log(`    ${k} = ${v}`));
 }
 
 // =============================================================================
@@ -708,80 +626,64 @@ function cmdTrace(filePath, sceneNum) {
 
 function printUsage() {
   console.log(`
-${c('bright', 'VND Debug CLI')} - Virtual Navigator Debug Tool
+VND Debug CLI - Virtual Navigator Debug Tool
 
-${c('yellow', 'Usage:')}
-  node vnd-debug.js <command> [options]
+USAGE: node vnd-debug.js <command> [options]
 
-${c('yellow', 'Commands:')}
-  ${c('cyan', 'info')} <file.vnd>              Show VND file info
-  ${c('cyan', 'scenes')} <file.vnd>            List all scenes
-  ${c('cyan', 'scene')} <file.vnd> <n>         Show scene details (1-indexed)
-  ${c('cyan', 'vars')} <file.vnd>              List all variables
-  ${c('cyan', 'search')} <file.vnd> <pattern>  Search in commands/strings
-  ${c('cyan', 'videos')} <file.vnd>            Find all video references
-  ${c('cyan', 'conditions')} <file.vnd>        List all IF conditions
-  ${c('cyan', 'simulate')} <file.vnd> <n>      Simulate scene load
-  ${c('cyan', 'trace')} <file.vnd> <n>         Trace all interactions
+PARSING & INFO:
+  info <file>                      Show VND file info
+  scenes <file>                    List all scenes
+  scene <file> <n>                 Show scene N details
+  vars <file>                      List all variables
 
-${c('yellow', 'Examples:')}
-  node vnd-debug.js info couleurs1.vnd
+RESOURCES:
+  resources <file> [type]          List resources (images/sounds/videos/html)
+  videos <file>                    List all videos
+  search <file> <pattern>          Search in commands
+
+LOGIC & CONDITIONS:
+  conditions <file> [scene]        List IF conditions
+  flow <file> <scene>              Analyze scene flow/transitions
+
+SIMULATION:
+  simulate <file> <scene>          Simulate scene load
+  trace <file> <scene> [cmd]       Trace interactions
+  run <file> <scene> [actions]     Run with actions (click:N,set:var=val)
+
+OPTIONS:
+  --json                           Output as JSON
+
+EXAMPLES:
   node vnd-debug.js scene couleurs1.vnd 27
   node vnd-debug.js search couleurs1.vnd "home2.avi"
-  node vnd-debug.js videos couleurs1.vnd
-  node vnd-debug.js simulate couleurs1.vnd 27
+  node vnd-debug.js trace italie.vnd 27
+  node vnd-debug.js run couleurs1.vnd 35 "click:0"
+  node vnd-debug.js flow couleurs1.vnd 1 --json
 `);
 }
 
 const args = process.argv.slice(2);
+if (args.length === 0) { printUsage(); process.exit(0); }
 
-if (args.length === 0) {
-  printUsage();
-  process.exit(0);
-}
+const json = args.includes('--json');
+const cleanArgs = args.filter(a => a !== '--json');
+const [cmd, file, ...rest] = cleanArgs;
 
-const cmd = args[0];
-const file = args[1];
+const commands = {
+  info: () => cmdInfo(file, json),
+  scenes: () => cmdScenes(file, json),
+  scene: () => cmdScene(file, rest[0], json),
+  vars: () => cmdVars(file, json),
+  resources: () => cmdResources(file, rest[0], json),
+  videos: () => cmdVideos(file, json),
+  search: () => cmdSearch(file, rest[0], json),
+  conditions: () => cmdConditions(file, rest[0], json),
+  flow: () => cmdFlow(file, rest[0], json),
+  simulate: () => cmdSimulate(file, rest[0], json),
+  trace: () => cmdTrace(file, rest[0], rest[1], json),
+  run: () => cmdRun(file, rest[0], rest[1])
+};
 
-switch (cmd) {
-  case 'info':
-    if (!file) { console.error('Missing file argument'); process.exit(1); }
-    cmdInfo(file);
-    break;
-  case 'scenes':
-    if (!file) { console.error('Missing file argument'); process.exit(1); }
-    cmdScenes(file);
-    break;
-  case 'scene':
-    if (!file || !args[2]) { console.error('Usage: scene <file> <scene_number>'); process.exit(1); }
-    cmdScene(file, args[2]);
-    break;
-  case 'vars':
-    if (!file) { console.error('Missing file argument'); process.exit(1); }
-    cmdVars(file);
-    break;
-  case 'search':
-    if (!file || !args[2]) { console.error('Usage: search <file> <pattern>'); process.exit(1); }
-    cmdSearch(file, args[2]);
-    break;
-  case 'videos':
-    if (!file) { console.error('Missing file argument'); process.exit(1); }
-    cmdVideos(file);
-    break;
-  case 'conditions':
-    if (!file) { console.error('Missing file argument'); process.exit(1); }
-    cmdConditions(file);
-    break;
-  case 'simulate':
-    if (!file || !args[2]) { console.error('Usage: simulate <file> <scene_number>'); process.exit(1); }
-    cmdSimulate(file, args[2]);
-    break;
-  case 'trace':
-    if (!file || !args[2]) { console.error('Usage: trace <file> <scene_number>'); process.exit(1); }
-    cmdTrace(file, args[2]);
-    break;
-  default:
-    console.error(c('red', `Unknown command: ${cmd}`));
-    printUsage();
-    process.exit(1);
-}
+if (!commands[cmd]) { console.error(`Unknown command: ${cmd}`); printUsage(); process.exit(1); }
+if (!file) { console.error('Missing file argument'); process.exit(1); }
+commands[cmd]();

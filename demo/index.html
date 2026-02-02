@@ -1499,7 +1499,31 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
-  // Execute non-interactive commands (without polygons)
+  // First pass: Execute display conditions (addbmp/delbmp/showbmp/hidebmp) from ALL commands
+  // This restores the correct visual state based on variables when returning to a scene
+  // (e.g., collected items should stay hidden even after leaving and returning)
+  scene.commands.forEach(function(cmd) {
+    cmd.strings.forEach(function(s) {
+      if (s.type === 21) {
+        var lowerStr = s.string.toLowerCase();
+        // Only execute IF conditions that affect display state
+        if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp')) {
+          var action = evaluateIf(s.string);
+          if (action) {
+            var actLower = action.toLowerCase().trim().split(/\s+/)[0];
+            // Only execute display-related actions
+            if (actLower === 'addbmp' || actLower === 'delbmp' ||
+                actLower === 'showbmp' || actLower === 'hidebmp') {
+              executeAction(action);
+            }
+          }
+        }
+      }
+    });
+  });
+
+  // Second pass: Execute non-interactive commands (without polygons)
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
@@ -1510,9 +1534,15 @@ function executeSceneCommands(scene) {
       if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
 
       if (s.type === 21) {
-        // IF - evaluate and execute
+        // IF - evaluate and execute (skip display commands, already handled in first pass)
         var action = evaluateIf(s.string);
-        if (action) executeAction(action);
+        if (action) {
+          var actLower = action.toLowerCase().trim().split(/\s+/)[0];
+          if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
+              actLower !== 'showbmp' && actLower !== 'hidebmp') {
+            executeAction(action);
+          }
+        }
         return;
       }
 

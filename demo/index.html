@@ -242,8 +242,6 @@
   <canvas id="game-canvas" width="640" height="480"></canvas>
   <div id="scene-list"></div>
   <div id="tooltip"></div>
-  <div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
-  <button id="debug-toggle" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';" style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:8px 12px;font:bold 12px monospace;border-radius:4px;touch-action:manipulation;">DBG</button>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:auto;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
@@ -1242,7 +1240,7 @@ function addTextOverlay(val) {
   // parts[6] = flags
   var textPart = parts.slice(7).join(' ');
   overlayTexts[name] = { text: textPart, fontSize: fontSize, x: x, y: y, w: w, h: h, color: '#ffffff' };
-  console.log('ADDTEXT:', name, '=', displayText, 'at', x, y);
+  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y);
   render();
 }
 
@@ -2081,6 +2079,12 @@ function doNavigation(nav) {
     // Go back to previous location in history (supports cross-project)
     if (sceneHistory.length > 0) {
       var prev = sceneHistory.pop();
+      // Validate history entry
+      if (!prev || !prev.entry) {
+        console.error('NAV: PREV - invalid history entry:', prev);
+        logHistory('PREV - invalid entry (skipped)');
+        return;
+      }
       logHistory('PREV - popped ' + prev.entry.name + ':' + (prev.sceneIndex + 1));
       // Check if we need to load a different project
       if (prev.entry !== currentVNDEntry) {
@@ -2099,6 +2103,12 @@ function doNavigation(nav) {
 
 // Load a VND entry and go to a specific scene (for cross-project PREV)
 function loadVNDEntryAndGoToScene(entry, sceneIndex) {
+  // Validate entry object
+  if (!entry || !entry.vnd || !entry.name) {
+    console.error('CROSS-PROJECT: invalid entry', entry);
+    waitingForVideoEnd = false;
+    return;
+  }
   console.log('CROSS-PROJECT: loading', entry.name, 'scene', sceneIndex + 1);
   waitingForVideoEnd = true; // Block clicks during cross-project loading
   stopAllAudio();
@@ -2810,5 +2820,9 @@ function debugSetVar() {
 // Initial resize
 resizeCanvas();
 </script>
+
+<!-- Debug elements outside canvas-container for reliable mobile positioning -->
+<div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
+<button id="debug-toggle" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">DBG</button>
 </body>
 </html>

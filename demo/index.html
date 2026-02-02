@@ -1459,7 +1459,14 @@ function playAvi(aviStr) {
     console.warn('AVI playback failed (codec not supported):', url);
     closeVideo();
   });
-  video.addEventListener('click', function() { closeVideo(); });
+  // Click on video: if paused (autoplay blocked), try to play; if playing, close
+  video.addEventListener('click', function() {
+    if (video.paused) {
+      video.play().catch(function() { closeVideo(); });
+    } else {
+      closeVideo();
+    }
+  });
 
   // Add to DOM immediately (needed for video events to work)
   container.appendChild(video);
@@ -1492,8 +1499,14 @@ function closeVideo() {
     currentVideo = null;
   }
   pendingVideoPlay = null;
-  pendingVideoNav = null;
   waitingForVideoEnd = false; // Re-enable clicks
+  // Execute pending navigation if video was blocked by autoplay and just finished
+  if (pendingVideoNav) {
+    var nav = pendingVideoNav;
+    pendingVideoNav = null;
+    console.log('closeVideo: executing pending nav', nav);
+    doNavigation(nav);
+  }
 }
 
 // --- SCENE COMMANDS ---
@@ -2003,7 +2016,8 @@ function resumeCommandProcessing(cmd, startIdx) {
 function logHistory(action) {
   var stack = sceneHistory.map(function(h) { return h.entry.name + ':' + (h.sceneIndex + 1); });
   var current = (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (currentSceneIndex + 1);
-  var msg = action + ' | Now: ' + current + ' | Stack: [' + (stack.length ? stack.join(', ') : 'empty') + ']';
+  var blocked = waitingForVideoEnd ? ' [BLOCKED]' : '';
+  var msg = action + ' | ' + current + blocked + ' | [' + (stack.length ? stack.join(', ') : '-') + ']';
   console.log('  HISTORY:', msg);
   var dbg = document.getElementById('debug-history');
   if (dbg) dbg.textContent = msg;

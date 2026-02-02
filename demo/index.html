@@ -497,6 +497,7 @@ var POLY_STROKE = {
 
 var project = null;
 var currentSceneIndex = -1;
+var sceneHistory = []; // Stack for PREV navigation - stores scene indices we came from
 var resources = {}; // path -> Image
 var showPolygons = true;
 var showLabels = true;
@@ -1992,6 +1993,11 @@ function resumeCommandProcessing(cmd, startIdx) {
 
 function doNavigation(nav) {
   if (nav.type === 'scene') {
+    // Push current scene to history before navigating
+    if (currentSceneIndex >= 0) {
+      sceneHistory.push(currentSceneIndex);
+      console.log('NAV: scene', nav.value, '- history push', currentSceneIndex + 1, '-> stack:', sceneHistory.map(function(i) { return i + 1; }));
+    }
     var idx = parseInt(nav.value, 10);
     if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
       goToScene(idx - 1);
@@ -2002,11 +2008,20 @@ function doNavigation(nav) {
       if (target >= 0) goToScene(target);
     }
   } else if (nav.type === 'runprj') {
+    // Push current scene to history before external navigation
+    if (currentSceneIndex >= 0) {
+      sceneHistory.push(currentSceneIndex);
+      console.log('NAV: runprj', nav.value, '- history push', currentSceneIndex + 1);
+    }
     executeRunPrj(nav.value);
   } else if (nav.type === 'prev') {
-    // Go back to previous scene
-    if (currentSceneIndex > 0) {
-      goToScene(currentSceneIndex - 1);
+    // Go back to previous scene in history (not just index - 1)
+    if (sceneHistory.length > 0) {
+      var prevScene = sceneHistory.pop();
+      console.log('NAV: PREV - history pop -> scene', prevScene + 1, ', remaining stack:', sceneHistory.map(function(i) { return i + 1; }));
+      goToScene(prevScene);
+    } else {
+      console.log('NAV: PREV - history empty, staying at scene', currentSceneIndex + 1);
     }
   }
 }

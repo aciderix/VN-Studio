@@ -813,16 +813,52 @@ function render() {
 var audioElements = {}; // key -> HTMLAudioElement
 var audioUnlocked = false;
 var pendingAudioPlays = []; // audio elements waiting for user gesture
+var audioContext = null;
 
-// Unlock audio on first user interaction
+// Unlock audio on first user interaction (critical for mobile browsers)
 function unlockAudio() {
   if (audioUnlocked) return;
+
+  // Create and resume AudioContext (required for iOS/Android)
+  try {
+    if (!audioContext) {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) audioContext = new AudioCtx();
+    }
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  } catch (e) {
+    console.warn('AudioContext unlock failed:', e);
+  }
+
+  // Play silent audio to unlock on iOS (belt and suspenders)
+  var silentAudio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRwmHAAAAAAD/+1DEAAAFeANX9AAACM8K6f80IAIAAD/JBAEBQdB0P/E4Pg+CAIAgCAYfB8uD4Pgh//y4nw+H5c+D7//8vKAgGPt/Lhj//////1gQB8Hw///AgCAI=');
+  silentAudio.play().catch(function() {});
+
   audioUnlocked = true;
+  console.log('Audio unlocked');
+
   // Replay any pending audio
   pendingAudioPlays.forEach(function(audio) {
     audio.play().catch(function() {});
   });
   pendingAudioPlays = [];
+
+  // Play pending video if any
+  if (pendingVideoPlay) {
+    var video = pendingVideoPlay;
+    pendingVideoPlay = null;
+    video.play().then(function() {
+      // Add to DOM now that it's playing
+      var container = document.getElementById('canvas-container');
+      if (container && !video.parentNode) {
+        container.appendChild(video);
+        currentVideo = video;
+      }
+    }).catch(function() {});
+  }
+
   // Re-trigger scene auto-play audio if nothing played yet
   if (project && currentSceneIndex >= 0) {
     var scene = project.scenes[currentSceneIndex];
@@ -834,7 +870,7 @@ function unlockAudio() {
   }
 }
 
-['click', 'touchstart', 'keydown'].forEach(function(evt) {
+['click', 'touchstart', 'touchend', 'keydown'].forEach(function(evt) {
   document.addEventListener(evt, unlockAudio, { once: false, capture: true });
 });
 
@@ -1330,6 +1366,7 @@ function closeHtmlOverlay() {
 
 // --- PLAYAVI ---
 var currentVideo = null;
+var pendingVideoPlay = null; // Video waiting for user gesture to play
 
 function resolveAviPath(aviRef) {
   var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
@@ -1375,8 +1412,9 @@ function playAvi(aviStr) {
   var scaleY = rect.height / gameH;
 
   var video = document.createElement('video');
-  video.autoplay = true;
   video.playsInline = true;
+  video.setAttribute('playsinline', ''); // iOS requires attribute
+  video.setAttribute('webkit-playsinline', ''); // older iOS
   var srcWebm = document.createElement('source');
   srcWebm.src = webmUrl;
   srcWebm.type = 'video/webm';
@@ -1411,8 +1449,29 @@ function playAvi(aviStr) {
   });
   video.addEventListener('click', function() { closeVideo(); });
 
-  container.appendChild(video);
-  currentVideo = video;
+  // Try to play - handle autoplay policy on mobile
+  // DON'T append to DOM until we know it can play (prevents blocking clicks)
+  var playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.then(function() {
+      // Play succeeded - now add to DOM
+      container.appendChild(video);
+      currentVideo = video;
+    }).catch(function(e) {
+      if (e.name === 'NotAllowedError') {
+        console.warn('Video autoplay blocked, waiting for user interaction:', file);
+        // Store as pending video to play on next user interaction
+        // Video is NOT in DOM yet, so it won't block clicks
+        pendingVideoPlay = video;
+      } else {
+        console.warn('Video play failed:', e.message);
+      }
+    });
+  } else {
+    // Old browsers without promise - just add to DOM
+    container.appendChild(video);
+    currentVideo = video;
+  }
 }
 
 function closeVideo() {
@@ -1421,6 +1480,8 @@ function closeVideo() {
     if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
     currentVideo = null;
   }
+  // Also clear pending video if scene changes
+  pendingVideoPlay = null;
 }
 
 // --- SCENE COMMANDS ---
@@ -1592,6 +1653,26 @@ function executeSceneCommands(scene) {
     } else {
       console.log('Skipping string6 HTM (playhtml already triggered):', scene.fields.string6);
     }
+  }
+
+  // Auto-play AVI from scene string4 field (informative videos on scene load)
+  if (scene.fields.string4 && scene.fields.string4.toLowerCase().endsWith('.avi')) {
+    var aviFile = scene.fields.string4;
+    var aviFlags = scene.fields.val3 || 0;
+    // Build playAvi string: "filename flags x1 y1 x2 y2"
+    // Use scene rect if available, otherwise default to positioned overlay
+    var x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    if (scene.rect) {
+      x1 = scene.rect.left || 0;
+      y1 = scene.rect.top || 0;
+      x2 = scene.rect.right || 0;
+      y2 = scene.rect.bottom || 0;
+    }
+    console.log('Auto-play AVI from string4:', aviFile);
+    // Delay slightly to allow scene to render first
+    setTimeout(function() {
+      playAvi(aviFile + ' ' + aviFlags + ' ' + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2);
+    }, 100);
   }
 }
 
@@ -2499,6 +2580,7 @@ canvas.addEventListener('touchend', function(e) {
     return;
   }
   handleCommandClick(cmd);
+  render(); // Refresh display after action (e.g., item pickup)
 }, { passive: false });
 
 // =============================================================================

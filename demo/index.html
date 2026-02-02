@@ -1913,6 +1913,12 @@ function resumeCommandProcessing(cmd, startIdx) {
           if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
         } else if (actCmd === 'runprj') {
           if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
+        } else if (actCmd === 'playavi') {
+          // PLAYAVI from IF condition - execute and track for video deferral
+          playAvi(actParts.slice(1).join(' '));
+          videoPlaying = true;
+        } else if (actCmd === 'prev') {
+          if (!deferredNav) deferredNav = { type: 'prev', value: '' };
         } else {
           executeAction(action);
         }
@@ -1926,8 +1932,11 @@ function resumeCommandProcessing(cmd, startIdx) {
       if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
     } else if (s.type === 13) {
       if (!deferredHtml) deferredHtml = { value: s.string, idx: si };
-    } else if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) {
-      // PLAYTEXT, FONT, PREV, HOTSPOT - handled in render or ignored
+    } else if (s.type === 3) {
+      // PREV - go back to previous scene
+      if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+    } else if (s.type === 38 || s.type === 39 || s.type === 7) {
+      // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
     } else {
       executeStringCommand(s.type, s.string);
     }
@@ -1984,6 +1993,11 @@ function doNavigation(nav) {
     }
   } else if (nav.type === 'runprj') {
     executeRunPrj(nav.value);
+  } else if (nav.type === 'prev') {
+    // Go back to previous scene
+    if (currentSceneIndex > 0) {
+      goToScene(currentSceneIndex - 1);
+    }
   }
 }
 
@@ -1994,12 +2008,12 @@ canvas.addEventListener('click', function(e) {
   if (allCmds.length === 0) return;
   // Execute non-navigable commands first (set_var, addbmp, etc.)
   allCmds.forEach(function(cmd) {
-    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31; });
+    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
     if (!hasNav) handleCommandClick(cmd);
   });
   // Then execute the navigable command (if any)
   var navCmd = allCmds.find(function(cmd) {
-    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31; });
+    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
   });
   if (navCmd) handleCommandClick(navCmd);
   else if (allCmds.length > 0) {

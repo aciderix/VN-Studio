@@ -60,6 +60,102 @@
       color: #888;
     }
 
+    /* Hamburger menu for mobile */
+    #burger-btn {
+      display: none;
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    #burger-btn:hover { background: #533483; }
+    #burger-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+    }
+    #burger-menu.open { display: flex; }
+    #burger-menu-content {
+      background: #16213e;
+      width: 280px;
+      max-width: 85vw;
+      height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #burger-menu-content button,
+    #burger-menu-content select {
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      text-align: left;
+    }
+    #burger-menu-content button:hover { background: #533483; }
+    #burger-menu-content label {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+    #burger-menu-content .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #533483;
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+    }
+    #burger-menu-content .menu-header h2 {
+      color: #e94560;
+      font-size: 16px;
+    }
+    #burger-close {
+      background: transparent;
+      border: none;
+      color: #e0e0e0;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px 8px;
+      width: auto !important;
+    }
+    #burger-menu-content .menu-section {
+      border-top: 1px solid #333;
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+    #burger-menu-content .menu-section-title {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 800px) {
+      #burger-btn { display: block; }
+      #toolbar .desktop-only { display: none; }
+      #toolbar { gap: 8px; padding: 8px; }
+      #toolbar h1 { font-size: 12px; margin-right: 4px; }
+    }
+
     /* Zone de rendu - remplit tout l'espace restant */
     #canvas-container {
       flex: 1;
@@ -208,20 +304,51 @@
 <body>
 
 <div id="toolbar">
+  <button id="burger-btn" onclick="openBurgerMenu()">&#9776;</button>
   <h1>VN-Studio</h1>
   <select id="vnd-select"><option value="">-- Charger VND --</option></select>
-  <button id="btn-load">Fichier local</button>
-  <button id="btn-load-res">Ressources locales</button>
-  <button id="btn-scenes">Scènes</button>
+  <button id="btn-load" class="desktop-only">Fichier local</button>
+  <button id="btn-load-res" class="desktop-only">Ressources locales</button>
+  <button id="btn-scenes" class="desktop-only">Scènes</button>
   <button id="btn-prev">&larr;</button>
   <select id="scene-select"></select>
   <button id="btn-next">&rarr;</button>
-  <label><input type="checkbox" id="chk-polygons" checked> Polygones</label>
-  <label><input type="checkbox" id="chk-labels" checked> Labels</label>
-  <label><input type="checkbox" id="chk-fill"> Remplir</label>
-  <button id="btn-fullscreen">Plein écran</button>
-  <button id="btn-debug">Debug</button>
+  <label class="desktop-only"><input type="checkbox" id="chk-polygons" checked> Polygones</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-labels" checked> Labels</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-fill"> Remplir</label>
+  <button id="btn-fullscreen" class="desktop-only">Plein écran</button>
+  <button id="btn-debug" class="desktop-only">Debug</button>
   <span id="scene-info"></span>
+</div>
+
+<!-- Burger menu for mobile -->
+<div id="burger-menu" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="burger-menu-content">
+    <div class="menu-header">
+      <h2>Menu</h2>
+      <button id="burger-close" onclick="document.getElementById('burger-menu').classList.remove('open')">&times;</button>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Fichiers</div>
+      <button onclick="document.getElementById('btn-load').click();document.getElementById('burger-menu').classList.remove('open')">Fichier local</button>
+      <button onclick="document.getElementById('btn-load-res').click();document.getElementById('burger-menu').classList.remove('open')">Ressources locales</button>
+      <button onclick="document.getElementById('btn-scenes').click();document.getElementById('burger-menu').classList.remove('open')">Liste des scènes</button>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Affichage</div>
+      <label><input type="checkbox" id="chk-polygons-mobile" checked onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
+      <label><input type="checkbox" id="chk-labels-mobile" checked onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
+      <label><input type="checkbox" id="chk-fill-mobile" onchange="document.getElementById('chk-fill').checked=this.checked;document.getElementById('chk-fill').dispatchEvent(new Event('change'))"> Remplir polygones</label>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Outils</div>
+      <button onclick="document.getElementById('btn-fullscreen').click();document.getElementById('burger-menu').classList.remove('open')">Plein écran</button>
+      <button onclick="document.getElementById('btn-debug').click();document.getElementById('burger-menu').classList.remove('open')">Debug Panel</button>
+    </div>
+  </div>
 </div>
 
 <!-- Debug panel -->
@@ -2815,6 +2942,15 @@ function debugSetVar() {
     setVar(name, val);
     console.log('DEBUG SET:', name, '=', val);
   }
+}
+
+// Burger menu for mobile
+function openBurgerMenu() {
+  // Sync checkbox states before opening
+  document.getElementById('chk-polygons-mobile').checked = document.getElementById('chk-polygons').checked;
+  document.getElementById('chk-labels-mobile').checked = document.getElementById('chk-labels').checked;
+  document.getElementById('chk-fill-mobile').checked = document.getElementById('chk-fill').checked;
+  document.getElementById('burger-menu').classList.add('open');
 }
 
 // Initial resize

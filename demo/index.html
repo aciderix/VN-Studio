@@ -698,25 +698,35 @@ function render() {
     var lines = [];
     var line = '';
     var maxW = tw - 8;
+    var maxLineWidth = 0;
     for (var wi = 0; wi < words.length; wi++) {
       var test = line ? line + ' ' + words[wi] : words[wi];
-      if (ctx.measureText(test).width > maxW && line) {
+      var testWidth = ctx.measureText(test).width;
+      if (testWidth > maxW && line) {
+        var lineWidth = ctx.measureText(line).width;
+        if (lineWidth > maxLineWidth) maxLineWidth = lineWidth;
         lines.push(line);
         line = words[wi];
       } else {
         line = test;
       }
     }
-    if (line) lines.push(line);
+    if (line) {
+      var lineWidth = ctx.measureText(line).width;
+      if (lineWidth > maxLineWidth) maxLineWidth = lineWidth;
+      lines.push(line);
+    }
 
     var lineH = fontSize + 4;
     var textH = lines.length * lineH;
     var boxH = th > 0 ? th : textH + 8;
+    // Dynamic width: use actual text width + padding, capped at tw
+    var boxW = Math.min(tw, maxLineWidth + 16);
 
     // Only draw background if this is a standalone text (not part of multi-line set)
     if (!noBackground) {
       ctx.fillStyle = 'rgba(0,0,0,0.75)';
-      ctx.fillRect(tx, ty, tw, boxH);
+      ctx.fillRect(tx, ty, boxW, boxH);
     }
     ctx.fillStyle = fontColor;
     ctx.textAlign = 'start';
@@ -2479,7 +2489,15 @@ canvas.addEventListener('touchend', function(e) {
   var touch = e.changedTouches[0];
   var pos = screenToGame(touch.clientX, touch.clientY);
   var cmd = findClickableCommandAtPoint(pos.x, pos.y);
-  if (!cmd) return;
+
+  // Clear hover state after tap to avoid stuck tooltips/rollovers
+  hoveredCmd = null;
+  activePlayTexts = [];
+
+  if (!cmd) {
+    render();
+    return;
+  }
   handleCommandClick(cmd);
 }, { passive: false });
 

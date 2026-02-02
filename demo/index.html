@@ -1721,6 +1721,14 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
+  // Reset click-guard variable 'jeu' to 0 on scene entry
+  // This variable is used in library scenes to prevent double-clicks:
+  // Pattern: INC_VAR jeu 1 + IF jeu = 1 then runprj
+  // Without resetting, returning to the scene leaves jeu at 1, breaking future clicks
+  if (gameVars['jeu'] !== undefined) {
+    gameVars['jeu'] = 0;
+  }
+
   // First pass: Execute display conditions (addbmp/delbmp/showbmp/hidebmp) from ALL commands
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
@@ -1813,18 +1821,59 @@ function executeSceneCommands(scene) {
   // Special case: Interactive commands with PLAYAVI + PREV
   // These are "farewell videos" that should play on scene arrival, not on click
   // The button click should just do PREV (return)
+  // Check both direct PLAYAVI (type 9) and PLAYAVI inside IF conditions (type 21)
   scene.commands.forEach(function(cmd) {
     if (cmd.paramPairs.length === 0) return; // Only interactive commands
-    var hasPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
-    var hasPrev = cmd.strings.some(function(s) { return s.type === 3; });
+
+    // Check for direct PLAYAVI (type 9)
+    var hasDirectPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
+
+    // Check for PLAYAVI inside IF conditions (type 21)
+    var hasIfPlayAvi = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      return str.indexOf('playavi') >= 0;
+    });
+
+    var hasPlayAvi = hasDirectPlayAvi || hasIfPlayAvi;
+
+    // Check for direct PREV (type 3) or PREV inside IF conditions
+    var hasDirectPrev = cmd.strings.some(function(s) { return s.type === 3; });
+    var hasIfPrev = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      // Check if "prev" appears as an action (not as part of variable name)
+      return /\bthen\s+prev\b/.test(str) || /\belse\s+prev\b/.test(str);
+    });
+
+    var hasPrev = hasDirectPrev || hasIfPrev;
+
     if (hasPlayAvi && hasPrev) {
       // Mark command for special handling (skip PLAYAVI on click)
       cmd.autoPlayedVideo = true;
-      // Auto-play the video now
+
+      // Find and auto-play the video now
+      // First check direct PLAYAVI
       var aviStr = cmd.strings.find(function(s) { return s.type === 9; });
       if (aviStr) {
         console.log('Auto-playing video from PLAYAVI+PREV command:', aviStr.string);
         playAvi(aviStr.string);
+      } else {
+        // Check IF conditions for PLAYAVI
+        var ifStr = cmd.strings.find(function(s) {
+          return s.type === 21 && s.string.toLowerCase().indexOf('playavi') >= 0;
+        });
+        if (ifStr) {
+          // Parse the IF to get the PLAYAVI action
+          var action = evaluateIf(ifStr.string);
+          if (action) {
+            var actParts = action.trim().split(/\s+/);
+            if (actParts[0].toLowerCase() === 'playavi') {
+              console.log('Auto-playing video from IF+PLAYAVI+PREV command:', actParts.slice(1).join(' '));
+              playAvi(actParts.slice(1).join(' '));
+            }
+          }
+        }
       }
     }
   });
@@ -2267,13 +2316,18 @@ function loadVNDEntryAndGoToScene(entry, sceneIndex) {
 canvas.addEventListener('click', function(e) {
   // Block clicks while waiting for video to end
   if (waitingForVideoEnd) {
-    console.log('Click blocked: waiting for video to end');
+    console.log('Click blocked: waiting for video to end, waitingForVideoEnd=' + waitingForVideoEnd);
     return;
   }
   var pos = screenToGame(e.clientX, e.clientY);
+  console.log('Canvas click at game coords:', pos.x, pos.y);
   // Find ALL commands at click point, execute side effects for all
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
-  if (allCmds.length === 0) return;
+  if (allCmds.length === 0) {
+    console.log('No commands found at click point');
+    return;
+  }
+  console.log('Found', allCmds.length, 'command(s) at click point');
   // Execute non-navigable commands first (set_var, addbmp, etc.)
   allCmds.forEach(function(cmd) {
     var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });

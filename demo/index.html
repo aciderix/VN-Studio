@@ -690,6 +690,15 @@ function render() {
       }
     }
     if (fontSize < 6) fontSize = 12;
+    // Ensure text is readable on dark background: convert dark colors to white
+    if (fontColor) {
+      var hex = fontColor.replace('#', '');
+      var r = parseInt(hex.substr(0, 2), 16) || 0;
+      var g = parseInt(hex.substr(2, 2), 16) || 0;
+      var b = parseInt(hex.substr(4, 2), 16) || 0;
+      var luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+      if (luminance < 128) fontColor = '#ffffff';
+    }
 
     ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
 
@@ -719,7 +728,8 @@ function render() {
 
     var lineH = fontSize + 4;
     var textH = lines.length * lineH;
-    var boxH = th > 0 ? th : textH + 8;
+    // Always use calculated text height, ignore VND coordinates (often much larger)
+    var boxH = textH + 8;
     // Dynamic width: use actual text width + small padding (8px = 4px each side)
     var boxW = maxLineWidth + 8;
 

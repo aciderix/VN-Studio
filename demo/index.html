@@ -242,6 +242,7 @@
   <canvas id="game-canvas" width="640" height="480"></canvas>
   <div id="scene-list"></div>
   <div id="tooltip"></div>
+  <div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.8);color:#0f0;font:10px monospace;padding:4px;z-index:9999;max-height:60px;overflow:auto;"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:auto;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
@@ -1999,12 +2000,21 @@ function resumeCommandProcessing(cmd, startIdx) {
   }
 }
 
+function logHistory(action) {
+  var stack = sceneHistory.map(function(h) { return h.entry.name + ':' + (h.sceneIndex + 1); });
+  var current = (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (currentSceneIndex + 1);
+  var msg = action + ' | Now: ' + current + ' | Stack: [' + (stack.length ? stack.join(', ') : 'empty') + ']';
+  console.log('  HISTORY:', msg);
+  var dbg = document.getElementById('debug-history');
+  if (dbg) dbg.textContent = msg;
+}
+
 function doNavigation(nav) {
   if (nav.type === 'scene') {
     // Push current location to history before navigating (same project)
     if (currentSceneIndex >= 0 && currentVNDEntry) {
       sceneHistory.push({ entry: currentVNDEntry, sceneIndex: currentSceneIndex });
-      console.log('NAV: scene', nav.value, '- history push', currentVNDEntry.name + ':' + (currentSceneIndex + 1));
+      logHistory('SCENE ' + nav.value + ' - pushed ' + currentVNDEntry.name + ':' + (currentSceneIndex + 1));
     }
     var idx = parseInt(nav.value, 10);
     if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
@@ -2019,31 +2029,32 @@ function doNavigation(nav) {
     // Push current location to history before external navigation
     if (currentSceneIndex >= 0 && currentVNDEntry) {
       sceneHistory.push({ entry: currentVNDEntry, sceneIndex: currentSceneIndex });
-      console.log('NAV: runprj', nav.value, '- history push', currentVNDEntry.name + ':' + (currentSceneIndex + 1));
+      logHistory('RUNPRJ ' + nav.value + ' - pushed ' + currentVNDEntry.name + ':' + (currentSceneIndex + 1));
     }
     executeRunPrj(nav.value);
   } else if (nav.type === 'prev') {
     // Go back to previous location in history (supports cross-project)
     if (sceneHistory.length > 0) {
       var prev = sceneHistory.pop();
-      console.log('NAV: PREV - history pop ->', prev.entry.name + ':' + (prev.sceneIndex + 1));
+      logHistory('PREV - popped ' + prev.entry.name + ':' + (prev.sceneIndex + 1));
       // Check if we need to load a different project
       if (prev.entry !== currentVNDEntry) {
         // Cross-project navigation: reload the previous VND
-        console.log('NAV: PREV - cross-project, loading', prev.entry.name);
+        console.log('NAV: PREV - cross-project to', prev.entry.name);
         loadVNDEntryAndGoToScene(prev.entry, prev.sceneIndex);
       } else {
         // Same project, just go to scene
         goToScene(prev.sceneIndex);
       }
     } else {
-      console.log('NAV: PREV - history empty, staying at scene', currentSceneIndex + 1);
+      console.log('NAV: PREV - history empty, staying at', currentVNDEntry ? currentVNDEntry.name : '?', 'scene', currentSceneIndex + 1);
     }
   }
 }
 
 // Load a VND entry and go to a specific scene (for cross-project PREV)
 function loadVNDEntryAndGoToScene(entry, sceneIndex) {
+  console.log('CROSS-PROJECT: loading', entry.name, 'scene', sceneIndex + 1);
   waitingForVideoEnd = true; // Block clicks during cross-project loading
   stopAllAudio();
   currentBasePath = entry.base;
@@ -2062,6 +2073,7 @@ function loadVNDEntryAndGoToScene(entry, sceneIndex) {
     if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
     preloadResources(function() {
       waitingForVideoEnd = false; // Re-enable clicks
+      console.log('CROSS-PROJECT: now going to scene', sceneIndex + 1);
       goToScene(sceneIndex);
     });
   }).catch(function(e) {
@@ -2135,6 +2147,8 @@ function goToScene(index) {
   }
   updateUI();
   resizeCanvas();
+  // Update debug display
+  logHistory('AT ' + (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (index + 1));
 }
 
 function updateUI() {

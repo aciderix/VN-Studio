@@ -1683,6 +1683,25 @@ function executeSceneCommands(scene) {
   // Note: string4 AVI field is NOT auto-played here.
   // Videos should be triggered by commands (type 9 PLAYAVI) for proper control.
   // The string4 field seems to be informational/unused in most VNDs.
+
+  // Special case: Interactive commands with PLAYAVI + PREV
+  // These are "farewell videos" that should play on scene arrival, not on click
+  // The button click should just do PREV (return)
+  scene.commands.forEach(function(cmd) {
+    if (cmd.paramPairs.length === 0) return; // Only interactive commands
+    var hasPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
+    var hasPrev = cmd.strings.some(function(s) { return s.type === 3; });
+    if (hasPlayAvi && hasPrev) {
+      // Mark command for special handling (skip PLAYAVI on click)
+      cmd.autoPlayedVideo = true;
+      // Auto-play the video now
+      var aviStr = cmd.strings.find(function(s) { return s.type === 9; });
+      if (aviStr) {
+        console.log('Auto-playing video from PLAYAVI+PREV command:', aviStr.string);
+        playAvi(aviStr.string);
+      }
+    }
+  });
 }
 
 function isToolbarVisible() {
@@ -1919,6 +1938,11 @@ function evaluateIfReadOnly(ifStr) {
 // Action commune clic / tap
 function handleCommandClick(cmd) {
   console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
+  // If this command had auto-played video and video is still playing, close it first
+  if (cmd.autoPlayedVideo && currentVideo) {
+    console.log('Closing auto-played video on button click');
+    closeVideo();
+  }
   resumeCommandProcessing(cmd, 0);
 }
 
@@ -1945,8 +1969,11 @@ function resumeCommandProcessing(cmd, startIdx) {
           if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
         } else if (actCmd === 'playavi') {
           // PLAYAVI from IF condition - execute and track for video deferral
-          playAvi(actParts.slice(1).join(' '));
-          videoPlaying = true;
+          // Skip if video was auto-played on scene load (PLAYAVI+PREV pattern)
+          if (!cmd.autoPlayedVideo) {
+            playAvi(actParts.slice(1).join(' '));
+            videoPlaying = true;
+          }
         } else if (actCmd === 'prev') {
           if (!deferredNav) deferredNav = { type: 'prev', value: '' };
         } else {
@@ -1954,8 +1981,11 @@ function resumeCommandProcessing(cmd, startIdx) {
         }
       }
     } else if (s.type === 9) {
-      playAvi(s.string);
-      videoPlaying = true;
+      // Skip PLAYAVI if video was auto-played on scene load (PLAYAVI+PREV pattern)
+      if (!cmd.autoPlayedVideo) {
+        playAvi(s.string);
+        videoPlaying = true;
+      }
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
     } else if (s.type === 31) {

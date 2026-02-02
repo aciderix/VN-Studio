@@ -845,49 +845,12 @@ function unlockAudio() {
   });
   pendingAudioPlays = [];
 
-  // Play pending video if any
-  if (pendingVideoPlay) {
+  // Play pending video if any (that was blocked by autoplay policy)
+  if (pendingVideoPlay && currentVideo === pendingVideoPlay) {
     var video = pendingVideoPlay;
-    var nav = pendingVideoNav;
-    var gen = video._generation;
     pendingVideoPlay = null;
-    pendingVideoNav = null;
-    // Check if video is still valid (scene hasn't changed)
-    if (gen !== undefined && gen !== videoGeneration) {
-      console.log('Pending video invalidated (scene changed)');
-      video.pause();
-      video.src = '';
-      if (nav) doNavigation(nav);
-      return;
-    }
-    video.play().then(function() {
-      // Double-check generation after async play
-      if (gen !== undefined && gen !== videoGeneration) {
-        console.log('Video started but scene changed, stopping');
-        video.pause();
-        video.src = '';
-        return;
-      }
-      // Add to DOM now that it's playing
-      var cont = document.getElementById('canvas-container');
-      if (cont && !video.parentNode) {
-        cont.appendChild(video);
-        currentVideo = video;
-        // If there's a pending navigation, wait for video to end
-        if (nav) {
-          function onEnd() {
-            video.removeEventListener('ended', onEnd);
-            video.removeEventListener('error', onEnd);
-            closeVideo();
-            doNavigation(nav);
-          }
-          video.addEventListener('ended', onEnd);
-          video.addEventListener('error', onEnd);
-        }
-      }
-    }).catch(function() {
-      // If play still fails, execute pending navigation if any
-      if (nav) doNavigation(nav);
+    video.play().catch(function(e) {
+      console.warn('Video play still failed:', e.message);
     });
   }
 
@@ -1400,7 +1363,6 @@ function closeHtmlOverlay() {
 var currentVideo = null;
 var pendingVideoPlay = null; // Video waiting for user gesture to play
 var pendingVideoNav = null; // Navigation to execute after video ends
-var videoGeneration = 0; // Incremented on scene change to invalidate stale videos
 
 function resolveAviPath(aviRef) {
   var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
@@ -1483,29 +1445,18 @@ function playAvi(aviStr) {
   });
   video.addEventListener('click', function() { closeVideo(); });
 
+  // Add to DOM immediately (needed for video events to work)
+  container.appendChild(video);
+  currentVideo = video;
+
   // Try to play - handle autoplay policy on mobile
-  // DON'T append to DOM until we know it can play (prevents blocking clicks)
-  var gen = videoGeneration; // Capture current generation
   var playPromise = video.play();
   if (playPromise !== undefined) {
-    playPromise.then(function() {
-      // Check if still valid (scene hasn't changed)
-      if (gen !== videoGeneration) {
-        console.log('Video play succeeded but scene changed, discarding');
-        video.pause();
-        video.src = '';
-        return;
-      }
-      // Play succeeded - now add to DOM
-      container.appendChild(video);
-      currentVideo = video;
-    }).catch(function(e) {
+    playPromise.catch(function(e) {
       if (e.name === 'NotAllowedError') {
         console.warn('Video autoplay blocked, waiting for user interaction:', file);
         // Store as pending video to play on next user interaction
-        // Video is NOT in DOM yet, so it won't block clicks
         pendingVideoPlay = video;
-        pendingVideoPlay._generation = gen; // Track generation
       } else {
         console.warn('Video play failed:', e.message);
       }
@@ -1518,20 +1469,13 @@ function playAvi(aviStr) {
 }
 
 function closeVideo() {
-  // Increment generation to invalidate any async callbacks
-  videoGeneration++;
   if (currentVideo) {
     currentVideo.pause();
     currentVideo.src = ''; // Stop loading
     if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
     currentVideo = null;
   }
-  // Also clear pending video and its navigation
-  if (pendingVideoPlay) {
-    pendingVideoPlay.pause();
-    pendingVideoPlay.src = ''; // Stop loading
-    pendingVideoPlay = null;
-  }
+  pendingVideoPlay = null;
   pendingVideoNav = null;
 }
 
@@ -1706,25 +1650,9 @@ function executeSceneCommands(scene) {
     }
   }
 
-  // Auto-play AVI from scene string4 field (informative videos on scene load)
-  if (scene.fields.string4 && scene.fields.string4.toLowerCase().endsWith('.avi')) {
-    var aviFile = scene.fields.string4;
-    var aviFlags = scene.fields.val3 || 0;
-    // Build playAvi string: "filename flags x1 y1 x2 y2"
-    // Use scene rect if available, otherwise default to positioned overlay
-    var x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-    if (scene.rect) {
-      x1 = scene.rect.left || 0;
-      y1 = scene.rect.top || 0;
-      x2 = scene.rect.right || 0;
-      y2 = scene.rect.bottom || 0;
-    }
-    console.log('Auto-play AVI from string4:', aviFile);
-    // Delay slightly to allow scene to render first
-    setTimeout(function() {
-      playAvi(aviFile + ' ' + aviFlags + ' ' + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2);
-    }, 100);
-  }
+  // Note: string4 AVI field is NOT auto-played here.
+  // Videos should be triggered by commands (type 9 PLAYAVI) for proper control.
+  // The string4 field seems to be informational/unused in most VNDs.
 }
 
 function isToolbarVisible() {
@@ -2098,6 +2026,20 @@ function goToScene(index) {
   activePlayTexts = [];
   overlayTexts = {};
   loadSceneBackground(project.scenes[index]);
+
+  // DEBUG: Log scene structure for analysis
+  var scene = project.scenes[index];
+  console.log('=== SCENE ' + (index+1) + ': ' + scene.name + ' ===');
+  console.log('Fields:', JSON.stringify(scene.fields));
+  console.log('Hotspot:', scene.hotspot ? JSON.stringify(scene.hotspot) : 'none');
+  scene.commands.forEach(function(cmd, ci) {
+    var hasPolygon = cmd.paramPairs.length > 0;
+    var strDescr = cmd.strings.map(function(s) {
+      return '[' + s.type + ':' + (CMD_NAMES[s.type] || '?') + '] ' + s.string.substring(0, 80);
+    }).join(' | ');
+    console.log('  C' + ci + (hasPolygon ? ' (poly)' : '') + ': type=' + cmd.commandType + ' ' + strDescr);
+  });
+
   executeSceneCommands(project.scenes[index]);
   // Load toolbar overlay if available and not navigating to toolbar itself
   if (toolbarSceneIndex >= 0 && index !== toolbarSceneIndex) {

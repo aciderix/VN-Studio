@@ -720,8 +720,8 @@ function render() {
     var lineH = fontSize + 4;
     var textH = lines.length * lineH;
     var boxH = th > 0 ? th : textH + 8;
-    // Dynamic width: use actual text width + padding, capped at tw
-    var boxW = Math.min(tw, maxLineWidth + 16);
+    // Dynamic width: use actual text width + small padding (8px = 4px each side)
+    var boxW = maxLineWidth + 8;
 
     // Only draw background if this is a standalone text (not part of multi-line set)
     if (!noBackground) {
@@ -848,15 +848,47 @@ function unlockAudio() {
   // Play pending video if any
   if (pendingVideoPlay) {
     var video = pendingVideoPlay;
+    var nav = pendingVideoNav;
+    var gen = video._generation;
     pendingVideoPlay = null;
+    pendingVideoNav = null;
+    // Check if video is still valid (scene hasn't changed)
+    if (gen !== undefined && gen !== videoGeneration) {
+      console.log('Pending video invalidated (scene changed)');
+      video.pause();
+      video.src = '';
+      if (nav) doNavigation(nav);
+      return;
+    }
     video.play().then(function() {
-      // Add to DOM now that it's playing
-      var container = document.getElementById('canvas-container');
-      if (container && !video.parentNode) {
-        container.appendChild(video);
-        currentVideo = video;
+      // Double-check generation after async play
+      if (gen !== undefined && gen !== videoGeneration) {
+        console.log('Video started but scene changed, stopping');
+        video.pause();
+        video.src = '';
+        return;
       }
-    }).catch(function() {});
+      // Add to DOM now that it's playing
+      var cont = document.getElementById('canvas-container');
+      if (cont && !video.parentNode) {
+        cont.appendChild(video);
+        currentVideo = video;
+        // If there's a pending navigation, wait for video to end
+        if (nav) {
+          function onEnd() {
+            video.removeEventListener('ended', onEnd);
+            video.removeEventListener('error', onEnd);
+            closeVideo();
+            doNavigation(nav);
+          }
+          video.addEventListener('ended', onEnd);
+          video.addEventListener('error', onEnd);
+        }
+      }
+    }).catch(function() {
+      // If play still fails, execute pending navigation if any
+      if (nav) doNavigation(nav);
+    });
   }
 
   // Re-trigger scene auto-play audio if nothing played yet
@@ -1367,6 +1399,8 @@ function closeHtmlOverlay() {
 // --- PLAYAVI ---
 var currentVideo = null;
 var pendingVideoPlay = null; // Video waiting for user gesture to play
+var pendingVideoNav = null; // Navigation to execute after video ends
+var videoGeneration = 0; // Incremented on scene change to invalidate stale videos
 
 function resolveAviPath(aviRef) {
   var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
@@ -1451,9 +1485,17 @@ function playAvi(aviStr) {
 
   // Try to play - handle autoplay policy on mobile
   // DON'T append to DOM until we know it can play (prevents blocking clicks)
+  var gen = videoGeneration; // Capture current generation
   var playPromise = video.play();
   if (playPromise !== undefined) {
     playPromise.then(function() {
+      // Check if still valid (scene hasn't changed)
+      if (gen !== videoGeneration) {
+        console.log('Video play succeeded but scene changed, discarding');
+        video.pause();
+        video.src = '';
+        return;
+      }
       // Play succeeded - now add to DOM
       container.appendChild(video);
       currentVideo = video;
@@ -1463,6 +1505,7 @@ function playAvi(aviStr) {
         // Store as pending video to play on next user interaction
         // Video is NOT in DOM yet, so it won't block clicks
         pendingVideoPlay = video;
+        pendingVideoPlay._generation = gen; // Track generation
       } else {
         console.warn('Video play failed:', e.message);
       }
@@ -1475,13 +1518,21 @@ function playAvi(aviStr) {
 }
 
 function closeVideo() {
+  // Increment generation to invalidate any async callbacks
+  videoGeneration++;
   if (currentVideo) {
     currentVideo.pause();
+    currentVideo.src = ''; // Stop loading
     if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
     currentVideo = null;
   }
-  // Also clear pending video if scene changes
-  pendingVideoPlay = null;
+  // Also clear pending video and its navigation
+  if (pendingVideoPlay) {
+    pendingVideoPlay.pause();
+    pendingVideoPlay.src = ''; // Stop loading
+    pendingVideoPlay = null;
+  }
+  pendingVideoNav = null;
 }
 
 // --- SCENE COMMANDS ---
@@ -1964,20 +2015,28 @@ function resumeCommandProcessing(cmd, startIdx) {
       pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
     }
   } else if (deferredNav) {
-    if (videoPlaying && currentVideo) {
-      // Defer navigation until video ends
-      var nav = deferredNav;
-      var vid = currentVideo;
-      function onVideoEnd() {
-        vid.removeEventListener('ended', onVideoEnd);
-        vid.removeEventListener('error', onVideoEnd);
-        vid.removeEventListener('click', onVideoEnd);
-        closeVideo();
-        doNavigation(nav);
+    if (videoPlaying) {
+      if (currentVideo) {
+        // Video is playing in DOM - wait for it to end
+        var nav = deferredNav;
+        var vid = currentVideo;
+        function onVideoEnd() {
+          vid.removeEventListener('ended', onVideoEnd);
+          vid.removeEventListener('error', onVideoEnd);
+          vid.removeEventListener('click', onVideoEnd);
+          closeVideo();
+          doNavigation(nav);
+        }
+        vid.addEventListener('ended', onVideoEnd);
+        vid.addEventListener('error', onVideoEnd);
+        vid.addEventListener('click', onVideoEnd);
+      } else if (pendingVideoPlay) {
+        // Video autoplay was blocked - store nav for when video plays via unlock
+        pendingVideoNav = deferredNav;
+      } else {
+        // No video actually playing/pending, navigate now
+        doNavigation(deferredNav);
       }
-      vid.addEventListener('ended', onVideoEnd);
-      vid.addEventListener('error', onVideoEnd);
-      vid.addEventListener('click', onVideoEnd);
     } else {
       doNavigation(deferredNav);
     }

@@ -370,7 +370,7 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
-  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;"></div></div>
+  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
     <div class="drop-area" id="drop-area">
@@ -1500,6 +1500,7 @@ function loadSceneHtml(htmFile, rect) {
   });
 }
 
+
 function closeSceneHtml() {
   document.getElementById('scene-html').style.display = 'none';
 }
@@ -2218,7 +2219,8 @@ function resumeCommandProcessing(cmd, startIdx) {
         } else if (actCmd === 'playavi') {
           // PLAYAVI from IF condition - execute and track for video deferral
           // Skip if video was auto-played on scene load (PLAYAVI+PREV pattern)
-          if (!cmd.autoPlayedVideo) {
+          // Skip if another video is already playing from this command
+          if (!cmd.autoPlayedVideo && !videoPlaying) {
             playAvi(actParts.slice(1).join(' '));
             videoPlaying = true;
           }
@@ -2230,7 +2232,8 @@ function resumeCommandProcessing(cmd, startIdx) {
       }
     } else if (s.type === 9) {
       // Skip PLAYAVI if video was auto-played on scene load (PLAYAVI+PREV pattern)
-      if (!cmd.autoPlayedVideo) {
+      // Skip if another video is already playing from this command
+      if (!cmd.autoPlayedVideo && !videoPlaying) {
         playAvi(s.string);
         videoPlaying = true;
       }
@@ -3089,6 +3092,31 @@ function openBurgerMenu() {
   document.getElementById('chk-fill-mobile').checked = document.getElementById('chk-fill').checked;
   document.getElementById('burger-menu').classList.add('open');
 }
+
+// Handle clicks on scene-html that should go to canvas polygons
+// (allows clicking answer polygons in bonus questions while HTM overlay is visible)
+document.querySelector('#scene-html .scene-html-content').addEventListener('click', function(e) {
+  // Convert click position to game coordinates
+  var pos = screenToGame(e.clientX, e.clientY);
+  // Check if there's a polygon at this position
+  var cmds = findAllCommandsAtPoint(pos.x, pos.y);
+  if (cmds.length > 0) {
+    console.log('HTM click forwarded to polygon at', pos.x, pos.y);
+    // Prevent default to avoid double-handling
+    e.stopPropagation();
+    // Simulate canvas click by directly calling the click handler logic
+    if (!waitingForVideoEnd) {
+      cmds.forEach(function(cmd) {
+        var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
+        if (!hasNav) handleCommandClick(cmd);
+      });
+      var navCmd = cmds.find(function(cmd) {
+        return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
+      });
+      if (navCmd) handleCommandClick(navCmd);
+    }
+  }
+});
 
 // Initial resize
 resizeCanvas();

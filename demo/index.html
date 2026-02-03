@@ -1117,18 +1117,26 @@ function executeRunPrj(runPrjStr) {
   console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
   stopAllAudio();
 
-  // Load VNP config first
   currentBasePath = parsed.entry.base;
-  fetch('/game-data/' + parsed.entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
-    currentVNPConfig = parseVNP(text);
-  }).catch(function() { currentVNPConfig = null; });
-
-  // Load VND then preload then go to scene
   var targetScene = parsed.sceneIndex;
   var targetEntry = parsed.entry;
-  fetch('/game-data/' + targetEntry.vnd).then(function(r) {
-    return r.arrayBuffer();
-  }).then(function(buf) {
+
+  // Load both VNP and VND, but wait for BOTH before going to scene
+  // This ensures currentVNPConfig is set correctly for video path resolution
+  var vnpPromise = fetch('/game-data/' + parsed.entry.vnp)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      currentVNPConfig = parseVNP(text);
+      console.log('VNP loaded for', targetEntry.name, ':', currentVNPConfig);
+    })
+    .catch(function() { currentVNPConfig = null; });
+
+  var vndPromise = fetch('/game-data/' + targetEntry.vnd)
+    .then(function(r) { return r.arrayBuffer(); });
+
+  // Wait for both VNP and VND to load
+  Promise.all([vnpPromise, vndPromise]).then(function(results) {
+    var buf = results[1];
     loadVNDFile(buf, targetEntry.vnd, true);
     currentVNDEntry = targetEntry; // Track current VND for cross-project PREV
     // Update VND selector
@@ -1822,7 +1830,7 @@ function executeSceneCommands(scene) {
   // These are "farewell videos" that should play on scene arrival, not on click
   // The button click should just do PREV (return)
   // Check both direct PLAYAVI (type 9) and PLAYAVI inside IF conditions (type 21)
-  scene.commands.forEach(function(cmd) {
+  scene.commands.forEach(function(cmd, cmdIndex) {
     if (cmd.paramPairs.length === 0) return; // Only interactive commands
 
     // Check for direct PLAYAVI (type 9)
@@ -1848,9 +1856,15 @@ function executeSceneCommands(scene) {
 
     var hasPrev = hasDirectPrev || hasIfPrev;
 
+    console.log('Auto-play check C' + cmdIndex + ': hasPlayAvi=' + hasPlayAvi +
+                ' (direct=' + hasDirectPlayAvi + ', if=' + hasIfPlayAvi +
+                '), hasPrev=' + hasPrev +
+                ' (direct=' + hasDirectPrev + ', if=' + hasIfPrev + ')');
+
     if (hasPlayAvi && hasPrev) {
       // Mark command for special handling (skip PLAYAVI on click)
       cmd.autoPlayedVideo = true;
+      console.log('Auto-play: marking C' + cmdIndex + ' as autoPlayedVideo');
 
       // Find and auto-play the video now
       // First check direct PLAYAVI
@@ -2289,14 +2303,21 @@ function loadVNDEntryAndGoToScene(entry, sceneIndex) {
   waitingForVideoEnd = true; // Block clicks during cross-project loading
   stopAllAudio();
   currentBasePath = entry.base;
-  // Load VNP config
-  fetch('/game-data/' + entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
-    currentVNPConfig = parseVNP(text);
-  }).catch(function() { currentVNPConfig = null; });
-  // Load VND
-  fetch('/game-data/' + entry.vnd).then(function(r) {
-    return r.arrayBuffer();
-  }).then(function(buf) {
+
+  // Load both VNP and VND, but wait for BOTH before going to scene
+  var vnpPromise = fetch('/game-data/' + entry.vnp)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      currentVNPConfig = parseVNP(text);
+      console.log('VNP loaded for', entry.name);
+    })
+    .catch(function() { currentVNPConfig = null; });
+
+  var vndPromise = fetch('/game-data/' + entry.vnd)
+    .then(function(r) { return r.arrayBuffer(); });
+
+  Promise.all([vnpPromise, vndPromise]).then(function(results) {
+    var buf = results[1];
     loadVNDFile(buf, entry.vnd, true);
     currentVNDEntry = entry;
     // Update VND selector

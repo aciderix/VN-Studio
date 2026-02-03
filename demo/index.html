@@ -1794,14 +1794,13 @@ function executeSceneCommands(scene) {
     }
   });
 
-  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
+  // Pass 1: Execute IF conditions with display actions from ALL commands
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
-  // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
+  // IMPORTANT: We execute display IF conditions from BOTH interactive AND non-interactive commands
+  // because inventory items like helice.bmp must be restored on scene entry regardless of command type
   console.log('Pass 1: Processing display IF conditions for scene', currentSceneIndex + 1);
   scene.commands.forEach(function(cmd, cmdIdx) {
-    // Skip interactive commands - their conditions should execute on click, not on entry
-    if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();

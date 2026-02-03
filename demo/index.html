@@ -1760,14 +1760,23 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // Pass 0: Execute DIRECT display commands (addbmp/delbmp/showbmp/hidebmp) from ALL commands
+  // Pass 0: Execute DIRECT display commands and PLAYAVI from ALL commands
   // This sets up the initial visual state for overlay images defined in ANY command
-  // (e.g., scene 23 has ADDBMP qcasta.bmp inside an interactive command that must show on entry)
+  // (e.g., scene 23 has ADDBMP qcasta.bmp and PLAYAVI casta1.avi inside interactive commands that must execute on entry)
+  var videoPlayedInPass0 = false;
   scene.commands.forEach(function(cmd) {
     cmd.strings.forEach(function(s) {
-      // Only execute direct display commands (not IF conditions with display)
+      // Execute direct display commands (not IF conditions with display)
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
         executeStringCommand(s.type, s.string);
+      }
+      // Execute PLAYAVI from interactive commands on scene entry (e.g., scene 23 casta1.avi offer)
+      // Only play ONE video to avoid conflicts; mark command so it won't replay on click
+      if (s.type === 9 && cmd.paramPairs.length > 0 && !videoPlayedInPass0) {
+        console.log('Pass 0: Auto-playing PLAYAVI from interactive command:', s.string);
+        cmd.autoPlayedVideo = true;
+        playAvi(s.string);
+        videoPlayedInPass0 = true;
       }
     });
   });

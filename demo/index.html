@@ -1759,10 +1759,22 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // First pass: Execute display conditions (addbmp/delbmp/showbmp/hidebmp) from NON-INTERACTIVE commands only
+  // Pass 0: Execute DIRECT display commands (addbmp/delbmp/showbmp/hidebmp) from ALL commands
+  // This sets up the initial visual state for overlay images defined in ANY command
+  // (e.g., scene 23 has ADDBMP qcasta.bmp inside an interactive command that must show on entry)
+  scene.commands.forEach(function(cmd) {
+    cmd.strings.forEach(function(s) {
+      // Only execute direct display commands (not IF conditions with display)
+      if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        executeStringCommand(s.type, s.string);
+      }
+    });
+  });
+
+  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
-  // Interactive commands (with polygons) should only execute their conditions on CLICK, not on scene entry
+  // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
   scene.commands.forEach(function(cmd) {
     // Skip interactive commands - their conditions should execute on click, not on entry
     if (cmd.paramPairs.length > 0) return;
@@ -1786,15 +1798,17 @@ function executeSceneCommands(scene) {
     });
   });
 
-  // Second pass: Execute non-interactive commands (without polygons)
+  // Pass 2: Execute non-interactive commands (without polygons)
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
     if (cmd.paramPairs.length > 0) return;
 
     cmd.strings.forEach(function(s) {
-      // Skip types handled interactively
+      // Skip types handled interactively or already processed in Pass 0
       if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
+      // Skip direct display commands - already handled in Pass 0
+      if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
       if (s.type === 21) {
         // IF - evaluate and execute (skip display commands, already handled in first pass)

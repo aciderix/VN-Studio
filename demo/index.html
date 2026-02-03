@@ -370,7 +370,7 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
-  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:auto;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;"></div></div>
+  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
     <div class="drop-area" id="drop-area">
@@ -1891,6 +1891,41 @@ function executeSceneCommands(scene) {
       }
     }
   });
+
+  // Special case: Interactive commands with ADDBMP + PREV (but no PLAYAVI)
+  // These are "static farewell scenes" with an image overlay
+  // The ADDBMP should show on scene arrival, not on click
+  scene.commands.forEach(function(cmd, cmdIndex) {
+    if (cmd.paramPairs.length === 0) return; // Only interactive commands
+    if (cmd.autoPlayedVideo) return; // Already handled as video scene
+
+    // Check for ADDBMP (type 27)
+    var hasAddBmp = cmd.strings.some(function(s) { return s.type === 27; });
+
+    // Check for PREV (direct or in IF)
+    var hasDirectPrev = cmd.strings.some(function(s) { return s.type === 3; });
+    var hasIfPrev = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      return /\bthen\s+prev\b/.test(str) || /\belse\s+prev\b/.test(str);
+    });
+    var hasPrev = hasDirectPrev || hasIfPrev;
+
+    // Check there's NO PLAYAVI (those are handled above)
+    var hasPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
+
+    if (hasAddBmp && hasPrev && !hasPlayAvi) {
+      console.log('Auto-showing ADDBMP for ADDBMP+PREV command C' + cmdIndex);
+      cmd.autoShowedBmp = true;
+      // Execute all ADDBMP commands in this command
+      cmd.strings.forEach(function(s) {
+        if (s.type === 27) {
+          console.log('Auto ADDBMP:', s.string);
+          addBmpOverlay(s.string);
+        }
+      });
+    }
+  });
 }
 
 function isToolbarVisible() {
@@ -2186,6 +2221,9 @@ function resumeCommandProcessing(cmd, startIdx) {
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
     } else if (s.type === 38 || s.type === 39 || s.type === 7) {
       // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
+    } else if (s.type === 27 && cmd.autoShowedBmp) {
+      // Skip ADDBMP if it was auto-shown on scene load (ADDBMP+PREV pattern)
+      console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
     } else {
       executeStringCommand(s.type, s.string);
     }

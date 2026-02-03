@@ -2038,12 +2038,30 @@ function findCommandAtPoint(x, y) {
   if (!project || currentSceneIndex < 0) return null;
   var scene = project.scenes[currentSceneIndex];
   var sceneW = getSceneWidth(scene);
-  for (var i = scene.commands.length - 1; i >= 0; i--) {
+
+  // Find all matching commands and return the smallest one (most specific)
+  var matches = [];
+  for (var i = 0; i < scene.commands.length; i++) {
     var cmd = scene.commands[i];
     if (cmd.paramPairs.length >= 2 && isPolygonInBounds(cmd.paramPairs, sceneW) && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
-      return cmd;
+      // Calculate polygon area (approximate using bounding box)
+      var bounds = cmd.paramPairs.reduce(function(acc, p) {
+        return {
+          minX: Math.min(acc.minX, p.a), maxX: Math.max(acc.maxX, p.a),
+          minY: Math.min(acc.minY, p.b), maxY: Math.max(acc.maxY, p.b)
+        };
+      }, {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity});
+      var area = (bounds.maxX - bounds.minX) * (bounds.maxY - bounds.minY);
+      matches.push({ cmd: cmd, area: area });
     }
   }
+
+  // Return the smallest polygon (most specific) for hover
+  if (matches.length > 0) {
+    matches.sort(function(a, b) { return a.area - b.area; });
+    return matches[0].cmd;
+  }
+
   // Check toolbar commands for hover
   if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
@@ -2181,7 +2199,10 @@ function evaluateHoverEffects(cmd) {
       } else if (act === 'addbmp') {
         // Track this as a hover-added image (will be cleaned up on unhover)
         var imgName = parts[1] ? parts[1].toLowerCase() : '';
-        if (imgName) hoverAddedImages[imgName] = true;
+        if (imgName) {
+          hoverAddedImages[imgName] = true;
+          console.log('HOVER adding image:', imgName, 'hoverAddedImages:', Object.keys(hoverAddedImages));
+        }
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {
         delBmpOverlay(parts[1] || '');

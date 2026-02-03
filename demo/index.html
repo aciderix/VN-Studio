@@ -1584,14 +1584,17 @@ function playAvi(aviStr) {
   video.playsInline = true;
   video.setAttribute('playsinline', ''); // iOS requires attribute
   video.setAttribute('webkit-playsinline', ''); // older iOS
+  // Only use WebM - AVI is not supported by browsers
+  // Also try MP4 as fallback
+  var mp4Url = url.replace(/\.avi$/i, '.mp4');
   var srcWebm = document.createElement('source');
   srcWebm.src = webmUrl;
   srcWebm.type = 'video/webm';
-  var srcAvi = document.createElement('source');
-  srcAvi.src = url;
-  srcAvi.type = 'video/avi';
+  var srcMp4 = document.createElement('source');
+  srcMp4.src = mp4Url;
+  srcMp4.type = 'video/mp4';
   video.appendChild(srcWebm);
-  video.appendChild(srcAvi);
+  video.appendChild(srcMp4);
   video.style.position = 'absolute';
   video.style.zIndex = '16';
   video.style.background = '#000';
@@ -1613,7 +1616,7 @@ function playAvi(aviStr) {
 
   video.addEventListener('ended', function() { closeVideo(); });
   video.addEventListener('error', function() {
-    console.warn('AVI playback failed (codec not supported):', url);
+    console.warn('Video playback failed - no WebM/MP4 found for:', file);
     closeVideo();
   });
   // Click on video: if paused (autoplay blocked), try to play; if playing, close

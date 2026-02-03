@@ -1760,25 +1760,33 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // Pass 0: Execute DIRECT display commands and PLAYAVI from ALL commands
+  // Pass 0: Execute DIRECT display commands (addbmp/delbmp/showbmp/hidebmp) from ALL commands
   // This sets up the initial visual state for overlay images defined in ANY command
-  // (e.g., scene 23 has ADDBMP qcasta.bmp and PLAYAVI casta1.avi inside interactive commands that must execute on entry)
-  var videoPlayedInPass0 = false;
+  // (e.g., scene 23 has ADDBMP qcasta.bmp inside an interactive command that must show on entry)
   scene.commands.forEach(function(cmd) {
+    var hasDirectAddbmp = cmd.strings.some(function(s) { return s.type === 27; });
+    var hasPlayavi = cmd.strings.some(function(s) { return s.type === 9; });
+
     cmd.strings.forEach(function(s) {
       // Execute direct display commands (not IF conditions with display)
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
         executeStringCommand(s.type, s.string);
       }
-      // Execute PLAYAVI from interactive commands on scene entry (e.g., scene 23 casta1.avi offer)
-      // Only play ONE video to avoid conflicts; mark command so it won't replay on click
-      if (s.type === 9 && cmd.paramPairs.length > 0 && !videoPlayedInPass0) {
-        console.log('Pass 0: Auto-playing PLAYAVI from interactive command:', s.string);
-        cmd.autoPlayedVideo = true;
-        playAvi(s.string);
-        videoPlayedInPass0 = true;
-      }
     });
+
+    // Special case: If interactive command has BOTH direct ADDBMP AND PLAYAVI,
+    // the PLAYAVI is likely scene setup audio/video that should play on entry.
+    // (e.g., scene 23: qcasta.bmp shows + casta1.avi plays the offer)
+    // But if PLAYAVI is alone with SCENE, it's a click transition animation.
+    if (cmd.paramPairs.length > 0 && hasDirectAddbmp && hasPlayavi) {
+      cmd.strings.forEach(function(s) {
+        if (s.type === 9 && !cmd.autoPlayedVideo) {
+          console.log('Pass 0: Auto-playing PLAYAVI (ADDBMP+PLAYAVI pattern):', s.string);
+          cmd.autoPlayedVideo = true;
+          playAvi(s.string);
+        }
+      });
+    }
   });
 
   // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
@@ -2206,11 +2214,12 @@ function evaluateHoverEffects(cmd) {
       if (act === 'playtext') {
         activePlayTexts.push({ text: parts.slice(1).join(' '), font: font });
       } else if (act === 'addbmp') {
-        // Track this as a hover-added image (will be cleaned up on unhover)
+        // Track this as a hover-added image ONLY if it doesn't already exist
+        // (existing images are persistent from scene entry and shouldn't be removed on unhover)
         var imgName = parts[1] ? parts[1].toLowerCase() : '';
-        if (imgName) {
+        if (imgName && !overlayImages[imgName]) {
           hoverAddedImages[imgName] = true;
-          console.log('HOVER adding image:', imgName, 'hoverAddedImages:', Object.keys(hoverAddedImages));
+          console.log('HOVER adding NEW image:', imgName);
         }
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {

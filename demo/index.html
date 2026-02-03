@@ -1294,6 +1294,7 @@ function executeAction(action) {
 
 // --- OVERLAY BMP ---
 var overlayImages = {}; // name -> { img, x, y, w, h, visible }
+var imagesAddedThisClick = {}; // Track images added in current click to prevent immediate DELBMP
 
 function resolveOverlayPath(bmpRef) {
   // Could be relative like "rollover\all.bmp" or absolute path
@@ -1328,6 +1329,9 @@ function addBmpOverlay(addbmpStr) {
   var parts = addbmpStr.trim().split(/\s+/);
   if (parts.length < 4) return;
   var name = parts[0].toLowerCase();
+  // Track that this image was added in the current click event
+  // This prevents overlapping DELBMP commands from immediately removing it
+  imagesAddedThisClick[name] = true;
   var path = parts[1];
   // Skip flags (parts[2])
   var x = parseInt(parts[3]) || 0;
@@ -1356,6 +1360,12 @@ function addBmpOverlay(addbmpStr) {
 
 function delBmpOverlay(name) {
   name = name.trim().toLowerCase();
+  // Skip deletion if image was just added in the same click event
+  // This handles overlapping polygons where one adds and another deletes
+  if (imagesAddedThisClick[name]) {
+    console.log('DELBMP skipped (image added this click):', name);
+    return;
+  }
   if (overlayImages[name]) {
     delete overlayImages[name];
     console.log('DELBMP:', name);
@@ -2408,6 +2418,8 @@ canvas.addEventListener('click', function(e) {
     console.log('Click blocked: waiting for video to end, waitingForVideoEnd=' + waitingForVideoEnd);
     return;
   }
+  // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
+  imagesAddedThisClick = {};
   var pos = screenToGame(e.clientX, e.clientY);
   console.log('Canvas click at game coords:', pos.x, pos.y);
   // Find ALL commands at click point, execute side effects for all
@@ -3107,6 +3119,8 @@ document.querySelector('#scene-html .scene-html-content').addEventListener('clic
     console.log('HTM click forwarded to polygon at', pos.x, pos.y);
     // Prevent default to avoid double-handling
     e.stopPropagation();
+    // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
+    imagesAddedThisClick = {};
     // Simulate canvas click by directly calling the click handler logic
     if (!waitingForVideoEnd) {
       cmds.forEach(function(cmd) {

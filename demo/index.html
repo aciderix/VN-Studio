@@ -2442,7 +2442,10 @@ canvas.addEventListener('click', function(e) {
     console.log('No commands found at click point');
     return;
   }
-  console.log('Found', allCmds.length, 'command(s) at click point');
+  console.log('Found', allCmds.length, 'command(s) at click point:', allCmds.map(function(c) {
+    var scene = project.scenes[currentSceneIndex];
+    return 'C' + scene.commands.indexOf(c);
+  }).join(', '));
   // Execute non-navigable commands first (set_var, addbmp, etc.)
   allCmds.forEach(function(cmd) {
     var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });

@@ -994,13 +994,19 @@ function unlockAudio() {
     });
   }
 
-  // Re-trigger scene auto-play audio if nothing played yet
+  // Re-trigger scene background WAV if it exists and isn't playing
   if (project && currentSceneIndex >= 0) {
     var scene = project.scenes[currentSceneIndex];
-    if (scene.fields.string3 && Object.keys(audioElements).length === 0) {
+    if (scene.fields.string3) {
       var wavFile = scene.fields.string3;
+      var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
       var loops = scene.fields.val2 || 1;
-      playWav(wavFile + ' ' + loops);
+      // Check if this WAV isn't already playing
+      var existing = audioElements[wavKey];
+      if (!existing || existing.paused || existing.ended) {
+        console.log('Unlock: re-triggering scene WAV:', wavFile);
+        playWav(wavFile + ' ' + loops);
+      }
     }
   }
 }
@@ -1056,9 +1062,14 @@ function stopAllAudio() {
   audioElements = {};
 }
 
-// Collect WAV keys that a scene will play on enter (auto-execute commands)
+// Collect WAV keys that a scene will play on enter (auto-execute commands + background WAV)
 function getSceneAutoWavKeys(scene) {
   var keys = {};
+  // Include scene's background WAV (string3 field)
+  if (scene.fields.string3) {
+    keys[scene.fields.string3.toLowerCase().split(/\s+/)[0]] = true;
+  }
+  // Include WAVs from non-interactive commands
   scene.commands.forEach(function(cmd) {
     if (cmd.paramPairs.length > 0) return; // interactive, skip
     cmd.strings.forEach(function(s) {
@@ -1819,6 +1830,19 @@ function executeSceneCommands(scene) {
       loadSceneHtml(htmToLoad, scene.rect);
     } else {
       console.log('Skipping string6 HTM (playhtml already triggered):', scene.fields.string6);
+    }
+  }
+
+  // Auto-play scene background WAV (string3 field)
+  // This is the ambient/background music for the scene
+  if (scene.fields.string3) {
+    var wavFile = scene.fields.string3;
+    var loops = scene.fields.val2 || 1;
+    var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+    // Only play if not already playing this WAV
+    if (!audioElements[wavKey] || audioElements[wavKey].paused || audioElements[wavKey].ended) {
+      console.log('Auto-playing scene WAV:', wavFile, 'loops:', loops);
+      playWav(wavFile + ' ' + loops);
     }
   }
 

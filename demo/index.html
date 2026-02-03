@@ -1798,7 +1798,8 @@ function executeSceneCommands(scene) {
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
   // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
-  scene.commands.forEach(function(cmd) {
+  console.log('Pass 1: Processing display IF conditions for scene', currentSceneIndex + 1);
+  scene.commands.forEach(function(cmd, cmdIdx) {
     // Skip interactive commands - their conditions should execute on click, not on entry
     if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
@@ -1813,6 +1814,7 @@ function executeSceneCommands(scene) {
             // Only execute display-related actions
             if (actLower === 'addbmp' || actLower === 'delbmp' ||
                 actLower === 'showbmp' || actLower === 'hidebmp') {
+              console.log('Pass 1 CMD' + cmdIdx + ': Executing', action);
               executeAction(action);
             }
           }
@@ -1822,7 +1824,8 @@ function executeSceneCommands(scene) {
   });
 
   // Pass 2: Execute non-interactive commands (without polygons)
-  scene.commands.forEach(function(cmd) {
+  console.log('Pass 2: Processing non-display commands for scene', currentSceneIndex + 1);
+  scene.commands.forEach(function(cmd, cmdIdx) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
     if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
@@ -1840,12 +1843,17 @@ function executeSceneCommands(scene) {
           var actLower = action.toLowerCase().trim().split(/\s+/)[0];
           if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
               actLower !== 'showbmp' && actLower !== 'hidebmp') {
+            console.log('Pass 2 CMD' + cmdIdx + ': IF action =', action);
             executeAction(action);
           }
         }
         return;
       }
 
+      // Log direct commands (especially Type 9 PLAYAVI)
+      if (s.type === 9) {
+        console.log('Pass 2 CMD' + cmdIdx + ': Direct PLAYAVI =', s.string);
+      }
       executeStringCommand(s.type, s.string);
     });
   });

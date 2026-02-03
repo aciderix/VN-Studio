@@ -1778,9 +1778,7 @@ function executeSceneCommands(scene) {
     // the PLAYAVI is likely scene setup audio/video that should play on entry.
     // (e.g., scene 23: qcasta.bmp shows + casta1.avi plays the offer)
     // But if PLAYAVI is alone with SCENE, it's a click transition animation.
-    var isInteractive = cmd.paramPairs && cmd.paramPairs.length > 0;
-    console.log('Pass 0 check:', 'interactive=' + isInteractive, 'hasAddbmp=' + hasDirectAddbmp, 'hasPlayavi=' + hasPlayavi);
-    if (isInteractive && hasDirectAddbmp && hasPlayavi) {
+    if (cmd.paramPairs.length > 0 && hasDirectAddbmp && hasPlayavi) {
       cmd.strings.forEach(function(s) {
         if (s.type === 9 && !cmd.autoPlayedVideo) {
           console.log('Pass 0: Auto-playing PLAYAVI (ADDBMP+PLAYAVI pattern):', s.string);
@@ -1797,7 +1795,7 @@ function executeSceneCommands(scene) {
   // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
   scene.commands.forEach(function(cmd) {
     // Skip interactive commands - their conditions should execute on click, not on entry
-    if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
+    if (cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
@@ -1822,7 +1820,7 @@ function executeSceneCommands(scene) {
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
-    if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
+    if (cmd.paramPairs.length > 0) return;
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or already processed in Pass 0

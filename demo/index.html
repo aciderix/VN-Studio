@@ -1584,17 +1584,14 @@ function playAvi(aviStr) {
   video.playsInline = true;
   video.setAttribute('playsinline', ''); // iOS requires attribute
   video.setAttribute('webkit-playsinline', ''); // older iOS
-  // Only use WebM - AVI is not supported by browsers
-  // Also try MP4 as fallback
-  var mp4Url = url.replace(/\.avi$/i, '.mp4');
   var srcWebm = document.createElement('source');
   srcWebm.src = webmUrl;
   srcWebm.type = 'video/webm';
-  var srcMp4 = document.createElement('source');
-  srcMp4.src = mp4Url;
-  srcMp4.type = 'video/mp4';
+  var srcAvi = document.createElement('source');
+  srcAvi.src = url;
+  srcAvi.type = 'video/avi';
   video.appendChild(srcWebm);
-  video.appendChild(srcMp4);
+  video.appendChild(srcAvi);
   video.style.position = 'absolute';
   video.style.zIndex = '16';
   video.style.background = '#000';
@@ -1616,7 +1613,7 @@ function playAvi(aviStr) {
 
   video.addEventListener('ended', function() { closeVideo(); });
   video.addEventListener('error', function() {
-    console.warn('Video playback failed - no WebM/MP4 found for:', file);
+    console.warn('AVI playback failed (codec not supported):', url);
     closeVideo();
   });
   // Click on video: if paused (autoplay blocked), try to play; if playing, close
@@ -1794,13 +1791,13 @@ function executeSceneCommands(scene) {
     }
   });
 
-  // Pass 1: Execute IF conditions with display actions from ALL commands
+  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
-  // IMPORTANT: We execute display IF conditions from BOTH interactive AND non-interactive commands
-  // because inventory items like helice.bmp must be restored on scene entry regardless of command type
-  console.log('Pass 1: Processing display IF conditions for scene', currentSceneIndex + 1);
-  scene.commands.forEach(function(cmd, cmdIdx) {
+  // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
+  scene.commands.forEach(function(cmd) {
+    // Skip interactive commands - their conditions should execute on click, not on entry
+    if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
@@ -1813,7 +1810,6 @@ function executeSceneCommands(scene) {
             // Only execute display-related actions
             if (actLower === 'addbmp' || actLower === 'delbmp' ||
                 actLower === 'showbmp' || actLower === 'hidebmp') {
-              console.log('Pass 1 CMD' + cmdIdx + ': Executing', action);
               executeAction(action);
             }
           }
@@ -1823,8 +1819,7 @@ function executeSceneCommands(scene) {
   });
 
   // Pass 2: Execute non-interactive commands (without polygons)
-  console.log('Pass 2: Processing non-display commands for scene', currentSceneIndex + 1);
-  scene.commands.forEach(function(cmd, cmdIdx) {
+  scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
     if (cmd.paramPairs && cmd.paramPairs.length > 0) return;
@@ -1842,17 +1837,12 @@ function executeSceneCommands(scene) {
           var actLower = action.toLowerCase().trim().split(/\s+/)[0];
           if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
               actLower !== 'showbmp' && actLower !== 'hidebmp') {
-            console.log('Pass 2 CMD' + cmdIdx + ': IF action =', action);
             executeAction(action);
           }
         }
         return;
       }
 
-      // Log direct commands (especially Type 9 PLAYAVI)
-      if (s.type === 9) {
-        console.log('Pass 2 CMD' + cmdIdx + ': Direct PLAYAVI =', s.string);
-      }
       executeStringCommand(s.type, s.string);
     });
   });

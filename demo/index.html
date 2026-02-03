@@ -1778,7 +1778,9 @@ function executeSceneCommands(scene) {
     // the PLAYAVI is likely scene setup audio/video that should play on entry.
     // (e.g., scene 23: qcasta.bmp shows + casta1.avi plays the offer)
     // But if PLAYAVI is alone with SCENE, it's a click transition animation.
-    if (cmd.paramPairs.length > 0 && hasDirectAddbmp && hasPlayavi) {
+    var isInteractive = cmd.paramPairs && cmd.paramPairs.length > 0;
+    console.log('Pass 0 check:', 'interactive=' + isInteractive, 'hasAddbmp=' + hasDirectAddbmp, 'hasPlayavi=' + hasPlayavi);
+    if (isInteractive && hasDirectAddbmp && hasPlayavi) {
       cmd.strings.forEach(function(s) {
         if (s.type === 9 && !cmd.autoPlayedVideo) {
           console.log('Pass 0: Auto-playing PLAYAVI (ADDBMP+PLAYAVI pattern):', s.string);

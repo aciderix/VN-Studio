@@ -2085,7 +2085,24 @@ function findAllCommandsAtPoint(x, y) {
   var result = [];
   for (var i = scene.commands.length - 1; i >= 0; i--) {
     var cmd = scene.commands[i];
-    if (cmd.paramPairs.length >= 2 && isPolygonInBounds(cmd.paramPairs, sceneW) && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+    var hasPairs = cmd.paramPairs.length >= 2;
+    var inBounds = hasPairs && isPolygonInBounds(cmd.paramPairs, sceneW);
+    var inPoly = inBounds && pointInPolygon(x, y, expandRect(cmd.paramPairs));
+    // Debug: log C5 specifically (index 5 in scene 6)
+    if (i === 5 && currentSceneIndex === 5) {
+      console.log('C5 check at (' + x + ',' + y + '): pairs=' + cmd.paramPairs.length +
+        ', inBounds=' + inBounds + ', inPoly=' + inPoly);
+      if (cmd.paramPairs.length > 0) {
+        var bounds = cmd.paramPairs.reduce(function(acc, p) {
+          return {
+            minX: Math.min(acc.minX, p.a), maxX: Math.max(acc.maxX, p.a),
+            minY: Math.min(acc.minY, p.b), maxY: Math.max(acc.maxY, p.b)
+          };
+        }, {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity});
+        console.log('C5 bounds: ' + bounds.minX + ',' + bounds.minY + ' -> ' + bounds.maxX + ',' + bounds.maxY);
+      }
+    }
+    if (hasPairs && inBounds && inPoly) {
       result.push(cmd);
     }
   }

@@ -1749,10 +1749,13 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // First pass: Execute display conditions (addbmp/delbmp/showbmp/hidebmp) from ALL commands
+  // First pass: Execute display conditions (addbmp/delbmp/showbmp/hidebmp) from NON-INTERACTIVE commands only
   // This restores the correct visual state based on variables when returning to a scene
   // (e.g., collected items should stay hidden even after leaving and returning)
+  // Interactive commands (with polygons) should only execute their conditions on CLICK, not on scene entry
   scene.commands.forEach(function(cmd) {
+    // Skip interactive commands - their conditions should execute on click, not on entry
+    if (cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();

@@ -1295,6 +1295,7 @@ function executeAction(action) {
 // --- OVERLAY BMP ---
 var overlayImages = {}; // name -> { img, x, y, w, h, visible }
 var imagesAddedThisClick = {}; // Track images added in current click to prevent immediate DELBMP
+var hoverAddedImages = {}; // Track images added during hover (should be removed on unhover)
 
 function resolveOverlayPath(bmpRef) {
   // Could be relative like "rollover\all.bmp" or absolute path
@@ -2128,6 +2129,15 @@ canvas.addEventListener('mousemove', function(e) {
   var cmd = findCommandAtPoint(pos.x, pos.y);
 
   if (cmd !== hoveredCmd) {
+    // Clean up images added by previous hover
+    Object.keys(hoverAddedImages).forEach(function(name) {
+      if (overlayImages[name]) {
+        delete overlayImages[name];
+        console.log('HOVER cleanup:', name);
+      }
+    });
+    hoverAddedImages = {};
+
     hoveredCmd = cmd;
     activePlayTexts = [];
     canvas.style.cursor = cmd ? 'pointer' : 'default';
@@ -2169,6 +2179,9 @@ function evaluateHoverEffects(cmd) {
       if (act === 'playtext') {
         activePlayTexts.push({ text: parts.slice(1).join(' '), font: font });
       } else if (act === 'addbmp') {
+        // Track this as a hover-added image (will be cleaned up on unhover)
+        var imgName = parts[1] ? parts[1].toLowerCase() : '';
+        if (imgName) hoverAddedImages[imgName] = true;
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {
         delBmpOverlay(parts[1] || '');
@@ -2451,6 +2464,8 @@ canvas.addEventListener('click', function(e) {
   }
   // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
   imagesAddedThisClick = {};
+  // Convert hover-added images to permanent (user clicked, so they want to keep them)
+  hoverAddedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
   console.log('Canvas click at game coords:', pos.x, pos.y);
   // Find ALL commands at click point, execute side effects for all
@@ -3001,6 +3016,14 @@ canvas.addEventListener('touchstart', function(e) {
     var pos = screenToGame(tx, ty);
     var cmd = findCommandAtPoint(pos.x, pos.y);
     if (cmd !== hoveredCmd) {
+      // Clean up previous hover images before showing new ones
+      Object.keys(hoverAddedImages).forEach(function(name) {
+        if (overlayImages[name]) {
+          delete overlayImages[name];
+        }
+      });
+      hoverAddedImages = {};
+
       hoveredCmd = cmd;
       activePlayTexts = [];
       if (cmd) evaluateHoverEffects(cmd);
@@ -3034,6 +3057,15 @@ canvas.addEventListener('touchend', function(e) {
   e.preventDefault();
   clearTimeout(longPressTimer);
 
+  // Clean up hover-added images (from long-press or previous interactions)
+  Object.keys(hoverAddedImages).forEach(function(name) {
+    if (overlayImages[name]) {
+      delete overlayImages[name];
+      console.log('TOUCH cleanup hover image:', name);
+    }
+  });
+  hoverAddedImages = {};
+
   // Si long-press actif, juste masquer le hover
   if (longPressTriggered) {
     hoveredCmd = null;
@@ -3042,20 +3074,39 @@ canvas.addEventListener('touchend', function(e) {
   }
 
   if (touchMoved || !project || currentSceneIndex < 0) return;
-  // Tap = clic
+
+  // Tap = clic - use same logic as desktop click (find ALL overlapping commands)
   var touch = e.changedTouches[0];
   var pos = screenToGame(touch.clientX, touch.clientY);
-  var cmd = findClickableCommandAtPoint(pos.x, pos.y);
+  console.log('Touch tap at game coords:', pos.x, pos.y);
 
   // Clear hover state after tap to avoid stuck tooltips/rollovers
   hoveredCmd = null;
   activePlayTexts = [];
 
-  if (!cmd) {
+  // Clear click-scope tracking and hover tracking
+  imagesAddedThisClick = {};
+
+  // Find ALL commands at tap point (same as desktop click)
+  var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
+  if (allCmds.length === 0) {
+    console.log('No commands found at tap point');
     render();
     return;
   }
-  handleCommandClick(cmd);
+  console.log('Touch found', allCmds.length, 'command(s) at tap point');
+
+  // Execute non-navigable commands first (set_var, addbmp, etc.)
+  allCmds.forEach(function(cmd) {
+    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
+    if (!hasNav) handleCommandClick(cmd);
+  });
+  // Then execute the navigable command (if any)
+  var navCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
+  });
+  if (navCmd) handleCommandClick(navCmd);
+
   render(); // Refresh display after action (e.g., item pickup)
 }, { passive: false });
 

@@ -1,0 +1,848 @@
+{
+  "file": "start.vnd",
+  "fileSize": 6323,
+  "header": {
+    "magic": "VNFILE",
+    "version": "2.13",
+    "sceneCount": 4,
+    "projectName": "Europeo",
+    "editor": "Sopra Multimedia",
+    "serial": "5D51F233",
+    "projectIDStr": "EUROPEO",
+    "registry": "SOFTWARE\\SOPRA MULTIMEDIA\\EUROPEO",
+    "width": 640,
+    "height": 480,
+    "depth": 16,
+    "flag": 0,
+    "u1": 4,
+    "u2": 1,
+    "reserved": 0,
+    "dllPath": "..\\vnstudio\\vnresmod.dll",
+    "varCount": 284,
+    "endPos": 178
+  },
+  "variableCount": 284,
+  "variables": [
+    "SACADOS",
+    "JEU",
+    "BIDON",
+    "MILLEEURO",
+    "CALC",
+    "TELEPHONE",
+    "ACTIVE",
+    "FRANCS",
+    "DELPHITEST1",
+    "DELPHITEST2",
+    "CPAYS",
+    "CMENU1",
+    "CMENU2",
+    "CMENU3",
+    "COMPTEUR1",
+    "COMPTEUR2",
+    "COMPTEUR3",
+    "RAQUETTE",
+    "REPONSEM",
+    "AFFICHEM",
+    "PIECE",
+    "DICO",
+    "BEETHOVEN",
+    "PHOTO",
+    "SCOTCH",
+    "QUESTION",
+    "REPONSE",
+    "NOTE",
+    "MAUVAISENOTE",
+    "TAILLEPIERRE",
+    "EXPO",
+    "CHEVAL",
+    "SABOT2",
+    "RIZ",
+    "CLE",
+    "SCORE",
+    "SIROP",
+    "LEVURE",
+    "CAPITALE",
+    "CISEAUX",
+    "MENU",
+    "PIZZA",
+    "COSTUME",
+    "LOUPE",
+    "PALME",
+    "BOUEE",
+    "RESSORT",
+    "NUMERO",
+    "HARPON",
+    "MASQUE",
+    "BOUT_PLO",
+    "BALLON1",
+    "PLONGE",
+    "GRECQUESTION",
+    "GRECREPONSE",
+    "FIOLEGRECE",
+    "CPHOTO",
+    "ORGUE",
+    "GUITARE",
+    "PIER_BERLIN",
+    "MASSE",
+    "JUSTEPRIXOBJ",
+    "JUSTEPRIXEURO",
+    "JUSTEPRIXCLIC",
+    "JUSTEPRIX1",
+    "JUSTEPRIX10",
+    "JUSTEPRIX15",
+    "JUSTEPRIX20",
+    "JUSTEPRIX25",
+    "JUSTEPRIX30",
+    "JUSTEPRIX50",
+    "JUSTEPRIX100",
+    "JUSTEPRIXSCORE",
+    "PAIN",
+    "HELICE",
+    "CARTETOUR",
+    "BUS",
+    "LEVRIERNUMERO",
+    "LEVRIERPARI",
+    "LEVRIERRESULTAT",
+    "PARFUM",
+    "PEPE",
+    "CASTAGNETTE",
+    "DANSE",
+    "TICKET",
+    "TICKET_A",
+    "RUBAN",
+    "MATH",
+    "FIOLEGRECE2",
+    "ROUEDENT",
+    "VIOLON",
+    "MARMOTTE",
+    "MUSIC",
+    "PARTITION",
+    "ORGE",
+    "TONDEUSE",
+    "PALETTE",
+    "PEINTRE",
+    "SCOREPEINTRE",
+    "HOTTE",
+    "FROG",
+    "TRANS",
+    "ALLEMAGNE",
+    "FIOLE",
+    "FRANCE",
+    "ANGLETERRE",
+    "AUTRICHE",
+    "BELGIQUE",
+    "EUROLAND",
+    "DANEMARK",
+    "ECOSSE",
+    "ESPAGNE",
+    "FINLANDE",
+    "GRECE",
+    "PAYSBAS",
+    "IRLANDE",
+    "ITALIE",
+    "PORTUGAL",
+    "SUEDE",
+    "FIOLEECOSSE",
+    "FIOLEIRLANDE",
+    "FIOLEESPAGNE",
+    "FIOLESUEDE",
+    "FIOLEFINLANDE",
+    "FIOLEAUTRICHE",
+    "FIOLEPAYSBAS",
+    "FIOLEESPAGNE2",
+    "FIOLEITALIE",
+    "FIOLEANGLETERRE",
+    "OCCUPE1",
+    "OCCUPE2",
+    "OCCUPE3",
+    "OCCUPE4",
+    "OCCUPE5",
+    "OCCUPE6",
+    "OCCUPE7",
+    "OCCUPE8",
+    "OCCUPE9",
+    "OCCUPE10",
+    "OCCUPE11",
+    "OCCUPE12",
+    "OCCUPE",
+    "FIOLEOK",
+    "FIOLEVASE",
+    "FIOLEAUTR",
+    "CLEJAUNE",
+    "AP_PHOTO",
+    "POIVROUGE",
+    "AIL",
+    "BONNET",
+    "SKATE",
+    "FARINE",
+    "API",
+    "DORADE",
+    "TEMPSLAPIN",
+    "CHIANTI",
+    "BOUTEILLE",
+    "SAC",
+    "CHEWING",
+    "CLEROUGE",
+    "PAPIERCADO",
+    "SABOT1",
+    "TONO",
+    "OEUF",
+    "COLOMB",
+    "PASTEUR",
+    "PORTESECRETE",
+    "BOITE",
+    "CLEVERTE",
+    "PONPON",
+    "PONPONOR",
+    "FINIPONPON",
+    "CORNEMUSE",
+    "NESSIE",
+    "BONUS1",
+    "ALLUMETTE",
+    "BONUS2",
+    "BURETTE",
+    "BONUS3",
+    "BONUS4",
+    "CHAMPAGNE",
+    "BONUS5",
+    "NUMPAYS",
+    "NUMPAYS2",
+    "NUMPAYSSCORE",
+    "BONUS6",
+    "BONUS9",
+    "BONUS8",
+    "BONUS7",
+    "JUSTEPRIX",
+    "POIVJAUNE",
+    "OIGNON",
+    "MOULE",
+    "FROMAGE",
+    "TULIPEJAUNE",
+    "PEINTRE1",
+    "SECHE",
+    "BLEU",
+    "HUILE",
+    "LAINE",
+    "BOUT_EAU",
+    "ROUGE",
+    "CHAMPAGNE2",
+    "PATE",
+    "SALIERE",
+    "PUCE",
+    "GLO",
+    "BONUS26",
+    "BONUS25",
+    "BONUS24",
+    "BONUS23",
+    "OUTIL",
+    "OUTIL2",
+    "OUTIL3",
+    "MACHINE",
+    "CIRE",
+    "BOUBOU",
+    "SOUSMARINOK",
+    "LAPINSORTIE",
+    "TOURNEVIS",
+    "NAINOK",
+    "PINCE",
+    "PIERREOR",
+    "NBINGR",
+    "INGROK",
+    "OLIVE",
+    "BOUILLON",
+    "EAUBIERE",
+    "HOUBLON",
+    "BIEREOK",
+    "CHOUETTE",
+    "CHOUETTEOR",
+    "PISE",
+    "BIERESO",
+    "BETAIL",
+    "VASE",
+    "BOTTE",
+    "HARPEOK",
+    "PUBOK",
+    "ERREUR7OK",
+    "ERREUR7D1",
+    "ERREUR7D2",
+    "ERREUR7D3",
+    "ERREUR7D4",
+    "ERREUR7D5",
+    "ERREUR7D6",
+    "ERREUR7D7",
+    "BONUS14",
+    "BONUS30",
+    "MESP",
+    "MGRE",
+    "MGRA",
+    "MITA",
+    "MALL",
+    "MFRA",
+    "MARMOT",
+    "NON",
+    "BONUS15",
+    "BONUS16",
+    "BONUS18",
+    "BONUS19",
+    "BONUS20",
+    "JUSTEPRIXQUESTION",
+    "JUSTEPRIXREPONSE",
+    "JUSTEPRIXOK",
+    "PUNK",
+    "SOUSMARINOK2",
+    "ERREUR7OK2",
+    "CASTA",
+    "EAUPAIN",
+    "PAINOK",
+    "VINCI",
+    "VA",
+    "VF",
+    "VE",
+    "BONUS29",
+    "BONUS22",
+    "BOUCHE",
+    "LAPIN",
+    "LOC",
+    "POGNON",
+    "OBJETSFERMIER",
+    "DRUIDE",
+    "DEJACLEJAUNE"
+  ],
+  "sceneCount": 4,
+  "scenesParsed": 4,
+  "bytesRemaining": 0,
+  "errors": [],
+  "scenes": [
+    {
+      "index": 1,
+      "name": "Quitter",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "<res0001>",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "hotspot": {
+        "timer": 5000,
+        "objects": [
+          {
+            "type": 0,
+            "string": ""
+          }
+        ]
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 0,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "La légende",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 9,
+              "value": "..\\..\\couleurs1\\movie\\intro12.avi 1 0 40 640 440"
+            },
+            {
+              "type": 6,
+              "value": "3"
+            },
+            {
+              "type": 6,
+              "value": "3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "Frontal",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "interface.bmp",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 33,
+              "value": "..\\frontal\\vnoption.dll"
+            },
+            {
+              "type": 10,
+              "value": "interface\\jeu.bmp 0 176 257"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\couleurs1\\digit\\super.wav"
+            },
+            {
+              "type": 26,
+              "value": "0"
+            },
+            {
+              "type": 22,
+              "value": "jeu 0"
+            },
+            {
+              "type": 22,
+              "value": "score 0"
+            }
+          ],
+          "polygon": [
+            [
+              219,
+              475
+            ],
+            [
+              218,
+              442
+            ],
+            [
+              245,
+              405
+            ],
+            [
+              186,
+              362
+            ],
+            [
+              185,
+              294
+            ],
+            [
+              212,
+              257
+            ],
+            [
+              281,
+              258
+            ],
+            [
+              327,
+              289
+            ],
+            [
+              340,
+              325
+            ],
+            [
+              325,
+              378
+            ],
+            [
+              309,
+              402
+            ],
+            [
+              281,
+              398
+            ],
+            [
+              308,
+              442
+            ],
+            [
+              312,
+              478
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 10,
+              "value": "interface\\livres.bmp 0 0 273"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\couleurs1\\digit\\yaou.wav"
+            },
+            {
+              "type": 31,
+              "value": "..\\biblio\\biblio.vnp 1"
+            }
+          ],
+          "polygon": [
+            [
+              1,
+              476
+            ],
+            [
+              0,
+              293
+            ],
+            [
+              51,
+              300
+            ],
+            [
+              67,
+              290
+            ],
+            [
+              84,
+              299
+            ],
+            [
+              109,
+              289
+            ],
+            [
+              172,
+              326
+            ],
+            [
+              118,
+              389
+            ],
+            [
+              92,
+              438
+            ],
+            [
+              146,
+              479
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 10,
+              "value": "interface\\tirelire.bmp 0 483 207"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\couleurs1\\digit\\ouais.wav"
+            },
+            {
+              "type": 36,
+              "value": ""
+            },
+            {
+              "type": 17,
+              "value": "tirelire.exe"
+            }
+          ],
+          "polygon": [
+            [
+              525,
+              470
+            ],
+            [
+              536,
+              435
+            ],
+            [
+              554,
+              416
+            ],
+            [
+              554,
+              373
+            ],
+            [
+              484,
+              316
+            ],
+            [
+              536,
+              268
+            ],
+            [
+              556,
+              220
+            ],
+            [
+              600,
+              205
+            ],
+            [
+              638,
+              279
+            ],
+            [
+              638,
+              479
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "1"
+            },
+            {
+              "type": 10,
+              "value": "interface\\oui.bmp 0 470 0"
+            },
+            {
+              "type": 11,
+              "value": "..\\..\\couleurs1\\digit\\ouvre.wav"
+            }
+          ],
+          "polygon": [
+            [
+              503,
+              6
+            ],
+            [
+              477,
+              27
+            ],
+            [
+              475,
+              70
+            ],
+            [
+              492,
+              115
+            ],
+            [
+              517,
+              159
+            ],
+            [
+              567,
+              159
+            ],
+            [
+              585,
+              92
+            ],
+            [
+              600,
+              36
+            ],
+            [
+              569,
+              7
+            ]
+          ]
+        },
+        {
+          "commandType": 105,
+          "strings": [
+            {
+              "type": 6,
+              "value": "2"
+            },
+            {
+              "type": 10,
+              "value": "interface\\video.bmp 0 0 0"
+            },
+            {
+              "type": 11,
+              "value": "ouvre2.wav"
+            }
+          ],
+          "polygon": [
+            [
+              163,
+              7
+            ],
+            [
+              145,
+              38
+            ],
+            [
+              164,
+              73
+            ],
+            [
+              207,
+              100
+            ],
+            [
+              263,
+              78
+            ],
+            [
+              340,
+              87
+            ],
+            [
+              366,
+              48
+            ],
+            [
+              346,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "Intro",
+      "flagBytes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "props": [
+        0,
+        0,
+        0
+      ],
+      "strings": {
+        "string1": "",
+        "string2": "",
+        "string3": "",
+        "string4": "",
+        "resource": "",
+        "string6": ""
+      },
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "commands": [
+        {
+          "commandType": 100,
+          "strings": [
+            {
+              "type": 6,
+              "value": "3"
+            },
+            {
+              "type": 9,
+              "value": "inter.avi 1 100 100 520 400"
+            },
+            {
+              "type": 9,
+              "value": "oie.avi 1 100 100 520 400"
+            },
+            {
+              "type": 9,
+              "value": "sopra.avi 1 100 100 520 400"
+            },
+            {
+              "type": 6,
+              "value": "3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,65 +1,267 @@
-# VN-Studio - Configuration Claude
+# VN-Studio — Context for Claude Sessions
 
-## CONTEXTE DE RECUPERATION DE SESSION
+## What is this project?
 
-Ce projet est un portage du moteur de jeu "Virtual Navigator" (Windows 1999) vers React.
+**VN-Studio** is a web port of **Virtual Navigator 2.1**, a Windows game engine by Sopra Multimedia (1999).
+The target game is **"Europeo"**, an educational game about European countries, money, culture.
+The entire playable engine lives in **`demo/index.html`** (~2300 lines of vanilla JS).
 
-### Documents de référence (LIRE EN PRIORITE)
-1. `PORTAGE_SUIVI.md` - Document principal de suivi du portage
-2. `ENGINE_PSEUDOCODE.md` - Pseudo-code complet du moteur C++
+## Architecture
 
-### Fichiers binaires analysés
-- `europeo.exe` - Exécutable principal (vn21_32.exe, Visual Navigator 2.1)
-- `vnoption.dll` - Module dialogues d'options utilisateur
-- `vnresmod.dll` - Module ressources (curseurs, etc.)
-- `vndllapi.dll` - API centrale (variables, messages) - STRUCTURE EXACTE EXTRAITE
+### File structure
 
-### Résumé technique
-- **Produit**: Virtual Navigator Studio/Runtime par Sopra Multimedia (France, 1999)
-- **Technologie originale**: Borland C++ Builder, OWL 5.2, DirectDraw
-- **Cible du portage**: React avec Canvas 2D / Web Audio API
-- **Classes principales**: TVNApplication, TVNScene, TVNCommand, TVNHotspot, TVNVariable
-- **Système de scripting**: Commandes GOTO, SETVAR, IF, WAVE, MIDI, AVI, IMAGE, TEXT
+```
+demo/
+  index.html          ← THE main file. Contains everything: VND parser, renderer, game engine
+  server.js           ← Node.js static HTTP server (serves /game-data/)
+  game-data/          ← 592MB+ of game resources (19 country modules)
+    couleurs1/        ← Main game module (hub, toolbar, bonus questions)
+      couleurs1.vnd   ← Binary scene/command data
+      couleurs1.vnp   ← INI config (path mappings)
+      img24/          ← BMP images (backgrounds, rollover overlays)
+      html/           ← HTM files (Latin-1 encoded, displayed in scenes)
+      digit/          ← WAV sounds
+      movie/          ← AVI (original) + WebM (converted) videos
+    barre/            ← Toolbar assets (barre.bmp, icons, country flags)
+    france/, allem/, angl/, ecosse/, belge/, grece/, ...  ← Country modules
+    euroland/         ← Shared resources (videos, rollovers)
+```
 
-### Outils installés
-- radare2 5.5.0 (analyse binaire)
-- pev (analyse PE)
+### How to run
 
-### État du projet
-- Phase 1 (Analyse): COMPLETE
-- Phase 2 (Conception React): COMPLETE
-- Phase 3 (Implémentation): COMPLETE
-- Phase 4 (Formats de fichiers): COMPLETE
+```bash
+cd demo && node server.js
+# Open http://localhost:8080
+# Or deploy demo/ folder to Netlify (currently at europeo.netlify.app)
+```
 
-### Formats de fichiers VN analysés
-- **VNP** (.vnp): Configuration INI avec références DATFILE
-- **VND** (.vnd): Format binaire VALIDÉ avec:
-  - Header: 5 bytes flags + Borland strings (magic, version, metadata)
-  - Variables: uint32 count + (Borland string name + int32 value) × count
-  - Scenes: 50 bytes nom fixe + flag + resource + 32 bytes réservés + propriétés
-  - Commands: 24 bytes header + type + 50 bytes desc + 48 bytes padding + sous-commandes
-- **VNSAVFILE**: Sauvegardes - État du jeu et variables
-- Parser: `src/engine/VNFileLoader.ts` (RÉÉCRIT pour format VND réel)
+## VND Binary Format
 
-### Fichiers React créés
-- src/engine/* - Moteur complet (9 fichiers dont VNFileLoader.ts)
-- src/components/* - Composants React
-- src/hooks/* - Hooks React
-- src/types/* - Types TypeScript (types fichiers ajoutés)
-- src/examples/* - Projet de démonstration
-- package.json, tsconfig.json - Configuration
+Parsed by `parseVND()` in index.html. Structure:
 
-### Découvertes clés (Session Jan 2026)
-- **Format chaînes VND**: uint32 longueur + data (PAS uint16!)
-- **Ordre des données**: Variables AVANT les scènes
-- **Noms de scènes**: 50 bytes fixes (pas Borland strings)
-- **Fichiers test**: `VNP-VND/start.vnd`, `VNP-VND/start.vnp` (vrais fichiers du jeu)
-- **Fonctions Borland** (bds52t.dll):
-  - `ipstream::readWord32` @ 0x439180
-  - `operator>>(ipstream, string)` @ 0x439138
+```
+[5 bytes header] [Borland string "VNFILE"] [version "2.13"]
+[uint32 sceneCount] [project name] [editor] [serial] [projectID] [registry]
+[uint32 width=640] [uint32 height=480] [depth] [flag] [u1] [u2] [reserved]
+[dll path] [uint32 varCount]
+  → varCount × { Borland string name, uint32 value }
+  → sceneCount × readScene()
+```
 
-### Instructions pour nouvelles sessions
-1. Toujours lire PORTAGE_SUIVI.md en premier pour récupérer le contexte
-2. Consulter ENGINE_PSEUDOCODE.md pour les détails techniques
-3. Consulter VNP-VND/*.vnd pour tester le parser
-4. Utiliser radare2 pour toute analyse supplémentaire des binaires
+**Borland string** = `uint32 length + length bytes` (read by `readBS()`)
+
+**Scene** = name + 4 flagBytes + 3 props + 6 string fields + 6 int values + rect + hotspot + cmdList + commands
+
+**Key scene fields:**
+- `fields.resource` (s5) = background BMP path
+- `fields.string3` (s3) = auto-play WAV, `fields.val2` = loop count
+- `fields.string6` (s6) = auto-load HTM file (displayed in `scene.rect` area)
+
+**Command** = stringCollection (sub-commands) + commandType (100-108 = polygon types) + paramPairs (polygon vertices) + flags
+
+**String sub-command types** (the actual instructions):
+| Type | Name | Format |
+|------|------|--------|
+| 3 | PREV | Go to previous scene |
+| 6 | SCENE | `sceneIndex` (1-based) |
+| 9 | PLAYAVI | `file flags [x1 y1 x2 y2]` |
+| 10 | PLAYBMP | `file flags x y` |
+| 11 | PLAYWAV | `file loops` |
+| 13 | PLAYHTML | `file flags x y w h` |
+| 16 | PAUSE | `milliseconds` |
+| 21 | IF | `var op value then action [else action]` |
+| 22 | SET_VAR | `name value` |
+| 23 | INC_VAR | `name value` |
+| 24 | DEC_VAR | `name value` |
+| 25 | INVALIDATE | Force redraw |
+| 27 | ADDBMP | `name path flags x y [x2 y2]` |
+| 28 | DELBMP | `name` |
+| 29 | SHOWBMP | `name` |
+| 30 | HIDEBMP | `name` |
+| 31 | RUNPRJ | `path [startScene]` |
+| 33 | RUNDLL | `dllpath` (not implemented) |
+| 36 | CLOSEWAV | Stop all audio |
+| 38 | PLAYTEXT | `x y w h flags text` |
+| 39 | FONT | `size bold #color FontName` |
+| 40 | REM | Comment |
+| 41 | ADDTEXT | `name fontSize x y w h flags <varname>` |
+
+## Game Engine Architecture (in index.html)
+
+### Key globals
+- `project` — parsed VND data (scenes, commands, variables)
+- `currentSceneIndex` — current scene (0-based internally, VND uses 1-based)
+- `gameVars` — all game variables (lowercase keys), persisted across RUNPRJ
+- `overlayImages` — ADDBMP overlays `{ name: { img, x, y, w, h, visible } }`
+- `overlayTexts` — ADDTEXT overlays `{ name: { text, fontSize, x, y, ... } }`
+- `audioElements` — active WAV audio elements
+- `currentVideo` — active video element
+- `toolbarSceneIndex` — index of "Toolbar" scene (-1 if none)
+
+### Scene lifecycle
+```
+goToScene(index)
+  → stopAudioExcept(keepKeys)  // smart audio: keep same WAVs
+  → closeHtmlOverlay(), closeSceneHtml(), closeVideo()
+  → clear overlayImages, overlayTexts
+  → loadSceneBackground(scene)
+  → executeSceneCommands(scene)  // auto-exec commands without polygons
+  → executeToolbar()             // load toolbar barre + icons
+  → play scene.fields.string3 WAV
+  → loadSceneHtml(scene.fields.string6, scene.rect)
+```
+
+### Command execution (two-pass)
+`resumeCommandProcessing(cmd, startIdx)`:
+1. **First pass**: Execute ALL side-effects (SET_VAR, INC_VAR, PLAYWAV, ADDBMP...)
+   - Defer SCENE/RUNPRJ navigation
+   - Defer PLAYHTML
+2. **Second pass**: Execute deferred actions
+   - If PLAYHTML + SCENE both exist → show HTML first, navigate on close
+   - If video playing + SCENE → navigate after video ends
+   - Otherwise navigate immediately
+
+### Click handling
+```
+canvas click → screenToGame() → findAllCommandsAtPoint()
+  → returns ALL commands with matching polygons (scene + toolbar)
+  → execute non-navigable commands first
+  → execute navigable command last
+```
+
+### Hover/long-press
+```
+mousemove/touchstart(400ms) → findCommandAtPoint()
+  → evaluateHoverEffects(cmd)  // evaluate IF conditions read-only
+  → render() draws PLAYTEXT boxes + rollover ADDBMP
+```
+
+### Toolbar system
+- Scene named "Toolbar" (S36 in couleurs1, index 35) contains toolbar setup
+- `executeToolbar()` runs C0's strings after each scene load
+- Adds barre.bmp (y=400-480) + conditional icons based on variables
+- Toolbar commands also in hit testing (findAllCommandsAtPoint, findCommandAtPoint)
+- Hidden when background image height >= 480 (`isToolbarVisible()`)
+- Toolbar area: y=400 to y=480 (bottom 80px of 640×480 canvas)
+
+### Path resolution
+- VNP config maps keys (IMG24, WAV, AVI, TXT) to subdirectories
+- `resolveOverlayPath(path)` — handles `..\..\barre\images\file.bmp` cross-module paths
+- `resolveHtmlPath(file)` — maps to `/game-data/{module}/html/{file}`
+- `resolveAviPath(file)` — maps to `/game-data/{module}/{aviDir}/{file}`
+- WebM files: same name as AVI but `.webm` extension (all 392 AVIs converted via ffmpeg)
+
+### Audio system
+- `playWav(str)` — plays WAV, tracks in `audioElements` by key
+- `stopAudioExcept(keepKeys)` — stops audio not in keepKeys, protects `recentlyStartedAudio`
+- `unlockAudio()` — called on first user interaction, replays pending + re-triggers scene audio
+- Scene auto-play: `fields.string3` WAV with `fields.val2` loops
+
+### HTML overlay system
+- `playHtml(str)` — shows HTM in positioned overlay (html-overlay div, z-index 15)
+- `loadSceneHtml(file, rect)` — auto-loads scene HTM in rect area (scene-html div, z-index 14)
+- `fetchLatin1(url)` — fetches with ISO-8859-1 decoding (TextDecoder)
+- `closeHtmlOverlay()` — closes and resumes pending navigation/commands
+
+## What has been implemented
+
+### Fully working
+- ✅ VND binary parser (all field types, Borland strings)
+- ✅ VNP INI config parser
+- ✅ Scene rendering with BMP backgrounds (including panoramic scroll)
+- ✅ Polygon hit testing (click + hover) with complex shapes
+- ✅ All variable operations (SET_VAR, INC_VAR, DEC_VAR)
+- ✅ IF evaluator with 6 operators (=, <, >, <=, >=, !=/<>), nested IFs, else
+- ✅ Scene navigation (SCENE, RUNPRJ with cross-module + start scene)
+- ✅ PLAYWAV audio with smart scene transitions
+- ✅ PLAYAVI video (WebM conversion, overlay positioning x1,y1,x2,y2)
+- ✅ Video→scene sequencing (deferred navigation until video ends)
+- ✅ PLAYHTML overlay (blocks navigation, positioned)
+- ✅ Scene auto-load HTM (fields.string6 in scene.rect, Latin-1 encoding)
+- ✅ ADDBMP/DELBMP/SHOWBMP/HIDEBMP overlay system
+- ✅ PLAYTEXT with word-wrap, multi-line (multiple type 38 strings)
+- ✅ FONT handling for hover text
+- ✅ ADDTEXT for variable display (score)
+- ✅ Toolbar overlay (barre scene detection, conditional icons, fixed positioning)
+- ✅ Toolbar click/hover interaction
+- ✅ Resource pre-loading with progress bar
+- ✅ Variable persistence across RUNPRJ module switches
+- ✅ Touch support (tap=click, long-press=hover, drag=scroll)
+- ✅ Audio autoplay unlock
+- ✅ Overlapping polygon handling (all effects execute)
+- ✅ Two-pass command processing (side-effects before navigation)
+- ✅ Debug panel with scene list, polygon display, variable viewer
+
+### Not yet implemented / Known issues
+- ❌ PAUSE (type 16) — delay between commands (used in toolbar activation sequence scene 6)
+- ❌ RUNDLL (type 33) — DLL execution (euro32.dll=calculator, inv.dll=inventory, vnoption.dll=options)
+- ❌ Inventory system (sacados contents display) — originally via inv.dll
+- ❌ Calculator (euro32.dll) — currency converter mini-game
+- ❌ DEFCURSOR (type 26) — custom cursor changes
+- ❌ CLOSEMID/CLOSEAVI (types 47/48)
+- ❌ PLAYMID (type 12) — MIDI playback
+- ❌ SAVE/LOAD (types 45/46) — game state persistence
+- ❌ Hotspot timer system (scene.hotspot.timerValue)
+- ❌ Some ADDBMP coordinates may need verification (x,y vs x1,y1,x2,y2 heuristic)
+- ❌ Bonus question routing may show wrong HTML in edge cases (multiple bonusN vars)
+
+## How to debug / investigate
+
+### Dump VND scene data
+Use the Node.js script approach (paste into terminal):
+```bash
+timeout 15 node -e '...' > /tmp/vnd_dump.txt
+```
+See the parsing script pattern in the conversation history. Key: use the exact same parsing logic as `parseVND()`/`readScene()` from index.html.
+
+### Key search patterns in VND dump
+- `sacados`, `barre`, `toolbar` — toolbar/inventory system
+- `bonus[1-9]` — bonus question flow
+- `score` — scoring system
+- `perdu`, `danger` — game over conditions
+- `fiole` — country completion tracking (fiole 1-12)
+- `trans` — transportation system
+
+### Browser console
+The engine logs extensively:
+- `PLAYAVI:`, `PLAYWAV:`, `ADDBMP:`, `PLAYHTML:` — command execution
+- `Click: CMD_xxx` — click handler with full command dump
+- `IF eval:` — condition evaluation results
+- `Variables:` — variable state after load
+
+### Important VND scenes (couleurs1)
+| Index | Name | Purpose |
+|-------|------|---------|
+| 0 | Village | Starting scene (Euroland village) |
+| 7 | (armoire3) | Item collection (sacados, allumettes, clé jaune) |
+| 8 | Sac à dos | Backpack info screen (sets sacados=1 on exit) |
+| 35 | Toolbar | Toolbar overlay definition (barre + icons) |
+| 34 | (bonus answer) | Reused bonus answer scene with conditional routing |
+| 53 | Fin Perdu | Game over scene (score <= 0) |
+
+### Game variables to watch
+- `sacados` — backpack acquired (0/1)
+- `score` — player score (starts 0, ±10 per bonus, -25 wrong answers)
+- `calc`, `telephone`, `trans` — tools acquired
+- `fiole` — country fioles collected (0-12)
+- `bonus1`-`bonus9` — bonus question state (0=unseen, 1=seen, 2=answered)
+- Country vars (`france`, `allemagne`, etc.) — visited state
+
+## VNP Config format
+```ini
+[GENERAL]
+DATFILE=couleurs1.vnd
+[DIRECTORY]
+IMG24=img24\
+IMG8=img8\
+WAV=digit\
+AVI=movie\
+TXT=html\
+```
+
+## Conversion notes
+- **AVI→WebM**: All 392 AVI files (Cinepak codec) converted with ffmpeg:
+  `ffmpeg -i input.avi -c:v libvpx -b:v 1M -c:a libvorbis output.webm`
+- **BMP filenames**: 3 files with accented chars were renamed (hélico.bmp, épice.bmp)
+- **HTM encoding**: All .htm files are ISO-8859-1, fetched with `TextDecoder('iso-8859-1')`
+- **Scene indexing**: VND uses 1-based, JavaScript uses 0-based internally

@@ -8,188 +8,89 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import {
   VNEngine,
   createVNEngine,
-  VNEngineOptions,
-  VNEngineCallbacks,
   EngineState,
-  VNProjectInfo,
-  VNScene,
-  VNHotspot,
-  VNEvent,
 } from '../engine';
-import { SceneEvent } from '../engine/VNSceneManager';
+import type { VNEngineOptions } from '../engine/VNEngine';
+import type { VNDFile, VNSceneRaw } from '../types/vn.types';
 
-export interface UseVNEngineOptions extends Omit<VNEngineOptions, 'canvas'> {
+export interface UseVNEngineOptions {
+  basePath?: string;
   autoStart?: boolean;
+  debug?: boolean;
 }
 
 export interface UseVNEngineResult {
-  // Référence du canvas
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-
-  // État
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   state: EngineState;
   isLoading: boolean;
-  isPlaying: boolean;
+  isRunning: boolean;
   isPaused: boolean;
   error: Error | null;
-
-  // Projet et scène
-  project: VNProjectInfo | null;
-  currentScene: VNScene | null;
+  project: VNDFile | null;
+  currentScene: VNSceneRaw | null;
   currentSceneIndex: number;
-
-  // Hotspot
-  hoveredHotspot: VNHotspot | null;
-
-  // Curseur
-  cursor: string;
-
-  // Variables
-  getVariable: (name: string) => number;
-  setVariable: (name: string, value: number) => void;
-
-  // Contrôles
-  loadProject: (project: VNProjectInfo) => Promise<void>;
-  start: () => Promise<void>;
+  loadVND: (buffer: ArrayBuffer, fileName?: string) => Promise<VNDFile>;
+  goToScene: (index: number) => void;
+  goToSceneByName: (name: string) => void;
   pause: () => void;
   resume: () => void;
-  stop: () => void;
-
-  // Navigation
-  goToScene: (index: number) => Promise<void>;
-  navigateForward: () => Promise<void>;
-  navigateBackward: () => Promise<void>;
-  navigateLeft: () => Promise<void>;
-  navigateRight: () => Promise<void>;
-
-  // Sauvegarde
-  saveState: () => object;
-  loadState: (state: object) => Promise<void>;
-
-  // Accès direct au moteur
+  reset: () => void;
+  getVariable: (name: string) => number;
+  setVariable: (name: string, value: number) => void;
   engine: VNEngine | null;
 }
 
 export function useVNEngine(options: UseVNEngineOptions = {}): UseVNEngineResult {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<VNEngine | null>(null);
 
-  // État
-  const [state, setState] = useState<EngineState>(EngineState.UNINITIALIZED);
+  const [state, setState] = useState<EngineState>(EngineState.IDLE);
   const [error, setError] = useState<Error | null>(null);
-  const [project, setProject] = useState<VNProjectInfo | null>(null);
-  const [currentScene, setCurrentScene] = useState<VNScene | null>(null);
+  const [project, setProject] = useState<VNDFile | null>(null);
+  const [currentScene, setCurrentScene] = useState<VNSceneRaw | null>(null);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number>(-1);
-  const [hoveredHotspot, setHoveredHotspot] = useState<VNHotspot | null>(null);
-  const [cursor, setCursor] = useState<string>('default');
 
   // Initialisation du moteur
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const engineOptions: VNEngineOptions = {
+      canvas: canvasRef.current ?? undefined,
+      basePath: options.basePath,
+      autoStart: options.autoStart,
+      debug: options.debug,
+    };
 
-    // Créer le moteur
-    const engine = createVNEngine({
-      canvas: canvasRef.current,
-      baseUrl: options.baseUrl,
-      width: options.width ?? 800,
-      height: options.height ?? 600,
-      showHotspots: options.showHotspots,
-      smoothZoom: options.smoothZoom,
-      smoothScroll: options.smoothScroll,
-      voicesEnabled: options.voicesEnabled,
-      musicEnabled: options.musicEnabled,
-      videosEnabled: options.videosEnabled,
-    });
-
-    // Configurer les callbacks
-    engine.setCallbacks({
-      onStateChange: (newState) => {
-        setState(newState);
+    const engine = createVNEngine(engineOptions, {
+      onStateChange: (newState) => setState(newState),
+      onSceneChange: (scene, index) => {
+        setCurrentScene(scene);
+        setCurrentSceneIndex(index);
       },
-      onSceneChange: (event) => {
-        if (event.type === 'enter') {
-          setCurrentScene(event.scene);
-          setCurrentSceneIndex(event.sceneIndex);
-        }
-      },
-      onError: (err) => {
-        setError(err);
-      },
-      onHotspotEnter: (hotspot) => {
-        setHoveredHotspot(hotspot);
-      },
-      onHotspotExit: () => {
-        setHoveredHotspot(null);
-      },
-      onCursorChange: (newCursor) => {
-        setCursor(newCursor);
-      },
+      onError: (err) => setError(err),
     });
 
     engineRef.current = engine;
-    setState(EngineState.READY);
 
-    // Nettoyage
     return () => {
-      engine.dispose();
+      engine.reset();
       engineRef.current = null;
     };
   }, []);
 
-  // Gestionnaires d'événements du canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
+  const loadVND = useCallback(async (buffer: ArrayBuffer, fileName?: string) => {
     const engine = engineRef.current;
-    if (!canvas || !engine) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      engine.handleClick(x, y);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      engine.handleMouseMove(x, y);
-    };
-
-    canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      canvas.removeEventListener('click', handleClick);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-    };
+    if (!engine) throw new Error('Engine not initialized');
+    setError(null);
+    const result = await engine.loadVND(buffer, fileName);
+    setProject(result);
+    return result;
   }, []);
 
-  // Appliquer le curseur
-  useEffect(() => {
-    if (canvasRef.current) {
-      canvasRef.current.style.cursor = cursor;
-    }
-  }, [cursor]);
+  const goToScene = useCallback((index: number) => {
+    engineRef.current?.goToScene(index);
+  }, []);
 
-  // Fonctions de contrôle
-  const loadProject = useCallback(async (proj: VNProjectInfo) => {
-    const engine = engineRef.current;
-    if (!engine) throw new Error('Engine not initialized');
-
-    setError(null);
-    await engine.loadProject(proj);
-    setProject(proj);
-
-    if (options.autoStart) {
-      await engine.start();
-    }
-  }, [options.autoStart]);
-
-  const start = useCallback(async () => {
-    const engine = engineRef.current;
-    if (!engine) throw new Error('Engine not initialized');
-    await engine.start();
+  const goToSceneByName = useCallback((name: string) => {
+    engineRef.current?.goToSceneByName(name);
   }, []);
 
   const pause = useCallback(() => {
@@ -200,79 +101,39 @@ export function useVNEngine(options: UseVNEngineOptions = {}): UseVNEngineResult
     engineRef.current?.resume();
   }, []);
 
-  const stop = useCallback(() => {
-    engineRef.current?.stop();
+  const reset = useCallback(() => {
+    engineRef.current?.reset();
     setCurrentScene(null);
     setCurrentSceneIndex(-1);
+    setProject(null);
   }, []);
 
-  // Navigation
-  const goToScene = useCallback(async (index: number) => {
-    const engine = engineRef.current;
-    if (!engine) return;
-    await engine.goToScene(index);
-  }, []);
-
-  const navigateForward = useCallback(async () => {
-    await engineRef.current?.navigateForward();
-  }, []);
-
-  const navigateBackward = useCallback(async () => {
-    await engineRef.current?.navigateBackward();
-  }, []);
-
-  const navigateLeft = useCallback(async () => {
-    await engineRef.current?.navigateLeft();
-  }, []);
-
-  const navigateRight = useCallback(async () => {
-    await engineRef.current?.navigateRight();
-  }, []);
-
-  // Variables
   const getVariable = useCallback((name: string): number => {
-    return engineRef.current?.variableStore.get(name) ?? 0;
+    return engineRef.current?.getVariableStore().get(name) ?? 0;
   }, []);
 
   const setVariable = useCallback((name: string, value: number) => {
-    engineRef.current?.variableStore.set(name, value);
-  }, []);
-
-  // Sauvegarde
-  const saveState = useCallback(() => {
-    return engineRef.current?.exportState() ?? {};
-  }, []);
-
-  const loadState = useCallback(async (savedState: object) => {
-    await engineRef.current?.importState(savedState as Parameters<VNEngine['importState']>[0]);
+    engineRef.current?.getVariableStore().set(name, value);
   }, []);
 
   return {
     canvasRef,
     state,
     isLoading: state === EngineState.LOADING,
-    isPlaying: state === EngineState.PLAYING,
+    isRunning: state === EngineState.RUNNING,
     isPaused: state === EngineState.PAUSED,
     error,
     project,
     currentScene,
     currentSceneIndex,
-    hoveredHotspot,
-    cursor,
-    getVariable,
-    setVariable,
-    loadProject,
-    start,
+    loadVND,
+    goToScene,
+    goToSceneByName,
     pause,
     resume,
-    stop,
-    goToScene,
-    navigateForward,
-    navigateBackward,
-    navigateLeft,
-    navigateRight,
-    saveState,
-    loadState,
+    reset,
+    getVariable,
+    setVariable,
     engine: engineRef.current,
   };
 }

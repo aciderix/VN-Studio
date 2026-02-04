@@ -9,14 +9,14 @@
  * Basé sur timernfx.cpp
  */
 
-import { VNCommand, VNEventType } from '../types/vn.types';
+import { VNCommandRaw } from '../types/vn.types';
 import { VNCommandProcessor } from './VNCommandProcessor';
 
 // État d'un timer
 export interface TimerState {
   id: string;
   interval: number;        // Intervalle en millisecondes
-  commands: VNCommand[];   // Commandes à exécuter
+  commands: VNCommandRaw[];   // Commandes à exécuter
   isRunning: boolean;
   isPaused: boolean;
   startTime: number;       // Timestamp de démarrage
@@ -76,7 +76,7 @@ export class VNTimerManager {
    * Démarre un timer
    * Reproduit TIMERSTART command
    */
-  startTimer(id: string, interval: number, commands: VNCommand[]): void {
+  startTimer(id: string, interval: number, commands: VNCommandRaw[]): void {
     // Arrêter le timer existant avec le même ID
     if (this.timers.has(id)) {
       this.stopTimer(id);
@@ -254,7 +254,7 @@ export class VNTimerManager {
   exportState(): Array<{
     id: string;
     interval: number;
-    commands: VNCommand[];
+    commands: VNCommandRaw[];
     tickCount: number;
   }> {
     return Array.from(this.timers.values())
@@ -274,7 +274,7 @@ export class VNTimerManager {
     states: Array<{
       id: string;
       interval: number;
-      commands: VNCommand[];
+      commands: VNCommandRaw[];
       tickCount: number;
     }>
   ): void {

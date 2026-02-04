@@ -1,0 +1,3 @@
+            ; XREFS(49)
+/ 6: sub.bds52t.dll__ipstream_readWord_qv ();
+\           0x00439186      ff25785b4500   jmp dword [sym.imp.bds52t.dll__ipstream_readWord_qv] ; 0x455b78 ; "^\x1e\x05"

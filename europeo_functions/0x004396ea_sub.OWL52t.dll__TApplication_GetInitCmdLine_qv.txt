@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004010f9 @ +0xe6(x)
+/ 6: sub.OWL52t.dll__TApplication_GetInitCmdLine_qv ();
+\           0x004396ea      ff25185f4500   jmp dword [sym.imp.OWL52t.dll__TApplication_GetInitCmdLine_qv] ; 0x455f18 ; "z;\x05"

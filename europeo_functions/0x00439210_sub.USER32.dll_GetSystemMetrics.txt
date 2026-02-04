@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x0042689d  CALL 0x004268b9  CALL 0x0042dad1  
+            ; XREFS: CALL 0x0042dae3  CALL 0x0042efc6  CALL 0x0042efe1  
+            ; XREFS: CALL 0x0042f006  CALL 0x0042f017  CALL 0x0042f0ea  
+            ; XREFS: CALL 0x0042f105  CALL 0x00436999  CALL 0x004369ad  
+/ 6: int sub.USER32.dll_GetSystemMetrics (int nIndex);
+\           0x00439210      ff25d85b4500   jmp dword [sym.imp.USER32.dll_GetSystemMetrics] ; 0x455bd8

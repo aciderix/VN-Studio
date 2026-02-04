@@ -1,0 +1,77 @@
+            ; CALL XREF from fcn.004280ea @ 0x42812a(x)
+/ 221: fcn.00403eee (HWND hwnd, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(5:sp[0x8..0x30])
+|           0x00403eee      55             push ebp
+|           0x00403eef      8bec           mov ebp, esp
+|           0x00403ef1      83c4d4         add esp, 0xffffffd4
+|           0x00403ef4      53             push ebx
+|           0x00403ef5      8b5d0c         mov ebx, dword [arg_ch]
+|           0x00403ef8      b884a14300     mov eax, 0x43a184
+|           0x00403efd      e816f7ffff     call fcn.00403618
+|           0x00403f02      85db           test ebx, ebx
+|       ,=< 0x00403f04      0f8582000000   jne 0x403f8c
+|       |   0x00403f0a      8d55d4         lea edx, [var_2ch]
+|       |   0x00403f0d      52             push edx
+|       |   0x00403f0e      6a00           push 0
+|       |   0x00403f10      6a00           push 0
+|       |   0x00403f12      6a00           push 0
+|       |   0x00403f14      6a01           push 1                      ; 1
+|       |   0x00403f16      68e03b4000     push 0x403be0
+|       |   0x00403f1b      6a00           push 0
+|       |   0x00403f1d      66c745e40800   mov word [var_1ch], 8
+|       |   0x00403f23      6a2e           push 0x2e                   ; '.' ; 46
+|       |   0x00403f25      68c3a84300     push 0x43a8c3               ; "toolsfct.cpp"
+|       |   0x00403f2a      68bea84300     push 0x43a8be               ; "path"
+|       |   0x00403f2f      68d0a84300     push 0x43a8d0               ; "Precondition"
+|       |   0x00403f34      8d4dfc         lea ecx, [var_4h]
+|       |   0x00403f37      51             push ecx
+|       |   0x00403f38      e8d34f0300     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|       |   0x00403f3d      83c414         add esp, 0x14
+|       |   0x00403f40      8d45fc         lea eax, [var_4h]
+|       |   0x00403f43      50             push eax
+|       |   0x00403f44      ff45f0         inc dword [var_10h]
+|       |   0x00403f47      8d55f8         lea edx, [var_8h]
+|       |   0x00403f4a      52             push edx
+|       |   0x00403f4b      e8944e0300     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|       |   0x00403f50      83c408         add esp, 8
+|       |   0x00403f53      ff45f0         inc dword [var_10h]
+|       |   0x00403f56      66c745e41400   mov word [var_1ch], 0x14    ; 20
+|       |   0x00403f5c      ff4df0         dec dword [var_10h]
+|       |   0x00403f5f      6a02           push 2                      ; 2
+|       |   0x00403f61      8d4dfc         lea ecx, [var_4h]
+|       |   0x00403f64      51             push ecx
+|       |   0x00403f65      e8fa4f0300     call sub.cw3230mt.DLL__string__bdtr_qv
+|       |   0x00403f6a      83c408         add esp, 8
+|       |   0x00403f6d      66c745e40800   mov word [var_1ch], 8
+|       |   0x00403f73      8345f002       add dword [var_10h], 2
+|       |   0x00403f77      8345f003       add dword [var_10h], 3
+|       |   0x00403f7b      8d45f8         lea eax, [var_8h]
+|       |   0x00403f7e      50             push eax
+|       |   0x00403f7f      68883b4000     push 0x403b88
+|       |   0x00403f84      e8214f0300     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|       |   0x00403f89      83c424         add esp, 0x24
+|       |   ; CODE XREF from fcn.00403eee @ 0x403f04(x)
+|       `-> 0x00403f8c      803b00         cmp byte [ebx], 0
+|       ,=< 0x00403f8f      750e           jne 0x403f9f
+|       |   0x00403f91      33c0           xor eax, eax
+|       |   0x00403f93      8b55d4         mov edx, dword [var_2ch]
+|       |   0x00403f96      6489150000..   mov dword fs:[0], edx
+|      ,==< 0x00403f9d      eb27           jmp 0x403fc6
+|      ||   ; CODE XREF from fcn.00403eee @ 0x403f8f(x)
+|      |`-> 0x00403f9f      6a01           push 1                      ; 1
+|      |    0x00403fa1      6a00           push 0
+|      |    0x00403fa3      6a00           push 0
+|      |    0x00403fa5      53             push ebx                    ; LPCSTR lpFile
+|      |    0x00403fa6      68dda84300     push 0x43a8dd               ; "open" ; LPCSTR lpOperation
+|      |    0x00403fab      ff7508         push dword [hwnd]           ; HWND hwnd
+|      |    0x00403fae      e8b9500300     call sub.SHELL32.dll_ShellExecuteA ; HINSTANCE ShellExecuteA(HWND hwnd, LPCSTR lpOperation, LPCSTR lpFile, LPCSTR lpParameters, LPCSTR lpDirectory, INT nShowCmd)
+|      |    0x00403fb3      83f820         cmp eax, 0x20               ; 32
+|      |    0x00403fb6      0f97c0         seta al
+|      |    0x00403fb9      83e001         and eax, 1
+|      |    0x00403fbc      8b55d4         mov edx, dword [var_2ch]
+|      |    0x00403fbf      6489150000..   mov dword fs:[0], edx
+|      |    ; CODE XREF from fcn.00403eee @ 0x403f9d(x)
+|      `--> 0x00403fc6      5b             pop ebx
+|           0x00403fc7      8be5           mov esp, ebp
+|           0x00403fc9      5d             pop ebp
+\           0x00403fca      c3             ret

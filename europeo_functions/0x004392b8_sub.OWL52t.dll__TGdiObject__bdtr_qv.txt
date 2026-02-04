@@ -1,0 +1,9 @@
+            ; XREFS: CALL 0x0041d3df  CALL 0x0041d479  CALL 0x0041dfe3  
+            ; XREFS: CALL 0x0041e916  CALL 0x004204a6  CALL 0x00421184  
+            ; XREFS: CALL 0x00424ce1  CALL 0x00424d21  CALL 0x00424d99  
+            ; XREFS: CALL 0x00424f20  CALL 0x00424f62  CALL 0x00425041  
+            ; XREFS: CALL 0x00426e93  CALL 0x004303cc  CALL 0x00432067  
+            ; XREFS: CALL 0x004343e2  CALL 0x0043448e  CALL 0x004352a3  
+            ; XREFS: CALL 0x00435308  
+/ 6: sub.OWL52t.dll__TGdiObject__bdtr_qv ();
+\           0x004392b8      ff254c5c4500   jmp dword [sym.imp.OWL52t.dll__TGdiObject__bdtr_qv] ; 0x455c4c

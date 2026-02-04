@@ -1,0 +1,65 @@
+            ; XREFS: CALL 0x00404ed1  CALL 0x00404f20  CALL 0x00404f7e  
+            ; XREFS: CALL 0x0041ac00  CALL 0x0041ac2e  CALL 0x0041ac5e  
+            ; XREFS: CALL 0x0041ac98  
+/ 157: fcn.00404e29 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(4:sp[0x8..0x2c])
+|           0x00404e29      55             push ebp
+|           0x00404e2a      8bec           mov ebp, esp
+|           0x00404e2c      83c4d8         add esp, 0xffffffd8
+|           0x00404e2f      53             push ebx
+|           0x00404e30      8b5d08         mov ebx, dword [arg_8h]
+|           0x00404e33      b804a84300     mov eax, 0x43a804
+|           0x00404e38      e8dbe7ffff     call fcn.00403618
+|           0x00404e3d      85db           test ebx, ebx
+|       ,=< 0x00404e3f      7476           je 0x404eb7
+|       |   0x00404e41      66c745e80800   mov word [var_18h], 8
+|       |   0x00404e47      8d55fc         lea edx, [var_4h]
+|       |   0x00404e4a      52             push edx
+|       |   0x00404e4b      e872400300     call sub.cw3230mt.DLL__string__bctr_qv
+|       |   0x00404e50      59             pop ecx
+|       |   0x00404e51      ff45f4         inc dword [var_ch]
+|       |   0x00404e54      66c745e81400   mov word [var_18h], 0x14    ; 20
+|       |   0x00404e5a      8d4dfc         lea ecx, [var_4h]
+|       |   0x00404e5d      51             push ecx
+|       |   0x00404e5e      6a65           push 0x65                   ; 'e' ; 101
+|       |   0x00404e60      e83dfeffff     call fcn.00404ca2
+|       |   0x00404e65      83c408         add esp, 8
+|       |   0x00404e68      6a10           push 0x10                   ; 16 ; UINT uType
+|       |   0x00404e6a      e8cb430300     call sub.USER32.dll_MessageBeep ; BOOL MessageBeep(UINT uType)
+|       |   0x00404e6f      8b45fc         mov eax, dword [var_4h]
+|       |   0x00404e72      83780600       cmp dword [eax + 6], 0
+|      ,==< 0x00404e76      7408           je 0x404e80
+|      ||   0x00404e78      8b55fc         mov edx, dword [var_4h]
+|      ||   0x00404e7b      8b4202         mov eax, dword [edx + 2]
+|     ,===< 0x00404e7e      eb02           jmp 0x404e82
+|     |||   ; CODE XREF from fcn.00404e29 @ 0x404e76(x)
+|     |`--> 0x00404e80      33c0           xor eax, eax
+|     | |   ; CODE XREF from fcn.00404e29 @ 0x404e7e(x)
+|     `---> 0x00404e82      8bd3           mov edx, ebx
+|       |   0x00404e84      833df0a944..   cmp dword [0x44a9f0], 0     ; [0x44a9f0:4]=0
+|      ,==< 0x00404e8b      740b           je 0x404e98
+|      ||   0x00404e8d      8b0df0a94400   mov ecx, dword [0x44a9f0]   ; [0x44a9f0:4]=0
+|      ||   0x00404e93      8b490c         mov ecx, dword [ecx + 0xc]
+|     ,===< 0x00404e96      eb02           jmp 0x404e9a
+|     |||   ; CODE XREF from fcn.00404e29 @ 0x404e8b(x)
+|     |`--> 0x00404e98      33c9           xor ecx, ecx
+|     | |   ; CODE XREF from fcn.00404e29 @ 0x404e96(x)
+|     `---> 0x00404e9a      6a00           push 0
+|       |   0x00404e9c      6a10           push 0x10                   ; 16 ; UINT uType
+|       |   0x00404e9e      50             push eax                    ; LPCSTR lpCaption
+|       |   0x00404e9f      52             push edx                    ; LPCSTR lpText
+|       |   0x00404ea0      51             push ecx                    ; HWND hWnd
+|       |   0x00404ea1      e888430300     call sub.USER32.dll_MessageBoxExA ; int MessageBoxExA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, WORD wLanguageId)
+|       |   0x00404ea6      ff4df4         dec dword [var_ch]
+|       |   0x00404ea9      6a02           push 2                      ; 2
+|       |   0x00404eab      8d45fc         lea eax, [var_4h]
+|       |   0x00404eae      50             push eax
+|       |   0x00404eaf      e8b0400300     call sub.cw3230mt.DLL__string__bdtr_qv
+|       |   0x00404eb4      83c408         add esp, 8
+|       |   ; CODE XREF from fcn.00404e29 @ 0x404e3f(x)
+|       `-> 0x00404eb7      8b55d8         mov edx, dword [var_28h]
+|           0x00404eba      6489150000..   mov dword fs:[0], edx
+|           0x00404ec1      5b             pop ebx
+|           0x00404ec2      8be5           mov esp, ebp
+|           0x00404ec4      5d             pop ebp
+\           0x00404ec5      c3             ret

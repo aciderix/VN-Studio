@@ -1,0 +1,27 @@
+            ; CALL XREF from fcn.0041a221 @ +0x382(x)
+/ 55: fcn.00418f0f (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00418f0f      55             push ebp
+|           0x00418f10      8bec           mov ebp, esp
+|           0x00418f12      53             push ebx
+|           0x00418f13      8b5d08         mov ebx, dword [arg_8h]
+|           0x00418f16      85db           test ebx, ebx
+|       ,=< 0x00418f18      7429           je 0x418f43
+|       |   0x00418f1a      c703c8364400   mov dword [ebx], 0x4436c8   ; [0x4436c8:4]=0x418f0f fcn.00418f0f
+|       |   0x00418f20      837b0400       cmp dword [ebx + 4], 0
+|       |   0x00418f24      0f95c0         setne al
+|       |   0x00418f27      83e001         and eax, 1
+|       |   0x00418f2a      84c0           test al, al
+|      ,==< 0x00418f2c      7408           je 0x418f36
+|      ||   0x00418f2e      ff7304         push dword [ebx + 4]
+|      ||   0x00418f31      e816090200     call sub.WINMM.dll_timeEndPeriod
+|      ||   ; CODE XREF from fcn.00418f0f @ 0x418f2c(x)
+|      `--> 0x00418f36      f6450c01       test byte [arg_ch], 1
+|      ,==< 0x00418f3a      7407           je 0x418f43
+|      ||   0x00418f3c      53             push ebx
+|      ||   0x00418f3d      e8d4ff0100     call sub.cw3230mt.DLL___bdele_qpv
+|      ||   0x00418f42      59             pop ecx
+|      ||   ; CODE XREFS from fcn.00418f0f @ 0x418f18(x), 0x418f3a(x)
+|      ``-> 0x00418f43      5b             pop ebx
+|           0x00418f44      5d             pop ebp
+\           0x00418f45      c3             ret

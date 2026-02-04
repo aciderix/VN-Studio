@@ -1,0 +1,48 @@
+            ; CALL XREF from fcn.00415093 @ 0x4150cb(x)
+            ; CALL XREF from fcn.0041526b @ 0x4152a3(x)
+            ; CALL XREF from fcn.00415560 @ 0x415575(x)
+            ; CALL XREF from fcn.004169c5 @ +0x34f(x)
+/ 117: fcn.00414a70 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(4:sp[0x8..0x2c])
+|           0x00414a70      55             push ebp
+|           0x00414a71      8bec           mov ebp, esp
+|           0x00414a73      83c4d8         add esp, 0xffffffd8
+|           0x00414a76      53             push ebx
+|           0x00414a77      8b5d08         mov ebx, dword [arg_8h]
+|           0x00414a7a      b860184400     mov eax, 0x441860           ; '`\x18D'
+|           0x00414a7f      e894ebfeff     call fcn.00403618
+|           0x00414a84      66c745e80800   mov word [var_18h], 8
+|           0x00414a8a      685a294400     push 0x44295a               ; 'Z)D'
+|           0x00414a8f      8d55fc         lea edx, [var_4h]
+|           0x00414a92      52             push edx
+|           0x00414a93      e8d6430200     call sub.cw3230mt.DLL__string__bctr_qpxc
+|           0x00414a98      83c408         add esp, 8
+|           0x00414a9b      ff45f4         inc dword [var_ch]
+|           0x00414a9e      6aff           push 0xffffffffffffffff
+|           0x00414aa0      6a00           push 0
+|           0x00414aa2      8d4dfc         lea ecx, [var_4h]
+|           0x00414aa5      51             push ecx
+|           0x00414aa6      8d4308         lea eax, [ebx + 8]
+|           0x00414aa9      50             push eax
+|           0x00414aaa      e855440200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00414aaf      83c410         add esp, 0x10
+|           0x00414ab2      ff4df4         dec dword [var_ch]
+|           0x00414ab5      6a02           push 2                      ; 2
+|           0x00414ab7      8d55fc         lea edx, [var_4h]
+|           0x00414aba      52             push edx
+|           0x00414abb      e8a4440200     call sub.cw3230mt.DLL__string__bdtr_qv
+|           0x00414ac0      83c408         add esp, 8
+|           0x00414ac3      33c9           xor ecx, ecx
+|           0x00414ac5      894b10         mov dword [ebx + 0x10], ecx
+|           0x00414ac8      33c0           xor eax, eax
+|           0x00414aca      894314         mov dword [ebx + 0x14], eax
+|           0x00414acd      33d2           xor edx, edx
+|           0x00414acf      89530c         mov dword [ebx + 0xc], edx
+|           0x00414ad2      33c9           xor ecx, ecx
+|           0x00414ad4      894b04         mov dword [ebx + 4], ecx
+|           0x00414ad7      8b45d8         mov eax, dword [var_28h]
+|           0x00414ada      64a300000000   mov dword fs:[0], eax
+|           0x00414ae0      5b             pop ebx
+|           0x00414ae1      8be5           mov esp, ebp
+|           0x00414ae3      5d             pop ebp
+\           0x00414ae4      c3             ret

@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.004200cf @ 0x420435(x), 0x420448(x)
+/ 6: uint sub.GDI32.dll_SetTextAlign (HDC hdc, _TextAlignmentOptions fMode);
+\           0x004397bc      ff25a85f4500   jmp dword [sym.imp.GDI32.dll_SetTextAlign] ; 0x455fa8

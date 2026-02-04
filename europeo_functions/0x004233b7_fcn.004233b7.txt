@@ -1,0 +1,40 @@
+            ; CALL XREFS from fcn.004200cf @ 0x421113(x), 0x421480(x)
+/ 78: fcn.004233b7 (int32_t arg_8h, signed int arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x004233b7      55             push ebp
+|           0x004233b8      8bec           mov ebp, esp
+|           0x004233ba      53             push ebx
+|           0x004233bb      56             push esi
+|           0x004233bc      57             push edi
+|           0x004233bd      8b5d08         mov ebx, dword [arg_8h]
+|           0x004233c0      8b430d         mov eax, dword [ebx + 0xd]
+|           0x004233c3      3b4309         cmp eax, dword [ebx + 9]
+|       ,=< 0x004233c6      7218           jb 0x4233e0
+|       |   0x004233c8      6a00           push 0
+|       |   0x004233ca      8b530d         mov edx, dword [ebx + 0xd]
+|       |   0x004233cd      42             inc edx
+|       |   0x004233ce      52             push edx                    ; int32_t arg_ch
+|       |   0x004233cf      53             push ebx                    ; int32_t arg_8h
+|       |   0x004233d0      e8a8000000     call fcn.0042347d
+|       |   0x004233d5      83c40c         add esp, 0xc
+|       |   0x004233d8      85c0           test eax, eax
+|      ,==< 0x004233da      7504           jne 0x4233e0
+|      ||   0x004233dc      33c0           xor eax, eax
+|     ,===< 0x004233de      eb20           jmp 0x423400
+|     |||   ; CODE XREFS from fcn.004233b7 @ 0x4233c6(x), 0x4233da(x)
+|     |``-> 0x004233e0      8b530d         mov edx, dword [ebx + 0xd]
+|     |     0x004233e3      ff430d         inc dword [ebx + 0xd]
+|     |     0x004233e6      8d0c92         lea ecx, [edx + edx*4]
+|     |     0x004233e9      8b4305         mov eax, dword [ebx + 5]
+|     |     0x004233ec      8b550c         mov edx, dword [arg_ch]
+|     |     0x004233ef      8d3c88         lea edi, [eax + ecx*4]
+|     |     0x004233f2      8bf2           mov esi, edx
+|     |     0x004233f4      b905000000     mov ecx, 5
+|     |     0x004233f9      f3a5           rep movsd dword es:[edi], dword [esi]
+|     |     0x004233fb      b801000000     mov eax, 1
+|     |     ; CODE XREF from fcn.004233b7 @ 0x4233de(x)
+|     `---> 0x00423400      5f             pop edi
+|           0x00423401      5e             pop esi
+|           0x00423402      5b             pop ebx
+|           0x00423403      5d             pop ebp
+\           0x00423404      c3             ret

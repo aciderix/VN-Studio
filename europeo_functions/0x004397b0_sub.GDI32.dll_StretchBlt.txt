@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00419750 @ 0x419a12(x)
+            ; CALL XREFS from fcn.0041db36 @ 0x41dcc4(x), 0x41dd51(x), 0x41de74(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x10e6(x)
+/ 6: bool sub.GDI32.dll_StretchBlt (HDC hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, HDC hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, _TernaryDrawMode dwRop);
+\           0x004397b0      ff25a05f4500   jmp dword [sym.imp.GDI32.dll_StretchBlt] ; 0x455fa0

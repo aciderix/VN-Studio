@@ -1,0 +1,73 @@
+            ; CALL XREF from fcn.00424ee4 @ 0x4250c1(x)
+            ; CALL XREFS from fcn.00434070 @ 0x4343b1(x), 0x435271(x)
+/ 148: fcn.0041cc49 (int32_t arg_8h, HGDIOBJ hgdiobj);
+| `- args(sp[0x4..0x8]) vars(3:sp[0x6..0xa])
+|           0x0041cc49      55             push ebp
+|           0x0041cc4a      8bec           mov ebp, esp
+|           0x0041cc4c      83c4f8         add esp, 0xfffffff8
+|           0x0041cc4f      53             push ebx
+|           0x0041cc50      56             push esi
+|           0x0041cc51      8b750c         mov esi, dword [hgdiobj]
+|           0x0041cc54      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041cc57      8d45fe         lea eax, [lpvObject]
+|           0x0041cc5a      50             push eax                    ; LPVOID lpvObject
+|           0x0041cc5b      6a02           push 2                      ; 2 ; int cbBuffer
+|           0x0041cc5d      ff36           push dword [esi]            ; HGDIOBJ hgdiobj
+|           0x0041cc5f      e8accb0100     call sub.GDI32.dll_GetObjectA ; long GetObjectA(HGDIOBJ hgdiobj, int cbBuffer, LPVOID lpvObject)
+|           0x0041cc64      85c0           test eax, eax
+|       ,=< 0x0041cc66      7406           je 0x41cc6e
+|       |   0x0041cc68      668b55fe       mov dx, word [lpvObject]
+|      ,==< 0x0041cc6c      eb02           jmp 0x41cc70
+|      ||   ; CODE XREF from fcn.0041cc49 @ 0x41cc66(x)
+|      |`-> 0x0041cc6e      33d2           xor edx, edx
+|      |    ; CODE XREF from fcn.0041cc49 @ 0x41cc6c(x)
+|      `--> 0x0041cc70      663b5308       cmp dx, word [ebx + 8]
+|       ,=< 0x0041cc74      7637           jbe 0x41ccad
+|       |   0x0041cc76      ff7304         push dword [ebx + 4]
+|       |   0x0041cc79      e804c30100     call sub.cw3230mt.DLL___bdla_qpv
+|       |   0x0041cc7e      59             pop ecx
+|       |   0x0041cc7f      8d45fc         lea eax, [var_4h]
+|       |   0x0041cc82      50             push eax                    ; LPVOID lpvObject
+|       |   0x0041cc83      6a02           push 2                      ; 2 ; int cbBuffer
+|       |   0x0041cc85      ff36           push dword [esi]            ; HGDIOBJ hgdiobj
+|       |   0x0041cc87      e884cb0100     call sub.GDI32.dll_GetObjectA ; long GetObjectA(HGDIOBJ hgdiobj, int cbBuffer, LPVOID lpvObject)
+|       |   0x0041cc8c      85c0           test eax, eax
+|      ,==< 0x0041cc8e      7406           je 0x41cc96
+|      ||   0x0041cc90      668b4dfc       mov cx, word [var_4h]
+|     ,===< 0x0041cc94      eb02           jmp 0x41cc98
+|     |||   ; CODE XREF from fcn.0041cc49 @ 0x41cc8e(x)
+|     |`--> 0x0041cc96      33c9           xor ecx, ecx
+|     | |   ; CODE XREF from fcn.0041cc49 @ 0x41cc94(x)
+|     `---> 0x0041cc98      66894b08       mov word [ebx + 8], cx
+|       |   0x0041cc9c      0fb74308       movzx eax, word [ebx + 8]
+|       |   0x0041cca0      c1e002         shl eax, 2
+|       |   0x0041cca3      50             push eax
+|       |   0x0041cca4      e8a7c10100     call sub.cw3230mt.DLL___bnwa_qui
+|       |   0x0041cca9      59             pop ecx
+|       |   0x0041ccaa      894304         mov dword [ebx + 4], eax
+|       |   ; CODE XREF from fcn.0041cc49 @ 0x41cc74(x)
+|       `-> 0x0041ccad      8b5b04         mov ebx, dword [ebx + 4]
+|           0x0041ccb0      8d55fa         lea edx, [var_6h]
+|           0x0041ccb3      52             push edx                    ; LPVOID lpvObject
+|           0x0041ccb4      6a02           push 2                      ; 2 ; int cbBuffer
+|           0x0041ccb6      ff36           push dword [esi]            ; HGDIOBJ hgdiobj
+|           0x0041ccb8      e853cb0100     call sub.GDI32.dll_GetObjectA ; long GetObjectA(HGDIOBJ hgdiobj, int cbBuffer, LPVOID lpvObject)
+|           0x0041ccbd      85c0           test eax, eax
+|       ,=< 0x0041ccbf      7406           je 0x41ccc7
+|       |   0x0041ccc1      668b45fa       mov ax, word [var_6h]
+|      ,==< 0x0041ccc5      eb02           jmp 0x41ccc9
+|      ||   ; CODE XREF from fcn.0041cc49 @ 0x41ccbf(x)
+|      |`-> 0x0041ccc7      33c0           xor eax, eax
+|      |    ; CODE XREF from fcn.0041cc49 @ 0x41ccc5(x)
+|      `--> 0x0041ccc9      53             push ebx
+|           0x0041ccca      0fb7d0         movzx edx, ax
+|           0x0041cccd      52             push edx
+|           0x0041ccce      6a00           push 0
+|           0x0041ccd0      ff36           push dword [esi]            ; HPALETTE hpal
+|           0x0041ccd2      e833cb0100     call sub.GDI32.dll_GetPaletteEntries ; dword GetPaletteEntries(HPALETTE hpal, UINT iStartIndex, UINT nEntries, LPPALETTEENTRY lppe)
+|           0x0041ccd7      5e             pop esi
+|           0x0041ccd8      5b             pop ebx
+|           0x0041ccd9      59             pop ecx
+|           0x0041ccda      59             pop ecx
+|           0x0041ccdb      5d             pop ebp
+\           0x0041ccdc      c3             ret

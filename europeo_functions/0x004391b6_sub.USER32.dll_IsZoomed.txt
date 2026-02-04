@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004266f0 @ 0x42679f(x)
+/ 6: BOOL sub.USER32.dll_IsZoomed (HWND hWnd);
+\           0x004391b6      ff259c5b4500   jmp dword [sym.imp.USER32.dll_IsZoomed] ; 0x455b9c

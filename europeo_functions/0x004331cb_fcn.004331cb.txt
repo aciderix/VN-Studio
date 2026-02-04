@@ -1,0 +1,45 @@
+            ; CALL XREF from fcn.0042d8b6 @ 0x42db6e(x)
+            ; CALL XREF from fcn.004335a4 @ 0x4335b7(x)
+/ 107: fcn.004331cb (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x004331cb      55             push ebp
+|           0x004331cc      8bec           mov ebp, esp
+|           0x004331ce      8b4508         mov eax, dword [arg_8h]
+|           0x004331d1      8d9028010000   lea edx, [eax + 0x128]
+|           0x004331d7      33c9           xor ecx, ecx
+|           0x004331d9      890a           mov dword [edx], ecx
+|           0x004331db      33c9           xor ecx, ecx
+|           0x004331dd      894a04         mov dword [edx + 4], ecx
+|           0x004331e0      33c9           xor ecx, ecx
+|           0x004331e2      894a08         mov dword [edx + 8], ecx
+|           0x004331e5      33c9           xor ecx, ecx
+|           0x004331e7      894a0c         mov dword [edx + 0xc], ecx
+|           0x004331ea      8d9038010000   lea edx, [eax + 0x138]
+|           0x004331f0      33c9           xor ecx, ecx
+|           0x004331f2      890a           mov dword [edx], ecx
+|           0x004331f4      33c9           xor ecx, ecx
+|           0x004331f6      894a04         mov dword [edx + 4], ecx
+|           0x004331f9      33c9           xor ecx, ecx
+|           0x004331fb      894a08         mov dword [edx + 8], ecx
+|           0x004331fe      33c9           xor ecx, ecx
+|           0x00433200      894a0c         mov dword [edx + 0xc], ecx
+|           0x00433203      8d9058010000   lea edx, [eax + 0x158]
+|           0x00433209      33c9           xor ecx, ecx
+|           0x0043320b      890a           mov dword [edx], ecx
+|           0x0043320d      33c9           xor ecx, ecx
+|           0x0043320f      894a04         mov dword [edx + 4], ecx
+|           0x00433212      33c9           xor ecx, ecx
+|           0x00433214      894a08         mov dword [edx + 8], ecx
+|           0x00433217      33c9           xor ecx, ecx
+|           0x00433219      894a0c         mov dword [edx + 0xc], ecx
+|           0x0043321c      0568010000     add eax, 0x168              ; 360
+|           0x00433221      33d2           xor edx, edx
+|           0x00433223      8910           mov dword [eax], edx
+|           0x00433225      33d2           xor edx, edx
+|           0x00433227      895004         mov dword [eax + 4], edx
+|           0x0043322a      33c9           xor ecx, ecx
+|           0x0043322c      894808         mov dword [eax + 8], ecx
+|           0x0043322f      33d2           xor edx, edx
+|           0x00433231      89500c         mov dword [eax + 0xc], edx
+|           0x00433234      5d             pop ebp
+\           0x00433235      c3             ret

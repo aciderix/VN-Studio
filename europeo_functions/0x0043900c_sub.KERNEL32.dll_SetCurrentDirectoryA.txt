@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0040402f @ 0x404086(x)
+            ; CALL XREF from fcn.0040411c @ 0x40417c(x)
+/ 6: BOOL sub.KERNEL32.dll_SetCurrentDirectoryA (LPCSTR lpPathName);
+\           0x0043900c      ff25745a4500   jmp dword [sym.imp.KERNEL32.dll_SetCurrentDirectoryA] ; 0x455a74

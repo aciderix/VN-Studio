@@ -1,0 +1,77 @@
+            ; CALL XREF from fcn.0040222e @ 0x402260(x)
+            ; CALL XREFS from fcn.004027b3 @ +0x52d(x), +0x7ce(x)
+            ; CALL XREF from fcn.00438675 @ 0x4386ad(x)
+/ 178: fcn.00401f16 (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h, int32_t arg_14h, uint32_t arg_18h);
+| `- args(sp[0x4..0x14]) vars(3:sp[0x18..0x2c])
+|           0x00401f16      55             push ebp
+|           0x00401f17      8bec           mov ebp, esp
+|           0x00401f19      83c4d8         add esp, 0xffffffd8
+|           0x00401f1c      53             push ebx
+|           0x00401f1d      56             push esi
+|           0x00401f1e      57             push edi
+|           0x00401f1f      8b7514         mov esi, dword [arg_14h]
+|           0x00401f22      8b5d0c         mov ebx, dword [arg_ch]
+|           0x00401f25      b86ae54400     mov eax, 0x44e56a
+|           0x00401f2a      e8e9160000     call fcn.00403618
+|           0x00401f2f      66c745ec0800   mov word [var_14h], 8
+|           0x00401f35      8b5508         mov edx, dword [arg_8h]
+|           0x00401f38      33c9           xor ecx, ecx
+|           0x00401f3a      890a           mov dword [edx], ecx
+|           0x00401f3c      6a00           push 0
+|           0x00401f3e      ff7510         push dword [arg_10h]
+|           0x00401f41      e822720300     call sub.bds52t.dll__strnewdup_qpxcui
+|           0x00401f46      8bf8           mov edi, eax
+|           0x00401f48      8b4508         mov eax, dword [arg_8h]
+|           0x00401f4b      83c408         add esp, 8
+|           0x00401f4e      897804         mov dword [eax + 4], edi
+|           0x00401f51      837d1800       cmp dword [arg_18h], 0
+|       ,=< 0x00401f55      751c           jne 0x401f73
+|       |   0x00401f57      8d55d8         lea edx, [var_28h]
+|       |   0x00401f5a      52             push edx
+|       |   0x00401f5b      ff7508         push dword [arg_8h]
+|       |   0x00401f5e      6a00           push 0
+|       |   0x00401f60      56             push esi
+|       |   0x00401f61      6a00           push 0
+|       |   0x00401f63      6847e84400     push 0x44e847
+|       |   0x00401f68      6a00           push 0
+|       |   0x00401f6a      57             push edi                    ; LPCSTR lpSubKey
+|       |   0x00401f6b      53             push ebx                    ; HKEY hKey
+|       |   0x00401f6c      e84d790300     call sub.ADVAPI32.dll_RegCreateKeyExA ; LSTATUS RegCreateKeyExA(HKEY hKey, LPCSTR lpSubKey, DWORD Reserved, LPSTR lpClass, DWORD dwOptions, REGSAM samDesired, const LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult, LPDWORD lpdwDisposition)
+|      ,==< 0x00401f71      eb12           jmp 0x401f85
+|      ||   ; CODE XREF from fcn.00401f16 @ 0x401f55(x)
+|      |`-> 0x00401f73      ff7508         push dword [arg_8h]
+|      |    0x00401f76      56             push esi
+|      |    0x00401f77      6a00           push 0
+|      |    0x00401f79      8b4d08         mov ecx, dword [arg_8h]
+|      |    0x00401f7c      ff7104         push dword [ecx + 4]        ; LPCSTR lpSubKey
+|      |    0x00401f7f      53             push ebx                    ; HKEY hKey
+|      |    0x00401f80      e821790300     call sub.ADVAPI32.dll_RegOpenKeyExA ; LSTATUS RegOpenKeyExA(HKEY hKey, LPCSTR lpSubKey, DWORD ulOptions, REGSAM samDesired, PHKEY phkResult)
+|      |    ; CODE XREF from fcn.00401f16 @ 0x401f71(x)
+|      `--> 0x00401f85      6a00           push 0
+|           0x00401f87      6a00           push 0
+|           0x00401f89      6a00           push 0
+|           0x00401f8b      6a00           push 0
+|           0x00401f8d      8b4508         mov eax, dword [arg_8h]
+|           0x00401f90      83c00c         add eax, 0xc                ; 12
+|           0x00401f93      50             push eax
+|           0x00401f94      6a00           push 0
+|           0x00401f96      6a00           push 0
+|           0x00401f98      8b5508         mov edx, dword [arg_8h]
+|           0x00401f9b      83c208         add edx, 8
+|           0x00401f9e      52             push edx
+|           0x00401f9f      6a00           push 0
+|           0x00401fa1      6a00           push 0
+|           0x00401fa3      ff7508         push dword [arg_8h]
+|           0x00401fa6      e8b1010000     call fcn.0040215c
+|           0x00401fab      83c42c         add esp, 0x2c
+|           0x00401fae      8b4d08         mov ecx, dword [arg_8h]
+|           0x00401fb1      c6411001       mov byte [ecx + 0x10], 1
+|           0x00401fb5      8b45dc         mov eax, dword [var_24h]
+|           0x00401fb8      64a300000000   mov dword fs:[0], eax
+|           0x00401fbe      8b4508         mov eax, dword [arg_8h]
+|           0x00401fc1      5f             pop edi
+|           0x00401fc2      5e             pop esi
+|           0x00401fc3      5b             pop ebx
+|           0x00401fc4      8be5           mov esp, ebp
+|           0x00401fc6      5d             pop ebp
+\           0x00401fc7      c3             ret

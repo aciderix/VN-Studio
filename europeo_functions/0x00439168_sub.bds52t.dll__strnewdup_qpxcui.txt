@@ -1,0 +1,8 @@
+            ; XREFS: CALL 0x00401f41  CALL 0x00402092  CALL 0x00407d80  
+            ; XREFS: CALL 0x004083e6  CALL 0x004085e4  CALL 0x00408873  
+            ; XREFS: CALL 0x00408a46  CALL 0x00408be4  CALL 0x00408f14  
+            ; XREFS: CALL 0x00409242  CALL 0x00409626  CALL 0x00409a9e  
+            ; XREFS: CALL 0x00409efb  CALL 0x0040a0f1  CALL 0x0040a333  
+            ; XREFS: CALL 0x0040ac29  CALL 0x0040af4a  CALL 0x0040b30b  
+/ 6: sub.bds52t.dll__strnewdup_qpxcui ();
+\           0x00439168      ff25645b4500   jmp dword [sym.imp.bds52t.dll__strnewdup_qpxcui] ; 0x455b64

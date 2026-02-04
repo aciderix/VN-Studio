@@ -1,0 +1,285 @@
+            ; CALL XREF from fcn.0043089a @ 0x430985(x)
+/ 802: fcn.00421b26 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(18:sp[0x8..0x6c])
+|           0x00421b26      55             push ebp
+|           0x00421b27      8bec           mov ebp, esp
+|           0x00421b29      83c498         add esp, 0xffffff98
+|           0x00421b2c      53             push ebx
+|           0x00421b2d      56             push esi
+|           0x00421b2e      57             push edi
+|           0x00421b2f      8b7d08         mov edi, dword [arg_8h]
+|           0x00421b32      8d5dbc         lea ebx, [var_44h]
+|           0x00421b35      bef4604400     mov esi, 0x4460f4
+|           0x00421b3a      b8a8554400     mov eax, 0x4455a8
+|           0x00421b3f      e8d41afeff     call fcn.00403618
+|           0x00421b44      8d471d         lea eax, [edi + 0x1d]
+|           0x00421b47      83c004         add eax, 4
+|           0x00421b4a      894598         mov dword [var_68h], eax
+|           0x00421b4d      50             push eax
+|           0x00421b4e      8b5001         mov edx, dword [eax + 1]
+|           0x00421b51      ff12           call dword [edx]
+|           0x00421b53      59             pop ecx
+|           0x00421b54      33c9           xor ecx, ecx
+|           0x00421b56      894da0         mov dword [var_60h], ecx
+|           0x00421b59      894d9c         mov dword [var_64h], ecx
+|           0x00421b5c      8945a4         mov dword [var_5ch], eax
+|       ,=< 0x00421b5f      e9c6020000     jmp 0x421e2a
+|       |   ; CODE XREF from fcn.00421b26 @ 0x421e30(x)
+|      .--> 0x00421b64      8b7d0c         mov edi, dword [arg_ch]
+|      :|   0x00421b67      8b459c         mov eax, dword [var_64h]
+|      :|   0x00421b6a      3b45a4         cmp eax, dword [var_5ch]
+|     ,===< 0x00421b6d      727c           jb 0x421beb
+|     |:|   0x00421b6f      53             push ebx
+|     |:|   0x00421b70      6a00           push 0
+|     |:|   0x00421b72      6a00           push 0
+|     |:|   0x00421b74      6a00           push 0
+|     |:|   0x00421b76      6a01           push 1                      ; 1
+|     |:|   0x00421b78      68e03b4000     push 0x403be0
+|     |:|   0x00421b7d      6a00           push 0
+|     |:|   0x00421b7f      683f010000     push 0x13f                  ; 319
+|     |:|   0x00421b84      8d960b050000   lea edx, [esi + 0x50b]
+|     |:|   0x00421b8a      52             push edx
+|     |:|   0x00421b8b      8d86ff040000   lea eax, [esi + 0x4ff]
+|     |:|   0x00421b91      50             push eax
+|     |:|   0x00421b92      8d962d050000   lea edx, [esi + 0x52d]
+|     |:|   0x00421b98      52             push edx
+|     |:|   0x00421b99      8d4dfc         lea ecx, [var_4h]
+|     |:|   0x00421b9c      51             push ecx
+|     |:|   0x00421b9d      e86e730100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|     |:|   0x00421ba2      83c414         add esp, 0x14
+|     |:|   0x00421ba5      8d45fc         lea eax, [var_4h]
+|     |:|   0x00421ba8      50             push eax
+|     |:|   0x00421ba9      ff431c         inc dword [ebx + 0x1c]
+|     |:|   0x00421bac      8d55f8         lea edx, [var_8h]
+|     |:|   0x00421baf      52             push edx
+|     |:|   0x00421bb0      e82f720100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|     |:|   0x00421bb5      83c408         add esp, 8
+|     |:|   0x00421bb8      ff431c         inc dword [ebx + 0x1c]
+|     |:|   0x00421bbb      66c743100c00   mov word [ebx + 0x10], 0xc  ; [0xc:2]=0xffff ; 12
+|     |:|   0x00421bc1      ff4b1c         dec dword [ebx + 0x1c]
+|     |:|   0x00421bc4      6a02           push 2                      ; 2
+|     |:|   0x00421bc6      8d4dfc         lea ecx, [var_4h]
+|     |:|   0x00421bc9      51             push ecx
+|     |:|   0x00421bca      e895730100     call sub.cw3230mt.DLL__string__bdtr_qv
+|     |:|   0x00421bcf      83c408         add esp, 8
+|     |:|   0x00421bd2      83431c02       add dword [ebx + 0x1c], 2
+|     |:|   0x00421bd6      83431c03       add dword [ebx + 0x1c], 3
+|     |:|   0x00421bda      8d45f8         lea eax, [var_8h]
+|     |:|   0x00421bdd      50             push eax
+|     |:|   0x00421bde      68883b4000     push 0x403b88
+|     |:|   0x00421be3      e8c2720100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|     |:|   0x00421be8      83c424         add esp, 0x24
+|     |:|   ; CODE XREF from fcn.00421b26 @ 0x421b6d(x)
+|     `---> 0x00421beb      8b559c         mov edx, dword [var_64h]
+|      :|   0x00421bee      8955b4         mov dword [var_4ch], edx
+|      :|   0x00421bf1      8b4d98         mov ecx, dword [var_68h]
+|      :|   0x00421bf4      894db0         mov dword [var_50h], ecx
+|      :|   0x00421bf7      8b45b0         mov eax, dword [var_50h]
+|      :|   0x00421bfa      83780900       cmp dword [eax + 9], 0
+|     ,===< 0x00421bfe      7614           jbe 0x421c14
+|     |:|   0x00421c00      8b55b0         mov edx, dword [var_50h]
+|     |:|   0x00421c03      837a0500       cmp dword [edx + 5], 0
+|    ,====< 0x00421c07      740b           je 0x421c14
+|    ||:|   0x00421c09      8b4db0         mov ecx, dword [var_50h]
+|    ||:|   0x00421c0c      8b4109         mov eax, dword [ecx + 9]
+|    ||:|   0x00421c0f      3b45b4         cmp eax, dword [var_4ch]
+|   ,=====< 0x00421c12      777c           ja 0x421c90
+|   |||:|   ; CODE XREFS from fcn.00421b26 @ 0x421bfe(x), 0x421c07(x)
+|   |``---> 0x00421c14      53             push ebx
+|   |  :|   0x00421c15      6a00           push 0
+|   |  :|   0x00421c17      6a00           push 0
+|   |  :|   0x00421c19      6a00           push 0
+|   |  :|   0x00421c1b      6a01           push 1                      ; 1
+|   |  :|   0x00421c1d      68e03b4000     push 0x403be0
+|   |  :|   0x00421c22      6a00           push 0
+|   |  :|   0x00421c24      68c7000000     push 0xc7                   ; 199
+|   |  :|   0x00421c29      8d965e050000   lea edx, [esi + 0x55e]
+|   |  :|   0x00421c2f      52             push edx
+|   |  :|   0x00421c30      8d8e3a050000   lea ecx, [esi + 0x53a]
+|   |  :|   0x00421c36      51             push ecx
+|   |  :|   0x00421c37      8d8680050000   lea eax, [esi + 0x580]
+|   |  :|   0x00421c3d      50             push eax
+|   |  :|   0x00421c3e      8d55f4         lea edx, [var_ch]
+|   |  :|   0x00421c41      52             push edx
+|   |  :|   0x00421c42      e8c9720100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|   |  :|   0x00421c47      83c414         add esp, 0x14
+|   |  :|   0x00421c4a      8d4df4         lea ecx, [var_ch]
+|   |  :|   0x00421c4d      51             push ecx
+|   |  :|   0x00421c4e      ff431c         inc dword [ebx + 0x1c]
+|   |  :|   0x00421c51      8d45f0         lea eax, [var_10h]
+|   |  :|   0x00421c54      50             push eax
+|   |  :|   0x00421c55      e88a710100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|   |  :|   0x00421c5a      83c408         add esp, 8
+|   |  :|   0x00421c5d      ff431c         inc dword [ebx + 0x1c]
+|   |  :|   0x00421c60      66c743101800   mov word [ebx + 0x10], 0x18 ; [0x18:2]=0xffff ; 24
+|   |  :|   0x00421c66      ff4b1c         dec dword [ebx + 0x1c]
+|   |  :|   0x00421c69      6a02           push 2                      ; 2
+|   |  :|   0x00421c6b      8d55f4         lea edx, [var_ch]
+|   |  :|   0x00421c6e      52             push edx
+|   |  :|   0x00421c6f      e8f0720100     call sub.cw3230mt.DLL__string__bdtr_qv
+|   |  :|   0x00421c74      83c408         add esp, 8
+|   |  :|   0x00421c77      83431c02       add dword [ebx + 0x1c], 2
+|   |  :|   0x00421c7b      83431c03       add dword [ebx + 0x1c], 3
+|   |  :|   0x00421c7f      8d4df0         lea ecx, [var_10h]
+|   |  :|   0x00421c82      51             push ecx
+|   |  :|   0x00421c83      68883b4000     push 0x403b88
+|   |  :|   0x00421c88      e81d720100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|   |  :|   0x00421c8d      83c424         add esp, 0x24
+|   |  :|   ; CODE XREF from fcn.00421b26 @ 0x421c12(x)
+|   `-----> 0x00421c90      8b45b0         mov eax, dword [var_50h]
+|      :|   0x00421c93      8b5005         mov edx, dword [eax + 5]
+|      :|   0x00421c96      8b4db4         mov ecx, dword [var_4ch]
+|      :|   0x00421c99      c1e102         shl ecx, 2
+|      :|   0x00421c9c      8d0c89         lea ecx, [ecx + ecx*4]
+|      :|   0x00421c9f      03d1           add edx, ecx
+|      :|   0x00421ca1      83c204         add edx, 4
+|      :|   0x00421ca4      8955b8         mov dword [var_48h], edx
+|      :|   0x00421ca7      8b07           mov eax, dword [edi]
+|      :|   0x00421ca9      8b55b8         mov edx, dword [var_48h]
+|      :|   0x00421cac      3b02           cmp eax, dword [edx]
+|     ,===< 0x00421cae      7c20           jl 0x421cd0
+|     |:|   0x00421cb0      8b0f           mov ecx, dword [edi]
+|     |:|   0x00421cb2      8b45b8         mov eax, dword [var_48h]
+|     |:|   0x00421cb5      3b4808         cmp ecx, dword [eax + 8]
+|    ,====< 0x00421cb8      7d16           jge 0x421cd0
+|    ||:|   0x00421cba      8b5704         mov edx, dword [edi + 4]
+|    ||:|   0x00421cbd      8b4db8         mov ecx, dword [var_48h]
+|    ||:|   0x00421cc0      3b5104         cmp edx, dword [ecx + 4]
+|   ,=====< 0x00421cc3      7c0b           jl 0x421cd0
+|   |||:|   0x00421cc5      8b4704         mov eax, dword [edi + 4]
+|   |||:|   0x00421cc8      8b55b8         mov edx, dword [var_48h]
+|   |||:|   0x00421ccb      3b420c         cmp eax, dword [edx + 0xc]
+|  ,======< 0x00421cce      7c04           jl 0x421cd4
+|  ||||:|   ; CODE XREFS from fcn.00421b26 @ 0x421cae(x), 0x421cb8(x), 0x421cc3(x)
+|  |```---> 0x00421cd0      33c9           xor ecx, ecx
+|  |  ,===< 0x00421cd2      eb05           jmp 0x421cd9
+|  |  |:|   ; CODE XREF from fcn.00421b26 @ 0x421cce(x)
+|  `------> 0x00421cd4      b901000000     mov ecx, 1
+|     |:|   ; CODE XREF from fcn.00421b26 @ 0x421cd2(x)
+|     `---> 0x00421cd9      884daf         mov byte [var_51h], cl
+|      :|   0x00421cdc      84c9           test cl, cl
+|     ,===< 0x00421cde      7410           je 0x421cf0
+|     |:|   0x00421ce0      b001           mov al, 1
+|     |:|   0x00421ce2      8b13           mov edx, dword [ebx]
+|     |:|   0x00421ce4      6489150000..   mov dword fs:[0], edx
+|    ,====< 0x00421ceb      e951010000     jmp 0x421e41
+|    ||:|   ; CODE XREF from fcn.00421b26 @ 0x421cde(x)
+|    |`---> 0x00421cf0      8b459c         mov eax, dword [var_64h]
+|    | :|   0x00421cf3      3b45a4         cmp eax, dword [var_5ch]
+|    |,===< 0x00421cf6      0f8288000000   jb 0x421d84
+|    ||:|   0x00421cfc      53             push ebx
+|    ||:|   0x00421cfd      6a00           push 0
+|    ||:|   0x00421cff      6a00           push 0
+|    ||:|   0x00421d01      6a00           push 0
+|    ||:|   0x00421d03      6a01           push 1                      ; 1
+|    ||:|   0x00421d05      68e03b4000     push 0x403be0
+|    ||:|   0x00421d0a      6a00           push 0
+|    ||:|   0x00421d0c      66c743102400   mov word [ebx + 0x10], 0x24 ; '$'
+|    ||:|                                                              ; [0x24:2]=0xffff ; 36
+|    ||:|   0x00421d12      683f010000     push 0x13f                  ; 319
+|    ||:|   0x00421d17      8d9699050000   lea edx, [esi + 0x599]
+|    ||:|   0x00421d1d      52             push edx
+|    ||:|   0x00421d1e      8d8e8d050000   lea ecx, [esi + 0x58d]
+|    ||:|   0x00421d24      51             push ecx
+|    ||:|   0x00421d25      8d86bb050000   lea eax, [esi + 0x5bb]
+|    ||:|   0x00421d2b      50             push eax
+|    ||:|   0x00421d2c      8d55ec         lea edx, [var_14h]
+|    ||:|   0x00421d2f      52             push edx
+|    ||:|   0x00421d30      e8db710100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|    ||:|   0x00421d35      83c414         add esp, 0x14
+|    ||:|   0x00421d38      8d4dec         lea ecx, [var_14h]
+|    ||:|   0x00421d3b      51             push ecx
+|    ||:|   0x00421d3c      ff431c         inc dword [ebx + 0x1c]
+|    ||:|   0x00421d3f      8d45e8         lea eax, [var_18h]
+|    ||:|   0x00421d42      50             push eax
+|    ||:|   0x00421d43      e89c700100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|    ||:|   0x00421d48      83c408         add esp, 8
+|    ||:|   0x00421d4b      ff431c         inc dword [ebx + 0x1c]
+|    ||:|   0x00421d4e      66c743103000   mov word [ebx + 0x10], 0x30 ; '0'
+|    ||:|                                                              ; [0x30:2]=0xffff ; 48
+|    ||:|   0x00421d54      ff4b1c         dec dword [ebx + 0x1c]
+|    ||:|   0x00421d57      6a02           push 2                      ; 2
+|    ||:|   0x00421d59      8d55ec         lea edx, [var_14h]
+|    ||:|   0x00421d5c      52             push edx
+|    ||:|   0x00421d5d      e802720100     call sub.cw3230mt.DLL__string__bdtr_qv
+|    ||:|   0x00421d62      83c408         add esp, 8
+|    ||:|   0x00421d65      66c743102400   mov word [ebx + 0x10], 0x24 ; '$'
+|    ||:|                                                              ; [0x24:2]=0xffff ; 36
+|    ||:|   0x00421d6b      83431c02       add dword [ebx + 0x1c], 2
+|    ||:|   0x00421d6f      83431c03       add dword [ebx + 0x1c], 3
+|    ||:|   0x00421d73      8d4de8         lea ecx, [var_18h]
+|    ||:|   0x00421d76      51             push ecx
+|    ||:|   0x00421d77      68883b4000     push 0x403b88
+|    ||:|   0x00421d7c      e829710100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|    ||:|   0x00421d81      83c424         add esp, 0x24
+|    ||:|   ; CODE XREF from fcn.00421b26 @ 0x421cf6(x)
+|    |`---> 0x00421d84      8b459c         mov eax, dword [var_64h]
+|    | :|   0x00421d87      8945a8         mov dword [var_58h], eax
+|    | :|   0x00421d8a      8b7d98         mov edi, dword [var_68h]
+|    | :|   0x00421d8d      837f0900       cmp dword [edi + 9], 0
+|    |,===< 0x00421d91      7612           jbe 0x421da5
+|    ||:|   0x00421d93      837f0500       cmp dword [edi + 5], 0
+|   ,=====< 0x00421d97      740c           je 0x421da5
+|   |||:|   0x00421d99      8b5709         mov edx, dword [edi + 9]
+|   |||:|   0x00421d9c      3b55a8         cmp edx, dword [var_58h]
+|  ,======< 0x00421d9f      0f8782000000   ja 0x421e27
+|  ||||:|   ; CODE XREFS from fcn.00421b26 @ 0x421d91(x), 0x421d97(x)
+|  |`-`---> 0x00421da5      53             push ebx
+|  | | :|   0x00421da6      6a00           push 0
+|  | | :|   0x00421da8      6a00           push 0
+|  | | :|   0x00421daa      6a00           push 0
+|  | | :|   0x00421dac      6a01           push 1                      ; 1
+|  | | :|   0x00421dae      68e03b4000     push 0x403be0
+|  | | :|   0x00421db3      6a00           push 0
+|  | | :|   0x00421db5      68c7000000     push 0xc7                   ; 199
+|  | | :|   0x00421dba      8d8eec050000   lea ecx, [esi + 0x5ec]
+|  | | :|   0x00421dc0      51             push ecx
+|  | | :|   0x00421dc1      8d86c8050000   lea eax, [esi + 0x5c8]
+|  | | :|   0x00421dc7      50             push eax
+|  | | :|   0x00421dc8      8d960e060000   lea edx, [esi + 0x60e]
+|  | | :|   0x00421dce      52             push edx
+|  | | :|   0x00421dcf      8d4de4         lea ecx, [var_1ch]
+|  | | :|   0x00421dd2      51             push ecx
+|  | | :|   0x00421dd3      e838710100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|  | | :|   0x00421dd8      83c414         add esp, 0x14
+|  | | :|   0x00421ddb      8d45e4         lea eax, [var_1ch]
+|  | | :|   0x00421dde      50             push eax
+|  | | :|   0x00421ddf      ff431c         inc dword [ebx + 0x1c]
+|  | | :|   0x00421de2      8d55e0         lea edx, [var_20h]
+|  | | :|   0x00421de5      52             push edx
+|  | | :|   0x00421de6      e8f96f0100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|  | | :|   0x00421deb      83c408         add esp, 8
+|  | | :|   0x00421dee      ff431c         inc dword [ebx + 0x1c]
+|  | | :|   0x00421df1      66c743103c00   mov word [ebx + 0x10], 0x3c ; '<'
+|  | | :|                                                              ; [0x3c:2]=0xffff ; 60
+|  | | :|   0x00421df7      ff4b1c         dec dword [ebx + 0x1c]
+|  | | :|   0x00421dfa      6a02           push 2                      ; 2
+|  | | :|   0x00421dfc      8d4de4         lea ecx, [var_1ch]
+|  | | :|   0x00421dff      51             push ecx
+|  | | :|   0x00421e00      e85f710100     call sub.cw3230mt.DLL__string__bdtr_qv
+|  | | :|   0x00421e05      83c408         add esp, 8
+|  | | :|   0x00421e08      66c743102400   mov word [ebx + 0x10], 0x24 ; '$'
+|  | | :|                                                              ; [0x24:2]=0xffff ; 36
+|  | | :|   0x00421e0e      83431c02       add dword [ebx + 0x1c], 2
+|  | | :|   0x00421e12      83431c03       add dword [ebx + 0x1c], 3
+|  | | :|   0x00421e16      8d45e0         lea eax, [var_20h]
+|  | | :|   0x00421e19      50             push eax
+|  | | :|   0x00421e1a      68883b4000     push 0x403b88
+|  | | :|   0x00421e1f      e886700100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|  | | :|   0x00421e24      83c424         add esp, 0x24
+|  | | :|   ; CODE XREF from fcn.00421b26 @ 0x421d9f(x)
+|  `------> 0x00421e27      ff459c         inc dword [var_64h]
+|    | :|   ; CODE XREF from fcn.00421b26 @ 0x421b5f(x)
+|    | :`-> 0x00421e2a      8b559c         mov edx, dword [var_64h]
+|    | :    0x00421e2d      3b55a4         cmp edx, dword [var_5ch]
+|    | `==< 0x00421e30      0f822efdffff   jb 0x421b64
+|    |      0x00421e36      33c0           xor eax, eax
+|    |      0x00421e38      8b13           mov edx, dword [ebx]
+|    |      0x00421e3a      6489150000..   mov dword fs:[0], edx
+|    |      ; CODE XREF from fcn.00421b26 @ 0x421ceb(x)
+|    `----> 0x00421e41      5f             pop edi
+|           0x00421e42      5e             pop esi
+|           0x00421e43      5b             pop ebx
+|           0x00421e44      8be5           mov esp, ebp
+|           0x00421e46      5d             pop ebp
+\           0x00421e47      c3             ret

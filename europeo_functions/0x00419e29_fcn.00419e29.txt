@@ -1,0 +1,16 @@
+            ; CALL XREF from fcn.0043089a @ +0x9ec(x)
+            ; CALL XREF from fcn.0043243c @ +0x7c3(x)
+/ 26: fcn.00419e29 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00419e29      55             push ebp
+|           0x00419e2a      8bec           mov ebp, esp
+|           0x00419e2c      8b4508         mov eax, dword [arg_8h]
+|           0x00419e2f      c6401c01       mov byte [eax + 0x1c], 1
+|           0x00419e33      ff750c         push dword [arg_ch]
+|           0x00419e36      6a01           push 1                      ; 1
+|           0x00419e38      50             push eax
+|           0x00419e39      8b00           mov eax, dword [eax]
+|           0x00419e3b      ff500c         call dword [eax + 0xc]      ; 12
+|           0x00419e3e      83c40c         add esp, 0xc
+|           0x00419e41      5d             pop ebp
+\           0x00419e42      c3             ret

@@ -1,0 +1,35 @@
+            ; CALL XREFS from fcn.00436271 @ +0x376(x), +0x517(x)
+/ 106: fcn.0041d898 (uint32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(3:sp[0xc..0x28])
+|           0x0041d898      55             push ebp
+|           0x0041d899      8bec           mov ebp, esp
+|           0x0041d89b      83c4dc         add esp, 0xffffffdc
+|           0x0041d89e      b814454400     mov eax, 0x444514           ; '\x14ED'
+|           0x0041d8a3      e8705dfeff     call fcn.00403618
+|           0x0041d8a8      c745f80200..   mov dword [var_8h], 2
+|           0x0041d8af      837d0800       cmp dword [arg_8h], 0
+|       ,=< 0x0041d8b3      7440           je 0x41d8f5
+|       |   0x0041d8b5      66c745ec0800   mov word [var_14h], 8
+|       |   0x0041d8bb      8b5508         mov edx, dword [arg_8h]
+|       |   0x0041d8be      c74205ec49..   mov dword [edx + 5], 0x4449ec ; [0x4449ec:4]=0x41d898 fcn.0041d898
+|       |   0x0041d8c5      6a03           push 3                      ; 3
+|       |   0x0041d8c7      8b4d08         mov ecx, dword [arg_8h]
+|       |   0x0041d8ca      ff7109         push dword [ecx + 9]
+|       |   0x0041d8cd      e8a6bd0100     call sub.OWL52t.dll__TDib__bdtr_qv
+|       |   0x0041d8d2      83c408         add esp, 8
+|       |   0x0041d8d5      836df802       sub dword [var_8h], 2
+|       |   0x0041d8d9      6a00           push 0
+|       |   0x0041d8db      ff7508         push dword [arg_8h]
+|       |   0x0041d8de      e801be0100     call sub.OWL52t.dll__TBitmap__bdtr_qv
+|       |   0x0041d8e3      83c408         add esp, 8
+|       |   0x0041d8e6      f6450c01       test byte [arg_ch], 1
+|      ,==< 0x0041d8ea      7409           je 0x41d8f5
+|      ||   0x0041d8ec      ff7508         push dword [arg_8h]
+|      ||   0x0041d8ef      e822b60100     call sub.cw3230mt.DLL___bdele_qpv
+|      ||   0x0041d8f4      59             pop ecx
+|      ||   ; CODE XREFS from fcn.0041d898 @ 0x41d8b3(x), 0x41d8ea(x)
+|      ``-> 0x0041d8f5      8b45dc         mov eax, dword [var_24h]
+|           0x0041d8f8      64a300000000   mov dword fs:[0], eax
+|           0x0041d8fe      8be5           mov esp, ebp
+|           0x0041d900      5d             pop ebp
+\           0x0041d901      c3             ret

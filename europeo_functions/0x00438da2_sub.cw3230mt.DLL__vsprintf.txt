@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00404f44 @ 0x404f6f(x)
+/ 6: sub.cw3230mt.DLL__vsprintf ();
+\           0x00438da2      ff25d4584500   jmp dword [sym.imp.cw3230mt.DLL__vsprintf] ; 0x4558d4

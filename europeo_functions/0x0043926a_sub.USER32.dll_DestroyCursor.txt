@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00428154 @ 0x4281cb(x)
+            ; CALL XREF from fcn.0042e641 @ +0x12d(x)
+/ 6: BOOL sub.USER32.dll_DestroyCursor (HCURSOR hCursor);
+\           0x0043926a      ff25145c4500   jmp dword [sym.imp.USER32.dll_DestroyCursor] ; 0x455c14

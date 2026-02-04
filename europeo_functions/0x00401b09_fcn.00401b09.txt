@@ -1,0 +1,46 @@
+            ; CALL XREF from fcn.004027b3 @ +0x701(x)
+/ 82: fcn.00401b09 (int32_t arg_8h, LPCSTR *lpString2, int32_t arg_10h);
+| `- args(sp[0x4..0xc])
+|           0x00401b09      55             push ebp
+|           0x00401b0a      8bec           mov ebp, esp
+|           0x00401b0c      53             push ebx
+|           0x00401b0d      56             push esi
+|           0x00401b0e      57             push edi
+|           0x00401b0f      837d0c00       cmp dword [lpString2], 0
+|           0x00401b13      8b4508         mov eax, dword [arg_8h]
+|       ,=< 0x00401b16      743c           je 0x401b54
+|       |   0x00401b18      8b18           mov ebx, dword [eax]
+|      ,==< 0x00401b1a      eb33           jmp 0x401b4f
+|      ||   ; CODE XREF from fcn.00401b09 @ 0x401b52(x)
+|     .---> 0x00401b1c      8b750c         mov esi, dword [lpString2]
+|     :||   0x00401b1f      8b3b           mov edi, dword [ebx]
+|     :||   0x00401b21      56             push esi                    ; LPCSTR lpString2
+|     :||   0x00401b22      57             push edi                    ; LPCSTR lpString1
+|     :||   0x00401b23      e8a8740300     call sub.KERNEL32.dll_lstrcmpA ; int lstrcmpA(LPCSTR lpString1, LPCSTR lpString2)
+|     :||   0x00401b28      85c0           test eax, eax
+|    ,====< 0x00401b2a      7520           jne 0x401b4c
+|    |:||   0x00401b2c      837b0400       cmp dword [ebx + 4], 0
+|   ,=====< 0x00401b30      7413           je 0x401b45
+|   ||:||   0x00401b32      668b4510       mov ax, word [arg_10h]
+|   ||:||   0x00401b36      50             push eax
+|   ||:||   0x00401b37      83c304         add ebx, 4
+|   ||:||   0x00401b3a      53             push ebx
+|   ||:||   0x00401b3b      e8adfbffff     call fcn.004016ed
+|   ||:||   0x00401b40      83c408         add esp, 8
+|  ,======< 0x00401b43      eb11           jmp 0x401b56
+|  |||:||   ; CODE XREF from fcn.00401b09 @ 0x401b30(x)
+|  |`-----> 0x00401b45      b8d4e34400     mov eax, 0x44e3d4
+|  |,=====< 0x00401b4a      eb0a           jmp 0x401b56
+|  |||:||   ; CODE XREF from fcn.00401b09 @ 0x401b2a(x)
+|  ||`----> 0x00401b4c      83c308         add ebx, 8
+|  || :||   ; CODE XREF from fcn.00401b09 @ 0x401b1a(x)
+|  || :`--> 0x00401b4f      833b00         cmp dword [ebx], 0
+|  || `===< 0x00401b52      75c8           jne 0x401b1c
+|  ||   |   ; CODE XREF from fcn.00401b09 @ 0x401b16(x)
+|  ||   `-> 0x00401b54      33c0           xor eax, eax
+|  ||       ; CODE XREFS from fcn.00401b09 @ 0x401b43(x), 0x401b4a(x)
+|  ``-----> 0x00401b56      5f             pop edi
+|           0x00401b57      5e             pop esi
+|           0x00401b58      5b             pop ebx
+|           0x00401b59      5d             pop ebp
+\           0x00401b5a      c3             ret

@@ -1,0 +1,63 @@
+            ; XREFS: CALL 0x0041951e  CALL 0x004196e7  CALL 0x00419b34  
+            ; XREFS: CALL 0x00419c12  CALL 0x00419e9a  CALL 0x00419fa4  
+            ; XREFS: CALL 0x0041a45a  CALL 0x00433a99  
+/ 131: fcn.0041debb (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(6:sp[0xc..0x24])
+|           0x0041debb      55             push ebp
+|           0x0041debc      8bec           mov ebp, esp
+|           0x0041debe      83c4e0         add esp, 0xffffffe0
+|           0x0041dec1      53             push ebx
+|           0x0041dec2      56             push esi
+|           0x0041dec3      57             push edi
+|           0x0041dec4      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041dec7      8b450c         mov eax, dword [arg_ch]
+|           0x0041deca      8bf0           mov esi, eax
+|           0x0041decc      8d7b0d         lea edi, [ebx + 0xd]
+|           0x0041decf      b904000000     mov ecx, 4
+|           0x0041ded4      f3a5           rep movsd dword es:[edi], dword [esi]
+|           0x0041ded6      53             push ebx
+|           0x0041ded7      8b4305         mov eax, dword [ebx + 5]
+|           0x0041deda      ff5008         call dword [eax + 8]        ; 8
+|           0x0041dedd      59             pop ecx
+|           0x0041dede      8945ec         mov dword [var_14h], eax
+|           0x0041dee1      db45ec         fild dword [ebp - 0x14]
+|           0x0041dee4      8d730d         lea esi, [ebx + 0xd]
+|           0x0041dee7      8b460c         mov eax, dword [esi + 0xc]
+|           0x0041deea      2b4604         sub eax, dword [esi + 4]
+|           0x0041deed      8945e8         mov dword [var_18h], eax
+|           0x0041def0      db45e8         fild dword [ebp - 0x18]
+|           0x0041def3      def1           fdivrp st(1)
+|           0x0041def5      dd5df8         fstp qword [ebp - 8]
+|           0x0041def8      53             push ebx
+|           0x0041def9      8b5305         mov edx, dword [ebx + 5]
+|           0x0041defc      ff5204         call dword [edx + 4]        ; 4
+|           0x0041deff      59             pop ecx
+|           0x0041df00      8945e4         mov dword [var_1ch], eax
+|           0x0041df03      db45e4         fild dword [ebp - 0x1c]
+|           0x0041df06      8d7b0d         lea edi, [ebx + 0xd]
+|           0x0041df09      8b4708         mov eax, dword [edi + 8]
+|           0x0041df0c      2b07           sub eax, dword [edi]
+|           0x0041df0e      8945e0         mov dword [var_20h], eax
+|           0x0041df11      db45e0         fild dword [ebp - 0x20]
+|           0x0041df14      def1           fdivrp st(1)
+|           0x0041df16      dd5df0         fstp qword [ebp - 0x10]
+|           0x0041df19      dd45f0         fld qword [ebp - 0x10]
+|           0x0041df1c      dc5df8         fcomp qword [ebp - 8]
+|           0x0041df1f      dfe0           fnstsw ax
+|           0x0041df21      9e             sahf
+|       ,=< 0x0041df22      7605           jbe 0x41df29
+|       |   0x0041df24      8d55f0         lea edx, [var_10h]
+|      ,==< 0x0041df27      eb03           jmp 0x41df2c
+|      ||   ; CODE XREF from fcn.0041debb @ 0x41df22(x)
+|      |`-> 0x0041df29      8d55f8         lea edx, [var_8h]
+|      |    ; CODE XREF from fcn.0041debb @ 0x41df27(x)
+|      `--> 0x0041df2c      8b02           mov eax, dword [edx]
+|           0x0041df2e      89431d         mov dword [ebx + 0x1d], eax
+|           0x0041df31      8b4204         mov eax, dword [edx + 4]
+|           0x0041df34      894321         mov dword [ebx + 0x21], eax
+|           0x0041df37      5f             pop edi
+|           0x0041df38      5e             pop esi
+|           0x0041df39      5b             pop ebx
+|           0x0041df3a      8be5           mov esp, ebp
+|           0x0041df3c      5d             pop ebp
+\           0x0041df3d      c3             ret

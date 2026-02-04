@@ -1,0 +1,33 @@
+            ; XREFS: CALL 0x004022b0  CALL 0x004022db  CALL 0x004022ec  
+            ; XREFS: CALL 0x00402309  CALL 0x00402339  CALL 0x00402d24  
+            ; XREFS: CALL 0x00402fbd  CALL 0x00402fd8  CALL 0x00402ff3  
+            ; XREFS: CALL 0x0040300e  CALL 0x00403029  CALL 0x00403044  
+            ; XREFS: CALL 0x00403056  CALL 0x00403068  CALL 0x004387c1  
+/ 54: fcn.00402126 (HKEY arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00402126      55             push ebp
+|           0x00402127      8bec           mov ebp, esp
+|           0x00402129      53             push ebx
+|           0x0040212a      8b5d08         mov ebx, dword [arg_8h]
+|           0x0040212d      85db           test ebx, ebx
+|       ,=< 0x0040212f      7428           je 0x402159
+|       |   0x00402131      8b03           mov eax, dword [ebx]
+|       |   0x00402133      85c0           test eax, eax
+|      ,==< 0x00402135      740c           je 0x402143
+|      ||   0x00402137      807b1000       cmp byte [ebx + 0x10], 0
+|     ,===< 0x0040213b      7406           je 0x402143
+|     |||   0x0040213d      50             push eax                    ; HKEY hKey
+|     |||   0x0040213e      e881770300     call sub.ADVAPI32.dll_RegCloseKey ; LSTATUS RegCloseKey(HKEY hKey)
+|     |||   ; CODE XREFS from fcn.00402126 @ 0x402135(x), 0x40213b(x)
+|     ``--> 0x00402143      ff7304         push dword [ebx + 4]
+|       |   0x00402146      e8376e0300     call sub.cw3230mt.DLL___bdla_qpv
+|       |   0x0040214b      f6450c01       test byte [arg_ch], 1
+|       |   0x0040214f      59             pop ecx
+|      ,==< 0x00402150      7407           je 0x402159
+|      ||   0x00402152      53             push ebx
+|      ||   0x00402153      e8be6d0300     call sub.cw3230mt.DLL___bdele_qpv
+|      ||   0x00402158      59             pop ecx
+|      ||   ; CODE XREFS from fcn.00402126 @ 0x40212f(x), 0x402150(x)
+|      ``-> 0x00402159      5b             pop ebx
+|           0x0040215a      5d             pop ebp
+\           0x0040215b      c3             ret

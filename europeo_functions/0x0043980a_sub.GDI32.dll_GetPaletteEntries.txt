@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041cc49 @ 0x41ccd2(x)
+/ 6: dword sub.GDI32.dll_GetPaletteEntries (HPALETTE hpal, UINT iStartIndex, UINT nEntries, LPPALETTEENTRY lppe);
+\           0x0043980a      ff25dc5f4500   jmp dword [sym.imp.GDI32.dll_GetPaletteEntries] ; 0x455fdc

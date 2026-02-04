@@ -1,0 +1,8 @@
+            ; XREFS: CALL 0x0040bc34  CALL 0x0040bcff  CALL 0x0040bee7  
+            ; XREFS: CALL 0x0040cf3d  CALL 0x0040d4b5  CALL 0x0040d6b2  
+            ; XREFS: CALL 0x0041c1a2  CALL 0x0041c3c6  CALL 0x0041c4a0  
+            ; XREFS: CALL 0x004293bd  CALL 0x0042e9b2  CALL 0x0042eb41  
+            ; XREFS: CALL 0x0042ec73  CALL 0x00432fb5  CALL 0x004381ad  
+            ; XREFS: CALL 0x004382cf  CALL 0x00438448  CALL 0x004388fe  
+/ 6: BOOL sub.USER32.dll_PostMessageA (HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+\           0x00439252      ff25045c4500   jmp dword [sym.imp.USER32.dll_PostMessageA] ; 0x455c04

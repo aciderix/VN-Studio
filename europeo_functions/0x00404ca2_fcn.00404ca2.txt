@@ -1,0 +1,96 @@
+            ; CALL XREF from fcn.00404ca2 @ +0x134(x)
+            ; CALL XREF from fcn.00404e29 @ 0x404e60(x)
+            ; CALL XREF from fcn.00404ed9 @ 0x404f09(x)
+            ; CALL XREF from fcn.00404f9c @ 0x404fd0(x)
+/ 260: fcn.00404ca2 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(6:sp[0x8..0x34])
+|           0x00404ca2      55             push ebp
+|           0x00404ca3      8bec           mov ebp, esp
+|           0x00404ca5      83c4d0         add esp, 0xffffffd0
+|           0x00404ca8      53             push ebx
+|           0x00404ca9      56             push esi
+|           0x00404caa      8b5d0c         mov ebx, dword [arg_ch]
+|           0x00404cad      8b7508         mov esi, dword [arg_8h]
+|           0x00404cb0      b840a74300     mov eax, 0x43a740
+|           0x00404cb5      e85ee9ffff     call fcn.00403618
+|           0x00404cba      66c745e00800   mov word [var_20h], 8
+|           0x00404cc0      68f0a84300     push 0x43a8f0
+|           0x00404cc5      8d55fc         lea edx, [var_4h]
+|           0x00404cc8      52             push edx
+|           0x00404cc9      e8a0410300     call sub.cw3230mt.DLL__string__bctr_qpxc
+|           0x00404cce      83c408         add esp, 8
+|           0x00404cd1      ff45ec         inc dword [var_14h]
+|           0x00404cd4      6aff           push 0xffffffffffffffff
+|           0x00404cd6      6a00           push 0
+|           0x00404cd8      8d4dfc         lea ecx, [var_4h]
+|           0x00404cdb      51             push ecx
+|           0x00404cdc      53             push ebx
+|           0x00404cdd      e822420300     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00404ce2      83c410         add esp, 0x10
+|           0x00404ce5      ff4dec         dec dword [var_14h]
+|           0x00404ce8      6a02           push 2                      ; 2
+|           0x00404cea      8d45fc         lea eax, [var_4h]
+|           0x00404ced      50             push eax
+|           0x00404cee      e871420300     call sub.cw3230mt.DLL__string__bdtr_qv
+|           0x00404cf3      83c408         add esp, 8
+|           0x00404cf6      833df1ec44..   cmp dword [0x44ecf1], 0     ; [0x44ecf1:4]=0
+|       ,=< 0x00404cfd      7443           je 0x404d42
+|       |   0x00404cff      66c745e01400   mov word [var_20h], 0x14    ; 20
+|       |   0x00404d05      68ff000000     push 0xff                   ; 255
+|       |   0x00404d0a      56             push esi
+|       |   0x00404d0b      8b15f1ec4400   mov edx, dword [0x44ecf1]   ; [0x44ecf1:4]=0
+|       |   0x00404d11      ff7208         push dword [edx + 8]
+|       |   0x00404d14      8d4df8         lea ecx, [var_8h]
+|       |   0x00404d17      51             push ecx
+|       |   0x00404d18      e8db410300     call sub.cw3230mt.DLL__string__bctr_qp11HINSTANCE__uii
+|       |   0x00404d1d      83c410         add esp, 0x10
+|       |   0x00404d20      ff45ec         inc dword [var_14h]
+|       |   0x00404d23      6aff           push 0xffffffffffffffff
+|       |   0x00404d25      6a00           push 0
+|       |   0x00404d27      50             push eax
+|       |   0x00404d28      53             push ebx
+|       |   0x00404d29      e8d6410300     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|       |   0x00404d2e      83c410         add esp, 0x10
+|       |   0x00404d31      ff4dec         dec dword [var_14h]
+|       |   0x00404d34      6a02           push 2                      ; 2
+|       |   0x00404d36      8d45f8         lea eax, [var_8h]
+|       |   0x00404d39      50             push eax
+|       |   0x00404d3a      e825420300     call sub.cw3230mt.DLL__string__bdtr_qv
+|       |   0x00404d3f      83c408         add esp, 8
+|       |   ; CODE XREF from fcn.00404ca2 @ 0x404cfd(x)
+|       `-> 0x00404d42      8b13           mov edx, dword [ebx]
+|           0x00404d44      8b4a02         mov ecx, dword [edx + 2]
+|           0x00404d47      803900         cmp byte [ecx], 0
+|       ,=< 0x00404d4a      754b           jne 0x404d97
+|       |   0x00404d4c      833db86a44..   cmp dword [0x446ab8], 0     ; [0x446ab8:4]=0
+|      ,==< 0x00404d53      7442           je 0x404d97
+|      ||   0x00404d55      66c745e02000   mov word [var_20h], 0x20    ; 32
+|      ||   0x00404d5b      68ff000000     push 0xff                   ; 255
+|      ||   0x00404d60      56             push esi
+|      ||   0x00404d61      a1b86a4400     mov eax, dword [0x446ab8]   ; [0x446ab8:4]=0
+|      ||   0x00404d66      ff7008         push dword [eax + 8]
+|      ||   0x00404d69      8d55f4         lea edx, [var_ch]
+|      ||   0x00404d6c      52             push edx
+|      ||   0x00404d6d      e886410300     call sub.cw3230mt.DLL__string__bctr_qp11HINSTANCE__uii
+|      ||   0x00404d72      83c410         add esp, 0x10
+|      ||   0x00404d75      ff45ec         inc dword [var_14h]
+|      ||   0x00404d78      6aff           push 0xffffffffffffffff
+|      ||   0x00404d7a      6a00           push 0
+|      ||   0x00404d7c      50             push eax
+|      ||   0x00404d7d      53             push ebx
+|      ||   0x00404d7e      e881410300     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|      ||   0x00404d83      83c410         add esp, 0x10
+|      ||   0x00404d86      ff4dec         dec dword [var_14h]
+|      ||   0x00404d89      6a02           push 2                      ; 2
+|      ||   0x00404d8b      8d4df4         lea ecx, [var_ch]
+|      ||   0x00404d8e      51             push ecx
+|      ||   0x00404d8f      e8d0410300     call sub.cw3230mt.DLL__string__bdtr_qv
+|      ||   0x00404d94      83c408         add esp, 8
+|      ||   ; CODE XREFS from fcn.00404ca2 @ 0x404d4a(x), 0x404d53(x)
+|      ``-> 0x00404d97      8b45d0         mov eax, dword [var_30h]
+|           0x00404d9a      64a300000000   mov dword fs:[0], eax
+|           0x00404da0      5e             pop esi
+|           0x00404da1      5b             pop ebx
+|           0x00404da2      8be5           mov esp, ebp
+|           0x00404da4      5d             pop ebp
+\           0x00404da5      c3             ret

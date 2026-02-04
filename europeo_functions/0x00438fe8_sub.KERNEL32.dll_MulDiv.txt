@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.0041f028 @ 0x41f0e1(x)
+            ; CALL XREF from fcn.0041fc53 @ 0x41fd83(x)
+            ; CALL XREFS from fcn.004200cf @ 0x420caf(x), 0x420d92(x)
+/ 6: int sub.KERNEL32.dll_MulDiv (int nNumber, int nNumerator, int nDenominator);
+\           0x00438fe8      ff255c5a4500   jmp dword [sym.imp.KERNEL32.dll_MulDiv] ; 0x455a5c

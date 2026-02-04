@@ -1,0 +1,63 @@
+            ; CALL XREF from fcn.0041f121 @ 0x41f160(x)
+            ; CALL XREF from fcn.0041f121 @ +0x95(x)
+            ; CALL XREF from fcn.0041f1cf @ 0x41f218(x)
+            ; CALL XREF from fcn.0041f2ba @ 0x41f2f5(x)
+            ; CALL XREF from fcn.004200cf @ 0x420f8b(x)
+/ 137: fcn.0041f231 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0041f231      55             push ebp
+|           0x0041f232      8bec           mov ebp, esp
+|           0x0041f234      53             push ebx
+|           0x0041f235      56             push esi
+|           0x0041f236      8b750c         mov esi, dword [arg_ch]
+|           0x0041f239      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041f23c      85f6           test esi, esi
+|       ,=< 0x0041f23e      746c           je 0x41f2ac
+|       |   0x0041f240      6a3c           push 0x3c                   ; '<' ; 60
+|       |   0x0041f242      6a00           push 0
+|       |   0x0041f244      8d4304         lea eax, [ebx + 4]
+|       |   0x0041f247      50             push eax
+|       |   0x0041f248      e8919b0100     call sub.cw3230mt.DLL__memset
+|       |   0x0041f24d      83c40c         add esp, 0xc
+|       |   0x0041f250      8b16           mov edx, dword [esi]
+|       |   0x0041f252      895304         mov dword [ebx + 4], edx
+|       |   0x0041f255      8b4e04         mov ecx, dword [esi + 4]
+|       |   0x0041f258      894b08         mov dword [ebx + 8], ecx
+|       |   0x0041f25b      8b4608         mov eax, dword [esi + 8]
+|       |   0x0041f25e      89430c         mov dword [ebx + 0xc], eax
+|       |   0x0041f261      8b560c         mov edx, dword [esi + 0xc]
+|       |   0x0041f264      895310         mov dword [ebx + 0x10], edx
+|       |   0x0041f267      8b4e10         mov ecx, dword [esi + 0x10]
+|       |   0x0041f26a      894b14         mov dword [ebx + 0x14], ecx
+|       |   0x0041f26d      8a4614         mov al, byte [esi + 0x14]
+|       |   0x0041f270      884318         mov byte [ebx + 0x18], al
+|       |   0x0041f273      8a5615         mov dl, byte [esi + 0x15]
+|       |   0x0041f276      885319         mov byte [ebx + 0x19], dl
+|       |   0x0041f279      8a4e16         mov cl, byte [esi + 0x16]
+|       |   0x0041f27c      884b1a         mov byte [ebx + 0x1a], cl
+|       |   0x0041f27f      8a4617         mov al, byte [esi + 0x17]
+|       |   0x0041f282      88431b         mov byte [ebx + 0x1b], al
+|       |   0x0041f285      8a5618         mov dl, byte [esi + 0x18]
+|       |   0x0041f288      88531c         mov byte [ebx + 0x1c], dl
+|       |   0x0041f28b      8a4e19         mov cl, byte [esi + 0x19]
+|       |   0x0041f28e      884b1d         mov byte [ebx + 0x1d], cl
+|       |   0x0041f291      8a461a         mov al, byte [esi + 0x1a]
+|       |   0x0041f294      88431e         mov byte [ebx + 0x1e], al
+|       |   0x0041f297      8a561b         mov dl, byte [esi + 0x1b]
+|       |   0x0041f29a      88531f         mov byte [ebx + 0x1f], dl
+|       |   0x0041f29d      83c61c         add esi, 0x1c               ; 28
+|       |   0x0041f2a0      56             push esi                    ; LPCSTR lpString2
+|       |   0x0041f2a1      83c320         add ebx, 0x20               ; 32
+|       |   0x0041f2a4      53             push ebx                    ; LPSTR lpString1
+|       |   0x0041f2a5      e8509d0100     call sub.KERNEL32.dll_lstrcpyA ; LPSTR lstrcpyA(LPSTR lpString1, LPCSTR lpString2)
+|      ,==< 0x0041f2aa      eb0a           jmp 0x41f2b6
+|      ||   ; CODE XREF from fcn.0041f231 @ 0x41f23e(x)
+|      |`-> 0x0041f2ac      83c304         add ebx, 4
+|      |    0x0041f2af      53             push ebx                    ; int32_t arg_8h
+|      |    0x0041f2b0      e873fdffff     call fcn.0041f028
+|      |    0x0041f2b5      59             pop ecx
+|      |    ; CODE XREF from fcn.0041f231 @ 0x41f2aa(x)
+|      `--> 0x0041f2b6      5e             pop esi
+|           0x0041f2b7      5b             pop ebx
+|           0x0041f2b8      5d             pop ebp
+\           0x0041f2b9      c3             ret

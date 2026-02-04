@@ -1,0 +1,37 @@
+            ; CALL XREF from fcn.0041b8d0 @ +0x9d(x)
+/ 80: fcn.0041b8d0 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(3:sp[0xc..0x14])
+|           0x0041b8d0      55             push ebp
+|           0x0041b8d1      8bec           mov ebp, esp
+|           0x0041b8d3      83c4f0         add esp, 0xfffffff0
+|           0x0041b8d6      53             push ebx
+|           0x0041b8d7      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041b8da      53             push ebx
+|           0x0041b8db      8b03           mov eax, dword [ebx]
+|           0x0041b8dd      ff5008         call dword [eax + 8]        ; 8
+|           0x0041b8e0      59             pop ecx
+|           0x0041b8e1      84c0           test al, al
+|       ,=< 0x0041b8e3      7505           jne 0x41b8ea
+|       |   0x0041b8e5      83c8ff         or eax, 0xffffffff          ; -1
+|      ,==< 0x0041b8e8      eb31           jmp 0x41b91b
+|      ||   ; CODE XREF from fcn.0041b8d0 @ 0x41b8e3(x)
+|      |`-> 0x0041b8ea      6a10           push 0x10                   ; 16
+|      |    0x0041b8ec      6a00           push 0
+|      |    0x0041b8ee      8d55f0         lea edx, [var_10h]
+|      |    0x0041b8f1      52             push edx
+|      |    0x0041b8f2      e8e7d40100     call sub.cw3230mt.DLL__memset
+|      |    0x0041b8f7      83c40c         add esp, 0xc
+|      |    0x0041b8fa      c745f80800..   mov dword [var_8h], 8
+|      |    0x0041b901      8d4df0         lea ecx, [var_10h]
+|      |    0x0041b904      51             push ecx
+|      |    0x0041b905      6802010000     push 0x102                  ; 258
+|      |    0x0041b90a      6814080000     push 0x814                  ; 2068
+|      |    0x0041b90f      53             push ebx
+|      |    0x0041b910      e8c6f5ffff     call fcn.0041aedb
+|      |    0x0041b915      83c410         add esp, 0x10
+|      |    0x0041b918      8b45f4         mov eax, dword [var_ch]
+|      |    ; CODE XREF from fcn.0041b8d0 @ 0x41b8e8(x)
+|      `--> 0x0041b91b      5b             pop ebx
+|           0x0041b91c      8be5           mov esp, ebp
+|           0x0041b91e      5d             pop ebp
+\           0x0041b91f      c3             ret

@@ -1,0 +1,8 @@
+            ; XREFS: CALL 0x00425c54  CALL 0x00425c82  CALL 0x00425cec  
+            ; XREFS: CALL 0x00425d1a  CALL 0x00425d84  CALL 0x00425db2  
+            ; XREFS: CALL 0x00425e0e  CALL 0x00425e3c  CALL 0x00425ea6  
+            ; XREFS: CALL 0x00425ed4  CALL 0x00425f4e  CALL 0x00425f7f  
+            ; XREFS: CALL 0x00425ff9  CALL 0x0042602a  CALL 0x00426092  
+            ; XREFS: CALL 0x004260c3  
+/ 6: sub.bds52t.dll__TProfile_WriteString_qpxct1 ();
+\           0x004390ae      ff25e85a4500   jmp dword [sym.imp.bds52t.dll__TProfile_WriteString_qpxct1] ; 0x455ae8

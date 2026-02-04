@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0042ecb9 @ +0x1549(x)
+/ 6: bool sub.GDI32.dll_Rectangle (HDC hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+\           0x004397e0      ff25c05f4500   jmp dword [sym.imp.GDI32.dll_Rectangle] ; 0x455fc0 ; "H@\x05"

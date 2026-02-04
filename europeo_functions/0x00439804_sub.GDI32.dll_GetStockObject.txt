@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041cf1f @ 0x41d029(x)
+/ 6: hgdiobj sub.GDI32.dll_GetStockObject ();
+\           0x00439804      ff25d85f4500   jmp dword [sym.imp.GDI32.dll_GetStockObject] ; 0x455fd8

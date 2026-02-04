@@ -1,0 +1,3 @@
+            ; XREFS(28)
+/ 6: sub.bds52t.dll___brsh_qr8ipstreamr6string ();
+\           0x00439138      ff25445b4500   jmp dword [sym.imp.bds52t.dll___brsh_qr8ipstreamr6string] ; 0x455b44 ; "$\x1d\x05"

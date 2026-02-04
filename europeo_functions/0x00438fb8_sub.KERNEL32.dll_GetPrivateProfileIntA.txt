@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.004254e7 @ 0x425694(x), 0x4256b2(x)
+/ 6: UINT sub.KERNEL32.dll_GetPrivateProfileIntA (LPCSTR lpAppName, LPCSTR lpKeyName, INT nDefault, LPCSTR lpFileName);
+\           0x00438fb8      ff253c5a4500   jmp dword [sym.imp.KERNEL32.dll_GetPrivateProfileIntA] ; 0x455a3c

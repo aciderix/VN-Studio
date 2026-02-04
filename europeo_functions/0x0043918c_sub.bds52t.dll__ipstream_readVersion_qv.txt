@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041721d @ 0x4172f6(x)
+            ; CALL XREF from fcn.0042999a @ 0x429aac(x)
+/ 6: sub.bds52t.dll__ipstream_readVersion_qv ();
+\           0x0043918c      ff257c5b4500   jmp dword [sym.imp.bds52t.dll__ipstream_readVersion_qv] ; 0x455b7c ; "v\x1e\x05"

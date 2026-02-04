@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x0042b5c2  CALL 0x0042b607  CALL 0x0042b64c  
+            ; XREFS: CALL 0x0042b691  CALL 0x0042b6d6  CALL 0x0042b71b  
+            ; XREFS: CALL 0x0042b760  CALL 0x0042b7a5  CALL 0x0042b7ea  
+/ 6: sub.OWL52t.dll__TCheckBox__bctr_qp7TWindowip9TGroupBoxp7TModule ();
+\           0x004395ac      ff25445e4500   jmp dword [sym.imp.OWL52t.dll__TCheckBox__bctr_qp7TWindowip9TGroupBoxp7TModule] ; 0x455e44

@@ -1,0 +1,43 @@
+            ; CALL XREFS from fcn.00411e9f @ +0x232(x), +0x2b2(x)
+            ; CALL XREFS from fcn.00412168 @ +0x5d0(x), +0xa57(x)
+            ; CALL XREF from fcn.0041318b @ +0x202(x)
+/ 82: fcn.00412168 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00412168      55             push ebp
+|           0x00412169      8bec           mov ebp, esp
+|           0x0041216b      53             push ebx
+|           0x0041216c      56             push esi
+|           0x0041216d      8b4508         mov eax, dword [arg_8h]
+|           0x00412170      83783502       cmp dword [eax + 0x35], 2
+|       ,=< 0x00412174      7540           jne 0x4121b6
+|       |   0x00412176      8b5039         mov edx, dword [eax + 0x39]
+|       |   0x00412179      8b0a           mov ecx, dword [edx]
+|       |   0x0041217b      8b5039         mov edx, dword [eax + 0x39]
+|       |   0x0041217e      3b4a08         cmp ecx, dword [edx + 8]
+|      ,==< 0x00412181      7e11           jle 0x412194
+|      ||   0x00412183      8b5039         mov edx, dword [eax + 0x39]
+|      ||   0x00412186      83c208         add edx, 8
+|      ||   0x00412189      8b4839         mov ecx, dword [eax + 0x39]
+|      ||   0x0041218c      8b19           mov ebx, dword [ecx]
+|      ||   0x0041218e      8b32           mov esi, dword [edx]
+|      ||   0x00412190      8931           mov dword [ecx], esi
+|      ||   0x00412192      891a           mov dword [edx], ebx
+|      ||   ; CODE XREF from fcn.00412168 @ 0x412181(x)
+|      `--> 0x00412194      8b5039         mov edx, dword [eax + 0x39]
+|       |   0x00412197      8b4a04         mov ecx, dword [edx + 4]
+|       |   0x0041219a      8b5039         mov edx, dword [eax + 0x39]
+|       |   0x0041219d      3b4a0c         cmp ecx, dword [edx + 0xc]
+|      ,==< 0x004121a0      7e14           jle 0x4121b6
+|      ||   0x004121a2      8b5039         mov edx, dword [eax + 0x39]
+|      ||   0x004121a5      83c20c         add edx, 0xc                ; 12
+|      ||   0x004121a8      8b4039         mov eax, dword [eax + 0x39]
+|      ||   0x004121ab      83c004         add eax, 4
+|      ||   0x004121ae      8b08           mov ecx, dword [eax]
+|      ||   0x004121b0      8b1a           mov ebx, dword [edx]
+|      ||   0x004121b2      8918           mov dword [eax], ebx
+|      ||   0x004121b4      890a           mov dword [edx], ecx
+|      ||   ; CODE XREFS from fcn.00412168 @ 0x412174(x), 0x4121a0(x)
+|      ``-> 0x004121b6      5e             pop esi
+|           0x004121b7      5b             pop ebx
+|           0x004121b8      5d             pop ebp
+\           0x004121b9      c3             ret

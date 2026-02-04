@@ -1,0 +1,50 @@
+            ; CALL XREF from fcn.0041684e @ 0x416891(x)
+            ; CALL XREF from fcn.004169c5 @ +0x134(x)
+            ; CALL XREF from fcn.00417031 @ 0x41704b(x)
+            ; CALL XREF from fcn.0041721d @ 0x4174e7(x)
+            ; CALL XREF from fcn.004251a8 @ 0x4251ba(x)
+/ 80: fcn.00416fcd (uint32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00416fcd      55             push ebp
+|           0x00416fce      8bec           mov ebp, esp
+|           0x00416fd0      53             push ebx
+|           0x00416fd1      56             push esi
+|           0x00416fd2      8b5d08         mov ebx, dword [arg_8h]
+|           0x00416fd5      8d435e         lea eax, [ebx + 0x5e]
+|       ,=< 0x00416fd8      eb0a           jmp 0x416fe4
+..
+|     |||   ; CODE XREF from fcn.00416fcd @ 0x416fd8(x)
+|     |||   ; CODE XREF from fcn.00416fcd @ +0x11(x)
+|     |``-> 0x00416fe4      ba01000000     mov edx, 1
+|     |     ; CODE XREF from fcn.00416fcd @ +0x15(x)
+|     `---> 0x00416fe9      8d7004         lea esi, [eax + 4]
+|           0x00416fec      6a00           push 0
+|           0x00416fee      6aff           push 0xffffffffffffffff
+|           0x00416ff0      52             push edx
+|           0x00416ff1      56             push esi
+|           0x00416ff2      e8abfbfeff     call fcn.00406ba2
+|           0x00416ff7      83c410         add esp, 0x10
+|           0x00416ffa      33c0           xor eax, eax
+|           0x00416ffc      89460d         mov dword [esi + 0xd], eax
+|       ,=< 0x00416fff      eb0a           jmp 0x41700b
+..
+|     |||   ; CODE XREF from fcn.00416fcd @ 0x416fff(x)
+|     |||   ; CODE XREF from fcn.00416fcd @ +0x38(x)
+|     |``-> 0x0041700b      b801000000     mov eax, 1
+|     |     ; CODE XREF from fcn.00416fcd @ +0x3c(x)
+|     `---> 0x00417010      8d7304         lea esi, [ebx + 4]
+|           0x00417013      6a00           push 0
+|           0x00417015      6aff           push 0xffffffffffffffff     ; int32_t arg_10h
+|           0x00417017      50             push eax                    ; uint32_t arg_ch
+|           0x00417018      56             push esi                    ; int32_t arg_8h
+|           0x00417019      e8d5f40000     call fcn.004264f3
+|           0x0041701e      83c410         add esp, 0x10
+|           0x00417021      33c0           xor eax, eax
+|           0x00417023      89460d         mov dword [esi + 0xd], eax
+|           0x00417026      53             push ebx                    ; int32_t arg_8h
+|           0x00417027      e899f9ffff     call fcn.004169c5
+|           0x0041702c      59             pop ecx
+|           0x0041702d      5e             pop esi
+|           0x0041702e      5b             pop ebx
+|           0x0041702f      5d             pop ebp
+\           0x00417030      c3             ret

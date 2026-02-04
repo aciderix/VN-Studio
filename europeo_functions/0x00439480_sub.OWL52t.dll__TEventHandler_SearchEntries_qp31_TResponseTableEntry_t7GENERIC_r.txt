@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0041b8d0 @ +0x15b(x)
+            ; CALL XREF from fcn.0042d858 @ +0x35(x)
+            ; CALL XREF from fcn.00436271 @ +0x5eb(x)
+            ; CALL XREF from fcn.00437415 @ +0x766(x)
+/ 6: sub.OWL52t.dll__TEventHandler_SearchEntries_qp31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfopqr31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfo_4bool ();
+\           0x00439480      ff257c5d4500   jmp dword [sym.imp.OWL52t.dll__TEventHandler_SearchEntries_qp31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfopqr31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfo_4bool] ; 0x455d7c

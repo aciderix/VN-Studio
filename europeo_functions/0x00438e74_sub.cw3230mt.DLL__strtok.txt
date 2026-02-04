@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x0040520f  CALL 0x00405232  CALL 0x00412431  
+            ; XREFS: CALL 0x004125a7  CALL 0x0041265a  CALL 0x004127d4  
+            ; XREFS: CALL 0x00412887  CALL 0x0041293a  CALL 0x00412a2e  
+            ; XREFS: CALL 0x00412ae1  
+/ 6: sub.cw3230mt.DLL__strtok ();
+\           0x00438e74      ff2560594500   jmp dword [sym.imp.cw3230mt.DLL__strtok] ; 0x455960

@@ -1,0 +1,103 @@
+            ; CALL XREF from fcn.004195cc @ 0x419607(x)
+/ 283: fcn.00419e5d (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(5:sp[0x8..0x30])
+|           0x00419e5d      55             push ebp
+|           0x00419e5e      8bec           mov ebp, esp
+|           0x00419e60      83c4d4         add esp, 0xffffffd4
+|           0x00419e63      53             push ebx
+|           0x00419e64      8b5d08         mov ebx, dword [arg_8h]
+|           0x00419e67      b864314400     mov eax, 0x443164           ; 'd1D'
+|           0x00419e6c      e8a797feff     call fcn.00403618
+|           0x00419e71      33d2           xor edx, edx
+|           0x00419e73      895351         mov dword [ebx + 0x51], edx
+|           0x00419e76      8d433d         lea eax, [ebx + 0x3d]
+|           0x00419e79      33d2           xor edx, edx
+|           0x00419e7b      8910           mov dword [eax], edx
+|           0x00419e7d      33c9           xor ecx, ecx
+|           0x00419e7f      894804         mov dword [eax + 4], ecx
+|           0x00419e82      33d2           xor edx, edx
+|           0x00419e84      895008         mov dword [eax + 8], edx
+|           0x00419e87      33c9           xor ecx, ecx
+|           0x00419e89      89480c         mov dword [eax + 0xc], ecx
+|           0x00419e8c      c7434d0100..   mov dword [ebx + 0x4d], 1
+|           0x00419e93      8d432d         lea eax, [ebx + 0x2d]
+|           0x00419e96      50             push eax
+|           0x00419e97      ff730c         push dword [ebx + 0xc]
+|           0x00419e9a      e81c400000     call fcn.0041debb
+|           0x00419e9f      83c408         add esp, 8
+|           0x00419ea2      8b430c         mov eax, dword [ebx + 0xc]
+|           0x00419ea5      83c00d         add eax, 0xd                ; 13
+|           0x00419ea8      8b5008         mov edx, dword [eax + 8]
+|           0x00419eab      2b10           sub edx, dword [eax]
+|           0x00419ead      85d2           test edx, edx
+|       ,=< 0x00419eaf      7e10           jle 0x419ec1
+|       |   0x00419eb1      8b430c         mov eax, dword [ebx + 0xc]
+|       |   0x00419eb4      83c00d         add eax, 0xd                ; 13
+|       |   0x00419eb7      8b500c         mov edx, dword [eax + 0xc]
+|       |   0x00419eba      2b5004         sub edx, dword [eax + 4]
+|       |   0x00419ebd      85d2           test edx, edx
+|      ,==< 0x00419ebf      7f18           jg 0x419ed9
+|      ||   ; CODE XREF from fcn.00419e5d @ 0x419eaf(x)
+|      |`-> 0x00419ec1      53             push ebx
+|      |    0x00419ec2      8b0b           mov ecx, dword [ebx]
+|      |    0x00419ec4      ff5114         call dword [ecx + 0x14]     ; 20
+|      |    0x00419ec7      59             pop ecx
+|      |    0x00419ec8      33c0           xor eax, eax
+|      |    0x00419eca      8b55d4         mov edx, dword [var_2ch]
+|      |    0x00419ecd      6489150000..   mov dword fs:[0], edx
+|      |,=< 0x00419ed4      e99a000000     jmp 0x419f73
+|      ||   ; CODE XREF from fcn.00419e5d @ 0x419ebf(x)
+|      `--> 0x00419ed9      8b5b08         mov ebx, dword [ebx + 8]
+|       |   0x00419edc      837b0c00       cmp dword [ebx + 0xc], 0
+|      ,==< 0x00419ee0      7579           jne 0x419f5b
+|      ||   0x00419ee2      8d4dd4         lea ecx, [var_2ch]
+|      ||   0x00419ee5      51             push ecx
+|      ||   0x00419ee6      6a00           push 0
+|      ||   0x00419ee8      6a00           push 0
+|      ||   0x00419eea      6a00           push 0
+|      ||   0x00419eec      6a01           push 1                      ; 1
+|      ||   0x00419eee      68e03b4000     push 0x403be0
+|      ||   0x00419ef3      6a00           push 0
+|      ||   0x00419ef5      6869070000     push 0x769                  ; 1897
+|      ||   0x00419efa      6842354400     push 0x443542               ; 'B5D' ; "C:\BC5\INCLUDE\owl/window.h"
+|      ||   0x00419eff      6836354400     push 0x443536               ; '65D' ; "GetHandle()"
+|      ||   0x00419f04      685e354400     push 0x44355e               ; '^5D' ; "Precondition"
+|      ||   0x00419f09      8d45fc         lea eax, [var_4h]
+|      ||   0x00419f0c      50             push eax
+|      ||   0x00419f0d      e8feef0100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|      ||   0x00419f12      83c414         add esp, 0x14
+|      ||   0x00419f15      8d55fc         lea edx, [var_4h]
+|      ||   0x00419f18      52             push edx
+|      ||   0x00419f19      ff45f0         inc dword [var_10h]
+|      ||   0x00419f1c      8d4df8         lea ecx, [var_8h]
+|      ||   0x00419f1f      51             push ecx
+|      ||   0x00419f20      e8bfee0100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|      ||   0x00419f25      83c408         add esp, 8
+|      ||   0x00419f28      ff45f0         inc dword [var_10h]
+|      ||   0x00419f2b      66c745e40c00   mov word [var_1ch], 0xc     ; 12
+|      ||   0x00419f31      ff4df0         dec dword [var_10h]
+|      ||   0x00419f34      6a02           push 2                      ; 2
+|      ||   0x00419f36      8d45fc         lea eax, [var_4h]
+|      ||   0x00419f39      50             push eax
+|      ||   0x00419f3a      e825f00100     call sub.cw3230mt.DLL__string__bdtr_qv
+|      ||   0x00419f3f      83c408         add esp, 8
+|      ||   0x00419f42      8345f002       add dword [var_10h], 2
+|      ||   0x00419f46      8345f003       add dword [var_10h], 3
+|      ||   0x00419f4a      8d55f8         lea edx, [var_8h]
+|      ||   0x00419f4d      52             push edx
+|      ||   0x00419f4e      68883b4000     push 0x403b88
+|      ||   0x00419f53      e852ef0100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|      ||   0x00419f58      83c424         add esp, 0x24
+|      ||   ; CODE XREF from fcn.00419e5d @ 0x419ee0(x)
+|      `--> 0x00419f5b      6a00           push 0
+|       |   0x00419f5d      6a00           push 0
+|       |   0x00419f5f      ff730c         push dword [ebx + 0xc]      ; HWND hWnd
+|       |   0x00419f62      e88bf20100     call sub.USER32.dll_InvalidateRect ; BOOL InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
+|       |   0x00419f67      b001           mov al, 1
+|       |   0x00419f69      8b55d4         mov edx, dword [var_2ch]
+|       |   0x00419f6c      6489150000..   mov dword fs:[0], edx
+|       |   ; CODE XREF from fcn.00419e5d @ 0x419ed4(x)
+|       `-> 0x00419f73      5b             pop ebx
+|           0x00419f74      8be5           mov esp, ebp
+|           0x00419f76      5d             pop ebp
+\           0x00419f77      c3             ret

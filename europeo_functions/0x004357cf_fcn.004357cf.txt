@@ -1,0 +1,72 @@
+            ; CALL XREF from fcn.0042908f @ 0x42948c(x)
+            ; CALL XREF from fcn.00437f61 @ +0x4fa(x)
+/ 148: fcn.004357cf (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x004357cf      55             push ebp
+|           0x004357d0      8bec           mov ebp, esp
+|           0x004357d2      53             push ebx
+|           0x004357d3      56             push esi
+|           0x004357d4      57             push edi
+|           0x004357d5      8b5d08         mov ebx, dword [arg_8h]
+|           0x004357d8      6870ec4400     push 0x44ec70
+|           0x004357dd      a19dec4400     mov eax, dword [0x44ec9d]   ; [0x44ec9d:4]=0
+|           0x004357e2      ff5004         call dword [eax + 4]        ; 4
+|           0x004357e5      59             pop ecx
+|           0x004357e6      84c0           test al, al
+|       ,=< 0x004357e8      745a           je 0x435844
+|       |   0x004357ea      53             push ebx
+|       |   0x004357eb      8b5308         mov edx, dword [ebx + 8]
+|       |   0x004357ee      ff527c         call dword [edx + 0x7c]     ; 124
+|       |   0x004357f1      59             pop ecx
+|       |   0x004357f2      85c0           test eax, eax
+|      ,==< 0x004357f4      7541           jne 0x435837
+|      ||   0x004357f6      8b35b5ec4400   mov esi, dword [0x44ecb5]   ; [0x44ecb5:4]=0
+|      ||   0x004357fc      8bfe           mov edi, esi
+|      ||   0x004357fe      83ff01         cmp edi, 1                  ; 1
+|     ,===< 0x00435801      7c12           jl 0x435815
+|     |||   0x00435803      6874ec4400     push 0x44ec74
+|     |||   0x00435808      a175ec4400     mov eax, dword [0x44ec75]   ; [0x44ec75:4]=0
+|     |||   0x0043580d      ff5004         call dword [eax + 4]        ; 4
+|     |||   0x00435810      59             pop ecx
+|     |||   0x00435811      3bf8           cmp edi, eax
+|    ,====< 0x00435813      7e04           jle 0x435819
+|    ||||   ; CODE XREF from fcn.004357cf @ 0x435801(x)
+|    |`---> 0x00435815      33d2           xor edx, edx
+|    |,===< 0x00435817      eb05           jmp 0x43581e
+|    ||||   ; CODE XREF from fcn.004357cf @ 0x435813(x)
+|    `----> 0x00435819      ba01000000     mov edx, 1
+|     |||   ; CODE XREF from fcn.004357cf @ 0x435817(x)
+|     `---> 0x0043581e      84d2           test dl, dl
+|     ,===< 0x00435820      7505           jne 0x435827
+|     |||   0x00435822      be01000000     mov esi, 1
+|     |||   ; CODE XREF from fcn.004357cf @ 0x435820(x)
+|     `---> 0x00435827      6a01           push 1                      ; 1
+|      ||   0x00435829      6a00           push 0
+|      ||   0x0043582b      56             push esi
+|      ||   0x0043582c      53             push ebx
+|      ||   0x0043582d      e8c610ffff     call fcn.004268f8
+|      ||   0x00435832      83c410         add esp, 0x10
+|     ,===< 0x00435835      eb1a           jmp 0x435851
+|     |||   ; CODE XREF from fcn.004357cf @ 0x4357f4(x)
+|     |`--> 0x00435837      6a01           push 1                      ; 1 ; int32_t arg_ch
+|     | |   0x00435839      53             push ebx                    ; int32_t arg_8h
+|     | |   0x0043583a      e85394ffff     call fcn.0042ec92
+|     | |   0x0043583f      83c408         add esp, 8
+|     |,==< 0x00435842      eb0d           jmp 0x435851
+|     |||   ; CODE XREF from fcn.004357cf @ 0x4357e8(x)
+|     ||`-> 0x00435844      6a01           push 1                      ; 1
+|     ||    0x00435846      6a00           push 0
+|     ||    0x00435848      53             push ebx
+|     ||    0x00435849      e822e8ffff     call fcn.00434070
+|     ||    0x0043584e      83c40c         add esp, 0xc
+|     ||    ; CODE XREFS from fcn.004357cf @ 0x435835(x), 0x435842(x)
+|     ``--> 0x00435851      8b4368         mov eax, dword [ebx + 0x68]
+|           0x00435854      83c019         add eax, 0x19               ; 25
+|           0x00435857      50             push eax
+|           0x00435858      e827380000     call sub.bds52t.dll__TMsgThread_PumpWaitingMessages_qv
+|           0x0043585d      59             pop ecx
+|           0x0043585e      5f             pop edi
+|           0x0043585f      5e             pop esi
+|           0x00435860      5b             pop ebx
+|           0x00435861      5d             pop ebp
+\           0x00435862      c3             ret

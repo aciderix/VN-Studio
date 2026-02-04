@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041d898 @ 0x41d8de(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x8d0(x)
+/ 6: sub.OWL52t.dll__TBitmap__bdtr_qv ();
+\           0x004396e4      ff25145f4500   jmp dword [sym.imp.OWL52t.dll__TBitmap__bdtr_qv] ; 0x455f14 ; "f;\x05"

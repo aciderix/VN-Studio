@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.004266f0 @ 0x426706(x)
+            ; CODE XREF from fcn.0042af80 @ +0x31e(x)
+            ; CODE XREF from fcn.0042b90b @ +0x9d5(x)
+/ 6: sub.OWL52t.dll__TDialog_SetupWindow_qv ();
+\           0x004394f8      ff25cc5d4500   jmp dword [sym.imp.OWL52t.dll__TDialog_SetupWindow_qv] ; 0x455dcc

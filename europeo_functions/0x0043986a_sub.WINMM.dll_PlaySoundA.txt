@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0041b38f @ +0x2a1(x), +0x343(x)
+/ 6: sub.WINMM.dll_PlaySoundA ();
+\           0x0043986a      ff2520604500   jmp dword [sym.imp.WINMM.dll_PlaySoundA] ; 0x456020

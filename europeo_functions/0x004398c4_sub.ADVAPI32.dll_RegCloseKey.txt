@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00402126 @ 0x40213e(x)
+/ 6: LSTATUS sub.ADVAPI32.dll_RegCloseKey (HKEY hKey);
+\           0x004398c4      ff2568604500   jmp dword [sym.imp.ADVAPI32.dll_RegCloseKey] ; 0x456068

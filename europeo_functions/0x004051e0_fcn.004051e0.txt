@@ -1,0 +1,69 @@
+            ; CALL XREF from fcn.0040527d @ +0xaf(x)
+/ 157: fcn.004051e0 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(2:sp[0x6..0xc])
+|           0x004051e0      55             push ebp
+|           0x004051e1      8bec           mov ebp, esp
+|           0x004051e3      83c4f8         add esp, 0xfffffff8
+|           0x004051e6      53             push ebx
+|           0x004051e7      56             push esi
+|           0x004051e8      57             push edi
+|           0x004051e9      8b5d0c         mov ebx, dword [arg_ch]
+|           0x004051ec      8b03           mov eax, dword [ebx]
+|           0x004051ee      8b5006         mov edx, dword [eax + 6]
+|           0x004051f1      42             inc edx
+|           0x004051f2      52             push edx
+|           0x004051f3      e8583c0300     call sub.cw3230mt.DLL___bnwa_qui
+|           0x004051f8      59             pop ecx
+|           0x004051f9      8bf0           mov esi, eax
+|           0x004051fb      8b03           mov eax, dword [ebx]
+|           0x004051fd      ff7002         push dword [eax + 2]
+|           0x00405200      56             push esi
+|           0x00405201      e8043d0300     call sub.cw3230mt.DLL__strcpy
+|           0x00405206      83c408         add esp, 8
+|           0x00405209      6898a94300     push 0x43a998               ; u"..\u7525\u252eu"
+|           0x0040520e      56             push esi
+|           0x0040520f      e8603c0300     call sub.cw3230mt.DLL__strtok
+|           0x00405214      83c408         add esp, 8
+|           0x00405217      8bd8           mov ebx, eax
+|           0x00405219      33ff           xor edi, edi
+|           0x0040521b      895df8         mov dword [var_8h], ebx
+|           0x0040521e      ff75f8         push dword [var_8h]
+|           0x00405221      e88a3c0300     call sub.cw3230mt.DLL__atol
+|           0x00405226      59             pop ecx
+|           0x00405227      668945fe       mov word [var_2h], ax
+|           0x0040522b      689aa94300     push 0x43a99a
+|           0x00405230      6a00           push 0
+|           0x00405232      e83d3c0300     call sub.cw3230mt.DLL__strtok
+|           0x00405237      83c408         add esp, 8
+|           0x0040523a      8bd8           mov ebx, eax
+|           0x0040523c      85db           test ebx, ebx
+|       ,=< 0x0040523e      741d           je 0x40525d
+|       |   0x00405240      8bfb           mov edi, ebx
+|       |   0x00405242      57             push edi
+|       |   0x00405243      e8683c0300     call sub.cw3230mt.DLL__atol
+|       |   0x00405248      59             pop ecx
+|       |   0x00405249      8bf8           mov edi, eax
+|       |   0x0040524b      807b0100       cmp byte [ebx + 1], 0
+|      ,==< 0x0040524f      750c           jne 0x40525d
+|      ||   0x00405251      0fb7c7         movzx eax, di
+|      ||   0x00405254      8bd0           mov edx, eax
+|      ||   0x00405256      03d2           add edx, edx
+|      ||   0x00405258      8d1492         lea edx, [edx + edx*4]
+|      ||   0x0040525b      8bfa           mov edi, edx
+|      ||   ; CODE XREFS from fcn.004051e0 @ 0x40523e(x), 0x40524f(x)
+|      ``-> 0x0040525d      0fb7cf         movzx ecx, di
+|           0x00405260      0fb745fe       movzx eax, word [var_2h]
+|           0x00405264      c1e010         shl eax, 0x10
+|           0x00405267      0bc8           or ecx, eax
+|           0x00405269      8b5508         mov edx, dword [arg_8h]
+|           0x0040526c      894a04         mov dword [edx + 4], ecx
+|           0x0040526f      56             push esi
+|           0x00405270      e80d3d0300     call sub.cw3230mt.DLL___bdla_qpv
+|           0x00405275      59             pop ecx
+|           0x00405276      5f             pop edi
+|           0x00405277      5e             pop esi
+|           0x00405278      5b             pop ebx
+|           0x00405279      59             pop ecx
+|           0x0040527a      59             pop ecx
+|           0x0040527b      5d             pop ebp
+\           0x0040527c      c3             ret

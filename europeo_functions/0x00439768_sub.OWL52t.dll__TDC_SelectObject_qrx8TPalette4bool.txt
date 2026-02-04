@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x00427935  CALL 0x00427a00  CALL 0x0042f453  
+            ; XREFS: CALL 0x0042f468  CALL 0x0042f624  CALL 0x0042f645  
+            ; XREFS: CALL 0x0042f6e1  CALL 0x0042f702  CALL 0x00431606  
+            ; XREFS: CALL 0x0043161e  
+/ 6: sub.OWL52t.dll__TDC_SelectObject_qrx8TPalette4bool ();
+\           0x00439768      ff256c5f4500   jmp dword [sym.imp.OWL52t.dll__TDC_SelectObject_qrx8TPalette4bool] ; 0x455f6c ; "J>\x05"

@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00407cc0 @ 0x407d5f(x)
+            ; CALL XREF from fcn.00428154 @ 0x428208(x)
+            ; CALL XREFS from fcn.0042cc94 @ 0x42ccc3(x), 0x42ccdb(x)
+/ 6: sub.cw3230mt.DLL__strnicmp ();
+\           0x00438f46      ff25ec594500   jmp dword [sym.imp.cw3230mt.DLL__strnicmp] ; 0x4559ec

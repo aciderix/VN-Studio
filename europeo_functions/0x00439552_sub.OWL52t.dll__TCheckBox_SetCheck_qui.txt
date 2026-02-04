@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x0042b0ca  CALL 0x0042b956  CALL 0x0042b971  
+            ; XREFS: CALL 0x0042b98c  CALL 0x0042b9a7  CALL 0x0042b9c2  
+            ; XREFS: CALL 0x0042b9dd  CALL 0x0042b9f8  CALL 0x0042ba13  
+            ; XREFS: CALL 0x0042ba2f  
+/ 6: sub.OWL52t.dll__TCheckBox_SetCheck_qui ();
+\           0x00439552      ff25085e4500   jmp dword [sym.imp.OWL52t.dll__TCheckBox_SetCheck_qui] ; 0x455e08

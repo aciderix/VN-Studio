@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0040453c @ 0x404555(x)
+            ; CALL XREF from fcn.0040453c @ +0xfc(x)
+/ 6: DWORD sub.KERNEL32.dll_GetFileAttributesA (LPCSTR lpFileName);
+\           0x00439036      ff25905a4500   jmp dword [sym.imp.KERNEL32.dll_GetFileAttributesA] ; 0x455a90 ; "X\x19\x05"

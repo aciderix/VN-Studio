@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00438675 @ 0x43877b(x)
+/ 6: BOOL sub.KERNEL32.dll_GetVolumeInformationA (LPCSTR lpRootPathName, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize, LPDWORD lpVolumeSerialNumber, LPDWORD lpMaximumComponentLength, LPDWORD lpFileSystemFlags, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
+\           0x0043901e      ff25805a4500   jmp dword [sym.imp.KERNEL32.dll_GetVolumeInformationA] ; 0x455a80

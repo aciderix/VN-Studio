@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x004043d3  CALL 0x0040a7ec  CALL 0x0040a910  
+            ; XREFS: CALL 0x0040b8bc  CALL 0x0041fcd1  CALL 0x0041fd28  
+            ; XREFS: CALL 0x0041feff  CALL 0x00428225  CALL 0x0042ccf8  
+/ 6: sub.cw3230mt.DLL__string_substr_xqui ();
+\           0x00438dc6      ff25ec584500   jmp dword [sym.imp.cw3230mt.DLL__string_substr_xqui] ; 0x4558ec ; "6\x11\x05"

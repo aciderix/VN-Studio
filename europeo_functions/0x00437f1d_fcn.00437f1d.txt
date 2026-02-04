@@ -1,0 +1,31 @@
+            ; CALL XREF from fcn.00437f61 @ 0x437f79(x)
+/ 68: fcn.00437f1d ();
+|           0x00437f1d      55             push ebp
+|           0x00437f1e      8bec           mov ebp, esp
+|           0x00437f20      833d50ec44..   cmp dword [0x44ec50], 0     ; [0x44ec50:4]=0
+|       ,=< 0x00437f27      740a           je 0x437f33
+|       |   0x00437f29      a150ec4400     mov eax, dword [0x44ec50]   ; [0x44ec50:4]=0
+|       |   0x00437f2e      8a5005         mov dl, byte [eax + 5]
+|      ,==< 0x00437f31      eb02           jmp 0x437f35
+|      ||   ; CODE XREF from fcn.00437f1d @ 0x437f27(x)
+|      |`-> 0x00437f33      33d2           xor edx, edx
+|      |    ; CODE XREF from fcn.00437f1d @ 0x437f31(x)
+|      `--> 0x00437f35      84d2           test dl, dl
+|       ,=< 0x00437f37      7421           je 0x437f5a
+|       |   0x00437f39      833d50ec44..   cmp dword [0x44ec50], 0     ; [0x44ec50:4]=0
+|      ,==< 0x00437f40      740a           je 0x437f4c
+|      ||   0x00437f42      a150ec4400     mov eax, dword [0x44ec50]   ; [0x44ec50:4]=0
+|      ||   0x00437f47      8b4806         mov ecx, dword [eax + 6]
+|     ,===< 0x00437f4a      eb02           jmp 0x437f4e
+|     |||   ; CODE XREF from fcn.00437f1d @ 0x437f40(x)
+|     |`--> 0x00437f4c      33c9           xor ecx, ecx
+|     | |   ; CODE XREF from fcn.00437f1d @ 0x437f4a(x)
+|     `---> 0x00437f4e      81f900010000   cmp ecx, 0x100              ; pe_nt_image_headers32
+|      ,==< 0x00437f54      7304           jae 0x437f5a
+|      ||   0x00437f56      33c0           xor eax, eax
+|     ,===< 0x00437f58      eb05           jmp 0x437f5f
+|     |||   ; CODE XREFS from fcn.00437f1d @ 0x437f37(x), 0x437f54(x)
+|     |``-> 0x00437f5a      b801000000     mov eax, 1
+|     |     ; CODE XREF from fcn.00437f1d @ 0x437f58(x)
+|     `---> 0x00437f5f      5d             pop ebp
+\           0x00437f60      c3             ret

@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.004033ce @ 0x403438(x)
+            ; CALL XREF from fcn.004033ce @ +0x139(x)
+/ 6: sub.cw3230mt.DLL____unlockDebuggerData_qv ();
+\           0x00438e44      ff2540594500   jmp dword [sym.imp.cw3230mt.DLL____unlockDebuggerData_qv] ; 0x455940

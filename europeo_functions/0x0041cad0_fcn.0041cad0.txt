@@ -1,0 +1,68 @@
+            ; CALL XREF from fcn.00424ee4 @ 0x4250a2(x)
+/ 156: fcn.0041cad0 (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h);
+| `- args(sp[0x4..0xc]) vars(2:sp[0x18..0x28])
+|           0x0041cad0      55             push ebp
+|           0x0041cad1      8bec           mov ebp, esp
+|           0x0041cad3      83c4dc         add esp, 0xffffffdc
+|           0x0041cad6      53             push ebx
+|           0x0041cad7      56             push esi
+|           0x0041cad8      57             push edi
+|           0x0041cad9      8b5d10         mov ebx, dword [arg_10h]
+|           0x0041cadc      8b750c         mov esi, dword [arg_ch]
+|           0x0041cadf      8d7d08         lea edi, [arg_8h]
+|           0x0041cae2      b854414400     mov eax, 0x444154           ; 'TAD'
+|           0x0041cae7      e82c6bfeff     call fcn.00403618
+|           0x0041caec      66c745ec0800   mov word [var_14h], 8
+|           0x0041caf2      8b17           mov edx, dword [edi]
+|           0x0041caf4      c70220434400   mov dword [edx], 0x444320   ; ' CD'
+|                                                                      ; [0x444320:4]=0x41d38b
+|           0x0041cafa      8b0f           mov ecx, dword [edi]
+|           0x0041cafc      66897108       mov word [ecx + 8], si
+|           0x0041cb00      0fb7c6         movzx eax, si
+|           0x0041cb03      c1e002         shl eax, 2
+|           0x0041cb06      50             push eax
+|           0x0041cb07      e844c30100     call sub.cw3230mt.DLL___bnwa_qui
+|           0x0041cb0c      59             pop ecx
+|           0x0041cb0d      8b17           mov edx, dword [edi]
+|           0x0041cb0f      894204         mov dword [edx + 4], eax
+|           0x0041cb12      33c0           xor eax, eax
+|           0x0041cb14      663bf0         cmp si, ax
+|       ,=< 0x0041cb17      7641           jbe 0x41cb5a
+|       |   ; CODE XREF from fcn.0041cad0 @ 0x41cb58(x)
+|      .--> 0x0041cb19      0fb7d0         movzx edx, ax
+|      :|   0x0041cb1c      8b0f           mov ecx, dword [edi]
+|      :|   0x0041cb1e      8b4904         mov ecx, dword [ecx + 4]
+|      :|   0x0041cb21      8d4c9102       lea ecx, [ecx + edx*4 + 2]
+|      :|   0x0041cb25      33d2           xor edx, edx
+|      :|   0x0041cb27      8811           mov byte [ecx], dl
+|      :|   0x0041cb29      52             push edx
+|      :|   0x0041cb2a      0fb7c8         movzx ecx, ax
+|      :|   0x0041cb2d      8b17           mov edx, dword [edi]
+|      :|   0x0041cb2f      8b5204         mov edx, dword [edx + 4]
+|      :|   0x0041cb32      8d548a01       lea edx, [edx + ecx*4 + 1]
+|      :|   0x0041cb36      59             pop ecx
+|      :|   0x0041cb37      880a           mov byte [edx], cl
+|      :|   0x0041cb39      51             push ecx
+|      :|   0x0041cb3a      0fb7d0         movzx edx, ax
+|      :|   0x0041cb3d      8b0f           mov ecx, dword [edi]
+|      :|   0x0041cb3f      8b4904         mov ecx, dword [ecx + 4]
+|      :|   0x0041cb42      8d0c91         lea ecx, [ecx + edx*4]
+|      :|   0x0041cb45      5a             pop edx
+|      :|   0x0041cb46      8811           mov byte [ecx], dl
+|      :|   0x0041cb48      0fb7d0         movzx edx, ax
+|      :|   0x0041cb4b      8b0f           mov ecx, dword [edi]
+|      :|   0x0041cb4d      8b4904         mov ecx, dword [ecx + 4]
+|      :|   0x0041cb50      885c9103       mov byte [ecx + edx*4 + 3], bl
+|      :|   0x0041cb54      40             inc eax
+|      :|   0x0041cb55      663bf0         cmp si, ax
+|      `==< 0x0041cb58      77bf           ja 0x41cb19
+|       |   ; CODE XREF from fcn.0041cad0 @ 0x41cb17(x)
+|       `-> 0x0041cb5a      8b45dc         mov eax, dword [var_24h]
+|           0x0041cb5d      64a300000000   mov dword fs:[0], eax
+|           0x0041cb63      8b07           mov eax, dword [edi]
+|           0x0041cb65      5f             pop edi
+|           0x0041cb66      5e             pop esi
+|           0x0041cb67      5b             pop ebx
+|           0x0041cb68      8be5           mov esp, ebp
+|           0x0041cb6a      5d             pop ebp
+\           0x0041cb6b      c3             ret

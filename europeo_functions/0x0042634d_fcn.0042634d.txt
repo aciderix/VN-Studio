@@ -1,0 +1,49 @@
+            ; CALL XREF from fcn.004251ce @ 0x425200(x)
+            ; CALL XREF from fcn.004268f8 @ 0x42693a(x)
+/ 76: fcn.0042634d (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0042634d      55             push ebp
+|           0x0042634e      8bec           mov ebp, esp
+|           0x00426350      53             push ebx
+|           0x00426351      56             push esi
+|           0x00426352      57             push edi
+|           0x00426353      8b7d0c         mov edi, dword [arg_ch]
+|           0x00426356      8b7508         mov esi, dword [arg_8h]
+|           0x00426359      56             push esi
+|           0x0042635a      8b4601         mov eax, dword [esi + 1]
+|           0x0042635d      ff10           call dword [eax]
+|           0x0042635f      59             pop ecx
+|           0x00426360      85c0           test eax, eax
+|       ,=< 0x00426362      742d           je 0x426391
+|       |   0x00426364      33db           xor ebx, ebx
+|      ,==< 0x00426366      eb1e           jmp 0x426386
+|      ||   ; CODE XREF from fcn.0042634d @ 0x42638f(x)
+|     .---> 0x00426368      8b4605         mov eax, dword [esi + 5]
+|     :||   0x0042636b      833c9800       cmp dword [eax + ebx*4], 0
+|    ,====< 0x0042636f      7414           je 0x426385
+|    |:||   0x00426371      8b5605         mov edx, dword [esi + 5]
+|    |:||   0x00426374      3b3c9a         cmp edi, dword [edx + ebx*4]
+|    |:||   0x00426377      0f94c1         sete cl
+|    |:||   0x0042637a      83e101         and ecx, 1
+|    |:||   0x0042637d      84c9           test cl, cl
+|   ,=====< 0x0042637f      7404           je 0x426385
+|   ||:||   ; CODE XREF from fcn.00426184 @ +0x18b(x)
+|   ||:||   0x00426381      8bc3           mov eax, ebx
+|  ,======< 0x00426383      eb0f           jmp 0x426394
+|  |||:||   ; CODE XREFS from fcn.0042634d @ 0x42636f(x), 0x42637f(x)
+|  |``----> 0x00426385      43             inc ebx
+|  |  :||   ; CODE XREF from fcn.0042634d @ 0x426366(x)
+|  |  :`--> 0x00426386      56             push esi
+|  |  : |   0x00426387      8b5601         mov edx, dword [esi + 1]
+|  |  : |   0x0042638a      ff12           call dword [edx]
+|  |  : |   0x0042638c      59             pop ecx
+|  |  : |   0x0042638d      3bd8           cmp ebx, eax
+|  |  `===< 0x0042638f      72d7           jb 0x426368
+|  |    |   ; CODE XREF from fcn.0042634d @ 0x426362(x)
+|  |    `-> 0x00426391      83c8ff         or eax, 0xffffffff          ; -1
+|  |        ; CODE XREF from fcn.0042634d @ 0x426383(x)
+|  `------> 0x00426394      5f             pop edi
+|           0x00426395      5e             pop esi
+|           0x00426396      5b             pop ebx
+|           0x00426397      5d             pop ebp
+\           0x00426398      c3             ret

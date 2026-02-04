@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x00401b23  CALL 0x00401b6f  CALL 0x004027dc  
+            ; XREFS: CALL 0x00402c34  CALL 0x00402db6  CALL 0x00402e6c  
+            ; XREFS: CALL 0x00402ed6  CALL 0x00403b16  
+/ 6: int sub.KERNEL32.dll_lstrcmpA (LPCSTR lpString1, LPCSTR lpString2);
+\           0x00438fd0      ff254c5a4500   jmp dword [sym.imp.KERNEL32.dll_lstrcmpA] ; 0x455a4c ; "D\x18\x05"

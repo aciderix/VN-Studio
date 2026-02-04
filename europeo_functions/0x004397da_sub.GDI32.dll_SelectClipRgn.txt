@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0042ecb9 @ +0xe50(x)
+/ 6: _regionflags sub.GDI32.dll_SelectClipRgn (HDC hdc, HRGN hrgn);
+\           0x004397da      ff25bc5f4500   jmp dword [sym.imp.GDI32.dll_SelectClipRgn] ; 0x455fbc ; "8@\x05"

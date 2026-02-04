@@ -1,0 +1,3 @@
+            ; XREFS(187)
+/ 6: sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1 ();
+\           0x00438eaa      ff2584594500   jmp dword [sym.imp.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1] ; 0x455984 ; "`\x14\x05"

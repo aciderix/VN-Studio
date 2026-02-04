@@ -1,0 +1,6 @@
+            ; CALL XREFS from fcn.00403a55 @ +0x365(x), +0x41f(x)
+            ; CALL XREF from fcn.00426184 @ 0x426230(x)
+            ; CALL XREF from fcn.004370b8 @ 0x4371a1(x)
+            ; CALL XREF from fcn.00437ba4 @ 0x437c60(x)
+/ 6: DWORD sub.KERNEL32.dll_GetModuleFileNameA (HMODULE hModule, LPSTR lpFilename, DWORD nSize);
+\           0x00438fdc      ff25545a4500   jmp dword [sym.imp.KERNEL32.dll_GetModuleFileNameA] ; 0x455a54 ; "\\x18\x05"

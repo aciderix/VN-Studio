@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.00415a4d @ +0x68f(x), +0x8ee(x)
+/ 6: sub.bds52t.dll___brsh_qr8ipstreamr5TRect ();
+\           0x0043913e      ff25485b4500   jmp dword [sym.imp.bds52t.dll___brsh_qr8ipstreamr5TRect] ; 0x455b48 ; "B\x1d\x05"

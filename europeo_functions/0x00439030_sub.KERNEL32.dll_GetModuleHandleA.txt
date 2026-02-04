@@ -1,0 +1,4 @@
+            ; CALL XREF from entry0 @ 0x401035(x)
+            ; CALL XREF from fcn.00401a18 @ 0x401a34(x)
+/ 6: HMODULE sub.KERNEL32.dll_GetModuleHandleA (LPCSTR lpModuleName);
+\           0x00439030      ff258c5a4500   jmp dword [sym.imp.KERNEL32.dll_GetModuleHandleA] ; 0x455a8c ; "D\x19\x05"

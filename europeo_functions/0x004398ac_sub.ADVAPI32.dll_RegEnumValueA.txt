@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0040222e @ +0x21b(x)
+/ 6: LSTATUS sub.ADVAPI32.dll_RegEnumValueA (HKEY hKey, DWORD dwIndex, LPSTR lpValueName, LPDWORD lpcchValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
+\           0x004398ac      ff2558604500   jmp dword [sym.imp.ADVAPI32.dll_RegEnumValueA] ; 0x456058

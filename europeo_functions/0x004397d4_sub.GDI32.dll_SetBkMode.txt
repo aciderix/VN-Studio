@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x0041e07e  CALL 0x0041e08e  CALL 0x00426ed0  
+            ; XREFS: CALL 0x00426ee0  CALL 0x0042754b  CALL 0x0042755b  
+            ; XREFS: CALL 0x0042f5a6  CALL 0x0042f5b9  
+/ 6: long sub.GDI32.dll_SetBkMode (HDC hdc, int iBkMode);
+\           0x004397d4      ff25b85f4500   jmp dword [sym.imp.GDI32.dll_SetBkMode] ; 0x455fb8 ; ",@\x05"

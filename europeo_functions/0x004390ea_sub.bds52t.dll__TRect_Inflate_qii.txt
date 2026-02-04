@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.00426d33 @ 0x426f0a(x), 0x426fda(x), 0x427015(x)
+/ 6: sub.bds52t.dll__TRect_Inflate_qii ();
+\           0x004390ea      ff25105b4500   jmp dword [sym.imp.bds52t.dll__TRect_Inflate_qii] ; 0x455b10

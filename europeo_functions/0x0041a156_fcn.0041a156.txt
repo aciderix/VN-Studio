@@ -1,0 +1,75 @@
+            ; CALL XREF from fcn.0041a221 @ +0x1e1(x)
+/ 175: fcn.0041a156 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0041a156      55             push ebp
+|           0x0041a157      8bec           mov ebp, esp
+|           0x0041a159      53             push ebx
+|           0x0041a15a      8b550c         mov edx, dword [arg_ch]
+|           0x0041a15d      8b4508         mov eax, dword [arg_8h]
+|           0x0041a160      8b480c         mov ecx, dword [eax + 0xc]
+|           0x0041a163      8b490d         mov ecx, dword [ecx + 0xd]
+|           0x0041a166      030a           add ecx, dword [edx]
+|           0x0041a168      85c9           test ecx, ecx
+|       ,=< 0x0041a16a      7e1a           jle 0x41a186
+|       |   0x0041a16c      8b480c         mov ecx, dword [eax + 0xc]
+|       |   0x0041a16f      83c10d         add ecx, 0xd                ; 13
+|       |   0x0041a172      8b5908         mov ebx, dword [ecx + 8]
+|       |   0x0041a175      2b19           sub ebx, dword [ecx]
+|       |   0x0041a177      3b5810         cmp ebx, dword [eax + 0x10]
+|      ,==< 0x0041a17a      7e0a           jle 0x41a186
+|      ||   0x0041a17c      8b480c         mov ecx, dword [eax + 0xc]
+|      ||   0x0041a17f      8b490d         mov ecx, dword [ecx + 0xd]
+|      ||   0x0041a182      f7d9           neg ecx
+|      ||   0x0041a184      890a           mov dword [edx], ecx
+|      ||   ; CODE XREFS from fcn.0041a156 @ 0x41a16a(x), 0x41a17a(x)
+|      ``-> 0x0041a186      8b480c         mov ecx, dword [eax + 0xc]
+|           0x0041a189      8b4911         mov ecx, dword [ecx + 0x11]
+|           0x0041a18c      034a04         add ecx, dword [edx + 4]
+|           0x0041a18f      85c9           test ecx, ecx
+|       ,=< 0x0041a191      7e1c           jle 0x41a1af
+|       |   0x0041a193      8b480c         mov ecx, dword [eax + 0xc]
+|       |   0x0041a196      83c10d         add ecx, 0xd                ; 13
+|       |   0x0041a199      8b590c         mov ebx, dword [ecx + 0xc]
+|       |   0x0041a19c      2b5904         sub ebx, dword [ecx + 4]
+|       |   0x0041a19f      3b5814         cmp ebx, dword [eax + 0x14]
+|      ,==< 0x0041a1a2      7e0b           jle 0x41a1af
+|      ||   0x0041a1a4      8b480c         mov ecx, dword [eax + 0xc]
+|      ||   0x0041a1a7      8b4911         mov ecx, dword [ecx + 0x11]
+|      ||   0x0041a1aa      f7d9           neg ecx
+|      ||   0x0041a1ac      894a04         mov dword [edx + 4], ecx
+|      ||   ; CODE XREFS from fcn.0041a156 @ 0x41a191(x), 0x41a1a2(x)
+|      ``-> 0x0041a1af      8b480c         mov ecx, dword [eax + 0xc]
+|           0x0041a1b2      8b4915         mov ecx, dword [ecx + 0x15]
+|           0x0041a1b5      030a           add ecx, dword [edx]
+|           0x0041a1b7      3b4810         cmp ecx, dword [eax + 0x10]
+|       ,=< 0x0041a1ba      7d1b           jge 0x41a1d7
+|       |   0x0041a1bc      8b480c         mov ecx, dword [eax + 0xc]
+|       |   0x0041a1bf      83c10d         add ecx, 0xd                ; 13
+|       |   0x0041a1c2      8b5908         mov ebx, dword [ecx + 8]
+|       |   0x0041a1c5      2b19           sub ebx, dword [ecx]
+|       |   0x0041a1c7      3b5810         cmp ebx, dword [eax + 0x10]
+|      ,==< 0x0041a1ca      7e0b           jle 0x41a1d7
+|      ||   0x0041a1cc      8b480c         mov ecx, dword [eax + 0xc]
+|      ||   0x0041a1cf      8b5810         mov ebx, dword [eax + 0x10]
+|      ||   0x0041a1d2      2b5915         sub ebx, dword [ecx + 0x15]
+|      ||   0x0041a1d5      891a           mov dword [edx], ebx
+|      ||   ; CODE XREFS from fcn.0041a156 @ 0x41a1ba(x), 0x41a1ca(x)
+|      ``-> 0x0041a1d7      8b480c         mov ecx, dword [eax + 0xc]
+|           0x0041a1da      8b4919         mov ecx, dword [ecx + 0x19]
+|           0x0041a1dd      034a04         add ecx, dword [edx + 4]
+|           0x0041a1e0      3b4814         cmp ecx, dword [eax + 0x14]
+|       ,=< 0x0041a1e3      7d1d           jge 0x41a202
+|       |   0x0041a1e5      8b480c         mov ecx, dword [eax + 0xc]
+|       |   0x0041a1e8      83c10d         add ecx, 0xd                ; 13
+|       |   0x0041a1eb      8b590c         mov ebx, dword [ecx + 0xc]
+|       |   0x0041a1ee      2b5904         sub ebx, dword [ecx + 4]
+|       |   0x0041a1f1      3b5814         cmp ebx, dword [eax + 0x14]
+|      ,==< 0x0041a1f4      7e0c           jle 0x41a202
+|      ||   0x0041a1f6      8b480c         mov ecx, dword [eax + 0xc]
+|      ||   0x0041a1f9      8b4014         mov eax, dword [eax + 0x14]
+|      ||   0x0041a1fc      2b4119         sub eax, dword [ecx + 0x19]
+|      ||   0x0041a1ff      894204         mov dword [edx + 4], eax
+|      ||   ; CODE XREFS from fcn.0041a156 @ 0x41a1e3(x), 0x41a1f4(x)
+|      ``-> 0x0041a202      5b             pop ebx
+|           0x0041a203      5d             pop ebp
+\           0x0041a204      c3             ret

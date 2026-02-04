@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00418e04 @ 0x418eee(x)
+/ 6: sub.WINMM.dll_timeBeginPeriod ();
+\           0x00439852      ff2510604500   jmp dword [sym.imp.WINMM.dll_timeBeginPeriod] ; 0x456010 ; "vA\x05"

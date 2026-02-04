@@ -1,0 +1,149 @@
+            ; CALL XREF from fcn.00437415 @ +0x1b9(x)
+/ 465: fcn.004370b8 (LPVOID *lplpBuffer, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(9:sp[0x8..0x13c])
+|           0x004370b8      55             push ebp
+|           0x004370b9      8bec           mov ebp, esp
+|           0x004370bb      81c4c8feffff   add esp, 0xfffffec8
+|           0x004370c1      53             push ebx
+|           0x004370c2      8b5d0c         mov ebx, dword [arg_ch]
+|           0x004370c5      b8d4d44400     mov eax, 0x44d4d4
+|           0x004370ca      e849c5fcff     call fcn.00403618
+|           0x004370cf      66c745e00800   mov word [var_20h], 8
+|           0x004370d5      8b5508         mov edx, dword [lplpBuffer]
+|           0x004370d8      c70284d94400   mov dword [edx], 0x44d984   ; [0x44d984:4]=0x437289 fcn.00437289
+|           0x004370de      66c745e02000   mov word [var_20h], 0x20    ; 32
+|           0x004370e4      68ff000000     push 0xff                   ; 255
+|           0x004370e9      e8621d0000     call sub.cw3230mt.DLL___bnwa_qui
+|           0x004370ee      59             pop ecx
+|           0x004370ef      8945fc         mov dword [lpSubBlock], eax
+|           0x004370f2      ff45ec         inc dword [var_14h]
+|           0x004370f5      66c745e01400   mov word [var_20h], 0x14    ; 20
+|           0x004370fb      8b4d08         mov ecx, dword [lplpBuffer]
+|           0x004370fe      33c0           xor eax, eax
+|           0x00437100      894108         mov dword [ecx + 8], eax
+|           0x00437103      837b0820       cmp dword [ebx + 8], 0x20
+|       ,=< 0x00437107      0f8785000000   ja 0x437192
+|       |   0x0043710d      8d55d0         lea edx, [var_30h]
+|       |   0x00437110      52             push edx
+|       |   0x00437111      6a00           push 0
+|       |   0x00437113      6a00           push 0
+|       |   0x00437115      6a00           push 0
+|       |   0x00437117      6a01           push 1                      ; 1
+|       |   0x00437119      68e03b4000     push 0x403be0
+|       |   0x0043711e      6a00           push 0
+|       |   0x00437120      66c745e02c00   mov word [var_20h], 0x2c    ; ',' ; 44
+|       |   0x00437126      68da030000     push 0x3da                  ; 986
+|       |   0x0043712b      68e5d74400     push 0x44d7e5               ; "C:\BC5\INCLUDE\owl/module.h"
+|       |   0x00437130      68c1d74400     push 0x44d7c1               ; "Handle > HINSTANCE(HINSTANCE_ERROR)"
+|       |   0x00437135      6801d84400     push 0x44d801               ; "Precondition"
+|       |   0x0043713a      8d4df8         lea ecx, [var_8h]
+|       |   0x0043713d      51             push ecx
+|       |   0x0043713e      e8cd1d0000     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|       |   0x00437143      83c414         add esp, 0x14
+|       |   0x00437146      8d45f8         lea eax, [var_8h]
+|       |   0x00437149      50             push eax
+|       |   0x0043714a      ff45ec         inc dword [var_14h]
+|       |   0x0043714d      8d55f4         lea edx, [var_ch]
+|       |   0x00437150      52             push edx
+|       |   0x00437151      e88e1c0000     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|       |   0x00437156      83c408         add esp, 8
+|       |   0x00437159      ff45ec         inc dword [var_14h]
+|       |   0x0043715c      66c745e03800   mov word [var_20h], 0x38    ; '8' ; 56
+|       |   0x00437162      ff4dec         dec dword [var_14h]
+|       |   0x00437165      6a02           push 2                      ; 2
+|       |   0x00437167      8d4df8         lea ecx, [var_8h]
+|       |   0x0043716a      51             push ecx
+|       |   0x0043716b      e8f41d0000     call sub.cw3230mt.DLL__string__bdtr_qv
+|       |   0x00437170      83c408         add esp, 8
+|       |   0x00437173      66c745e02c00   mov word [var_20h], 0x2c    ; ',' ; 44
+|       |   0x00437179      8345ec02       add dword [var_14h], 2
+|       |   0x0043717d      8345ec03       add dword [var_14h], 3
+|       |   0x00437181      8d45f4         lea eax, [var_ch]
+|       |   0x00437184      50             push eax
+|       |   0x00437185      68883b4000     push 0x403b88
+|       |   0x0043718a      e81b1d0000     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|       |   0x0043718f      83c424         add esp, 0x24
+|       |   ; CODE XREF from fcn.004370b8 @ 0x437107(x)
+|       `-> 0x00437192      68ff000000     push 0xff                   ; 255 ; DWORD nSize
+|           0x00437197      8d95c8feffff   lea edx, [lptstrFilename]
+|           0x0043719d      52             push edx                    ; LPSTR lpFilename
+|           0x0043719e      ff7308         push dword [ebx + 8]        ; HMODULE hModule
+|           0x004371a1      e8361e0000     call sub.KERNEL32.dll_GetModuleFileNameA ; DWORD GetModuleFileNameA(HMODULE hModule, LPSTR lpFilename, DWORD nSize)
+|           0x004371a6      8d8dc8feffff   lea ecx, [lptstrFilename]
+|           0x004371ac      51             push ecx                    ; LPSTR pDst
+|           0x004371ad      8d85c8feffff   lea eax, [lptstrFilename]
+|           0x004371b3      50             push eax                    ; LPCSTR pSrc
+|           0x004371b4      e8ab200000     call sub.USER32.dll_OemToCharA ; BOOL OemToCharA(LPCSTR pSrc, LPSTR pDst)
+|           0x004371b9      8d55cc         lea edx, [lpdwHandle]
+|           0x004371bc      52             push edx                    ; LPDWORD lpdwHandle
+|           0x004371bd      8d8dc8feffff   lea ecx, [lptstrFilename]
+|           0x004371c3      51             push ecx                    ; LPCSTR lptstrFilename
+|           0x004371c4      e8b3260000     call sub.VERSION.dll_GetFileVersionInfoSizeA ; DWORD GetFileVersionInfoSizeA(LPCSTR lptstrFilename, LPDWORD lpdwHandle)
+|           0x004371c9      8bd8           mov ebx, eax
+|           0x004371cb      66c745e01400   mov word [var_20h], 0x14    ; 20
+|           0x004371d1      85db           test ebx, ebx
+|       ,=< 0x004371d3      0f8493000000   je 0x43726c
+|       |   0x004371d9      53             push ebx
+|       |   0x004371da      e8711c0000     call sub.cw3230mt.DLL___bnwa_qui
+|       |   0x004371df      59             pop ecx
+|       |   0x004371e0      8b5508         mov edx, dword [lplpBuffer]
+|       |   0x004371e3      894208         mov dword [edx + 8], eax
+|       |   0x004371e6      8b4508         mov eax, dword [lplpBuffer]
+|       |   0x004371e9      ff7008         push dword [eax + 8]        ; LPVOID lpData
+|       |   0x004371ec      53             push ebx                    ; DWORD dwLen
+|       |   0x004371ed      ff75cc         push dword [lpdwHandle]     ; DWORD dwHandle
+|       |   0x004371f0      8d8dc8feffff   lea ecx, [lptstrFilename]
+|       |   0x004371f6      51             push ecx                    ; LPCSTR lptstrFilename
+|       |   0x004371f7      e886260000     call sub.VERSION.dll_GetFileVersionInfoA ; BOOL GetFileVersionInfoA(LPCSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData)
+|       |   0x004371fc      85c0           test eax, eax
+|      ,==< 0x004371fe      746c           je 0x43726c
+|      ||   0x00437200      680ed84400     push 0x44d80e               ; "\VarFileInfo\Translation"
+|      ||   0x00437205      ff75fc         push dword [lpSubBlock]
+|      ||   0x00437208      e8fd1c0000     call sub.cw3230mt.DLL__strcpy
+|      ||   0x0043720d      83c408         add esp, 8
+|      ||   0x00437210      8d45c8         lea eax, [puLen]
+|      ||   0x00437213      50             push eax                    ; PUINT puLen
+|      ||   0x00437214      8b5508         mov edx, dword [lplpBuffer]
+|      ||   0x00437217      83c204         add edx, 4
+|      ||   0x0043721a      52             push edx                    ; LPVOID *lplpBuffer
+|      ||   0x0043721b      ff75fc         push dword [lpSubBlock]     ; LPCSTR lpSubBlock
+|      ||   0x0043721e      8b4d08         mov ecx, dword [lplpBuffer]
+|      ||   0x00437221      ff7108         push dword [ecx + 8]        ; LPCVOID pBlock
+|      ||   0x00437224      e84d260000     call sub.VERSION.dll_VerQueryValueA ; BOOL VerQueryValueA(LPCVOID pBlock, LPCSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen)
+|      ||   0x00437229      85c0           test eax, eax
+|     ,===< 0x0043722b      7516           jne 0x437243
+|     |||   0x0043722d      8b4508         mov eax, dword [lplpBuffer]
+|     |||   0x00437230      ff7008         push dword [eax + 8]
+|     |||   0x00437233      e84a1d0000     call sub.cw3230mt.DLL___bdla_qpv
+|     |||   0x00437238      59             pop ecx
+|     |||   0x00437239      8b5508         mov edx, dword [lplpBuffer]
+|     |||   0x0043723c      33c9           xor ecx, ecx
+|     |||   0x0043723e      894a08         mov dword [edx + 8], ecx
+|    ,====< 0x00437241      eb29           jmp 0x43726c
+|    ||||   ; CODE XREF from fcn.004370b8 @ 0x43722b(x)
+|    |`---> 0x00437243      8b4508         mov eax, dword [lplpBuffer]
+|    | ||   0x00437246      8b5004         mov edx, dword [eax + 4]
+|    | ||   0x00437249      8b0a           mov ecx, dword [edx]
+|    | ||   0x0043724b      c1e910         shr ecx, 0x10
+|    | ||   0x0043724e      6681e1ffff     and cx, 0xffff
+|    | ||   0x00437253      0fb7c1         movzx eax, cx
+|    | ||   0x00437256      8b5508         mov edx, dword [lplpBuffer]
+|    | ||   0x00437259      8b4a04         mov ecx, dword [edx + 4]
+|    | ||   0x0043725c      0fb711         movzx edx, word [ecx]
+|    | ||   0x0043725f      c1e210         shl edx, 0x10
+|    | ||   0x00437262      0bc2           or eax, edx
+|    | ||   0x00437264      8b4d08         mov ecx, dword [lplpBuffer]
+|    | ||   0x00437267      8b5104         mov edx, dword [ecx + 4]
+|    | ||   0x0043726a      8902           mov dword [edx], eax
+|    | ||   ; CODE XREFS from fcn.004370b8 @ 0x4371d3(x), 0x4371fe(x), 0x437241(x)
+|    `-``-> 0x0043726c      ff4dec         dec dword [var_14h]
+|           0x0043726f      ff75fc         push dword [lpSubBlock]
+|           0x00437272      e80b1d0000     call sub.cw3230mt.DLL___bdla_qpv
+|           0x00437277      59             pop ecx
+|           0x00437278      8b45d0         mov eax, dword [var_30h]
+|           0x0043727b      64a300000000   mov dword fs:[0], eax
+|           0x00437281      8b4508         mov eax, dword [lplpBuffer]
+|           0x00437284      5b             pop ebx
+|           0x00437285      8be5           mov esp, ebp
+|           0x00437287      5d             pop ebp
+\           0x00437288      c3             ret

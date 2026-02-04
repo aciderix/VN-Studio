@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x004199b7  CALL 0x0041dbb8  CALL 0x0041dc0b  
+            ; XREFS: CALL 0x0041dc63  CALL 0x0041dcd8  CALL 0x0041dd6a  
+            ; XREFS: CALL 0x0042f577  CALL 0x0042f7c0  CALL 0x0042fd24  
+/ 6: sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap ();
+\           0x0043977a      ff25785f4500   jmp dword [sym.imp.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap] ; 0x455f78

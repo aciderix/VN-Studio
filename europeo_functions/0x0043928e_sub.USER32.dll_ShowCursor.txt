@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042703a @ 0x427434(x), 0x42746c(x)
+/ 6: int sub.USER32.dll_ShowCursor (BOOL bShow);
+\           0x0043928e      ff252c5c4500   jmp dword [sym.imp.USER32.dll_ShowCursor] ; 0x455c2c ; "$!\x05"

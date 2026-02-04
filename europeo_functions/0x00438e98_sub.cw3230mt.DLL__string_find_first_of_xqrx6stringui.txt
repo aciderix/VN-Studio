@@ -1,0 +1,4 @@
+            ; XREFS: CALL 0x0041f86c  CALL 0x0041fb2e  CALL 0x0041fb73  
+            ; XREFS: CALL 0x0041fdf5  CALL 0x0041fe3a  CALL 0x0042125c  
+/ 6: sub.cw3230mt.DLL__string_find_first_of_xqrx6stringui ();
+\           0x00438e98      ff2578594500   jmp dword [sym.imp.cw3230mt.DLL__string_find_first_of_xqrx6stringui] ; 0x455978 ; "\n\x14\x05"

@@ -1,0 +1,4 @@
+            ; CALL XREFS from fcn.0043089a @ 0x430bf5(x), 0x430ca2(x), 0x430d82(x)
+            ; CALL XREFS from fcn.0043089a @ +0xc96(x), +0xca9(x)
+/ 6: HCURSOR sub.USER32.dll_SetCursor (HCURSOR hCursor);
+\           0x004392a6      ff253c5c4500   jmp dword [sym.imp.USER32.dll_SetCursor] ; 0x455c3c ; "f!\x05"

@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x00405909  CALL 0x00405915  CALL 0x0040598d  
+            ; XREFS: CALL 0x00413370  CALL 0x0041337e  CALL 0x00414cd6  
+            ; XREFS: CALL 0x0041602d  CALL 0x0042664b  CALL 0x00426659  
+            ; XREFS: CALL 0x00426665  
+/ 6: sub.bds52t.dll__ipstream_readBytes_qpvui ();
+\           0x00439192      ff25805b4500   jmp dword [sym.imp.bds52t.dll__ipstream_readBytes_qpvui] ; 0x455b80

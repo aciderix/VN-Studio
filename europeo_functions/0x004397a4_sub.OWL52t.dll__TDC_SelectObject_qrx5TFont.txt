@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042ecb9 @ +0x1172(x), +0x16fa(x)
+/ 6: sub.OWL52t.dll__TDC_SelectObject_qrx5TFont ();
+\           0x004397a4      ff25945f4500   jmp dword [sym.imp.OWL52t.dll__TDC_SelectObject_qrx5TFont] ; 0x455f94

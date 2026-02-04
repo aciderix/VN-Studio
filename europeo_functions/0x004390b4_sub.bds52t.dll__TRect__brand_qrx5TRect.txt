@@ -1,0 +1,7 @@
+            ; CALL XREF from fcn.00427d34 @ 0x427e03(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x5dc(x)
+            ; CALL XREF from fcn.00433236 @ 0x433297(x)
+            ; CALL XREF from fcn.004332a5 @ 0x433306(x)
+            ; CALL XREF from fcn.00434070 @ 0x4350b4(x)
+/ 6: sub.bds52t.dll__TRect__brand_qrx5TRect ();
+\           0x004390b4      ff25ec5a4500   jmp dword [sym.imp.bds52t.dll__TRect__brand_qrx5TRect] ; 0x455aec

@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0040402f @ 0x40409e(x)
+            ; CALL XREF from fcn.0040411c @ 0x404194(x)
+/ 6: DWORD sub.KERNEL32.dll_GetFullPathNameA (LPCSTR lpFileName, DWORD nBufferLength, LPSTR lpBuffer, LPSTR *lpFilePart);
+\           0x00438fc4      ff25445a4500   jmp dword [sym.imp.KERNEL32.dll_GetFullPathNameA] ; 0x455a44 ; "\"\x18\x05"

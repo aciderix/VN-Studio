@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00401f16 @ 0x401f80(x)
+            ; CALL XREF from fcn.00401fc8 @ 0x402024(x)
+/ 6: LSTATUS sub.ADVAPI32.dll_RegOpenKeyExA (HKEY hKey, LPCSTR lpSubKey, DWORD ulOptions, REGSAM samDesired, PHKEY phkResult);
+\           0x004398a6      ff2554604500   jmp dword [sym.imp.ADVAPI32.dll_RegOpenKeyExA] ; 0x456054

@@ -1,0 +1,43 @@
+            ; CALL XREF from fcn.0042e379 @ +0x77(x)
+            ; CALL XREF from fcn.0042e49e @ 0x42e4e6(x)
+/ 98: fcn.0042e379 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x0042e379      55             push ebp
+|           0x0042e37a      8bec           mov ebp, esp
+|           0x0042e37c      53             push ebx
+|           0x0042e37d      8b5d08         mov ebx, dword [arg_8h]
+|           0x0042e380      83bb9e0000..   cmp dword [ebx + 0x9e], 0
+|       ,=< 0x0042e387      740d           je 0x42e396
+|       |   0x0042e389      8b839e000000   mov eax, dword [ebx + 0x9e]
+|       |   0x0042e38f      50             push eax
+|       |   0x0042e390      8b10           mov edx, dword [eax]
+|       |   0x0042e392      ff5230         call dword [edx + 0x30]     ; 48
+|       |   0x0042e395      59             pop ecx
+|       |   ; CODE XREF from fcn.0042e379 @ 0x42e387(x)
+|       `-> 0x0042e396      83bba20000..   cmp dword [ebx + 0xa2], 0
+|       ,=< 0x0042e39d      740d           je 0x42e3ac
+|       |   0x0042e39f      8b8ba2000000   mov ecx, dword [ebx + 0xa2]
+|       |   0x0042e3a5      51             push ecx
+|       |   0x0042e3a6      8b01           mov eax, dword [ecx]
+|       |   0x0042e3a8      ff5030         call dword [eax + 0x30]     ; 48
+|       |   0x0042e3ab      59             pop ecx
+|       |   ; CODE XREF from fcn.0042e379 @ 0x42e39d(x)
+|       `-> 0x0042e3ac      83bba60000..   cmp dword [ebx + 0xa6], 0
+|       ,=< 0x0042e3b3      740d           je 0x42e3c2
+|       |   0x0042e3b5      8b93a6000000   mov edx, dword [ebx + 0xa6]
+|       |   0x0042e3bb      52             push edx
+|       |   0x0042e3bc      8b0a           mov ecx, dword [edx]
+|       |   0x0042e3be      ff5130         call dword [ecx + 0x30]     ; 48
+|       |   0x0042e3c1      59             pop ecx
+|       |   ; CODE XREF from fcn.0042e379 @ 0x42e3b3(x)
+|       `-> 0x0042e3c2      83bbaa0000..   cmp dword [ebx + 0xaa], 0
+|       ,=< 0x0042e3c9      740d           je 0x42e3d8
+|       |   0x0042e3cb      8b83aa000000   mov eax, dword [ebx + 0xaa]
+|       |   0x0042e3d1      50             push eax
+|       |   0x0042e3d2      8b10           mov edx, dword [eax]
+|       |   0x0042e3d4      ff5230         call dword [edx + 0x30]     ; 48
+|       |   0x0042e3d7      59             pop ecx
+|       |   ; CODE XREF from fcn.0042e379 @ 0x42e3c9(x)
+|       `-> 0x0042e3d8      5b             pop ebx
+|           0x0042e3d9      5d             pop ebp
+\           0x0042e3da      c3             ret

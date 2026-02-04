@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004010c0 @ 0x4010cf(x)
+/ 6: LPVOID sub.KERNEL32.dll_TlsGetValue (DWORD dwTlsIndex);
+\           0x00439000      ff256c5a4500   jmp dword [sym.imp.KERNEL32.dll_TlsGetValue] ; 0x455a6c

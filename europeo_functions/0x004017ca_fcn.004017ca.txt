@@ -1,0 +1,37 @@
+            ; CALL XREFS from fcn.004027b3 @ +0x238(x), +0x730(x)
+/ 54: fcn.004017ca (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x004017ca      55             push ebp
+|           0x004017cb      8bec           mov ebp, esp
+|           0x004017cd      8b4508         mov eax, dword [arg_8h]
+|           0x004017d0      8b10           mov edx, dword [eax]
+|           0x004017d2      85d2           test edx, edx
+|       ,=< 0x004017d4      7504           jne 0x4017da
+|       |   0x004017d6      33c0           xor eax, eax
+|       |   0x004017d8      5d             pop ebp
+|       |   0x004017d9      c3             ret
+|       |   ; CODE XREF from fcn.004017ca @ 0x4017d4(x)
+|       `-> 0x004017da      8a0a           mov cl, byte [edx]
+|           0x004017dc      49             dec ecx
+|           0x004017dd      80e902         sub cl, 2
+|       ,=< 0x004017e0      7211           jb 0x4017f3
+|       |   0x004017e2      80e91e         sub cl, 0x1e                ; 30
+|      ,==< 0x004017e5      740c           je 0x4017f3
+|      ||   0x004017e7      80e902         sub cl, 2
+|     ,===< 0x004017ea      740c           je 0x4017f8
+|     |||   0x004017ec      80e91d         sub cl, 0x1d                ; 29
+|    ,====< 0x004017ef      7407           je 0x4017f8
+|   ,=====< 0x004017f1      eb09           jmp 0x4017fc
+|   |||||   ; CODE XREFS from fcn.004017ca @ 0x4017e0(x), 0x4017e5(x)
+|   |||``-> 0x004017f3      8b00           mov eax, dword [eax]
+|   |||     0x004017f5      40             inc eax
+|   |||     0x004017f6      5d             pop ebp
+|   |||     0x004017f7      c3             ret
+|   |||     ; CODE XREFS from fcn.004017ca @ 0x4017ea(x), 0x4017ef(x)
+|   |``---> 0x004017f8      33c0           xor eax, eax
+|   |       0x004017fa      5d             pop ebp
+|   |       0x004017fb      c3             ret
+|   |       ; CODE XREF from fcn.004017ca @ 0x4017f1(x)
+|   `-----> 0x004017fc      8b00           mov eax, dword [eax]
+|           0x004017fe      5d             pop ebp
+\           0x004017ff      c3             ret

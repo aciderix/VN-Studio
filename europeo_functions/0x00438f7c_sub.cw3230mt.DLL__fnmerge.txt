@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.00403a55 @ +0x462(x)
+            ; CALL XREF from fcn.004047a7 @ +0x11a(x)
+            ; CALL XREF from fcn.004048f9 @ 0x404977(x)
+            ; CALL XREF from fcn.00404acf @ 0x404b5d(x)
+/ 6: sub.cw3230mt.DLL__fnmerge ();
+\           0x00438f7c      ff25105a4500   jmp dword [sym.imp.cw3230mt.DLL__fnmerge] ; 0x455a10 ; "F\x17\x05"

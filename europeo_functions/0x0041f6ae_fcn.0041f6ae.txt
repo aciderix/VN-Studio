@@ -1,0 +1,73 @@
+            ; CALL XREF from fcn.0041f302 @ +0x27b(x)
+            ; CALL XREF from fcn.00427d34 @ 0x427d9c(x)
+            ; CALL XREF from fcn.00434070 @ 0x434877(x)
+/ 226: fcn.0041f6ae (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h);
+| `- args(sp[0x4..0xc]) vars(5:sp[0x50..0xb8])
+|           0x0041f6ae      55             push ebp
+|           0x0041f6af      8bec           mov ebp, esp
+|           0x0041f6b1      81c44cffffff   add esp, 0xffffff4c
+|           0x0041f6b7      53             push ebx
+|           0x0041f6b8      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041f6bb      b8984d4400     mov eax, 0x444d98
+|           0x0041f6c0      e8533ffeff     call fcn.00403618
+|           0x0041f6c5      53             push ebx                    ; uint32_t arg_8h
+|           0x0041f6c6      e8e4230000     call fcn.00421aaf
+|           0x0041f6cb      59             pop ecx
+|           0x0041f6cc      8b5510         mov edx, dword [arg_10h]
+|           0x0041f6cf      89533a         mov dword [ebx + 0x3a], edx
+|           0x0041f6d2      66c7855cff..   mov word [var_a4h], 8
+|           0x0041f6db      8b0df4584500   mov ecx, dword [sym.imp.cw3230mt.DLL__filebuf_openprot] ; [0x4558f4:4]=0x51156 reloc.cw3230mt.DLL__filebuf_openprot ; "V\x11\x05"
+|           0x0041f6e1      ff31           push dword [ecx]
+|           0x0041f6e3      6a01           push 1                      ; 1
+|           0x0041f6e5      8b450c         mov eax, dword [arg_ch]
+|           0x0041f6e8      8b10           mov edx, dword [eax]
+|           0x0041f6ea      ff7202         push dword [edx + 2]
+|           0x0041f6ed      6a00           push 0
+|           0x0041f6ef      8d8d70ffffff   lea ecx, [var_90h]
+|           0x0041f6f5      51             push ecx
+|           0x0041f6f6      e87f970100     call sub.cw3230mt.DLL__ifstream__bctr_qpxcii
+|           0x0041f6fb      83c414         add esp, 0x14
+|           0x0041f6fe      838568ffff..   add dword [var_98h], 6
+|           0x0041f705      66c7855cff..   mov word [var_a4h], 0x14    ; 20
+|           0x0041f70e      8b8570ffffff   mov eax, dword [var_90h]
+|           0x0041f714      f6400c86       test byte [eax + 0xc], 0x86
+|       ,=< 0x0041f718      742b           je 0x41f745
+|       |   0x0041f71a      33c0           xor eax, eax
+|       |   0x0041f71c      50             push eax
+|       |   0x0041f71d      83ad68ffff..   sub dword [var_98h], 6
+|       |   0x0041f724      6a02           push 2                      ; 2
+|       |   0x0041f726      8d9570ffffff   lea edx, [var_90h]
+|       |   0x0041f72c      52             push edx
+|       |   0x0041f72d      e8dc960100     call sub.cw3230mt.DLL__ifstream__bdtr_qv
+|       |   0x0041f732      83c408         add esp, 8
+|       |   0x0041f735      58             pop eax
+|       |   0x0041f736      8b954cffffff   mov edx, dword [var_b4h]
+|       |   0x0041f73c      6489150000..   mov dword fs:[0], edx
+|      ,==< 0x0041f743      eb46           jmp 0x41f78b
+|      ||   ; CODE XREF from fcn.0041f6ae @ 0x41f718(x)
+|      |`-> 0x0041f745      8d4db4         lea ecx, [var_4ch]
+|      |    0x0041f748      51             push ecx
+|      |    0x0041f749      83c336         add ebx, 0x36               ; 54
+|      |    0x0041f74c      53             push ebx
+|      |    0x0041f74d      e8fa970100     call sub.cw3230mt.DLL__string_read_file_qr7istream
+|      |    0x0041f752      83c408         add esp, 8
+|      |    0x0041f755      8d8570ffffff   lea eax, [var_90h]
+|      |    0x0041f75b      50             push eax
+|      |    0x0041f75c      e8f5960100     call sub.cw3230mt.DLL__fstreambase_close_qv
+|      |    0x0041f761      59             pop ecx
+|      |    0x0041f762      b001           mov al, 1
+|      |    0x0041f764      50             push eax
+|      |    0x0041f765      83ad68ffff..   sub dword [var_98h], 6
+|      |    0x0041f76c      6a02           push 2                      ; 2
+|      |    0x0041f76e      8d9570ffffff   lea edx, [var_90h]
+|      |    0x0041f774      52             push edx
+|      |    0x0041f775      e894960100     call sub.cw3230mt.DLL__ifstream__bdtr_qv
+|      |    0x0041f77a      83c408         add esp, 8
+|      |    0x0041f77d      58             pop eax
+|      |    0x0041f77e      8b954cffffff   mov edx, dword [var_b4h]
+|      |    0x0041f784      6489150000..   mov dword fs:[0], edx
+|      |    ; CODE XREF from fcn.0041f6ae @ 0x41f743(x)
+|      `--> 0x0041f78b      5b             pop ebx
+|           0x0041f78c      8be5           mov esp, ebp
+|           0x0041f78e      5d             pop ebp
+\           0x0041f78f      c3             ret

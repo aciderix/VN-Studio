@@ -1,0 +1,43 @@
+            ; CALL XREF from fcn.00419750 @ 0x419989(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x1059(x)
+/ 101: fcn.00405065 (int32_t arg_8h, int32_t arg_14h);
+| `- args(sp[0x4..0x10])
+|           0x00405065      55             push ebp
+|           0x00405066      8bec           mov ebp, esp
+|           0x00405068      53             push ebx
+|           0x00405069      8b4514         mov eax, dword [arg_14h]
+|           0x0040506c      8b5d08         mov ebx, dword [arg_8h]
+|           0x0040506f      8b5004         mov edx, dword [eax + 4]
+|           0x00405072      f7da           neg edx
+|           0x00405074      52             push edx
+|           0x00405075      8b00           mov eax, dword [eax]
+|           0x00405077      f7d8           neg eax
+|           0x00405079      50             push eax
+|           0x0040507a      53             push ebx
+|           0x0040507b      e846400300     call sub.bds52t.dll__TRect_Offset_qii
+|           0x00405080      83c40c         add esp, 0xc
+|           0x00405083      dd450c         fld qword [ebp + 0xc]
+|           0x00405086      d81dcd504000   fcomp dword [0x4050cd]
+|           0x0040508c      dfe0           fnstsw ax
+|           0x0040508e      9e             sahf
+|       ,=< 0x0040508f      7436           je 0x4050c7
+|       |   0x00405091      db03           fild dword [ebx]
+|       |   0x00405093      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x00405096      e83f3e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x0040509b      8903           mov dword [ebx], eax
+|       |   0x0040509d      db4304         fild dword [ebx + 4]
+|       |   0x004050a0      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x004050a3      e8323e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x004050a8      894304         mov dword [ebx + 4], eax
+|       |   0x004050ab      db4308         fild dword [ebx + 8]
+|       |   0x004050ae      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x004050b1      e8243e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x004050b6      894308         mov dword [ebx + 8], eax
+|       |   0x004050b9      db430c         fild dword [ebx + 0xc]
+|       |   0x004050bc      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x004050bf      e8163e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x004050c4      89430c         mov dword [ebx + 0xc], eax
+|       |   ; CODE XREF from fcn.00405065 @ 0x40508f(x)
+|       `-> 0x004050c7      5b             pop ebx
+|           0x004050c8      5d             pop ebp
+\           0x004050c9      c3             ret

@@ -1,0 +1,7 @@
+            ; XREFS: CALL 0x0040258d  CALL 0x004025a4  CALL 0x00412381  
+            ; XREFS: CALL 0x004123ec  CALL 0x00412754  CALL 0x00412784  
+            ; XREFS: CALL 0x00412bf4  CALL 0x00412c78  CALL 0x00412ccc  
+            ; XREFS: CALL 0x00412d5e  CALL 0x00412e9a  CALL 0x00414b55  
+            ; XREFS: CALL 0x00415aba  
+/ 6: int sub.USER32.dll_wsprintfA (LPSTR ARG_0, LPCSTR ARG_1, vararg ...);
+\           0x0043929a      ff25345c4500   jmp dword [sym.imp.USER32.dll_wsprintfA] ; 0x455c34 ; "H!\x05"

@@ -1,0 +1,25 @@
+            ; CALL XREF from fcn.00437415 @ +0x4ce(x)
+/ 48: fcn.00437289 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00437289      55             push ebp
+|           0x0043728a      8bec           mov ebp, esp
+|           0x0043728c      53             push ebx
+|           0x0043728d      8b5d08         mov ebx, dword [arg_8h]
+|           0x00437290      85db           test ebx, ebx
+|       ,=< 0x00437292      7422           je 0x4372b6
+|       |   0x00437294      c70384d94400   mov dword [ebx], 0x44d984   ; [0x44d984:4]=0x437289 fcn.00437289
+|       |   0x0043729a      837b0800       cmp dword [ebx + 8], 0
+|      ,==< 0x0043729e      7409           je 0x4372a9
+|      ||   0x004372a0      ff7308         push dword [ebx + 8]
+|      ||   0x004372a3      e8da1c0000     call sub.cw3230mt.DLL___bdla_qpv
+|      ||   0x004372a8      59             pop ecx
+|      ||   ; CODE XREF from fcn.00437289 @ 0x43729e(x)
+|      `--> 0x004372a9      f6450c01       test byte [arg_ch], 1
+|      ,==< 0x004372ad      7407           je 0x4372b6
+|      ||   0x004372af      53             push ebx
+|      ||   0x004372b0      e8611c0000     call sub.cw3230mt.DLL___bdele_qpv
+|      ||   0x004372b5      59             pop ecx
+|      ||   ; CODE XREFS from fcn.00437289 @ 0x437292(x), 0x4372ad(x)
+|      ``-> 0x004372b6      5b             pop ebx
+|           0x004372b7      5d             pop ebp
+\           0x004372b8      c3             ret

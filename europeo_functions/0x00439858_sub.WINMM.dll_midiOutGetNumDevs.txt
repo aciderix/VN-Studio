@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041b7d5 @ 0x41b84f(x)
+/ 6: sub.WINMM.dll_midiOutGetNumDevs ();
+\           0x00439858      ff2514604500   jmp dword [sym.imp.WINMM.dll_midiOutGetNumDevs] ; 0x456014

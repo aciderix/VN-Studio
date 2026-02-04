@@ -1,0 +1,3 @@
+            ; XREFS(52)
+/ 6: sub.cw3230mt.DLL___bnwa_qui ();
+\           0x00438e50      ff2548594500   jmp dword [sym.imp.cw3230mt.DLL___bnwa_qui] ; 0x455948 ; ",\x13\x05"

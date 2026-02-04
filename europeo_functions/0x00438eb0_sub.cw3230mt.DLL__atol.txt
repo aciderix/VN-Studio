@@ -1,0 +1,7 @@
+            ; XREFS: CALL 0x00405221  CALL 0x00405243  CALL 0x00407ea9  
+            ; XREFS: CALL 0x00408044  CALL 0x004124d1  CALL 0x00412647  
+            ; XREFS: CALL 0x004126fa  CALL 0x00412874  CALL 0x00412927  
+            ; XREFS: CALL 0x004129da  CALL 0x00412ace  CALL 0x00412b81  
+            ; XREFS: CALL 0x0041fc29  CALL 0x0042823e  CALL 0x0042cd11  
+/ 6: sub.cw3230mt.DLL__atol ();
+\           0x00438eb0      ff2588594500   jmp dword [sym.imp.cw3230mt.DLL__atol] ; 0x455988

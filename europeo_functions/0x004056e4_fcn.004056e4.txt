@@ -1,0 +1,31 @@
+            ; CALL XREF from fcn.004066a1 @ 0x40675d(x)
+/ 89: fcn.004056e4 (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h);
+| `- args(sp[0x4..0xc]) vars(3:sp[0xc..0x28])
+|           0x004056e4      55             push ebp
+|           0x004056e5      8bec           mov ebp, esp
+|           0x004056e7      83c4dc         add esp, 0xffffffdc
+|           0x004056ea      b890aa4300     mov eax, 0x43aa90
+|           0x004056ef      e824dfffff     call fcn.00403618
+|           0x004056f4      66c745ec0800   mov word [var_14h], 8
+|           0x004056fa      8b5508         mov edx, dword [arg_8h]
+|           0x004056fd      c70254b54300   mov dword [edx], 0x43b554   ; [0x43b554:4]=0x406d2d
+|           0x00405703      8b4d08         mov ecx, dword [arg_8h]
+|           0x00405706      83c104         add ecx, 4
+|           0x00405709      51             push ecx
+|           0x0040570a      e8b3370300     call sub.cw3230mt.DLL__string__bctr_qv
+|           0x0040570f      59             pop ecx
+|           0x00405710      ff45f8         inc dword [var_8h]
+|           0x00405713      ff7508         push dword [arg_8h]
+|           0x00405716      e822000000     call fcn.0040573d
+|           0x0040571b      59             pop ecx
+|           0x0040571c      ff7510         push dword [arg_10h]
+|           0x0040571f      ff750c         push dword [arg_ch]
+|           0x00405722      ff7508         push dword [arg_8h]
+|           0x00405725      e842020000     call fcn.0040596c
+|           0x0040572a      83c40c         add esp, 0xc
+|           0x0040572d      8b45dc         mov eax, dword [var_24h]
+|           0x00405730      64a300000000   mov dword fs:[0], eax
+|           0x00405736      8b4508         mov eax, dword [arg_8h]
+|           0x00405739      8be5           mov esp, ebp
+|           0x0040573b      5d             pop ebp
+\           0x0040573c      c3             ret

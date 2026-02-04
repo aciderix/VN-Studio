@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041cf1f @ 0x41cf3d(x)
+/ 6: sub.OWL52t.dll__TPalette__bctr_qp10HPALETTE__11TAutoDelete ();
+\           0x004396d2      ff25085f4500   jmp dword [sym.imp.OWL52t.dll__TPalette__bctr_qp10HPALETTE__11TAutoDelete] ; 0x455f08

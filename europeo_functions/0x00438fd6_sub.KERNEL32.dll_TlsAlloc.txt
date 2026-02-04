@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0040105a @ +0x4c(x)
+/ 6: DWORD sub.KERNEL32.dll_TlsAlloc ();
+\           0x00438fd6      ff25505a4500   jmp dword [sym.imp.KERNEL32.dll_TlsAlloc] ; 0x455a50 ; "P\x18\x05"

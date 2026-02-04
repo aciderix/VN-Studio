@@ -1,0 +1,19 @@
+            ; CALL XREFS from fcn.00401b09 @ +0xb5(x), +0xfc(x), +0x138(x), +0x177(x)
+/ 32: fcn.00401ae9 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00401ae9      55             push ebp
+|           0x00401aea      8bec           mov ebp, esp
+|           0x00401aec      53             push ebx
+|           0x00401aed      8b5d08         mov ebx, dword [arg_8h]
+|           0x00401af0      8b450c         mov eax, dword [arg_ch]
+|           0x00401af3      83c005         add eax, 5
+|           0x00401af6      50             push eax
+|           0x00401af7      e854730300     call sub.cw3230mt.DLL___bnwa_qui
+|           0x00401afc      59             pop ecx
+|           0x00401afd      8b13           mov edx, dword [ebx]
+|           0x00401aff      8910           mov dword [eax], edx
+|           0x00401b01      8903           mov dword [ebx], eax
+|           0x00401b03      83c004         add eax, 4
+|           0x00401b06      5b             pop ebx
+|           0x00401b07      5d             pop ebp
+\           0x00401b08      c3             ret

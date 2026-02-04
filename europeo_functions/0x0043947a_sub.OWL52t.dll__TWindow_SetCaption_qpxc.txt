@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0042908f @ 0x429449(x)
+            ; CALL XREF from fcn.00437f61 @ +0x3ab(x)
+/ 6: sub.OWL52t.dll__TWindow_SetCaption_qpxc ();
+\           0x0043947a      ff25785d4500   jmp dword [sym.imp.OWL52t.dll__TWindow_SetCaption_qpxc] ; 0x455d78

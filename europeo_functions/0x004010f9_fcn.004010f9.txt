@@ -1,0 +1,6 @@
+            ; XREFS(22)
+/ 15: fcn.004010f9 ();
+|           0x004010f9      a163a04300     mov eax, dword [0x43a063]   ; [0x43a063:4]=0
+|           0x004010fe      64678b162c00   mov edx, dword fs:[0x2c]
+|           0x00401104      8b0482         mov eax, dword [edx + eax*4]
+\           0x00401107      c3             ret

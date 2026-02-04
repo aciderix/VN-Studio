@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00429f02 @ 0x429fd3(x)
+/ 6: sub.bds52t.dll__opstream__bctr_qv ();
+\           0x0043917a      ff25705b4500   jmp dword [sym.imp.bds52t.dll__opstream__bctr_qv] ; 0x455b70 ; ".\x1e\x05"

@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.0041721d @ 0x4172bf(x)
+            ; CALL XREF from fcn.0042999a @ 0x429a75(x)
+            ; CALL XREF from fcn.00429f02 @ 0x429fc1(x)
+/ 6: sub.bds52t.dll__fpbase_open_qpxcii ();
+\           0x00439198      ff25845b4500   jmp dword [sym.imp.bds52t.dll__fpbase_open_qpxcii] ; 0x455b84

@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00401a18 @ 0x401a74(x)
+            ; CALL XREF from fcn.00403a55 @ 0x403b28(x)
+            ; CALL XREF from fcn.00438675 @ 0x438791(x)
+/ 6: int sub.KERNEL32.dll_lstrcmpiA (LPCSTR lpString1, LPCSTR lpString2);
+\           0x00438ff4      ff25645a4500   jmp dword [sym.imp.KERNEL32.dll_lstrcmpiA] ; 0x455a64

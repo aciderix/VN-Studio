@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00437ba4 @ 0x437dab(x)
+/ 6: VOID sub.KERNEL32.dll_GetSystemTime (LPSYSTEMTIME lpSystemTime);
+\           0x0043902a      ff25885a4500   jmp dword [sym.imp.KERNEL32.dll_GetSystemTime] ; 0x455a88 ; "4\x19\x05"

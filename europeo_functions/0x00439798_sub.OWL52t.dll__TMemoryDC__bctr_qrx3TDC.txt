@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.00419750 @ 0x41999e(x)
+            ; CALL XREF from fcn.0041db36 @ 0x41db6d(x)
+            ; CALL XREF from fcn.004275f6 @ 0x42790e(x)
+            ; CALL XREFS from fcn.0042ecb9 @ +0x87a(x), +0x9ac(x)
+/ 6: sub.OWL52t.dll__TMemoryDC__bctr_qrx3TDC ();
+\           0x00439798      ff258c5f4500   jmp dword [sym.imp.OWL52t.dll__TMemoryDC__bctr_qrx3TDC] ; 0x455f8c ; "V?\x05"

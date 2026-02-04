@@ -1,0 +1,37 @@
+            ; CALL XREFS from fcn.0041bec9 @ +0x60f(x), +0x62b(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x77c(x)
+/ 77: fcn.0041bec9 (int32_t arg_8h, uint32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(1:sp[0x8..0x8])
+|           0x0041bec9      55             push ebp
+|           0x0041beca      8bec           mov ebp, esp
+|           0x0041becc      51             push ecx
+|           0x0041becd      53             push ebx
+|           0x0041bece      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041bed1      83bba50000..   cmp dword [ebx + 0xa5], 0
+|       ,=< 0x0041bed8      7438           je 0x41bf12
+|       |   0x0041beda      6a04           push 4                      ; 4
+|       |   0x0041bedc      6a00           push 0
+|       |   0x0041bede      8d45fc         lea eax, [var_4h]
+|       |   0x0041bee1      50             push eax
+|       |   0x0041bee2      e8f7ce0100     call sub.cw3230mt.DLL__memset
+|       |   0x0041bee7      83c40c         add esp, 0xc
+|       |   0x0041beea      807d0c00       cmp byte [arg_ch], 0
+|      ,==< 0x0041beee      7407           je 0x41bef7
+|      ||   0x0041bef0      b800000200     mov eax, 0x20000
+|     ,===< 0x0041bef5      eb05           jmp 0x41befc
+|     |||   ; CODE XREF from fcn.0041bec9 @ 0x41beee(x)
+|     |`--> 0x0041bef7      b800000100     mov eax, 0x10000
+|     | |   ; CODE XREF from fcn.0041bec9 @ 0x41bef5(x)
+|     `---> 0x0041befc      8d55fc         lea edx, [var_4h]
+|       |   0x0041beff      52             push edx
+|       |   0x0041bf00      83c802         or eax, 2
+|       |   0x0041bf03      50             push eax
+|       |   0x0041bf04      6840080000     push 0x840                  ; 2112
+|       |   0x0041bf09      53             push ebx
+|       |   0x0041bf0a      e8ccefffff     call fcn.0041aedb
+|       |   0x0041bf0f      83c410         add esp, 0x10
+|       |   ; CODE XREF from fcn.0041bec9 @ 0x41bed8(x)
+|       `-> 0x0041bf12      5b             pop ebx
+|           0x0041bf13      59             pop ecx
+|           0x0041bf14      5d             pop ebp
+\           0x0041bf15      c3             ret

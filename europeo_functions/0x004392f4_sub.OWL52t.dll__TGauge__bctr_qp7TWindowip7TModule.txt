@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0042c4b4 @ 0x42c627(x)
+/ 6: sub.OWL52t.dll__TGauge__bctr_qp7TWindowip7TModule ();
+\           0x004392f4      ff25745c4500   jmp dword [sym.imp.OWL52t.dll__TGauge__bctr_qp7TWindowip7TModule] ; 0x455c74

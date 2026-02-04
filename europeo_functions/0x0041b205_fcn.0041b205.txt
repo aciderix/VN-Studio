@@ -1,0 +1,35 @@
+            ; CALL XREF from fcn.0041b38f @ +0x350(x)
+/ 69: fcn.0041b205 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(1:sp[0x8..0x8])
+|           0x0041b205      55             push ebp
+|           0x0041b206      8bec           mov ebp, esp
+|           0x0041b208      51             push ecx
+|           0x0041b209      53             push ebx
+|           0x0041b20a      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041b20d      807b1000       cmp byte [ebx + 0x10], 0
+|       ,=< 0x0041b211      7533           jne 0x41b246
+|       |   0x0041b213      53             push ebx
+|       |   0x0041b214      8b03           mov eax, dword [ebx]
+|       |   0x0041b216      ff500c         call dword [eax + 0xc]      ; 12
+|       |   0x0041b219      59             pop ecx
+|       |   0x0041b21a      84c0           test al, al
+|      ,==< 0x0041b21c      7428           je 0x41b246
+|      ||   0x0041b21e      6a04           push 4                      ; 4
+|      ||   0x0041b220      6a00           push 0
+|      ||   0x0041b222      8d55fc         lea edx, [var_4h]
+|      ||   0x0041b225      52             push edx
+|      ||   0x0041b226      e8b3db0100     call sub.cw3230mt.DLL__memset
+|      ||   0x0041b22b      83c40c         add esp, 0xc
+|      ||   0x0041b22e      c6431100       mov byte [ebx + 0x11], 0
+|      ||   0x0041b232      8d4dfc         lea ecx, [var_4h]
+|      ||   0x0041b235      51             push ecx
+|      ||   0x0041b236      6a02           push 2                      ; 2
+|      ||   0x0041b238      6808080000     push 0x808                  ; 2056
+|      ||   0x0041b23d      53             push ebx
+|      ||   0x0041b23e      e898fcffff     call fcn.0041aedb
+|      ||   0x0041b243      83c410         add esp, 0x10
+|      ||   ; CODE XREFS from fcn.0041b205 @ 0x41b211(x), 0x41b21c(x)
+|      ``-> 0x0041b246      5b             pop ebx
+|           0x0041b247      59             pop ecx
+|           0x0041b248      5d             pop ebp
+\           0x0041b249      c3             ret

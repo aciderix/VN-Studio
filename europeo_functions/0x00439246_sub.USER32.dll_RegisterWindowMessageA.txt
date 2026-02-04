@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x0043586b  CALL 0x0043587a  CALL 0x00435889  
+            ; XREFS: CALL 0x00435898  CALL 0x0043898f  CALL 0x0043899e  
+            ; XREFS: CALL 0x004389ad  CALL 0x004389bc  
+/ 6: UINT sub.USER32.dll_RegisterWindowMessageA (LPCSTR lpString);
+\           0x00439246      ff25fc5b4500   jmp dword [sym.imp.USER32.dll_RegisterWindowMessageA] ; 0x455bfc ; "^ \x05"

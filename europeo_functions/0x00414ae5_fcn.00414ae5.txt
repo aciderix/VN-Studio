@@ -1,0 +1,36 @@
+            ; CALL XREF from fcn.00415661 @ 0x415698(x)
+/ 69: fcn.00414ae5 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00414ae5      55             push ebp
+|           0x00414ae6      8bec           mov ebp, esp
+|           0x00414ae8      53             push ebx
+|           0x00414ae9      56             push esi
+|           0x00414aea      8b750c         mov esi, dword [arg_ch]
+|           0x00414aed      8b5d08         mov ebx, dword [arg_8h]
+|           0x00414af0      3bde           cmp ebx, esi
+|       ,=< 0x00414af2      7504           jne 0x414af8
+|       |   0x00414af4      8bc3           mov eax, ebx
+|      ,==< 0x00414af6      eb2e           jmp 0x414b26
+|      ||   ; CODE XREF from fcn.00414ae5 @ 0x414af2(x)
+|      |`-> 0x00414af8      8d4608         lea eax, [esi + 8]
+|      |    0x00414afb      6aff           push 0xffffffffffffffff
+|      |    0x00414afd      6a00           push 0
+|      |    0x00414aff      50             push eax
+|      |    0x00414b00      8d5308         lea edx, [ebx + 8]
+|      |    0x00414b03      52             push edx
+|      |    0x00414b04      e8fb430200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|      |    0x00414b09      83c410         add esp, 0x10
+|      |    0x00414b0c      8b4e10         mov ecx, dword [esi + 0x10]
+|      |    0x00414b0f      894b10         mov dword [ebx + 0x10], ecx
+|      |    0x00414b12      8b4614         mov eax, dword [esi + 0x14]
+|      |    0x00414b15      894314         mov dword [ebx + 0x14], eax
+|      |    0x00414b18      8b560c         mov edx, dword [esi + 0xc]
+|      |    0x00414b1b      89530c         mov dword [ebx + 0xc], edx
+|      |    0x00414b1e      8b4e04         mov ecx, dword [esi + 4]
+|      |    0x00414b21      894b04         mov dword [ebx + 4], ecx
+|      |    0x00414b24      8bc3           mov eax, ebx
+|      |    ; CODE XREF from fcn.00414ae5 @ 0x414af6(x)
+|      `--> 0x00414b26      5e             pop esi
+|           0x00414b27      5b             pop ebx
+|           0x00414b28      5d             pop ebp
+\           0x00414b29      c3             ret

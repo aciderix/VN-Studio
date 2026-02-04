@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0040222e @ +0x2d0(x)
+            ; CALL XREF from fcn.004027b3 @ +0x55a(x)
+/ 6: LSTATUS sub.ADVAPI32.dll_RegSetValueExA (HKEY hKey, LPCSTR lpValueName, DWORD Reserved, DWORD dwType, const BYTE *lpData, DWORD cbData);
+\           0x00439888      ff2540604500   jmp dword [sym.imp.ADVAPI32.dll_RegSetValueExA] ; 0x456040 ; "(B\x05"

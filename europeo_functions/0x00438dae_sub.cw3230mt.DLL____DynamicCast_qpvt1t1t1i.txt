@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00436885 @ +0x17d(x)
+/ 6: sub.cw3230mt.DLL____DynamicCast_qpvt1t1t1i ();
+\           0x00438dae      ff25dc584500   jmp dword [sym.imp.cw3230mt.DLL____DynamicCast_qpvt1t1t1i] ; 0x4558dc

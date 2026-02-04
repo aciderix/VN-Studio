@@ -1,0 +1,28 @@
+            ; CALL XREF from fcn.004056e4 @ 0x405725(x)
+/ 52: fcn.0040596c (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0040596c      55             push ebp
+|           0x0040596d      8bec           mov ebp, esp
+|           0x0040596f      53             push ebx
+|           0x00405970      56             push esi
+|           0x00405971      57             push edi
+|           0x00405972      8b5d08         mov ebx, dword [arg_8h]
+|           0x00405975      8d7b08         lea edi, [ebx + 8]
+|           0x00405978      8d4304         lea eax, [ebx + 4]
+|           0x0040597b      50             push eax
+|           0x0040597c      ff750c         push dword [arg_ch]
+|           0x0040597f      e8b4370300     call sub.bds52t.dll___brsh_qr8ipstreamr6string
+|           0x00405984      83c408         add esp, 8
+|           0x00405987      8bf0           mov esi, eax
+|           0x00405989      6a04           push 4                      ; 4
+|           0x0040598b      57             push edi
+|           0x0040598c      56             push esi
+|           0x0040598d      e800380300     call sub.bds52t.dll__ipstream_readBytes_qpvui
+|           0x00405992      83c40c         add esp, 0xc
+|           0x00405995      8b4308         mov eax, dword [ebx + 8]
+|           0x00405998      89430c         mov dword [ebx + 0xc], eax
+|           0x0040599b      5f             pop edi
+|           0x0040599c      5e             pop esi
+|           0x0040599d      5b             pop ebx
+|           0x0040599e      5d             pop ebp
+\           0x0040599f      c3             ret

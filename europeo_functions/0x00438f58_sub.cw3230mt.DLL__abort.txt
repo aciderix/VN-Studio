@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.004033ce @ 0x40346a(x)
+            ; CALL XREF from fcn.004033ce @ +0x14b(x)
+/ 6: sub.cw3230mt.DLL__abort ();
+\           0x00438f58      ff25f8594500   jmp dword [sym.imp.cw3230mt.DLL__abort] ; 0x4559f8

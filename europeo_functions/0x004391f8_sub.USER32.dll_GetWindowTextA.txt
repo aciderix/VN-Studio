@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00437415 @ +0x349(x)
+/ 6: int sub.USER32.dll_GetWindowTextA (HWND hWnd, LPSTR lpString, int nMaxCount);
+\           0x004391f8      ff25c85b4500   jmp dword [sym.imp.USER32.dll_GetWindowTextA] ; 0x455bc8

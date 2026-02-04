@@ -1,0 +1,3 @@
+            ; XREFS(84)
+/ 6: sub.cw3230mt.DLL__string__bctr_qv ();
+\           0x00438ec2      ff2594594500   jmp dword [sym.imp.cw3230mt.DLL__string__bctr_qv] ; 0x455994

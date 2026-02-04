@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.00405922 @ 0x405950(x), 0x40595f(x)
+/ 6: sub.bds52t.dll__opstream_writeBytes_qpxvui ();
+\           0x00439174      ff256c5b4500   jmp dword [sym.imp.bds52t.dll__opstream_writeBytes_qpxvui] ; 0x455b6c

@@ -1,0 +1,11 @@
+            ; CALL XREF from fcn.0040f9e2 @ +0xdde(x)
+/ 18: fcn.0040b97e (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x0040b97e      55             push ebp
+|           0x0040b97f      8bec           mov ebp, esp
+|           0x0040b981      8b4508         mov eax, dword [arg_8h]
+|           0x0040b984      83780800       cmp dword [eax + 8], 0
+|           0x0040b988      0f9dc0         setge al
+|           0x0040b98b      83e001         and eax, 1
+|           0x0040b98e      5d             pop ebp
+\           0x0040b98f      c3             ret

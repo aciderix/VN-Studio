@@ -1,0 +1,12 @@
+            ; CALL XREF from fcn.00401358 @ 0x4014df(x)
+/ 18: fcn.004012ea (int32_t arg_8h, signed int arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x004012ea      55             push ebp
+|           0x004012eb      8bec           mov ebp, esp
+|           0x004012ed      8b4508         mov eax, dword [arg_8h]
+|           0x004012f0      03450c         add eax, dword [arg_ch]
+|           0x004012f3      50             push eax
+|           0x004012f4      e8f37b0300     call sub.cw3230mt.DLL___bnew_qui
+|           0x004012f9      59             pop ecx
+|           0x004012fa      5d             pop ebp
+\           0x004012fb      c3             ret

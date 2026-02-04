@@ -1,0 +1,65 @@
+            ; XREFS: CALL 0x0042cd9a  CALL 0x0042dbae  CALL 0x0042dc21  
+            ; XREFS: CALL 0x0042dc68  CALL 0x0042dd8d  CALL 0x0042ddd4  
+            ; XREFS: CALL 0x004345e1  
+/ 173: fcn.0041d4f4 (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h, int32_t arg_14h);
+| `- args(sp[0x4..0x10]) vars(4:sp[0x8..0x2c])
+|           0x0041d4f4      55             push ebp
+|           0x0041d4f5      8bec           mov ebp, esp
+|           0x0041d4f7      83c4d8         add esp, 0xffffffd8
+|           0x0041d4fa      53             push ebx
+|           0x0041d4fb      56             push esi
+|           0x0041d4fc      57             push edi
+|           0x0041d4fd      b864434400     mov eax, 0x444364           ; 'dCD'
+|           0x0041d502      e81161feff     call fcn.00403618
+|           0x0041d507      66c745e80800   mov word [var_18h], 8
+|           0x0041d50d      ff7508         push dword [arg_8h]
+|           0x0041d510      e8ffc10100     call sub.OWL52t.dll__TBitmap__bctr_qv
+|           0x0041d515      59             pop ecx
+|           0x0041d516      8345f402       add dword [var_ch], 2
+|           0x0041d51a      8b5508         mov edx, dword [arg_8h]
+|           0x0041d51d      c74205ec49..   mov dword [edx + 5], 0x4449ec ; [0x4449ec:4]=0x41d898 fcn.0041d898
+|           0x0041d524      8b4d08         mov ecx, dword [arg_8h]
+|           0x0041d527      33c0           xor eax, eax
+|           0x0041d529      894109         mov dword [ecx + 9], eax
+|           0x0041d52c      66c745e81400   mov word [var_18h], 0x14    ; 20
+|           0x0041d532      6a1c           push 0x1c                   ; 28
+|           0x0041d534      e8b3b90100     call sub.cw3230mt.DLL___bnew_qui
+|           0x0041d539      59             pop ecx
+|           0x0041d53a      8945fc         mov dword [var_4h], eax
+|           0x0041d53d      85c0           test eax, eax
+|       ,=< 0x0041d53f      7428           je 0x41d569
+|       |   0x0041d541      66c745e82c00   mov word [var_18h], 0x2c    ; ',' ; 44
+|       |   0x0041d547      83c4fc         add esp, 0xfffffffc
+|       |   0x0041d54a      8b5510         mov edx, dword [arg_10h]
+|       |   0x0041d54d      891424         mov dword [esp], edx
+|       |   0x0041d550      ff750c         push dword [arg_ch]
+|       |   0x0041d553      ff75fc         push dword [var_4h]
+|       |   0x0041d556      e88bbf0100     call sub.OWL52t.dll__TDib__bctr_qp11HINSTANCE__6TResId
+|       |   0x0041d55b      83c40c         add esp, 0xc
+|       |   0x0041d55e      66c745e82000   mov word [var_18h], 0x20    ; 32
+|       |   0x0041d564      8b4dfc         mov ecx, dword [var_4h]
+|      ,==< 0x0041d567      eb03           jmp 0x41d56c
+|      ||   ; CODE XREF from fcn.0041d4f4 @ 0x41d53f(x)
+|      |`-> 0x0041d569      8b4dfc         mov ecx, dword [var_4h]
+|      |    ; CODE XREF from fcn.0041d4f4 @ 0x41d567(x)
+|      `--> 0x0041d56c      8b4508         mov eax, dword [arg_8h]
+|           0x0041d56f      894809         mov dword [eax + 9], ecx
+|           0x0041d572      ff7514         push dword [arg_14h]
+|           0x0041d575      8b5508         mov edx, dword [arg_8h]
+|           0x0041d578      ff7209         push dword [edx + 9]
+|           0x0041d57b      ff7508         push dword [arg_8h]
+|           0x0041d57e      e837c10100     call sub.OWL52t.dll__TBitmap_Create_qrx4TDibrx8TPalette
+|           0x0041d583      83c40c         add esp, 0xc
+|           0x0041d586      66c745e80800   mov word [var_18h], 8
+|       ,=< 0x0041d58c      eb32           jmp 0x41d5c0
+..
+|       |   ; CODE XREF from fcn.0041d4f4 @ 0x41d58c(x)
+|       `-> 0x0041d5c0      8b45d8         mov eax, dword [var_28h]
+|           0x0041d5c3      64a300000000   mov dword fs:[0], eax
+|           0x0041d5c9      8b4508         mov eax, dword [arg_8h]
+|           0x0041d5cc      5f             pop edi
+|           0x0041d5cd      5e             pop esi
+|           0x0041d5ce      5b             pop ebx
+|           0x0041d5cf      8be5           mov esp, ebp
+|           0x0041d5d1      5d             pop ebp
+\           0x0041d5d2      c3             ret

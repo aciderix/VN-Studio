@@ -642,6 +642,93 @@ var toolbarSceneIndex = -1; // index of the "Toolbar" scene
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
 var container = document.getElementById('canvas-container');
+var toolbar = document.getElementById('toolbar');
+
+var prefs = {
+  smoothZoom: true,
+  smoothScroll: true,
+  imageSmoothing: true,
+  toolbarVisible: true
+};
+var zoomLevel = 1;
+var targetZoom = 1;
+var zoomAnimId = null;
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+function loadPrefs() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('vn_prefs') || '{}');
+    Object.keys(prefs).forEach(function(key) {
+      if (typeof stored[key] !== 'undefined') prefs[key] = stored[key];
+    });
+  } catch (e) {
+    console.warn('Prefs load failed:', e.message);
+  }
+}
+
+function savePrefs() {
+  try {
+    localStorage.setItem('vn_prefs', JSON.stringify(prefs));
+  } catch (e) {
+    console.warn('Prefs save failed:', e.message);
+  }
+}
+
+function applyPrefs() {
+  ctx.imageSmoothingEnabled = !!prefs.imageSmoothing;
+  canvas.style.imageRendering = prefs.imageSmoothing ? 'auto' : 'pixelated';
+  if (toolbar) toolbar.style.display = prefs.toolbarVisible ? '' : 'none';
+}
+
+function updatePrefsFromString(prefStr) {
+  var str = (prefStr || '').trim();
+  if (!str) {
+    alert('Prefs: ' + JSON.stringify(prefs));
+    return;
+  }
+  str.split(/\s+/).forEach(function(pair) {
+    var parts = pair.split('=');
+    if (parts.length < 2) return;
+    var key = parts[0].toLowerCase();
+    var value = parts[1];
+    var boolVal = value === '1' || value.toLowerCase() === 'true';
+    if (key === 'smoothzoom') prefs.smoothZoom = boolVal;
+    if (key === 'smoothscroll') prefs.smoothScroll = boolVal;
+    if (key === 'imagesmoothing') prefs.imageSmoothing = boolVal;
+    if (key === 'toolbar') prefs.toolbarVisible = boolVal;
+  });
+  applyPrefs();
+  savePrefs();
+}
+
+function setZoom(target, immediate) {
+  targetZoom = clamp(target, 0.5, 3);
+  if (immediate || !prefs.smoothZoom) {
+    zoomLevel = targetZoom;
+    resizeCanvas();
+    return;
+  }
+  if (zoomAnimId) cancelAnimationFrame(zoomAnimId);
+  function step() {
+    var diff = targetZoom - zoomLevel;
+    if (Math.abs(diff) < 0.01) {
+      zoomLevel = targetZoom;
+      zoomAnimId = null;
+      resizeCanvas();
+      return;
+    }
+    zoomLevel += diff * 0.2;
+    resizeCanvas();
+    zoomAnimId = requestAnimationFrame(step);
+  }
+  zoomAnimId = requestAnimationFrame(step);
+}
+
+loadPrefs();
+applyPrefs();
 
 // =============================================================================
 // CANVAS SCALING (640x480 interne, CSS plein conteneur)
@@ -672,7 +759,7 @@ function resizeCanvas() {
   var gameH = project ? project.header.height : 480;
   canvas.width = gameW;
   canvas.height = gameH;
-  var scale = Math.min(cw / gameW, ch / gameH);
+  var scale = Math.min(cw / gameW, ch / gameH) * zoomLevel;
   var dispW = Math.floor(gameW * scale);
   var dispH = Math.floor(gameH * scale);
   canvas.style.width = dispW + 'px';
@@ -1026,6 +1113,28 @@ function resolveWavPath(wavRef) {
   return '/game-data/' + currentBasePath + wavDir + normalized;
 }
 
+function resolveMediaPath(mediaRef, configKey, defaultDir) {
+  var normalized = mediaRef.toLowerCase().replace(/\\/g, '/');
+  var mediaDir = defaultDir || '';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig[configKey] || '';
+    if (dir) {
+      mediaDir = dir.replace(/\\/g, '/');
+      if (mediaDir && !mediaDir.endsWith('/')) mediaDir += '/';
+    }
+  }
+  if (normalized.indexOf('..') >= 0) {
+    var parts = normalized.split('/');
+    var resolved = currentBasePath.replace(/\/$/, '').split('/').slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + mediaDir + normalized;
+}
+
 function playWav(wavStr) {
   // Format: "filename loop_count" ex: "music.wav 2"
   var parts = wavStr.trim().split(/\s+/);
@@ -1052,6 +1161,30 @@ function playWav(wavStr) {
     }
   });
   console.log('PLAYWAV:', file, 'loops:', loops);
+}
+
+function playMediaAudio(mediaStr, configKey, defaultDir, label) {
+  var parts = mediaStr.trim().split(/\s+/);
+  var file = parts[0];
+  var loops = parseInt(parts[1]) || 1;
+  var url = resolveMediaPath(file, configKey, defaultDir);
+  var key = file.toLowerCase();
+  if (audioElements[key] && !audioElements[key].paused && !audioElements[key].ended) {
+    return;
+  }
+  var audio = new Audio(url);
+  audio.loop = (loops > 1 || loops === 0);
+  audioElements[key] = audio;
+  recentlyStartedAudio[key] = true;
+  audio.play().catch(function(e) {
+    if (e.name === 'NotAllowedError') {
+      console.warn('Audio blocked (waiting for user gesture):', file);
+      pendingAudioPlays.push(audio);
+    } else {
+      console.warn('Audio play failed:', url, e.message);
+    }
+  });
+  console.log(label + ':', file, 'loops:', loops);
 }
 
 function stopAllAudio() {
@@ -1177,6 +1310,54 @@ function setVar(name, val) {
   console.log('SET_VAR:', name, '=', val);
 }
 
+function findEntryByName(name) {
+  if (!name) return null;
+  var lower = name.toLowerCase();
+  return VND_LIST.find(function(entry) {
+    return entry.name.toLowerCase() === lower || entry.vnd.toLowerCase().indexOf(lower) >= 0;
+  });
+}
+
+function saveGame(slot) {
+  var key = (slot || 'default').trim();
+  var payload = {
+    entry: currentVNDEntry ? currentVNDEntry.name : null,
+    sceneIndex: currentSceneIndex,
+    vars: gameVars
+  };
+  try {
+    localStorage.setItem('vn_save_' + key, JSON.stringify(payload));
+    console.log('SAVE:', key, payload);
+  } catch (e) {
+    console.warn('SAVE failed:', e.message);
+  }
+}
+
+function loadGame(slot) {
+  var key = (slot || 'default').trim();
+  var raw = localStorage.getItem('vn_save_' + key);
+  if (!raw) {
+    console.warn('LOAD: no save for slot', key);
+    return;
+  }
+  try {
+    var payload = JSON.parse(raw);
+    if (payload && payload.vars) {
+      gameVars = payload.vars;
+    }
+    var entry = findEntryByName(payload.entry || '');
+    if (entry && entry !== currentVNDEntry) {
+      loadVNDEntryAndGoToScene(entry, payload.sceneIndex || 0);
+    } else if (project) {
+      var idx = payload.sceneIndex || 0;
+      if (idx >= 0 && idx < project.scenes.length) goToScene(idx);
+    }
+    console.log('LOAD:', key, payload);
+  } catch (e) {
+    console.warn('LOAD failed:', e.message);
+  }
+}
+
 // --- IF EVALUATOR ---
 // Format: "variable op value then action [else action]"
 // Actions: "runprj path sceneIdx", "scene idx", "dec_var name val", "inc_var name val",
@@ -1246,6 +1427,18 @@ function executeAction(action) {
     if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
       goToScene(idx - 1);
     }
+  } else if (cmd === 'next') {
+    if (project && currentSceneIndex < project.scenes.length - 1) {
+      doNavigation({ type: 'next' });
+    }
+  } else if (cmd === 'prev') {
+    doNavigation({ type: 'prev' });
+  } else if (cmd === 'zoom') {
+    setZoom(zoomLevel === 1 ? 2 : 1, false);
+  } else if (cmd === 'zoomin') {
+    setZoom(zoomLevel + 0.1, false);
+  } else if (cmd === 'zoomout') {
+    setZoom(zoomLevel - 0.1, false);
   } else if (cmd === 'set_var') {
     setVar(parts[1], parseInt(parts[2]) || 0);
   } else if (cmd === 'inc_var') {
@@ -1256,6 +1449,9 @@ function executeAction(action) {
     playWav(parts.slice(1).join(' '));
   } else if (cmd === 'playavi') {
     playAvi(parts.slice(1).join(' '));
+  } else if (cmd === 'pause') {
+    var pauseVal = parts.slice(1).join(' ');
+    scheduleCommandPause(pauseVal, null, 0);
   } else if (cmd === 'playhtml') {
     playHtml(parts.slice(1).join(' '));
   } else if (cmd === 'playbmp') {
@@ -1270,6 +1466,31 @@ function executeAction(action) {
     hideBmpOverlay(parts[1] || '');
   } else if (cmd === 'closewav') {
     stopAllAudio();
+  } else if (cmd === 'closeavi') {
+    closeVideo();
+  } else if (cmd === 'playmid') {
+    playMediaAudio(parts.slice(1).join(' '), 'MID', 'midi/', 'PLAYMID');
+  } else if (cmd === 'playcda') {
+    playMediaAudio(parts.slice(1).join(' '), 'CDA', 'cda/', 'PLAYCDA');
+  } else if (cmd === 'playseq') {
+    playMediaAudio(parts.slice(1).join(' '), 'SEQ', 'seq/', 'PLAYSEQ');
+  } else if (cmd === 'msgbox') {
+    alert(parts.slice(1).join(' '));
+  } else if (cmd === 'playcmd') {
+    console.warn('PLAYCMD (not implemented):', parts.slice(1).join(' '));
+  } else if (cmd === 'about') {
+    alert('VN-Studio HTML Demo');
+  } else if (cmd === 'prefs') {
+    updatePrefsFromString(parts.slice(1).join(' '));
+  } else if (cmd === 'exec' || cmd === 'explore') {
+    var target = parts.slice(1).join(' ');
+    if (target) {
+      window.open(target, '_blank');
+    }
+  } else if (cmd === 'load') {
+    loadGame(parts[1]);
+  } else if (cmd === 'save') {
+    saveGame(parts[1]);
   } else if (cmd === 'addtext') {
     addTextOverlay(parts.slice(1).join(' '));
   } else if (cmd === 'closedll') {
@@ -1537,6 +1758,26 @@ var currentVideo = null;
 var pendingVideoPlay = null; // Video waiting for user gesture to play
 var pendingVideoNav = null; // Navigation to execute after video ends
 
+function parsePauseDurationMs(pauseVal) {
+  var raw = parseInt((pauseVal || '').trim(), 10);
+  if (isNaN(raw) || raw <= 0) return 0;
+  // Heuristic: small values are seconds, larger values are milliseconds
+  if (raw <= 10) return raw * 1000;
+  return raw;
+}
+
+function scheduleCommandPause(pauseVal, cmd, nextIdx) {
+  var delayMs = parsePauseDurationMs(pauseVal);
+  if (!delayMs) return false;
+  console.log('PAUSE:', delayMs, 'ms');
+  setTimeout(function() {
+    if (cmd) {
+      resumeCommandProcessing(cmd, nextIdx);
+    }
+  }, delayMs);
+  return true;
+}
+
 function resolveAviPath(aviRef) {
   var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
   var aviDir = 'movie/';
@@ -1703,8 +1944,26 @@ function executeStringCommand(strType, strValue) {
     case 36: // CLOSEWAV
       stopAllAudio();
       break;
+    case 0: // QUIT
+      console.warn('QUIT (not implemented)');
+      break;
+    case 1: // ABOUT
+      alert('VN-Studio HTML Demo');
+      break;
+    case 2: // PREFS
+      updatePrefsFromString(val);
+      break;
+    case 5: // ZOOM
+      setZoom(zoomLevel === 1 ? 2 : 1, false);
+      break;
+    case 14: // ZOOMIN
+      setZoom(zoomLevel + 0.1, false);
+      break;
+    case 15: // ZOOMOUT
+      setZoom(zoomLevel - 0.1, false);
+      break;
     case 16: // PAUSE
-      // TODO: implement actual pause/delay
+      console.warn('PAUSE ignored outside command chain:', val);
       break;
     case 25: // INVALIDATE
       render();
@@ -1717,6 +1976,16 @@ function executeStringCommand(strType, strValue) {
       break;
     case 33: // RUNDLL
       console.log('RUNDLL (not implemented):', val);
+      break;
+    case 34: // MSGBOX
+      alert(val);
+      break;
+    case 35: // PLAYCMD
+      console.warn('PLAYCMD (not implemented):', val);
+      break;
+    case 17: // EXEC
+    case 18: // EXPLORE
+      if (val) window.open(val, '_blank');
       break;
     case 40: // REM (comment)
       break;
@@ -1736,8 +2005,30 @@ function executeStringCommand(strType, strValue) {
     case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"
       addTextOverlay(val);
       break;
+    case 12: // PLAYMID
+      playMediaAudio(val, 'MID', 'midi/', 'PLAYMID');
+      break;
+    case 19: // PLAYCDA
+      playMediaAudio(val, 'CDA', 'cda/', 'PLAYCDA');
+      break;
+    case 20: // PLAYSEQ
+      playMediaAudio(val, 'SEQ', 'seq/', 'PLAYSEQ');
+      break;
+    case 45: // LOAD
+      loadGame(val);
+      break;
+    case 46: // SAVE
+      saveGame(val);
+      break;
+    case 47: // CLOSEAVI
+      closeVideo();
+      break;
+    case 48: // CLOSEMID
+      console.warn('CLOSEMID (not implemented):', val);
+      break;
     // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 39 (FONT), 3 (PREV), 7 (HOTSPOT)
     default:
+      console.warn('Unhandled command:', strType, val);
       break;
   }
 }
@@ -2335,6 +2626,8 @@ function resumeCommandProcessing(cmd, startIdx) {
       }
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
+    } else if (s.type === 4) {
+      if (!deferredNav) deferredNav = { type: 'next', value: '' };
     } else if (s.type === 31) {
       if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
     } else if (s.type === 13) {
@@ -2342,6 +2635,11 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 3) {
       // PREV - go back to previous scene
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+    } else if (s.type === 16) {
+      // PAUSE - defer remaining actions
+      if (scheduleCommandPause(s.string, cmd, si + 1)) {
+        return;
+      }
     } else if (s.type === 38 || s.type === 39 || s.type === 7) {
       // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
     } else if (s.type === 27 && cmd.autoShowedBmp) {
@@ -2448,6 +2746,16 @@ function doNavigation(nav) {
       }
     } else {
       console.log('NAV: PREV - history empty, staying at', currentVNDEntry ? currentVNDEntry.name : '?', 'scene', currentSceneIndex + 1);
+    }
+  } else if (nav.type === 'next') {
+    if (project && currentSceneIndex < project.scenes.length - 1) {
+      if (currentSceneIndex >= 0 && currentVNDEntry) {
+        sceneHistory.push({ entry: currentVNDEntry, sceneIndex: currentSceneIndex });
+        logHistory('NEXT - pushed ' + currentVNDEntry.name + ':' + (currentSceneIndex + 1));
+      }
+      goToScene(currentSceneIndex + 1);
+    } else {
+      console.log('NAV: NEXT - at end, staying at', currentVNDEntry ? currentVNDEntry.name : '?', 'scene', currentSceneIndex + 1);
     }
   }
 }

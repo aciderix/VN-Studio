@@ -1,0 +1,31 @@
+            ; CALL XREF from fcn.00415661 @ 0x415761(x)
+/ 49: fcn.00413aef (int32_t arg_8h, int32_t arg_ch, uint32_t arg_10h);
+| `- args(sp[0x4..0xc])
+|           0x00413aef      55             push ebp
+|           0x00413af0      8bec           mov ebp, esp
+|           0x00413af2      53             push ebx
+|           0x00413af3      56             push esi
+|           0x00413af4      8b750c         mov esi, dword [arg_ch]
+|           0x00413af7      8b5d08         mov ebx, dword [arg_8h]
+|           0x00413afa      3bde           cmp ebx, esi
+|       ,=< 0x00413afc      7504           jne 0x413b02
+|       |   0x00413afe      8bc3           mov eax, ebx
+|      ,==< 0x00413b00      eb1a           jmp 0x413b1c
+|      ||   ; CODE XREF from fcn.00413aef @ 0x413afc(x)
+|      |`-> 0x00413b02      807d1000       cmp byte [arg_10h], 0
+|      |,=< 0x00413b06      7408           je 0x413b10
+|      ||   0x00413b08      53             push ebx
+|      ||   0x00413b09      8b5325         mov edx, dword [ebx + 0x25]
+|      ||   0x00413b0c      ff5210         call dword [edx + 0x10]     ; 16
+|      ||   0x00413b0f      59             pop ecx
+|      ||   ; CODE XREF from fcn.00413aef @ 0x413b06(x)
+|      |`-> 0x00413b10      56             push esi
+|      |    0x00413b11      53             push ebx
+|      |    0x00413b12      e818fcffff     call fcn.0041372f
+|      |    0x00413b17      83c408         add esp, 8
+|      |    0x00413b1a      8bc3           mov eax, ebx
+|      |    ; CODE XREF from fcn.00413aef @ 0x413b00(x)
+|      `--> 0x00413b1c      5e             pop esi
+|           0x00413b1d      5b             pop ebx
+|           0x00413b1e      5d             pop ebp
+\           0x00413b1f      c3             ret

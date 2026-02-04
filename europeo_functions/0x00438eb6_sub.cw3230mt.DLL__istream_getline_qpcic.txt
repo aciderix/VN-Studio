@@ -1,0 +1,4 @@
+            ; XREFS: CALL 0x00402c1e  CALL 0x00402c4d  CALL 0x00402c64  
+            ; XREFS: CALL 0x00402da3  CALL 0x00402dcf  CALL 0x00402de6  
+/ 6: sub.cw3230mt.DLL__istream_getline_qpcic ();
+\           0x00438eb6      ff258c594500   jmp dword [sym.imp.cw3230mt.DLL__istream_getline_qpcic] ; 0x45598c

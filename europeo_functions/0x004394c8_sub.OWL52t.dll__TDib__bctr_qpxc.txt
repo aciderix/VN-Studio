@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041d5d3 @ 0x41d631(x)
+            ; CALL XREF from fcn.0041d7a5 @ 0x41d806(x)
+/ 6: sub.OWL52t.dll__TDib__bctr_qpxc ();
+\           0x004394c8      ff25ac5d4500   jmp dword [sym.imp.OWL52t.dll__TDib__bctr_qpxc] ; 0x455dac

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041f6ae @ 0x41f74d(x)
+/ 6: sub.cw3230mt.DLL__string_read_file_qr7istream ();
+\           0x00438f4c      ff25f0594500   jmp dword [sym.imp.cw3230mt.DLL__string_read_file_qr7istream] ; 0x4559f0

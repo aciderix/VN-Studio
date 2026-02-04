@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00401358 @ 0x401472(x)
+            ; CALL XREF from fcn.00401535 @ 0x4016ae(x)
+/ 6: BOOL sub.KERNEL32.dll_FreeResource (HGLOBAL hResData);
+\           0x00439042      ff25985a4500   jmp dword [sym.imp.KERNEL32.dll_FreeResource] ; 0x455a98 ; "~\x19\x05"

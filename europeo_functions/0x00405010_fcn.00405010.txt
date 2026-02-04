@@ -1,0 +1,9 @@
+            ; CALL XREF from fcn.004315bd @ +0x5a9(x)
+/ 13: fcn.00405010 (DWORD dwMilliseconds);
+| `- args(sp[0x4..0x4])
+|           0x00405010      55             push ebp
+|           0x00405011      8bec           mov ebp, esp
+|           0x00405013      ff7508         push dword [dwMilliseconds] ; DWORD dwMilliseconds
+|           0x00405016      e8eb3f0300     call sub.KERNEL32.dll_Sleep ; VOID Sleep(DWORD dwMilliseconds)
+|           0x0040501b      5d             pop ebp
+\           0x0040501c      c3             ret

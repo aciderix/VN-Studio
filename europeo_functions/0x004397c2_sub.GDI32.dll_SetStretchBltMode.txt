@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042ecb9 @ +0x91a(x), +0x92d(x), +0x9d6(x), +0x9e9(x)
+/ 6: long sub.GDI32.dll_SetStretchBltMode (HDC hdc, _COMBINRGN_STYLE iStretchMode);
+\           0x004397c2      ff25ac5f4500   jmp dword [sym.imp.GDI32.dll_SetStretchBltMode] ; 0x455fac

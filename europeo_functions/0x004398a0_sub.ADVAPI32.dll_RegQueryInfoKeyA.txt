@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0040215c @ 0x402222(x)
+/ 6: LSTATUS sub.ADVAPI32.dll_RegQueryInfoKeyA (HKEY hKey, LPSTR lpClass, LPDWORD lpcchClass, LPDWORD lpReserved, LPDWORD lpcSubKeys, LPDWORD lpcbMaxSubKeyLen, LPDWORD lpcbMaxClassLen, LPDWORD lpcValues, LPDWORD lpcbMaxValueNameLen, LPDWORD lpcbMaxValueLen, LPDWORD lpcbSecurityDescriptor, PFILETIME lpftLastWriteTime);
+\           0x004398a0      ff2550604500   jmp dword [sym.imp.ADVAPI32.dll_RegQueryInfoKeyA] ; 0x456050 ; "pB\x05"

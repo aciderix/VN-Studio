@@ -1,0 +1,5 @@
+            ; XREFS: CALL 0x00417332  CALL 0x00417442  CALL 0x00417756  
+            ; XREFS: CALL 0x00429ae3  CALL 0x00429bfb  CALL 0x00429e43  
+            ; XREFS: CALL 0x0042a044  CALL 0x0042a23b  
+/ 6: sub.bds52t.dll__fpbase_close_qv ();
+\           0x00439132      ff25405b4500   jmp dword [sym.imp.bds52t.dll__fpbase_close_qv] ; 0x455b40

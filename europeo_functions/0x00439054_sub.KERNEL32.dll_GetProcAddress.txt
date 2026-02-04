@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00401a18 @ 0x401a3a(x)
+            ; CALL XREFS from fcn.004294c9 @ 0x429675(x), 0x429730(x)
+            ; CALL XREF from fcn.00429865 @ 0x429921(x)
+/ 6: FARPROC sub.KERNEL32.dll_GetProcAddress (HMODULE hModule, LPCSTR lpProcName);
+\           0x00439054      ff25a45a4500   jmp dword [sym.imp.KERNEL32.dll_GetProcAddress] ; 0x455aa4

@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x0041c7cb  CALL 0x0042b02f  CALL 0x0042b8c5  
+            ; XREFS: CALL 0x0042c743  CALL 0x0042caa8  CALL 0x0042cc50  
+            ; XREFS: CALL 0x0042df8f  CALL 0x00436644  CALL 0x00436c52  
+            ; XREFS: CALL 0x00437b1c  CALL 0x0043863c  CALL 0x00438bee  
+/ 6: sub.OWL52t.dll__TWindow__bdtr_qv ();
+\           0x0043960c      ff25845e4500   jmp dword [sym.imp.OWL52t.dll__TWindow__bdtr_qv] ; 0x455e84

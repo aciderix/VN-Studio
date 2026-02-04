@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0041f028 @ 0x41f10e(x)
+            ; CALL XREF from fcn.0041f231 @ 0x41f2a5(x)
+            ; CALL XREF from fcn.0041fc53 @ 0x41fe8f(x)
+            ; CALL XREFS from fcn.004200cf @ 0x420e0f(x), 0x420e97(x)
+/ 6: LPSTR sub.KERNEL32.dll_lstrcpyA (LPSTR lpString1, LPCSTR lpString2);
+\           0x00438ffa      ff25685a4500   jmp dword [sym.imp.KERNEL32.dll_lstrcpyA] ; 0x455a68

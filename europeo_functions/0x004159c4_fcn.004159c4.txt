@@ -1,0 +1,52 @@
+            ; CALL XREF from fcn.0041526b @ +0x220(x)
+            ; CALL XREF from fcn.00415661 @ 0x415690(x)
+            ; CALL XREFS from fcn.00415a4d @ +0x4a(x), +0x7cd(x)
+/ 137: fcn.004159c4 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(4:sp[0x8..0x30])
+|           0x004159c4      55             push ebp
+|           0x004159c5      8bec           mov ebp, esp
+|           0x004159c7      83c4d4         add esp, 0xffffffd4
+|           0x004159ca      53             push ebx
+|           0x004159cb      8b5d08         mov ebx, dword [arg_8h]
+|           0x004159ce      b8a81a4400     mov eax, 0x441aa8
+|           0x004159d3      e840dcfeff     call fcn.00403618
+|           0x004159d8      8d5368         lea edx, [ebx + 0x68]
+|           0x004159db      52             push edx
+|           0x004159dc      8b8b8d000000   mov ecx, dword [ebx + 0x8d]
+|           0x004159e2      ff5110         call dword [ecx + 0x10]     ; 16
+|           0x004159e5      59             pop ecx
+|           0x004159e6      8b8395000000   mov eax, dword [ebx + 0x95]
+|           0x004159ec      8945fc         mov dword [var_4h], eax
+|           0x004159ef      837dfc00       cmp dword [var_4h], 0
+|       ,=< 0x004159f3      7419           je 0x415a0e
+|       |   0x004159f5      66c745e41400   mov word [var_1ch], 0x14    ; 20
+|       |   0x004159fb      6a03           push 3                      ; 3
+|       |   0x004159fd      8b55fc         mov edx, dword [var_4h]
+|       |   0x00415a00      52             push edx
+|       |   0x00415a01      8b0a           mov ecx, dword [edx]
+|       |   0x00415a03      ff11           call dword [ecx]
+|       |   0x00415a05      83c408         add esp, 8
+|       |   0x00415a08      66c745e40800   mov word [var_1ch], 8
+|       |   ; CODE XREF from fcn.004159c4 @ 0x4159f3(x)
+|       `-> 0x00415a0e      8b8391000000   mov eax, dword [ebx + 0x91]
+|           0x00415a14      8945f8         mov dword [var_8h], eax
+|           0x00415a17      837df800       cmp dword [var_8h], 0
+|       ,=< 0x00415a1b      741b           je 0x415a38
+|       |   0x00415a1d      66c745e42c00   mov word [var_1ch], 0x2c    ; ',' ; 44
+|       |   0x00415a23      6a03           push 3                      ; 3
+|       |   0x00415a25      8b55f8         mov edx, dword [var_8h]
+|       |   0x00415a28      52             push edx
+|       |   0x00415a29      8b4a21         mov ecx, dword [edx + 0x21]
+|       |   0x00415a2c      ff5104         call dword [ecx + 4]        ; 4
+|       |   0x00415a2f      83c408         add esp, 8
+|       |   0x00415a32      66c745e42000   mov word [var_1ch], 0x20    ; 32
+|       |   ; CODE XREF from fcn.004159c4 @ 0x415a1b(x)
+|       `-> 0x00415a38      53             push ebx
+|           0x00415a39      e822fbffff     call fcn.00415560
+|           0x00415a3e      59             pop ecx
+|           0x00415a3f      8b45d4         mov eax, dword [var_2ch]
+|           0x00415a42      64a300000000   mov dword fs:[0], eax
+|           0x00415a48      5b             pop ebx
+|           0x00415a49      8be5           mov esp, ebp
+|           0x00415a4b      5d             pop ebp
+\           0x00415a4c      c3             ret

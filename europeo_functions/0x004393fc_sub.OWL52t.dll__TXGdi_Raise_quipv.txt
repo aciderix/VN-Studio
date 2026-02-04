@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0041d4f4 @ +0xb9(x)
+            ; CALL XREF from fcn.0041d5d3 @ +0xb5(x)
+            ; CALL XREF from fcn.0041d6ae @ +0xd0(x)
+            ; CALL XREF from fcn.0041d7a5 @ +0xcc(x)
+/ 6: sub.OWL52t.dll__TXGdi_Raise_quipv ();
+\           0x004393fc      ff25245d4500   jmp dword [sym.imp.OWL52t.dll__TXGdi_Raise_quipv] ; 0x455d24

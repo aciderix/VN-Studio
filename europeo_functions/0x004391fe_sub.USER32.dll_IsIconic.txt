@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0042e49e @ 0x42e56e(x)
+            ; CALL XREF from fcn.00437ed4 @ 0x437efc(x)
+/ 6: BOOL sub.USER32.dll_IsIconic (HWND hWnd);
+\           0x004391fe      ff25cc5b4500   jmp dword [sym.imp.USER32.dll_IsIconic] ; 0x455bcc

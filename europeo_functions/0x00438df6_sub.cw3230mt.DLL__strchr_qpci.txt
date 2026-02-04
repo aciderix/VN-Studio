@@ -1,0 +1,4 @@
+            ; CALL XREFS from fcn.004027b3 @ +0x4c2(x), +0x4fa(x), +0x644(x), +0x675(x)
+            ; CALL XREF from fcn.0040de32 @ 0x40deed(x)
+/ 6: sub.cw3230mt.DLL__strchr_qpci ();
+\           0x00438df6      ff250c594500   jmp dword [sym.imp.cw3230mt.DLL__strchr_qpci] ; 0x45590c

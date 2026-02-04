@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.00426d33 @ 0x426d94(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x1944(x)
+            ; CALL XREFS from fcn.004315bd @ +0xc4f(x), +0xd6d(x)
+            ; CALL XREF from fcn.00433107 @ 0x43311f(x)
+/ 6: BOOL sub.USER32.dll_GetCursorPos (LPPOINT lpPoint);
+\           0x004391c2      ff25a45b4500   jmp dword [sym.imp.USER32.dll_GetCursorPos] ; 0x455ba4

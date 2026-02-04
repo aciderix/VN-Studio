@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00428154 @ 0x42830f(x)
+/ 6: HCURSOR sub.USER32.dll_LoadCursorA (HINSTANCE hInstance, LPCSTR lpCursorName);
+\           0x00439228      ff25e85b4500   jmp dword [sym.imp.USER32.dll_LoadCursorA] ; 0x455be8

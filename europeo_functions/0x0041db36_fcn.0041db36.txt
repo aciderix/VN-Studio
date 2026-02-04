@@ -1,0 +1,294 @@
+            ; CALL XREF from fcn.0041db0d @ 0x41db2c(x)
+            ; CALL XREFS from fcn.0042ecb9 @ +0x1601(x), +0x1671(x)
+/ 901: fcn.0041db36 (uint32_t arg_8h, HDC hdcDest, int32_t arg_10h, int32_t arg_14h, int32_t arg_18h, uint32_t arg_1ch);
+| `- args(sp[0x4..0x18]) vars(40:sp[0x8..0xc0])
+|           0x0041db36      55             push ebp
+|           0x0041db37      8bec           mov ebp, esp
+|           0x0041db39      81c444ffffff   add esp, 0xffffff44
+|           0x0041db3f      53             push ebx
+|           0x0041db40      56             push esi
+|           0x0041db41      57             push edi
+|           0x0041db42      8b7d18         mov edi, dword [arg_18h]
+|           0x0041db45      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041db48      b8ec454400     mov eax, 0x4445ec
+|           0x0041db4d      e8c65afeff     call fcn.00403618
+|           0x0041db52      6a21           push 0x21                   ; '!' ; 33
+|           0x0041db54      e893b30100     call sub.cw3230mt.DLL___bnew_qui
+|           0x0041db59      59             pop ecx
+|           0x0041db5a      8945fc         mov dword [var_4h], eax
+|           0x0041db5d      85c0           test eax, eax
+|       ,=< 0x0041db5f      741f           je 0x41db80
+|       |   0x0041db61      66c745e41400   mov word [var_1ch], 0x14    ; 20
+|       |   0x0041db67      ff750c         push dword [hdcDest]
+|       |   0x0041db6a      ff75fc         push dword [var_4h]
+|       |   0x0041db6d      e826bc0100     call sub.OWL52t.dll__TMemoryDC__bctr_qrx3TDC
+|       |   0x0041db72      83c408         add esp, 8
+|       |   0x0041db75      66c745e40800   mov word [var_1ch], 8
+|       |   0x0041db7b      8b75fc         mov esi, dword [var_4h]
+|      ,==< 0x0041db7e      eb03           jmp 0x41db83
+|      ||   ; CODE XREF from fcn.0041db36 @ 0x41db5f(x)
+|      |`-> 0x0041db80      8b75fc         mov esi, dword [var_4h]
+|      |    ; CODE XREF from fcn.0041db36 @ 0x41db7e(x)
+|      `--> 0x0041db83      837b0800       cmp dword [ebx + 8], 0
+|       ,=< 0x0041db87      0f84d9010000   je 0x41dd66
+|       |   0x0041db8d      8b4304         mov eax, dword [ebx + 4]
+|       |   0x0041db90      50             push eax
+|       |   0x0041db91      8b5005         mov edx, dword [eax + 5]
+|       |   0x0041db94      ff5204         call dword [edx + 4]        ; 4
+|       |   0x0041db97      59             pop ecx
+|       |   0x0041db98      3bf8           cmp edi, eax
+|      ,==< 0x0041db9a      0f85bf000000   jne 0x41dc5f
+|      ||   0x0041dba0      8b4b04         mov ecx, dword [ebx + 4]
+|      ||   0x0041dba3      51             push ecx
+|      ||   0x0041dba4      8b4105         mov eax, dword [ecx + 5]
+|      ||   0x0041dba7      ff5008         call dword [eax + 8]        ; 8
+|      ||   0x0041dbaa      59             pop ecx
+|      ||   0x0041dbab      3b451c         cmp eax, dword [arg_1ch]
+|     ,===< 0x0041dbae      0f85ab000000   jne 0x41dc5f
+|     |||   0x0041dbb4      ff7308         push dword [ebx + 8]
+|     |||   0x0041dbb7      56             push esi
+|     |||   0x0041dbb8      e8bdbb0100     call sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap
+|     |||   0x0041dbbd      83c408         add esp, 8
+|     |||   0x0041dbc0      8975cc         mov dword [var_34h], esi
+|     |||   0x0041dbc3      8b551c         mov edx, dword [arg_1ch]
+|     |||   0x0041dbc6      8955c8         mov dword [var_38h], edx
+|     |||   0x0041dbc9      897dc4         mov dword [var_3ch], edi
+|     |||   0x0041dbcc      8b4d14         mov ecx, dword [arg_14h]
+|     |||   0x0041dbcf      894dc0         mov dword [nYDest], ecx
+|     |||   0x0041dbd2      8b4510         mov eax, dword [arg_10h]
+|     |||   0x0041dbd5      8945bc         mov dword [nXDest], eax
+|     |||   0x0041dbd8      68c6008800     push 0x8800c6
+|     |||   0x0041dbdd      6a00           push 0
+|     |||   0x0041dbdf      6a00           push 0
+|     |||   0x0041dbe1      8b55cc         mov edx, dword [var_34h]
+|     |||   0x0041dbe4      ff32           push dword [edx]
+|     |||   0x0041dbe6      ff75c8         push dword [var_38h]
+|     |||   0x0041dbe9      ff75c4         push dword [var_3ch]
+|     |||   0x0041dbec      ff75c0         push dword [nYDest]         ; int nYDest
+|     |||   0x0041dbef      ff75bc         push dword [nXDest]         ; int nXDest
+|     |||   0x0041dbf2      8b4d0c         mov ecx, dword [hdcDest]
+|     |||   0x0041dbf5      ff31           push dword [ecx]            ; HDC hdcDest
+|     |||   0x0041dbf7      e832bc0100     call sub.GDI32.dll_BitBlt   ; bool BitBlt(HDC hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, _TernaryDrawMode dwRop)
+|     |||   0x0041dbfc      85c0           test eax, eax
+|     |||   0x0041dbfe      0f95c0         setne al
+|     |||   0x0041dc01      83e001         and eax, 1
+|     |||   0x0041dc04      8845d3         mov byte [var_2dh], al
+|     |||   0x0041dc07      ff7304         push dword [ebx + 4]
+|     |||   0x0041dc0a      56             push esi
+|     |||   0x0041dc0b      e86abb0100     call sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap
+|     |||   0x0041dc10      83c408         add esp, 8
+|     |||   0x0041dc13      8975b8         mov dword [var_48h], esi
+|     |||   0x0041dc16      8b551c         mov edx, dword [arg_1ch]
+|     |||   0x0041dc19      8955b4         mov dword [var_4ch], edx
+|     |||   0x0041dc1c      897db0         mov dword [var_50h], edi
+|     |||   0x0041dc1f      8b4d14         mov ecx, dword [arg_14h]
+|     |||   0x0041dc22      894dac         mov dword [var_54h], ecx
+|     |||   0x0041dc25      8b4510         mov eax, dword [arg_10h]
+|     |||   0x0041dc28      8945a8         mov dword [var_58h], eax
+|     |||   0x0041dc2b      688600ee00     push 0xee0086
+|     |||   0x0041dc30      6a00           push 0
+|     |||   0x0041dc32      6a00           push 0
+|     |||   0x0041dc34      8b55b8         mov edx, dword [var_48h]
+|     |||   0x0041dc37      ff32           push dword [edx]
+|     |||   0x0041dc39      ff75b4         push dword [var_4ch]
+|     |||   0x0041dc3c      ff75b0         push dword [var_50h]
+|     |||   0x0041dc3f      ff75ac         push dword [var_54h]        ; int nYDest
+|     |||   0x0041dc42      ff75a8         push dword [var_58h]        ; int nXDest
+|     |||   0x0041dc45      8b4d0c         mov ecx, dword [hdcDest]
+|     |||   0x0041dc48      ff31           push dword [ecx]            ; HDC hdcDest
+|     |||   0x0041dc4a      e8dfbb0100     call sub.GDI32.dll_BitBlt   ; bool BitBlt(HDC hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, _TernaryDrawMode dwRop)
+|     |||   0x0041dc4f      85c0           test eax, eax
+|     |||   0x0041dc51      0f95c0         setne al
+|     |||   0x0041dc54      83e001         and eax, 1
+|     |||   0x0041dc57      0845d3         or byte [var_2dh], al
+|    ,====< 0x0041dc5a      e925020000     jmp 0x41de84
+|    ||||   ; CODE XREFS from fcn.0041db36 @ 0x41db9a(x), 0x41dbae(x)
+|    |``--> 0x0041dc5f      ff7308         push dword [ebx + 8]
+|    |  |   0x0041dc62      56             push esi
+|    |  |   0x0041dc63      e812bb0100     call sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap
+|    |  |   0x0041dc68      83c408         add esp, 8
+|    |  |   0x0041dc6b      8b5304         mov edx, dword [ebx + 4]
+|    |  |   0x0041dc6e      52             push edx
+|    |  |   0x0041dc6f      8b4a05         mov ecx, dword [edx + 5]
+|    |  |   0x0041dc72      ff5108         call dword [ecx + 8]        ; 8
+|    |  |   0x0041dc75      59             pop ecx
+|    |  |   0x0041dc76      8945a4         mov dword [var_5ch], eax
+|    |  |   0x0041dc79      8b4304         mov eax, dword [ebx + 4]
+|    |  |   0x0041dc7c      50             push eax
+|    |  |   0x0041dc7d      8b5005         mov edx, dword [eax + 5]
+|    |  |   0x0041dc80      ff5204         call dword [edx + 4]        ; 4
+|    |  |   0x0041dc83      59             pop ecx
+|    |  |   0x0041dc84      8945a0         mov dword [var_60h], eax
+|    |  |   0x0041dc87      89759c         mov dword [var_64h], esi
+|    |  |   0x0041dc8a      8b4d1c         mov ecx, dword [arg_1ch]
+|    |  |   0x0041dc8d      894d98         mov dword [var_68h], ecx
+|    |  |   0x0041dc90      897d94         mov dword [var_6ch], edi
+|    |  |   0x0041dc93      8b4514         mov eax, dword [arg_14h]
+|    |  |   0x0041dc96      894590         mov dword [nYOriginDest], eax
+|    |  |   0x0041dc99      8b5510         mov edx, dword [arg_10h]
+|    |  |   0x0041dc9c      89558c         mov dword [nXOriginDest], edx
+|    |  |   0x0041dc9f      68c6008800     push 0x8800c6
+|    |  |   0x0041dca4      ff75a4         push dword [var_5ch]
+|    |  |   0x0041dca7      ff75a0         push dword [var_60h]
+|    |  |   0x0041dcaa      6a00           push 0
+|    |  |   0x0041dcac      6a00           push 0
+|    |  |   0x0041dcae      8b4d9c         mov ecx, dword [var_64h]
+|    |  |   0x0041dcb1      ff31           push dword [ecx]
+|    |  |   0x0041dcb3      ff7598         push dword [var_68h]
+|    |  |   0x0041dcb6      ff7594         push dword [var_6ch]
+|    |  |   0x0041dcb9      ff7590         push dword [nYOriginDest]   ; int nYOriginDest
+|    |  |   0x0041dcbc      ff758c         push dword [nXOriginDest]   ; int nXOriginDest
+|    |  |   0x0041dcbf      8b450c         mov eax, dword [hdcDest]
+|    |  |   0x0041dcc2      ff30           push dword [eax]            ; HDC hdcDest
+|    |  |   0x0041dcc4      e8e7ba0100     call sub.GDI32.dll_StretchBlt ; bool StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, HDC hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, _TernaryDrawMode dwRop)
+|    |  |   0x0041dcc9      85c0           test eax, eax
+|    |  |   0x0041dccb      0f95c2         setne dl
+|    |  |   0x0041dcce      83e201         and edx, 1
+|    |  |   0x0041dcd1      8855d3         mov byte [var_2dh], dl
+|    |  |   0x0041dcd4      ff7304         push dword [ebx + 4]
+|    |  |   0x0041dcd7      56             push esi
+|    |  |   0x0041dcd8      e89dba0100     call sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap
+|    |  |   0x0041dcdd      83c408         add esp, 8
+|    |  |   0x0041dce0      8b4b04         mov ecx, dword [ebx + 4]
+|    |  |   0x0041dce3      51             push ecx
+|    |  |   0x0041dce4      8b4105         mov eax, dword [ecx + 5]
+|    |  |   0x0041dce7      ff5008         call dword [eax + 8]        ; 8
+|    |  |   0x0041dcea      59             pop ecx
+|    |  |   0x0041dceb      894588         mov dword [var_78h], eax
+|    |  |   0x0041dcee      8b5304         mov edx, dword [ebx + 4]
+|    |  |   0x0041dcf1      52             push edx
+|    |  |   0x0041dcf2      8b4a05         mov ecx, dword [edx + 5]
+|    |  |   0x0041dcf5      ff5104         call dword [ecx + 4]        ; 4
+|    |  |   0x0041dcf8      59             pop ecx
+|    |  |   0x0041dcf9      894584         mov dword [var_7ch], eax
+|    |  |   0x0041dcfc      897580         mov dword [var_80h], esi
+|    |  |   0x0041dcff      8b451c         mov eax, dword [arg_1ch]
+|    |  |   0x0041dd02      89857cffffff   mov dword [var_84h], eax
+|    |  |   0x0041dd08      89bd78ffffff   mov dword [var_88h], edi
+|    |  |   0x0041dd0e      8b5514         mov edx, dword [arg_14h]
+|    |  |   0x0041dd11      899574ffffff   mov dword [var_8ch], edx
+|    |  |   0x0041dd17      8b4d10         mov ecx, dword [arg_10h]
+|    |  |   0x0041dd1a      898d70ffffff   mov dword [var_90h], ecx
+|    |  |   0x0041dd20      688600ee00     push 0xee0086
+|    |  |   0x0041dd25      ff7588         push dword [var_78h]
+|    |  |   0x0041dd28      ff7584         push dword [var_7ch]
+|    |  |   0x0041dd2b      6a00           push 0
+|    |  |   0x0041dd2d      6a00           push 0
+|    |  |   0x0041dd2f      8b4580         mov eax, dword [var_80h]
+|    |  |   0x0041dd32      ff30           push dword [eax]
+|    |  |   0x0041dd34      ffb57cffffff   push dword [var_84h]
+|    |  |   0x0041dd3a      ffb578ffffff   push dword [var_88h]
+|    |  |   0x0041dd40      ffb574ffffff   push dword [var_8ch]        ; int nYOriginDest
+|    |  |   0x0041dd46      ffb570ffffff   push dword [var_90h]        ; int nXOriginDest
+|    |  |   0x0041dd4c      8b550c         mov edx, dword [hdcDest]
+|    |  |   0x0041dd4f      ff32           push dword [edx]            ; HDC hdcDest
+|    |  |   0x0041dd51      e85aba0100     call sub.GDI32.dll_StretchBlt ; bool StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, HDC hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, _TernaryDrawMode dwRop)
+|    |  |   0x0041dd56      85c0           test eax, eax
+|    |  |   0x0041dd58      0f95c1         setne cl
+|    |  |   0x0041dd5b      83e101         and ecx, 1
+|    |  |   0x0041dd5e      084dd3         or byte [var_2dh], cl
+|    | ,==< 0x0041dd61      e91e010000     jmp 0x41de84
+|    | ||   ; CODE XREF from fcn.0041db36 @ 0x41db87(x)
+|    | |`-> 0x0041dd66      ff7304         push dword [ebx + 4]
+|    | |    0x0041dd69      56             push esi
+|    | |    0x0041dd6a      e80bba0100     call sub.OWL52t.dll__TMemoryDC_SelectObject_qrx7TBitmap
+|    | |    0x0041dd6f      83c408         add esp, 8
+|    | |    0x0041dd72      8b4304         mov eax, dword [ebx + 4]
+|    | |    0x0041dd75      50             push eax
+|    | |    0x0041dd76      8b5005         mov edx, dword [eax + 5]
+|    | |    0x0041dd79      ff5204         call dword [edx + 4]        ; 4
+|    | |    0x0041dd7c      59             pop ecx
+|    | |    0x0041dd7d      3bf8           cmp edi, eax
+|    | |,=< 0x0041dd7f      7570           jne 0x41ddf1
+|    | ||   0x0041dd81      8b4b04         mov ecx, dword [ebx + 4]
+|    | ||   0x0041dd84      51             push ecx
+|    | ||   0x0041dd85      8b4105         mov eax, dword [ecx + 5]
+|    | ||   0x0041dd88      ff5008         call dword [eax + 8]        ; 8
+|    | ||   0x0041dd8b      59             pop ecx
+|    | ||   0x0041dd8c      3b451c         cmp eax, dword [arg_1ch]
+|    |,===< 0x0041dd8f      7560           jne 0x41ddf1
+|    ||||   0x0041dd91      8bde           mov ebx, esi
+|    ||||   0x0041dd93      8b551c         mov edx, dword [arg_1ch]
+|    ||||   0x0041dd96      89956cffffff   mov dword [var_94h], edx
+|    ||||   0x0041dd9c      89bd68ffffff   mov dword [var_98h], edi
+|    ||||   0x0041dda2      8b4d14         mov ecx, dword [arg_14h]
+|    ||||   0x0041dda5      898d64ffffff   mov dword [var_9ch], ecx
+|    ||||   0x0041ddab      8b4510         mov eax, dword [arg_10h]
+|    ||||   0x0041ddae      898560ffffff   mov dword [var_a0h], eax
+|    ||||   0x0041ddb4      682000cc00     push 0xcc0020               ; ' '
+|    ||||   0x0041ddb9      6a00           push 0
+|    ||||   0x0041ddbb      6a00           push 0
+|    ||||   0x0041ddbd      ff33           push dword [ebx]
+|    ||||   0x0041ddbf      ffb56cffffff   push dword [var_94h]
+|    ||||   0x0041ddc5      ffb568ffffff   push dword [var_98h]
+|    ||||   0x0041ddcb      ffb564ffffff   push dword [var_9ch]        ; int nYDest
+|    ||||   0x0041ddd1      ffb560ffffff   push dword [var_a0h]        ; int nXDest
+|    ||||   0x0041ddd7      8b550c         mov edx, dword [hdcDest]
+|    ||||   0x0041ddda      ff32           push dword [edx]            ; HDC hdcDest
+|    ||||   0x0041dddc      e84dba0100     call sub.GDI32.dll_BitBlt   ; bool BitBlt(HDC hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, _TernaryDrawMode dwRop)
+|    ||||   0x0041dde1      85c0           test eax, eax
+|    ||||   0x0041dde3      0f95c1         setne cl
+|    ||||   0x0041dde6      83e101         and ecx, 1
+|    ||||   0x0041dde9      884dd3         mov byte [var_2dh], cl
+|   ,=====< 0x0041ddec      e993000000     jmp 0x41de84
+|   |||||   ; CODE XREFS from fcn.0041db36 @ 0x41dd7f(x), 0x41dd8f(x)
+|   ||`-`-> 0x0041ddf1      8b4304         mov eax, dword [ebx + 4]
+|   || |    0x0041ddf4      50             push eax
+|   || |    0x0041ddf5      8b5005         mov edx, dword [eax + 5]
+|   || |    0x0041ddf8      ff5208         call dword [edx + 8]        ; 8
+|   || |    0x0041ddfb      59             pop ecx
+|   || |    0x0041ddfc      89855cffffff   mov dword [var_a4h], eax
+|   || |    0x0041de02      8b4b04         mov ecx, dword [ebx + 4]
+|   || |    0x0041de05      51             push ecx
+|   || |    0x0041de06      8b4105         mov eax, dword [ecx + 5]
+|   || |    0x0041de09      ff5004         call dword [eax + 4]        ; 4
+|   || |    0x0041de0c      59             pop ecx
+|   || |    0x0041de0d      898558ffffff   mov dword [var_a8h], eax
+|   || |    0x0041de13      89b554ffffff   mov dword [var_ach], esi
+|   || |    0x0041de19      8b551c         mov edx, dword [arg_1ch]
+|   || |    0x0041de1c      899550ffffff   mov dword [var_b0h], edx
+|   || |    0x0041de22      89bd4cffffff   mov dword [var_b4h], edi
+|   || |    0x0041de28      8b4d14         mov ecx, dword [arg_14h]
+|   || |    0x0041de2b      898d48ffffff   mov dword [var_b8h], ecx
+|   || |    0x0041de31      8b4510         mov eax, dword [arg_10h]
+|   || |    0x0041de34      898544ffffff   mov dword [var_bch], eax
+|   || |    0x0041de3a      682000cc00     push 0xcc0020               ; ' '
+|   || |    0x0041de3f      ffb55cffffff   push dword [var_a4h]
+|   || |    0x0041de45      ffb558ffffff   push dword [var_a8h]
+|   || |    0x0041de4b      6a00           push 0
+|   || |    0x0041de4d      6a00           push 0
+|   || |    0x0041de4f      8b9554ffffff   mov edx, dword [var_ach]
+|   || |    0x0041de55      ff32           push dword [edx]
+|   || |    0x0041de57      ffb550ffffff   push dword [var_b0h]
+|   || |    0x0041de5d      ffb54cffffff   push dword [var_b4h]
+|   || |    0x0041de63      ffb548ffffff   push dword [var_b8h]        ; int nYOriginDest
+|   || |    0x0041de69      ffb544ffffff   push dword [var_bch]        ; int nXOriginDest
+|   || |    0x0041de6f      8b4d0c         mov ecx, dword [hdcDest]
+|   || |    0x0041de72      ff31           push dword [ecx]            ; HDC hdcDest
+|   || |    0x0041de74      e837b90100     call sub.GDI32.dll_StretchBlt ; bool StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, HDC hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, _TernaryDrawMode dwRop)
+|   || |    0x0041de79      85c0           test eax, eax
+|   || |    0x0041de7b      0f95c0         setne al
+|   || |    0x0041de7e      83e001         and eax, 1
+|   || |    0x0041de81      8845d3         mov byte [var_2dh], al
+|   || |    ; CODE XREFS from fcn.0041db36 @ 0x41dc5a(x), 0x41dd61(x), 0x41ddec(x)
+|   ``-`--> 0x0041de84      8975f8         mov dword [var_8h], esi
+|           0x0041de87      837df800       cmp dword [var_8h], 0
+|       ,=< 0x0041de8b      741a           je 0x41dea7
+|       |   0x0041de8d      66c745e42c00   mov word [var_1ch], 0x2c    ; ',' ; 44
+|       |   0x0041de93      6a03           push 3                      ; 3
+|       |   0x0041de95      8b55f8         mov edx, dword [var_8h]
+|       |   0x0041de98      52             push edx
+|       |   0x0041de99      8b4a05         mov ecx, dword [edx + 5]
+|       |   0x0041de9c      ff11           call dword [ecx]
+|       |   0x0041de9e      83c408         add esp, 8
+|       |   0x0041dea1      66c745e42000   mov word [var_1ch], 0x20    ; 32
+|       |   ; CODE XREF from fcn.0041db36 @ 0x41de8b(x)
+|       `-> 0x0041dea7      8a45d3         mov al, byte [var_2dh]
+|           0x0041deaa      8b55d4         mov edx, dword [var_2ch]
+|           0x0041dead      6489150000..   mov dword fs:[0], edx
+|           0x0041deb4      5f             pop edi
+|           0x0041deb5      5e             pop esi
+|           0x0041deb6      5b             pop ebx
+|           0x0041deb7      8be5           mov esp, ebp
+|           0x0041deb9      5d             pop ebp
+\           0x0041deba      c3             ret

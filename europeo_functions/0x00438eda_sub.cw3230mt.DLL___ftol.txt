@@ -1,0 +1,3 @@
+            ; XREFS(25)
+/ 6: sub.cw3230mt.DLL___ftol ();
+\           0x00438eda      ff25a4594500   jmp dword [sym.imp.cw3230mt.DLL___ftol] ; 0x4559a4

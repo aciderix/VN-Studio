@@ -1,0 +1,52 @@
+            ; CALL XREF from fcn.00428373 @ 0x428996(x)
+            ; CALL XREF from fcn.00428aad @ 0x428d1e(x)
+            ; CALL XREF from fcn.00428e06 @ 0x428e97(x)
+/ 111: fcn.00433236 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(1:sp[0x5..0x5])
+|           0x00433236      55             push ebp
+|           0x00433237      8bec           mov ebp, esp
+|           0x00433239      51             push ecx
+|           0x0043323a      53             push ebx
+|           0x0043323b      56             push esi
+|           0x0043323c      57             push edi
+|           0x0043323d      8b550c         mov edx, dword [arg_ch]
+|           0x00433240      8b5d08         mov ebx, dword [arg_8h]
+|           0x00433243      8d8348010000   lea eax, [ebx + 0x148]
+|           0x00433249      8b08           mov ecx, dword [eax]
+|           0x0043324b      3b4808         cmp ecx, dword [eax + 8]
+|       ,=< 0x0043324e      7d0c           jge 0x43325c
+|       |   0x00433250      8b4804         mov ecx, dword [eax + 4]
+|       |   0x00433253      3b480c         cmp ecx, dword [eax + 0xc]
+|      ,==< 0x00433256      7d04           jge 0x43325c
+|      ||   0x00433258      33c0           xor eax, eax
+|     ,===< 0x0043325a      eb05           jmp 0x433261
+|     |||   ; CODE XREFS from fcn.00433236 @ 0x43324e(x), 0x433256(x)
+|     |``-> 0x0043325c      b801000000     mov eax, 1
+|     |     ; CODE XREF from fcn.00433236 @ 0x43325a(x)
+|     `---> 0x00433261      8845ff         mov byte [var_1h], al
+|           0x00433264      84c0           test al, al
+|       ,=< 0x00433266      7411           je 0x433279
+|       |   0x00433268      8bf2           mov esi, edx
+|       |   0x0043326a      8dbb48010000   lea edi, [ebx + 0x148]
+|       |   0x00433270      b904000000     mov ecx, 4
+|       |   0x00433275      f3a5           rep movsd dword es:[edi], dword [esi]
+|      ,==< 0x00433277      eb10           jmp 0x433289
+|      ||   ; CODE XREF from fcn.00433236 @ 0x433266(x)
+|      |`-> 0x00433279      52             push edx
+|      |    0x0043327a      8d8348010000   lea eax, [ebx + 0x148]
+|      |    0x00433280      50             push eax
+|      |    0x00433281      e8945e0000     call sub.bds52t.dll__TRect__bror_qrx5TRect
+|      |    0x00433286      83c408         add esp, 8
+|      |    ; CODE XREF from fcn.00433236 @ 0x433277(x)
+|      `--> 0x00433289      8d9308010000   lea edx, [ebx + 0x108]
+|           0x0043328f      52             push edx
+|           0x00433290      81c348010000   add ebx, 0x148              ; 328
+|           0x00433296      53             push ebx
+|           0x00433297      e8185e0000     call sub.bds52t.dll__TRect__brand_qrx5TRect
+|           0x0043329c      83c408         add esp, 8
+|           0x0043329f      5f             pop edi
+|           0x004332a0      5e             pop esi
+|           0x004332a1      5b             pop ebx
+|           0x004332a2      59             pop ecx
+|           0x004332a3      5d             pop ebp
+\           0x004332a4      c3             ret

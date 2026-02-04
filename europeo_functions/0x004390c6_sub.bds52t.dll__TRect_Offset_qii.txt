@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00405065 @ 0x40507b(x)
+            ; CALL XREF from fcn.00405119 @ 0x40516e(x)
+            ; CALL XREF from fcn.00426d33 @ 0x426f64(x)
+/ 6: sub.bds52t.dll__TRect_Offset_qii ();
+\           0x004390c6      ff25f85a4500   jmp dword [sym.imp.bds52t.dll__TRect_Offset_qii] ; 0x455af8 ; "X\x1b\x05"

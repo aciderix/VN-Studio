@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.00434070 @ 0x4341dd(x), 0x434444(x)
+/ 6: sub.OWL52t.dll__TPalette__bctr_qpx15tagPALETTEENTRYi ();
+\           0x004396c6      ff25005f4500   jmp dword [sym.imp.OWL52t.dll__TPalette__bctr_qpx15tagPALETTEENTRYi] ; 0x455f00

@@ -1,0 +1,5 @@
+nth paddr      vaddr      bind   type size lib         name               demangled
+-----------------------------------------------------------------------------------
+1   0x0003906f 0x0043a06f GLOBAL FUNC 0    vn21_32.exe ___CPPdebugHook
+2   0x00000646 0x00401046 GLOBAL FUNC 0    vn21_32.exe __GetExceptDLLinfo
+3   0x0004da1c 0x0044ea1c GLOBAL FUNC 0    vn21_32.exe __DebuggerHookData

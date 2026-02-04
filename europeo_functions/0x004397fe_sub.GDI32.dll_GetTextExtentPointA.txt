@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.004200cf @ 0x4213bd(x), 0x42162a(x)
+/ 6: bool sub.GDI32.dll_GetTextExtentPointA (HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize);
+\           0x004397fe      ff25d45f4500   jmp dword [sym.imp.GDI32.dll_GetTextExtentPointA] ; 0x455fd4

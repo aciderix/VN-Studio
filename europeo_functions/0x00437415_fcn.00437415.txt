@@ -1,0 +1,65 @@
+            ; CALL XREF from fcn.00437415 @ +0x413(x)
+/ 174: fcn.00437415 (int32_t arg_8h, LPVOID *lplpBuffer);
+| `- args(sp[0x4..0x8]) vars(5:sp[0x8..0x30])
+|           0x00437415      55             push ebp
+|           0x00437416      8bec           mov ebp, esp
+|           0x00437418      83c4d4         add esp, 0xffffffd4
+|           0x0043741b      53             push ebx
+|           0x0043741c      8b5d08         mov ebx, dword [arg_8h]
+|           0x0043741f      b8b8d54400     mov eax, 0x44d5b8
+|           0x00437424      e8efc1fcff     call fcn.00403618
+|           0x00437429      66c745e81400   mov word [var_18h], 0x14    ; 20
+|           0x0043742f      68ff000000     push 0xff                   ; 255
+|           0x00437434      e8171a0000     call sub.cw3230mt.DLL___bnwa_qui
+|           0x00437439      59             pop ecx
+|           0x0043743a      8945fc         mov dword [lpSubBlock], eax
+|           0x0043743d      ff45f4         inc dword [var_ch]
+|           0x00437440      66c745e80800   mov word [var_18h], 8
+|           0x00437446      837b0800       cmp dword [ebx + 8], 0
+|       ,=< 0x0043744a      7458           je 0x4374a4
+|       |   0x0043744c      688dd84400     push 0x44d88d               ; "LegalCopyright"
+|       |   0x00437451      8b5304         mov edx, dword [ebx + 4]
+|       |   0x00437454      ff32           push dword [edx]
+|       |   0x00437456      6874d84400     push 0x44d874               ; "\StringFileInfo\%08lx\%s"
+|       |   0x0043745b      ff75fc         push dword [lpSubBlock]
+|       |   0x0043745e      e875190000     call sub.cw3230mt.DLL__sprintf
+|       |   0x00437463      83c410         add esp, 0x10
+|       |   0x00437466      837b0800       cmp dword [ebx + 8], 0
+|      ,==< 0x0043746a      7414           je 0x437480
+|      ||   0x0043746c      8d4dd4         lea ecx, [puLen]
+|      ||   0x0043746f      51             push ecx                    ; PUINT puLen
+|      ||   0x00437470      ff750c         push dword [lplpBuffer]     ; LPVOID *lplpBuffer
+|      ||   0x00437473      ff75fc         push dword [lpSubBlock]     ; LPCSTR lpSubBlock
+|      ||   0x00437476      ff7308         push dword [ebx + 8]        ; LPCVOID pBlock
+|      ||   0x00437479      e8f8230000     call sub.VERSION.dll_VerQueryValueA ; BOOL VerQueryValueA(LPCVOID pBlock, LPCSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen)
+|     ,===< 0x0043747e      eb02           jmp 0x437482
+|     |||   ; CODE XREF from fcn.00437415 @ 0x43746a(x)
+|     |`--> 0x00437480      33c0           xor eax, eax
+|     | |   ; CODE XREF from fcn.00437415 @ 0x43747e(x)
+|     `---> 0x00437482      85c0           test eax, eax
+|       |   0x00437484      0f95c0         setne al
+|       |   0x00437487      83e001         and eax, 1
+|       |   0x0043748a      50             push eax
+|       |   0x0043748b      ff4df4         dec dword [var_ch]
+|       |   0x0043748e      ff75fc         push dword [lpSubBlock]
+|       |   0x00437491      e8ec1a0000     call sub.cw3230mt.DLL___bdla_qpv
+|       |   0x00437496      59             pop ecx
+|       |   0x00437497      58             pop eax
+|       |   0x00437498      8b55d8         mov edx, dword [var_28h]
+|       |   0x0043749b      6489150000..   mov dword fs:[0], edx
+|      ,==< 0x004374a2      eb1a           jmp 0x4374be
+|      ||   ; CODE XREF from fcn.00437415 @ 0x43744a(x)
+|      |`-> 0x004374a4      33c0           xor eax, eax
+|      |    0x004374a6      50             push eax
+|      |    0x004374a7      ff4df4         dec dword [var_ch]
+|      |    0x004374aa      ff75fc         push dword [lpSubBlock]
+|      |    0x004374ad      e8d01a0000     call sub.cw3230mt.DLL___bdla_qpv
+|      |    0x004374b2      59             pop ecx
+|      |    0x004374b3      58             pop eax
+|      |    0x004374b4      8b55d8         mov edx, dword [var_28h]
+|      |    0x004374b7      6489150000..   mov dword fs:[0], edx
+|      |    ; CODE XREF from fcn.00437415 @ 0x4374a2(x)
+|      `--> 0x004374be      5b             pop ebx
+|           0x004374bf      8be5           mov esp, ebp
+|           0x004374c1      5d             pop ebp
+\           0x004374c2      c3             ret

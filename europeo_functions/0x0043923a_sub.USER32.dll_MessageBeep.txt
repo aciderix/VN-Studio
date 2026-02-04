@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00404e29 @ 0x404e6a(x)
+            ; CALL XREF from fcn.004315bd @ +0x85e(x)
+/ 6: BOOL sub.USER32.dll_MessageBeep (UINT uType);
+\           0x0043923a      ff25f45b4500   jmp dword [sym.imp.USER32.dll_MessageBeep] ; 0x455bf4 ; "D \x05"

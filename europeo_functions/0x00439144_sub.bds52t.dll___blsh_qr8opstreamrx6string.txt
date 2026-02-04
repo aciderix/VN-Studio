@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0040527d @ +0x10e(x)
+            ; CALL XREF from fcn.00405922 @ 0x40593f(x)
+            ; CALL XREFS from fcn.00429f02 @ 0x42a159(x), 0x42a1e6(x)
+            ; CALL XREF from fcn.0042d318 @ 0x42d377(x)
+/ 6: sub.bds52t.dll___blsh_qr8opstreamrx6string ();
+\           0x00439144      ff254c5b4500   jmp dword [sym.imp.bds52t.dll___blsh_qr8opstreamrx6string] ; 0x455b4c ; "^\x1d\x05"

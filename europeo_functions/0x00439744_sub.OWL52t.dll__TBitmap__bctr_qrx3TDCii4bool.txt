@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0042ecb9 @ +0x8ad(x)
+/ 6: sub.OWL52t.dll__TBitmap__bctr_qrx3TDCii4bool ();
+\           0x00439744      ff25545f4500   jmp dword [sym.imp.OWL52t.dll__TBitmap__bctr_qrx3TDCii4bool] ; 0x455f54 ; "|=\x05"

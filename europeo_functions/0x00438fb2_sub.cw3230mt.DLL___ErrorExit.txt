@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.004036b8 @ 0x403757(x)
+            ; CALL XREF from fcn.004037e0 @ 0x4038be(x)
+            ; CALL XREFS from fcn.004037e0 @ +0x157(x), +0x1a9(x)
+/ 6: sub.cw3230mt.DLL___ErrorExit ();
+\           0x00438fb2      ff25345a4500   jmp dword [sym.imp.cw3230mt.DLL___ErrorExit] ; 0x455a34

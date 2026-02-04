@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00418e04 @ 0x418ebd(x)
+/ 6: sub.WINMM.dll_timeGetDevCaps ();
+\           0x00439846      ff2508604500   jmp dword [sym.imp.WINMM.dll_timeGetDevCaps] ; 0x456008 ; "TA\x05"

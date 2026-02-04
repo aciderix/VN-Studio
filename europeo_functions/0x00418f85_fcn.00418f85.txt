@@ -1,0 +1,31 @@
+            ; CALL XREF from fcn.00419256 @ 0x4192e2(x)
+/ 89: fcn.00418f85 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(2:sp[0x18..0x28])
+|           0x00418f85      55             push ebp
+|           0x00418f86      8bec           mov ebp, esp
+|           0x00418f88      83c4dc         add esp, 0xffffffdc
+|           0x00418f8b      b8942e4400     mov eax, 0x442e94
+|           0x00418f90      e883a6feff     call fcn.00403618
+|           0x00418f95      66c745ec0800   mov word [var_14h], 8
+|           0x00418f9b      ff7508         push dword [arg_8h]
+|           0x00418f9e      e8a3ffffff     call fcn.00418f46
+|           0x00418fa3      59             pop ecx
+|           0x00418fa4      8b5508         mov edx, dword [arg_8h]
+|           0x00418fa7      c74214a836..   mov dword [edx + 0x14], 0x4436a8 ; [0x4436a8:4]=0x41aa1c
+|           0x00418fae      8b4d08         mov ecx, dword [arg_8h]
+|           0x00418fb1      33c0           xor eax, eax
+|           0x00418fb3      894118         mov dword [ecx + 0x18], eax
+|           0x00418fb6      8b5508         mov edx, dword [arg_8h]
+|           0x00418fb9      c6421c00       mov byte [edx + 0x1c], 0
+|           0x00418fbd      ff750c         push dword [arg_ch]
+|           0x00418fc0      8b4d08         mov ecx, dword [arg_8h]
+|           0x00418fc3      51             push ecx
+|           0x00418fc4      8b4114         mov eax, dword [ecx + 0x14]
+|           0x00418fc7      ff5008         call dword [eax + 8]        ; 8
+|           0x00418fca      83c408         add esp, 8
+|           0x00418fcd      8b55dc         mov edx, dword [var_24h]
+|           0x00418fd0      6489150000..   mov dword fs:[0], edx
+|           0x00418fd7      8b4508         mov eax, dword [arg_8h]
+|           0x00418fda      8be5           mov esp, ebp
+|           0x00418fdc      5d             pop ebp
+\           0x00418fdd      c3             ret

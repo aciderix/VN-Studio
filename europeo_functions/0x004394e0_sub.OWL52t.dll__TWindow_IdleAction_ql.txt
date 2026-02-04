@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042ecb9 @ +0x18e5(x), +0x1ac5(x)
+/ 6: sub.OWL52t.dll__TWindow_IdleAction_ql ();
+\           0x004394e0      ff25bc5d4500   jmp dword [sym.imp.OWL52t.dll__TWindow_IdleAction_ql] ; 0x455dbc

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041cf1f @ 0x41cfe2(x)
+/ 6: hpalette sub.GDI32.dll_CreateHalftonePalette ();
+\           0x00439828      ff25f05f4500   jmp dword [sym.imp.GDI32.dll_CreateHalftonePalette] ; 0x455ff0

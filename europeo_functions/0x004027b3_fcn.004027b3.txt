@@ -1,0 +1,38 @@
+            ; CALL XREFS from fcn.004027b3 @ +0x10e(x), +0x2a0(x)
+/ 60: fcn.004027b3 (int32_t arg_8h, LPCSTR *lpString2);
+| `- args(sp[0x4..0x8])
+|           0x004027b3      55             push ebp
+|           0x004027b4      8bec           mov ebp, esp
+|           0x004027b6      53             push ebx
+|           0x004027b7      56             push esi
+|           0x004027b8      57             push edi
+|           0x004027b9      837d0c00       cmp dword [lpString2], 0
+|       ,=< 0x004027bd      7505           jne 0x4027c4
+|       |   0x004027bf      83c8ff         or eax, 0xffffffff          ; -1
+|      ,==< 0x004027c2      eb26           jmp 0x4027ea
+|      ||   ; CODE XREF from fcn.004027b3 @ 0x4027bd(x)
+|      |`-> 0x004027c4      8b5508         mov edx, dword [arg_8h]
+|      |    0x004027c7      8b5a04         mov ebx, dword [edx + 4]
+|      |,=< 0x004027ca      eb19           jmp 0x4027e5
+|      ||   ; CODE XREF from fcn.004027b3 @ 0x4027e6(x)
+|     .---> 0x004027cc      8b5508         mov edx, dword [arg_8h]
+|     :||   0x004027cf      8d045b         lea eax, [ebx + ebx*2]
+|     :||   0x004027d2      8b750c         mov esi, dword [lpString2]
+|     :||   0x004027d5      8b0a           mov ecx, dword [edx]
+|     :||   0x004027d7      8b3c81         mov edi, dword [ecx + eax*4]
+|     :||   0x004027da      56             push esi                    ; LPCSTR lpString2
+|     :||   0x004027db      57             push edi                    ; LPCSTR lpString1
+|     :||   0x004027dc      e8ef670300     call sub.KERNEL32.dll_lstrcmpA ; int lstrcmpA(LPCSTR lpString1, LPCSTR lpString2)
+|     :||   0x004027e1      85c0           test eax, eax
+|    ,====< 0x004027e3      7403           je 0x4027e8
+|    |:||   ; CODE XREF from fcn.004027b3 @ 0x4027ca(x)
+|    |:|`-> 0x004027e5      4b             dec ebx
+|    |`===< 0x004027e6      79e4           jns 0x4027cc
+|    | |    ; CODE XREF from fcn.004027b3 @ 0x4027e3(x)
+|    `----> 0x004027e8      8bc3           mov eax, ebx
+|      |    ; CODE XREF from fcn.004027b3 @ 0x4027c2(x)
+|      `--> 0x004027ea      5f             pop edi
+|           0x004027eb      5e             pop esi
+|           0x004027ec      5b             pop ebx
+|           0x004027ed      5d             pop ebp
+\           0x004027ee      c3             ret

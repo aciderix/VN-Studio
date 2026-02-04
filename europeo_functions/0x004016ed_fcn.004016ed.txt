@@ -1,0 +1,105 @@
+            ; CALL XREF from fcn.004017ca @ +0x47(x)
+            ; CALL XREF from fcn.00401b09 @ 0x401b3b(x)
+            ; CALL XREF from fcn.004027b3 @ +0x134(x)
+/ 221: fcn.004016ed (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x004016ed      55             push ebp
+|           0x004016ee      8bec           mov ebp, esp
+|           0x004016f0      53             push ebx
+|           0x004016f1      56             push esi
+|           0x004016f2      57             push edi
+|           0x004016f3      8b5d0c         mov ebx, dword [arg_ch]
+|           0x004016f6      8b7508         mov esi, dword [arg_8h]
+|           0x004016f9      8b06           mov eax, dword [esi]
+|           0x004016fb      85c0           test eax, eax
+|       ,=< 0x004016fd      0f84c2000000   je 0x4017c5
+|       |   0x00401703      6685db         test bx, bx
+|      ,==< 0x00401706      7509           jne 0x401711
+|      ||   0x00401708      668b1dace3..   mov bx, word [0x44e3ac]     ; [0x44e3ac:2]=0
+|     ,===< 0x0040170f      eb1e           jmp 0x40172f
+|     |||   ; CODE XREF from fcn.004016ed @ 0x401706(x)
+|     |`--> 0x00401711      6681fb0008     cmp bx, 0x800               ; 2048
+|     |,==< 0x00401716      7509           jne 0x401721
+|     |||   0x00401718      668b1da4e2..   mov bx, word [0x44e2a4]     ; [0x44e2a4:2]=0
+|    ,====< 0x0040171f      eb0e           jmp 0x40172f
+|    ||||   ; CODE XREF from fcn.004016ed @ 0x401716(x)
+|    ||`--> 0x00401721      6681fb0004     cmp bx, 0x400               ; 1024
+|    ||,==< 0x00401726      7507           jne 0x40172f
+|    ||||   0x00401728      668b1da6e2..   mov bx, word [0x44e2a6]     ; [0x44e2a6:2]=0
+|    ||||   ; CODE XREFS from fcn.004016ed @ 0x40170f(x), 0x40171f(x), 0x401726(x)
+|    ```--> 0x0040172f      8b06           mov eax, dword [esi]
+|       |   0x00401731      8a10           mov dl, byte [eax]
+|       |   0x00401733      4a             dec edx
+|       |   0x00401734      80ea02         sub dl, 2
+|      ,==< 0x00401737      727d           jb 0x4017b6
+|      ||   0x00401739      80ea1e         sub dl, 0x1e                ; 30
+|     ,===< 0x0040173c      740e           je 0x40174c
+|     |||   0x0040173e      80ea02         sub dl, 2
+|    ,====< 0x00401741      7445           je 0x401788
+|    ||||   0x00401743      80ea1d         sub dl, 0x1d                ; 29
+|   ,=====< 0x00401746      7440           je 0x401788
+|   |||||   0x00401748      8b06           mov eax, dword [esi]
+|  ,======< 0x0040174a      eb79           jmp 0x4017c5
+|  ||||||   ; CODE XREF from fcn.004016ed @ 0x40173c(x)
+|  |||`---> 0x0040174c      53             push ebx
+|  ||| ||   0x0040174d      e8d4000000     call fcn.00401826
+|  ||| ||   0x00401752      59             pop ecx
+|  ||| ||   0x00401753      85c0           test eax, eax
+|  |||,===< 0x00401755      7405           je 0x40175c
+|  ||||||   0x00401757      8b06           mov eax, dword [esi]
+|  ||||||   0x00401759      40             inc eax
+| ,=======< 0x0040175a      eb69           jmp 0x4017c5
+| |||||||   ; CODE XREF from fcn.004016ed @ 0x401755(x)
+| ||||`---> 0x0040175c      ff36           push dword [esi]
+| |||| ||   0x0040175e      68fcec4400     push 0x44ecfc
+| |||| ||   0x00401763      e8f0fbffff     call fcn.00401358
+| |||| ||   0x00401768      83c408         add esp, 8
+| |||| ||   0x0040176b      8bf8           mov edi, eax
+| |||| ||   0x0040176d      85c0           test eax, eax
+| ||||,===< 0x0040176f      7506           jne 0x401777
+| |||||||   0x00401771      ff06           inc dword [esi]
+| |||||||   0x00401773      8b06           mov eax, dword [esi]
+| ========< 0x00401775      eb4e           jmp 0x4017c5
+| |||||||   ; CODE XREF from fcn.004016ed @ 0x40176f(x)
+| ||||`---> 0x00401777      8d5714         lea edx, [edi + 0x14]
+| |||| ||   0x0040177a      8916           mov dword [esi], edx
+| |||| ||   0x0040177c      53             push ebx
+| |||| ||   0x0040177d      57             push edi
+| |||| ||   0x0040177e      e8b2fdffff     call fcn.00401535
+| |||| ||   0x00401783      83c408         add esp, 8
+| ||||,===< 0x00401786      eb3d           jmp 0x4017c5
+| |||||||   ; CODE XREFS from fcn.004016ed @ 0x401741(x), 0x401746(x)
+| ||``----> 0x00401788      ff36           push dword [esi]
+| ||  |||   0x0040178a      68fcec4400     push 0x44ecfc
+| ||  |||   0x0040178f      e8c4fbffff     call fcn.00401358
+| ||  |||   0x00401794      83c408         add esp, 8
+| ||  |||   0x00401797      8bf8           mov edi, eax
+| ||  |||   0x00401799      85c0           test eax, eax
+| || ,====< 0x0040179b      7508           jne 0x4017a5
+| || ||||   0x0040179d      33d2           xor edx, edx
+| || ||||   0x0040179f      8916           mov dword [esi], edx
+| || ||||   0x004017a1      8bc2           mov eax, edx
+| ||,=====< 0x004017a3      eb20           jmp 0x4017c5
+| |||||||   ; CODE XREF from fcn.004016ed @ 0x40179b(x)
+| |||`----> 0x004017a5      8d4f14         lea ecx, [edi + 0x14]
+| ||| |||   0x004017a8      890e           mov dword [esi], ecx
+| ||| |||   0x004017aa      53             push ebx
+| ||| |||   0x004017ab      57             push edi
+| ||| |||   0x004017ac      e884fdffff     call fcn.00401535
+| ||| |||   0x004017b1      83c408         add esp, 8
+| |||,====< 0x004017b4      eb0f           jmp 0x4017c5
+| |||||||   ; CODE XREF from fcn.004016ed @ 0x401737(x)
+| |||||`--> 0x004017b6      8b3e           mov edi, dword [esi]
+| ||||| |   0x004017b8      83c7ec         add edi, 0xffffffec
+| ||||| |   0x004017bb      53             push ebx
+| ||||| |   0x004017bc      57             push edi
+| ||||| |   0x004017bd      e873fdffff     call fcn.00401535
+| ||||| |   0x004017c2      83c408         add esp, 8
+| ||||| |   ; XREFS: CODE 0x004016fd  CODE 0x0040174a  CODE 0x0040175a  
+| ||||| |   ; XREFS: CODE 0x00401775  CODE 0x00401786  CODE 0x004017a3  
+| ||||| |   ; XREFS: CODE 0x004017b4  
+| `````-`-> 0x004017c5      5f             pop edi
+|           0x004017c6      5e             pop esi
+|           0x004017c7      5b             pop ebx
+|           0x004017c8      5d             pop ebp
+\           0x004017c9      c3             ret

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00437ed4 @ 0x437f08(x)
+/ 6: BOOL sub.USER32.dll_ShowWindow (HWND hWnd, int nCmdShow);
+\           0x00439282      ff25245c4500   jmp dword [sym.imp.USER32.dll_ShowWindow] ; 0x455c24

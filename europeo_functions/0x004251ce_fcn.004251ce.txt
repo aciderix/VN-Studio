@@ -1,0 +1,45 @@
+            ; CALL XREF from fcn.00429f02 @ 0x429f36(x)
+/ 89: fcn.004251ce (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(1:sp[0x8..0x8])
+|           0x004251ce      55             push ebp
+|           0x004251cf      8bec           mov ebp, esp
+|           0x004251d1      51             push ecx
+|           0x004251d2      53             push ebx
+|           0x004251d3      56             push esi
+|           0x004251d4      57             push edi
+|           0x004251d5      8b5d08         mov ebx, dword [arg_8h]
+|           0x004251d8      8d4360         lea eax, [ebx + 0x60]
+|           0x004251db      50             push eax
+|           0x004251dc      8b938d000000   mov edx, dword [ebx + 0x8d]
+|           0x004251e2      ff5204         call dword [edx + 4]        ; 4
+|           0x004251e5      59             pop ecx
+|           0x004251e6      84c0           test al, al
+|       ,=< 0x004251e8      7432           je 0x42521c
+|       |   0x004251ea      837b5c00       cmp dword [ebx + 0x5c], 0
+|      ,==< 0x004251ee      742c           je 0x42521c
+|      ||   0x004251f0      8b4b5c         mov ecx, dword [ebx + 0x5c]
+|      ||   0x004251f3      894dfc         mov dword [var_4h], ecx
+|      ||   0x004251f6      8d7360         lea esi, [ebx + 0x60]
+|      ||   0x004251f9      ff75fc         push dword [var_4h]
+|      ||   0x004251fc      8d4604         lea eax, [esi + 4]
+|      ||   0x004251ff      50             push eax
+|      ||   0x00425200      e848110000     call fcn.0042634d
+|      ||   0x00425205      83c408         add esp, 8
+|      ||   0x00425208      8bf8           mov edi, eax
+|      ||   0x0042520a      83ffff         cmp edi, 0xffffffff
+|     ,===< 0x0042520d      7507           jne 0x425216
+|     |||   0x0042520f      b8ffffff7f     mov eax, 0x7fffffff
+|    ,====< 0x00425214      eb0b           jmp 0x425221
+|    ||||   ; CODE XREF from fcn.004251ce @ 0x42520d(x)
+|    |`---> 0x00425216      8b06           mov eax, dword [esi]
+|    | ||   0x00425218      03c7           add eax, edi
+|    |,===< 0x0042521a      eb05           jmp 0x425221
+|    ||||   ; CODE XREFS from fcn.004251ce @ 0x4251e8(x), 0x4251ee(x)
+|    ||``-> 0x0042521c      b8ffffff7f     mov eax, 0x7fffffff
+|    ||     ; CODE XREFS from fcn.004251ce @ 0x425214(x), 0x42521a(x)
+|    ``---> 0x00425221      5f             pop edi
+|           0x00425222      5e             pop esi
+|           0x00425223      5b             pop ebx
+|           0x00425224      59             pop ecx
+|           0x00425225      5d             pop ebp
+\           0x00425226      c3             ret

@@ -1,0 +1,32 @@
+            ; CALL XREF from fcn.00412168 @ +0xdf(x)
+            ; CALL XREF from fcn.00433f55 @ 0x433ffc(x)
+/ 67: fcn.0040501d (uint32_t arg_8h, int32_t arg_14h);
+| `- args(sp[0x4..0x10])
+|           0x0040501d      55             push ebp
+|           0x0040501e      8bec           mov ebp, esp
+|           0x00405020      53             push ebx
+|           0x00405021      8b4514         mov eax, dword [arg_14h]
+|           0x00405024      8b5d08         mov ebx, dword [arg_8h]
+|           0x00405027      8b5004         mov edx, dword [eax + 4]
+|           0x0040502a      f7da           neg edx
+|           0x0040502c      8b00           mov eax, dword [eax]
+|           0x0040502e      f7d8           neg eax
+|           0x00405030      0103           add dword [ebx], eax
+|           0x00405032      015304         add dword [ebx + 4], edx
+|           0x00405035      dd450c         fld qword [ebp + 0xc]
+|           0x00405038      d81d61504000   fcomp dword [0x405061]
+|           0x0040503e      dfe0           fnstsw ax
+|           0x00405040      9e             sahf
+|       ,=< 0x00405041      741a           je 0x40505d
+|       |   0x00405043      db03           fild dword [ebx]
+|       |   0x00405045      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x00405048      e88d3e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x0040504d      8903           mov dword [ebx], eax
+|       |   0x0040504f      db4304         fild dword [ebx + 4]
+|       |   0x00405052      dc750c         fdiv qword [ebp + 0xc]
+|       |   0x00405055      e8803e0300     call sub.cw3230mt.DLL___ftol
+|       |   0x0040505a      894304         mov dword [ebx + 4], eax
+|       |   ; CODE XREF from fcn.0040501d @ 0x405041(x)
+|       `-> 0x0040505d      5b             pop ebx
+|           0x0040505e      5d             pop ebp
+\           0x0040505f      c3             ret

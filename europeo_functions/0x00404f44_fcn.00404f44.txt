@@ -1,0 +1,32 @@
+            ; CALL XREF from fcn.00404f44 @ +0x4e(x)
+            ; CALL XREF from fcn.00404f9c @ 0x404fe8(x)
+/ 68: fcn.00404f44 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(1:sp[0x8..0x8])
+|           0x00404f44      55             push ebp
+|           0x00404f45      8bec           mov ebp, esp
+|           0x00404f47      50             push eax
+|           0x00404f48      b802000000     mov eax, 2
+|           ; CODE XREF from fcn.00404f44 @ 0x404f55(x)
+|       .-> 0x00404f4d      81c404f0ffff   add esp, 0xfffff004
+|       :   0x00404f53      50             push eax
+|       :   0x00404f54      48             dec eax
+|       `=< 0x00404f55      75f6           jne 0x404f4d
+|           0x00404f57      8b45fc         mov eax, dword [var_4h]
+|           0x00404f5a      83c404         add esp, 4
+|           0x00404f5d      8b4508         mov eax, dword [arg_8h]
+|           0x00404f60      85c0           test eax, eax
+|       ,=< 0x00404f62      7420           je 0x404f84
+|       |   0x00404f64      ff750c         push dword [arg_ch]
+|       |   0x00404f67      50             push eax
+|       |   0x00404f68      8d8500e0ffff   lea eax, [ebp - 0x2000]
+|       |   0x00404f6e      50             push eax
+|       |   0x00404f6f      e82e3e0300     call sub.cw3230mt.DLL__vsprintf
+|       |   0x00404f74      83c40c         add esp, 0xc
+|       |   0x00404f77      8d9500e0ffff   lea edx, [ebp - 0x2000]
+|       |   0x00404f7d      52             push edx
+|       |   0x00404f7e      e8a6feffff     call fcn.00404e29
+|       |   0x00404f83      59             pop ecx
+|       |   ; CODE XREF from fcn.00404f44 @ 0x404f62(x)
+|       `-> 0x00404f84      8be5           mov esp, ebp
+|           0x00404f86      5d             pop ebp
+\           0x00404f87      c3             ret

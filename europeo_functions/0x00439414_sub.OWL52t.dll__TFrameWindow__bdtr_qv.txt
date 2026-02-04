@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00436885 @ +0x3a9(x)
+/ 6: sub.OWL52t.dll__TFrameWindow__bdtr_qv ();
+\           0x00439414      ff25345d4500   jmp dword [sym.imp.OWL52t.dll__TFrameWindow__bdtr_qv] ; 0x455d34 ; "^*\x05"

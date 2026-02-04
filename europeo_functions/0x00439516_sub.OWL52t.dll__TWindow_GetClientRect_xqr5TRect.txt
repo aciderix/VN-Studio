@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041921b @ 0x41922e(x)
+            ; CALL XREF from fcn.004334a6 @ 0x4334b7(x)
+/ 6: sub.OWL52t.dll__TWindow_GetClientRect_xqr5TRect ();
+\           0x00439516      ff25e05d4500   jmp dword [sym.imp.OWL52t.dll__TWindow_GetClientRect_xqr5TRect] ; 0x455de0 ; "21\x05"

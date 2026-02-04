@@ -1,0 +1,9 @@
+            ; XREFS: CALL 0x00427153  CALL 0x00427bd7  CALL 0x00427cc3  
+            ; XREFS: CALL 0x00429169  CALL 0x004292f0  CALL 0x0042ef41  
+            ; XREFS: CALL 0x0042f1d9  CALL 0x0043092f  CALL 0x00430a4d  
+            ; XREFS: CALL 0x00430aad  CALL 0x00430ace  CALL 0x00430aef  
+            ; XREFS: CALL 0x00430b10  CALL 0x00430c2b  CALL 0x00430c46  
+            ; XREFS: CALL 0x00430cd8  CALL 0x00430cf3  CALL 0x00430d62  
+            ; XREFS: CALL 0x00430d9a  CALL 0x004340f1  
+/ 6: sub.OWL52t.dll__TWindow_SetCursor_qp7TModule6TResId ();
+\           0x00439468      ff256c5d4500   jmp dword [sym.imp.OWL52t.dll__TWindow_SetCursor_qp7TModule6TResId] ; 0x455d6c ; "Z,\x05"

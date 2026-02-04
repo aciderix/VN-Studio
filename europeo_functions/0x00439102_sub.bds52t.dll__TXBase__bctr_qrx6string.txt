@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00402541 @ 0x4025e5(x)
+/ 6: sub.bds52t.dll__TXBase__bctr_qrx6string ();
+\           0x00439102      ff25205b4500   jmp dword [sym.imp.bds52t.dll__TXBase__bctr_qrx6string] ; 0x455b20 ; "D\x1c\x05"

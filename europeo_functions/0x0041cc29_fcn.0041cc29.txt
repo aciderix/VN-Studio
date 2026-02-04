@@ -1,0 +1,17 @@
+            ; CALL XREFS from fcn.00434070 @ 0x43437d(x), 0x4352d4(x)
+/ 32: fcn.0041cc29 (int32_t arg_8h, HPALETTE hpal);
+| `- args(sp[0x4..0x8])
+|           0x0041cc29      55             push ebp
+|           0x0041cc2a      8bec           mov ebp, esp
+|           0x0041cc2c      8b4508         mov eax, dword [arg_8h]
+|           0x0041cc2f      8b5004         mov edx, dword [eax + 4]
+|           0x0041cc32      668b4008       mov ax, word [eax + 8]
+|           0x0041cc36      52             push edx
+|           0x0041cc37      0fb7c0         movzx eax, ax
+|           0x0041cc3a      50             push eax
+|           0x0041cc3b      6a00           push 0
+|           0x0041cc3d      8b4d0c         mov ecx, dword [hpal]
+|           0x0041cc40      ff31           push dword [ecx]            ; HPALETTE hpal
+|           0x0041cc42      e887cb0100     call sub.GDI32.dll_SetPaletteEntries ; dword SetPaletteEntries(HPALETTE hpal, UINT iStart, UINT cEntries, PALETTEENTRY *lppe)
+|           0x0041cc47      5d             pop ebp
+\           0x0041cc48      c3             ret

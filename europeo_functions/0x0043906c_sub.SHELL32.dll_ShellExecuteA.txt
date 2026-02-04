@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00403eee @ 0x403fae(x)
+            ; CALL XREFS from fcn.00427fae @ 0x428057(x), 0x428090(x)
+/ 6: HINSTANCE sub.SHELL32.dll_ShellExecuteA (HWND hwnd, LPCSTR lpOperation, LPCSTR lpFile, LPCSTR lpParameters, LPCSTR lpDirectory, INT nShowCmd);
+\           0x0043906c      ff25b85a4500   jmp dword [sym.imp.SHELL32.dll_ShellExecuteA] ; 0x455ab8

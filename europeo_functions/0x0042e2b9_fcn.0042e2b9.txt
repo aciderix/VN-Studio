@@ -1,0 +1,27 @@
+            ; CALL XREF from fcn.0042e2e6 @ 0x42e302(x)
+/ 45: fcn.0042e2b9 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0042e2b9      55             push ebp
+|           0x0042e2ba      8bec           mov ebp, esp
+|           0x0042e2bc      53             push ebx
+|           0x0042e2bd      56             push esi
+|           0x0042e2be      57             push edi
+|           0x0042e2bf      8b5d0c         mov ebx, dword [arg_ch]
+|           0x0042e2c2      8b7508         mov esi, dword [arg_8h]
+|           0x0042e2c5      833b00         cmp dword [ebx], 0
+|       ,=< 0x0042e2c8      7417           je 0x42e2e1
+|       |   0x0042e2ca      8b3b           mov edi, dword [ebx]
+|       |   0x0042e2cc      57             push edi                    ; UINT_PTR uIDEvent
+|       |   0x0042e2cd      ff760c         push dword [esi + 0xc]      ; HWND hWnd
+|       |   0x0042e2d0      e86baf0000     call sub.USER32.dll_KillTimer ; BOOL KillTimer(HWND hWnd, UINT_PTR uIDEvent)
+|       |   0x0042e2d5      85c0           test eax, eax
+|       |   0x0042e2d7      0f95c0         setne al
+|       |   0x0042e2da      83e001         and eax, 1
+|       |   0x0042e2dd      33d2           xor edx, edx
+|       |   0x0042e2df      8913           mov dword [ebx], edx
+|       |   ; CODE XREF from fcn.0042e2b9 @ 0x42e2c8(x)
+|       `-> 0x0042e2e1      5f             pop edi
+|           0x0042e2e2      5e             pop esi
+|           0x0042e2e3      5b             pop ebx
+|           0x0042e2e4      5d             pop ebp
+\           0x0042e2e5      c3             ret

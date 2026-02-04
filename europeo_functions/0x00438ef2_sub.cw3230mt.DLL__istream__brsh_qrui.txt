@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0041cdc2 @ 0x41ce90(x), 0x41ce99(x), 0x41cea2(x), 0x41ceab(x)
+/ 6: sub.cw3230mt.DLL__istream__brsh_qrui ();
+\           0x00438ef2      ff25b4594500   jmp dword [sym.imp.cw3230mt.DLL__istream__brsh_qrui] ; 0x4559b4 ; "`\x15\x05"

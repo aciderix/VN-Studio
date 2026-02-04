@@ -1,0 +1,4 @@
+            ; CALL XREFS from fcn.0040105a @ 0x401071(x), 0x40108b(x)
+            ; CALL XREF from fcn.0040105a @ +0x60(x)
+/ 1: fcn.00401059 ();
+\           0x00401059      cc             int3

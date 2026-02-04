@@ -1,0 +1,23 @@
+            ; CODE XREF from fcn.0040105a @ +0x59(x)
+/ 67: fcn.0040105a ();
+|           0x0040105a      b9b0000000     mov ecx, 0xb0               ; 176
+|           0x0040105f      0bc9           or ecx, ecx
+|       ,=< 0x00401061      7439           je 0x40109c
+|       |   0x00401063      833d63a043..   cmp dword [0x43a063], 0     ; [0x43a063:4]=0
+|      ,==< 0x0040106a      730a           jae 0x401076
+|      ||   0x0040106c      b8e2000000     mov eax, 0xe2               ; 226
+|      ||   0x00401071      e8e3ffffff     call fcn.00401059
+|      ||   ; CODE XREF from fcn.0040105a @ 0x40106a(x)
+|      `--> 0x00401076      68b0000000     push 0xb0                   ; 176 ; SIZE_T uBytes
+|       |   0x0040107b      6a40           push 0x40                   ; '@' ; 64 ; UINT uFlags
+|       |   0x0040107d      e8907f0300     call sub.KERNEL32.dll_LocalAlloc ; HLOCAL LocalAlloc(UINT uFlags, SIZE_T uBytes)
+|       |   0x00401082      0bc0           or eax, eax
+|      ,==< 0x00401084      750a           jne 0x401090
+|      ||   0x00401086      b8e2000000     mov eax, 0xe2               ; 226
+|      ||   0x0040108b      e8c9ffffff     call fcn.00401059
+|      ||   ; CODE XREF from fcn.0040105a @ 0x401084(x)
+|      `--> 0x00401090      50             push eax                    ; LPVOID lpTlsValue
+|       |   0x00401091      ff3563a04300   push dword [0x43a063]       ; DWORD dwTlsIndex
+|       |   0x00401097      e82e7f0300     call sub.KERNEL32.dll_TlsSetValue ; BOOL TlsSetValue(DWORD dwTlsIndex, LPVOID lpTlsValue)
+|       |   ; CODE XREF from fcn.0040105a @ 0x401061(x)
+\       `-> 0x0040109c      c3             ret

@@ -1,0 +1,18 @@
+            ; CODE XREF from sym.vn21_32.exe___GetExceptDLLinfo @ 0x401046(x)
+            ; CALL XREF from fcn.0040353f @ 0x403570(x)
+/ 59: fcn.004035da (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x004035da      55             push ebp
+|           0x004035db      8bec           mov ebp, esp
+|           0x004035dd      53             push ebx
+|           0x004035de      8b5d08         mov ebx, dword [arg_8h]
+|           0x004035e1      e813dbffff     call fcn.004010f9
+|           0x004035e6      81c030000000   add eax, 0x30               ; 48
+|           0x004035ec      a35ce94400     mov dword [0x44e95c], eax   ; [0x44e95c:4]=0
+|           0x004035f1      c70540e944..   mov dword [0x44e940], 0x44ea2c ; [0x44e940:4]=0
+|           0x004035fb      c70544e944..   mov dword [0x44e944], 0x44ea1c ; [0x44ea1c:4]=0xe91d8bb4 ; sym.vn21_32.exe___DebuggerHookData
+|           0x00403605      c70349737282   mov dword [ebx], 0x82727349 ; [0x82727349:4]=-1
+|           0x0040360b      c7430434e9..   mov dword [ebx + 4], 0x44e934 ; [0x44e934:4]=0
+|           0x00403612      5b             pop ebx
+|           0x00403613      5d             pop ebp
+\           0x00403614      c3             ret

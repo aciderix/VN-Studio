@@ -1,0 +1,73 @@
+            ; CALL XREF from fcn.0042ecb9 @ 0x42f1f7(x)
+            ; CALL XREF from fcn.00437f61 @ +0x53c(x)
+/ 214: fcn.0042e641 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(5:sp[0x8..0x30])
+|           0x0042e641      55             push ebp
+|           0x0042e642      8bec           mov ebp, esp
+|           0x0042e644      83c4d4         add esp, 0xffffffd4
+|           0x0042e647      53             push ebx
+|           0x0042e648      8b5d08         mov ebx, dword [arg_8h]
+|           0x0042e64b      b898ae4400     mov eax, 0x44ae98
+|           0x0042e650      e8c34ffdff     call fcn.00403618
+|           0x0042e655      80bba80100..   cmp byte [ebx + 0x1a8], 0
+|       ,=< 0x0042e65c      0f84a6000000   je 0x42e708
+|       |   0x0042e662      c683a80100..   mov byte [ebx + 0x1a8], 0
+|       |   0x0042e669      6a01           push 1                      ; 1
+|       |   0x0042e66b      53             push ebx
+|       |   0x0042e66c      e821060000     call fcn.0042ec92
+|       |   0x0042e671      83c408         add esp, 8
+|       |   0x0042e674      8b5368         mov edx, dword [ebx + 0x68]
+|       |   0x0042e677      83c219         add edx, 0x19               ; 25
+|       |   0x0042e67a      52             push edx
+|       |   0x0042e67b      e804aa0000     call sub.bds52t.dll__TMsgThread_PumpWaitingMessages_qv
+|       |   0x0042e680      59             pop ecx
+|       |   0x0042e681      837b0c00       cmp dword [ebx + 0xc], 0
+|      ,==< 0x0042e685      7579           jne 0x42e700
+|      ||   0x0042e687      8d4dd4         lea ecx, [var_2ch]
+|      ||   0x0042e68a      51             push ecx
+|      ||   0x0042e68b      6a00           push 0
+|      ||   0x0042e68d      6a00           push 0
+|      ||   0x0042e68f      6a00           push 0
+|      ||   0x0042e691      6a01           push 1                      ; 1
+|      ||   0x0042e693      68e03b4000     push 0x403be0
+|      ||   0x0042e698      6a00           push 0
+|      ||   0x0042e69a      686b050000     push 0x56b                  ; 1387
+|      ||   0x0042e69f      683ac64400     push 0x44c63a               ; "C:\BC5\INCLUDE\owl/window.h"
+|      ||   0x0042e6a4      682ec64400     push 0x44c62e               ; "GetHandle()"
+|      ||   0x0042e6a9      6856c64400     push 0x44c656               ; "Precondition"
+|      ||   0x0042e6ae      8d45fc         lea eax, [var_4h]
+|      ||   0x0042e6b1      50             push eax
+|      ||   0x0042e6b2      e859a80000     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|      ||   0x0042e6b7      83c414         add esp, 0x14
+|      ||   0x0042e6ba      8d55fc         lea edx, [var_4h]
+|      ||   0x0042e6bd      52             push edx
+|      ||   0x0042e6be      ff45f0         inc dword [var_10h]
+|      ||   0x0042e6c1      8d4df8         lea ecx, [var_8h]
+|      ||   0x0042e6c4      51             push ecx
+|      ||   0x0042e6c5      e81aa70000     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|      ||   0x0042e6ca      83c408         add esp, 8
+|      ||   0x0042e6cd      ff45f0         inc dword [var_10h]
+|      ||   0x0042e6d0      66c745e40c00   mov word [var_1ch], 0xc     ; 12
+|      ||   0x0042e6d6      ff4df0         dec dword [var_10h]
+|      ||   0x0042e6d9      6a02           push 2                      ; 2
+|      ||   0x0042e6db      8d45fc         lea eax, [var_4h]
+|      ||   0x0042e6de      50             push eax
+|      ||   0x0042e6df      e880a80000     call sub.cw3230mt.DLL__string__bdtr_qv
+|      ||   0x0042e6e4      83c408         add esp, 8
+|      ||   0x0042e6e7      8345f002       add dword [var_10h], 2
+|      ||   0x0042e6eb      8345f003       add dword [var_10h], 3
+|      ||   0x0042e6ef      8d55f8         lea edx, [var_8h]
+|      ||   0x0042e6f2      52             push edx
+|      ||   0x0042e6f3      68883b4000     push 0x403b88
+|      ||   0x0042e6f8      e8ada70000     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|      ||   0x0042e6fd      83c424         add esp, 0x24
+|      ||   ; CODE XREF from fcn.0042e641 @ 0x42e685(x)
+|      `--> 0x0042e700      ff730c         push dword [ebx + 0xc]      ; HWND hWnd
+|       |   0x0042e703      e89caa0000     call sub.USER32.dll_SetFocus ; HWND SetFocus(HWND hWnd)
+|       |   ; CODE XREF from fcn.0042e641 @ 0x42e65c(x)
+|       `-> 0x0042e708      8b4dd4         mov ecx, dword [var_2ch]
+|           0x0042e70b      64890d0000..   mov dword fs:[0], ecx
+|           0x0042e712      5b             pop ebx
+|           0x0042e713      8be5           mov esp, ebp
+|           0x0042e715      5d             pop ebp
+\           0x0042e716      c3             ret

@@ -1,0 +1,51 @@
+            ; CALL XREF from entry0 @ 0x401028(x)
+/ 154: fcn.0040353f (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(2:sp[0x8..0xc])
+|           0x0040353f      55             push ebp
+|           0x00403540      8bec           mov ebp, esp
+|           0x00403542      83c4f8         add esp, 0xfffffff8
+|           0x00403545      53             push ebx
+|           0x00403546      56             push esi
+|           0x00403547      8b5d08         mov ebx, dword [arg_8h]
+|           0x0040354a      85db           test ebx, ebx
+|           0x0040354c      0f95c0         setne al
+|           0x0040354f      83e001         and eax, 1
+|           0x00403552      85db           test ebx, ebx
+|           0x00403554      8bf0           mov esi, eax
+|       ,=< 0x00403556      7410           je 0x403568
+|       |   0x00403558      c74314a033..   mov dword [ebx + 0x14], 0x4033a0 ; [0x4033a0:4]=0x35bb3e8
+|       |   0x0040355f      c743188034..   mov dword [ebx + 0x18], 0x403480 ; [0x403480:4]=0xffff49e8
+|      ,==< 0x00403566      eb11           jmp 0x403579
+|      ||   ; CODE XREF from fcn.0040353f @ 0x403556(x)
+|      |`-> 0x00403568      85db           test ebx, ebx
+|      |,=< 0x0040356a      750d           jne 0x403579
+|      ||   0x0040356c      8d45f8         lea eax, [var_8h]
+|      ||   0x0040356f      50             push eax
+|      ||   0x00403570      e865000000     call fcn.004035da
+|      ||   0x00403575      59             pop ecx
+|      ||   0x00403576      8b5dfc         mov ebx, dword [var_4h]
+|      ||   ; CODE XREFS from fcn.0040353f @ 0x403566(x), 0x40356a(x)
+|      ``-> 0x00403579      68b0000000     push 0xb0                   ; 176
+|           0x0040357e      53             push ebx
+|           0x0040357f      e875dbffff     call fcn.004010f9
+|           0x00403584      81c000000000   add eax, 0
+|           0x0040358a      50             push eax
+|           0x0040358b      e824580300     call sub.cw3230mt.DLL__memcpy
+|           0x00403590      83c40c         add esp, 0xc
+|           0x00403593      85f6           test esi, esi
+|       ,=< 0x00403595      741e           je 0x4035b5
+|       |   0x00403597      e85ddbffff     call fcn.004010f9
+|       |   0x0040359c      c7800c0000..   mov dword [eax + 0xc], 0x44ea2c ; [0x44ea2c:4]=0
+|       |   0x004035a6      e84edbffff     call fcn.004010f9
+|       |   0x004035ab      c780100000..   mov dword [eax + 0x10], sym.vn21_32.exe___DebuggerHookData ; [0x44ea1c:4]=0xe91d8bb4
+|       |   ; CODE XREF from fcn.0040353f @ 0x403595(x)
+|       `-> 0x004035b5      e83fdbffff     call fcn.004010f9
+|           0x004035ba      c780140000..   mov dword [eax + 0x14], 0x4033a0 ; [0x4033a0:4]=0x35bb3e8
+|           0x004035c4      e830dbffff     call fcn.004010f9
+|           0x004035c9      c780180000..   mov dword [eax + 0x18], 0x403480 ; [0x403480:4]=0xffff49e8
+|           0x004035d3      5e             pop esi
+|           0x004035d4      5b             pop ebx
+|           0x004035d5      59             pop ecx
+|           0x004035d6      59             pop ecx
+|           0x004035d7      5d             pop ebp
+\           0x004035d8      c3             ret

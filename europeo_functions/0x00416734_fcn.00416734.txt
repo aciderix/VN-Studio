@@ -1,0 +1,38 @@
+            ; CALL XREF from fcn.004169c5 @ +0x54c(x)
+/ 77: fcn.00416734 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00416734      55             push ebp
+|           0x00416735      8bec           mov ebp, esp
+|           0x00416737      53             push ebx
+|           0x00416738      56             push esi
+|           0x00416739      8b750c         mov esi, dword [arg_ch]
+|           0x0041673c      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041673f      8d4604         lea eax, [esi + 4]
+|           0x00416742      6aff           push 0xffffffffffffffff
+|           0x00416744      6a00           push 0
+|           0x00416746      50             push eax
+|           0x00416747      8d5304         lea edx, [ebx + 4]
+|           0x0041674a      52             push edx
+|           0x0041674b      e8b4270200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00416750      83c410         add esp, 0x10
+|           0x00416753      8d4608         lea eax, [esi + 8]
+|           0x00416756      6aff           push 0xffffffffffffffff
+|           0x00416758      6a00           push 0
+|           0x0041675a      50             push eax
+|           0x0041675b      8d5308         lea edx, [ebx + 8]
+|           0x0041675e      52             push edx
+|           0x0041675f      e8a0270200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00416764      83c410         add esp, 0x10
+|           0x00416767      8d460c         lea eax, [esi + 0xc]
+|           0x0041676a      6aff           push 0xffffffffffffffff
+|           0x0041676c      6a00           push 0
+|           0x0041676e      50             push eax
+|           0x0041676f      8d530c         lea edx, [ebx + 0xc]
+|           0x00416772      52             push edx
+|           0x00416773      e88c270200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00416778      83c410         add esp, 0x10
+|           0x0041677b      8bc3           mov eax, ebx
+|           0x0041677d      5e             pop esi
+|           0x0041677e      5b             pop ebx
+|           0x0041677f      5d             pop ebp
+\           0x00416780      c3             ret

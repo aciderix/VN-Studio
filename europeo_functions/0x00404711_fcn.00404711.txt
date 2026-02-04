@@ -1,0 +1,51 @@
+            ; CALL XREF from fcn.004177ef @ 0x4178a4(x)
+/ 150: fcn.00404711 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(4:sp[0xc..0x128])
+|           0x00404711      55             push ebp
+|           0x00404712      8bec           mov ebp, esp
+|           0x00404714      81c4dcfeffff   add esp, 0xfffffedc
+|           0x0040471a      53             push ebx
+|           0x0040471b      8b5d0c         mov ebx, dword [arg_ch]
+|           0x0040471e      b838a54300     mov eax, 0x43a538
+|           0x00404723      e8f0eeffff     call fcn.00403618
+|           0x00404728      8b13           mov edx, dword [ebx]
+|           0x0040472a      8b4a02         mov ecx, dword [edx + 2]
+|           0x0040472d      803900         cmp byte [ecx], 0
+|       ,=< 0x00404730      752b           jne 0x40475d
+|       |   0x00404732      66c745ec0800   mov word [var_14h], 8
+|       |   0x00404738      68e9a84300     push 0x43a8e9
+|       |   0x0040473d      ff7508         push dword [arg_8h]
+|       |   0x00404740      e829470300     call sub.cw3230mt.DLL__string__bctr_qpxc
+|       |   0x00404745      83c408         add esp, 8
+|       |   0x00404748      ff45f8         inc dword [var_8h]
+|       |   0x0040474b      8b4508         mov eax, dword [arg_8h]
+|       |   0x0040474e      ff45f8         inc dword [var_8h]
+|       |   0x00404751      8b55dc         mov edx, dword [var_24h]
+|       |   0x00404754      6489150000..   mov dword fs:[0], edx
+|      ,==< 0x0040475b      eb45           jmp 0x4047a2
+|      ||   ; CODE XREF from fcn.00404711 @ 0x404730(x)
+|      |`-> 0x0040475d      8d8ddcfeffff   lea ecx, [var_124h]
+|      |    0x00404763      51             push ecx
+|      |    0x00404764      6a00           push 0
+|      |    0x00404766      6a00           push 0
+|      |    0x00404768      6a00           push 0
+|      |    0x0040476a      8b03           mov eax, dword [ebx]
+|      |    0x0040476c      ff7002         push dword [eax + 2]
+|      |    0x0040476f      e8ee460300     call sub.cw3230mt.DLL__fnsplit
+|      |    0x00404774      83c414         add esp, 0x14
+|      |    0x00404777      66c745ec1400   mov word [var_14h], 0x14    ; 20
+|      |    0x0040477d      8d95dcfeffff   lea edx, [var_124h]
+|      |    0x00404783      52             push edx
+|      |    0x00404784      ff7508         push dword [arg_8h]
+|      |    0x00404787      e8e2460300     call sub.cw3230mt.DLL__string__bctr_qpxc
+|      |    0x0040478c      83c408         add esp, 8
+|      |    0x0040478f      ff45f8         inc dword [var_8h]
+|      |    0x00404792      8b4508         mov eax, dword [arg_8h]
+|      |    0x00404795      ff45f8         inc dword [var_8h]
+|      |    0x00404798      8b55dc         mov edx, dword [var_24h]
+|      |    0x0040479b      6489150000..   mov dword fs:[0], edx
+|      |    ; CODE XREF from fcn.00404711 @ 0x40475b(x)
+|      `--> 0x004047a2      5b             pop ebx
+|           0x004047a3      8be5           mov esp, ebp
+|           0x004047a5      5d             pop ebp
+\           0x004047a6      c3             ret

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004370b8 @ 0x4371c4(x)
+/ 6: DWORD sub.VERSION.dll_GetFileVersionInfoSizeA (LPCSTR lptstrFilename, LPDWORD lpdwHandle);
+\           0x0043987c      ff2534604500   jmp dword [sym.imp.VERSION.dll_GetFileVersionInfoSizeA] ; 0x456034

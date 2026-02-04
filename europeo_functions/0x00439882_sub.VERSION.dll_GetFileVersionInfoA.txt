@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004370b8 @ 0x4371f7(x)
+/ 6: BOOL sub.VERSION.dll_GetFileVersionInfoA (LPCSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData);
+\           0x00439882      ff2538604500   jmp dword [sym.imp.VERSION.dll_GetFileVersionInfoA] ; 0x456038

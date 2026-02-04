@@ -1,0 +1,25 @@
+            ; CALL XREF from fcn.004012fc @ 0x40131b(x)
+            ; CALL XREFS from fcn.00401358 @ 0x40141c(x), 0x401493(x)
+/ 62: fcn.004012ac (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h);
+| `- args(sp[0x4..0xc]) vars(1:sp[0x28..0x28])
+|           0x004012ac      55             push ebp
+|           0x004012ad      8bec           mov ebp, esp
+|           0x004012af      83c4dc         add esp, 0xffffffdc
+|           0x004012b2      b8b0e24400     mov eax, 0x44e2b0
+|           0x004012b7      53             push ebx
+|           0x004012b8      8b5d08         mov ebx, dword [arg_8h]
+|           0x004012bb      e858230000     call fcn.00403618
+|           0x004012c0      8b5510         mov edx, dword [arg_10h]
+|           0x004012c3      8913           mov dword [ebx], edx
+|           0x004012c5      8b4d0c         mov ecx, dword [arg_ch]
+|           0x004012c8      894b04         mov dword [ebx + 4], ecx
+|           0x004012cb      a1fcec4400     mov eax, dword [0x44ecfc]   ; [0x44ecfc:4]=0
+|           0x004012d0      894308         mov dword [ebx + 8], eax
+|           0x004012d3      891dfcec4400   mov dword [0x44ecfc], ebx   ; [0x44ecfc:4]=0
+|           0x004012d9      8b55dc         mov edx, dword [var_24h]
+|           0x004012dc      6489150000..   mov dword fs:[0], edx
+|           0x004012e3      8bc3           mov eax, ebx
+|           0x004012e5      5b             pop ebx
+|           0x004012e6      8be5           mov esp, ebp
+|           0x004012e8      5d             pop ebp
+\           0x004012e9      c3             ret

@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00426d33 @ 0x426fa1(x)
+            ; CALL XREFS from fcn.0042ecb9 @ +0xe10(x), +0x1500(x)
+/ 6: sub.OWL52t.dll__TBrush__bdtr_qv ();
+\           0x00439612      ff25885e4500   jmp dword [sym.imp.OWL52t.dll__TBrush__bdtr_qv] ; 0x455e88

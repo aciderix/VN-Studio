@@ -1,0 +1,18 @@
+            ; XREFS(486)
+/ 59: fcn.00403618 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00403618      53             push ebx
+|           0x00403619      8bdd           mov ebx, ebp
+|           0x0040361b      035804         add ebx, dword [eax + 4]
+|           0x0040361e      894308         mov dword [ebx + 8], eax
+|           0x00403621      8d442408       lea eax, [arg_8h]
+|           0x00403625      89430c         mov dword [ebx + 0xc], eax
+|           0x00403628      c74304868e..   mov dword [ebx + 4], 0x438e86 ; [0x438e86:4]=0x596c25ff
+|           0x0040362f      c743100000..   mov dword [ebx + 0x10], 0
+|           0x00403636      c743120000..   mov dword [ebx + 0x12], 0
+|           0x0040363d      c7431c0000..   mov dword [ebx + 0x1c], 0
+|           0x00403644      6467a10000     mov eax, dword fs:[0]
+|           0x00403649      8903           mov dword [ebx], eax
+|           0x0040364b      6467891e0000   mov dword fs:[0], ebx
+|           0x00403651      5b             pop ebx
+\           0x00403652      c3             ret

@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00417031 @ 0x4171ec(x)
+            ; CALL XREF from fcn.0041721d @ 0x417738(x)
+/ 6: sub.OWL52t.dll__TGauge_StepIt_qv ();
+\           0x004392ca      ff25585c4500   jmp dword [sym.imp.OWL52t.dll__TGauge_StepIt_qv] ; 0x455c58

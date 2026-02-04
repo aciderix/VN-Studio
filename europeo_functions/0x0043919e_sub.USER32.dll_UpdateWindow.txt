@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0042ecb9 @ 0x42ef1b(x)
+            ; CALL XREF from fcn.0043089a @ +0x835(x)
+            ; CALL XREF from fcn.00432fd3 @ 0x4330a4(x)
+            ; CALL XREF from fcn.00433314 @ 0x433490(x)
+/ 6: BOOL sub.USER32.dll_UpdateWindow (HWND hWnd);
+\           0x0043919e      ff258c5b4500   jmp dword [sym.imp.USER32.dll_UpdateWindow] ; 0x455b8c

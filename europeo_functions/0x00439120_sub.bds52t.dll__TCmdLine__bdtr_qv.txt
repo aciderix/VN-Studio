@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00438675 @ +0x1af(x)
+/ 6: sub.bds52t.dll__TCmdLine__bdtr_qv ();
+\           0x00439120      ff25345b4500   jmp dword [sym.imp.bds52t.dll__TCmdLine__bdtr_qv] ; 0x455b34

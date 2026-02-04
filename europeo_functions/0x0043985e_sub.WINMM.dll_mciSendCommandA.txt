@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041aedb @ 0x41aeef(x)
+            ; CALL XREF from fcn.0041ba57 @ +0x175(x)
+/ 6: sub.WINMM.dll_mciSendCommandA ();
+\           0x0043985e      ff2518604500   jmp dword [sym.imp.WINMM.dll_mciSendCommandA] ; 0x456018

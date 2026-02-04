@@ -1,0 +1,88 @@
+            ; XREFS: CALL 0x004028d6  CALL 0x00402913  CALL 0x00402a6a  
+            ; XREFS: CALL 0x00402a98  CALL 0x00402ac7  CALL 0x00402d13  
+            ; XREFS: CALL 0x00402d4e  
+/ 251: fcn.00402541 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(8:sp[0x8..0x9c])
+|           0x00402541      55             push ebp
+|           0x00402542      8bec           mov ebp, esp
+|           0x00402544      81c468ffffff   add esp, 0xffffff68
+|           0x0040254a      53             push ebx
+|           0x0040254b      56             push esi
+|           0x0040254c      8b750c         mov esi, dword [arg_ch]
+|           0x0040254f      8b5d08         mov ebx, dword [arg_8h]
+|           0x00402552      b8bee64400     mov eax, 0x44e6be
+|           0x00402557      e8bc100000     call fcn.00403618
+|           0x0040255c      85db           test ebx, ebx
+|       ,=< 0x0040255e      0f84c9000000   je 0x40262d
+|       |   0x00402564      833d569143..   cmp dword [0x439156], 0     ; [0x439156:4]=0x5b5825ff
+|      ,==< 0x0040256b      0f85bc000000   jne 0x40262d
+|      ||   0x00402571      83fb01         cmp ebx, 1                  ; 1
+|     ,===< 0x00402574      7505           jne 0x40257b
+|     |||   0x00402576      bb05400080     mov ebx, 0x80004005
+|     |||   ; CODE XREF from fcn.00402541 @ 0x402574(x)
+|     `---> 0x0040257b      85f6           test esi, esi
+|     ,===< 0x0040257d      7418           je 0x402597
+|     |||   0x0040257f      53             push ebx
+|     |||   0x00402580      56             push esi                    ;  ...
+|     |||   0x00402581      68b6e84400     push 0x44e8b6               ; "Registry failure on key: %s, ErrorCode = %lX\n" ; LPCSTR ARG_1
+|     |||   0x00402586      8d8568ffffff   lea eax, [ARG_0]
+|     |||   0x0040258c      50             push eax                    ; LPSTR ARG_0
+|     |||   0x0040258d      e8086d0300     call sub.USER32.dll_wsprintfA ; int wsprintfA(LPSTR ARG_0, LPCSTR ARG_1, ...)
+|     |||   0x00402592      83c410         add esp, 0x10
+|    ,====< 0x00402595      eb15           jmp 0x4025ac
+|    ||||   ; CODE XREF from fcn.00402541 @ 0x40257d(x)
+|    |`---> 0x00402597      53             push ebx                    ;  ...
+|    | ||   0x00402598      68e4e84400     push 0x44e8e4               ; "Registry failure on unknown key: ErrorCode = %lX\n" ; LPCSTR ARG_1
+|    | ||   0x0040259d      8d9568ffffff   lea edx, [ARG_0]
+|    | ||   0x004025a3      52             push edx                    ; LPSTR ARG_0
+|    | ||   0x004025a4      e8f16c0300     call sub.USER32.dll_wsprintfA ; int wsprintfA(LPSTR ARG_0, LPCSTR ARG_1, ...)
+|    | ||   0x004025a9      83c40c         add esp, 0xc
+|    | ||   ; CODE XREF from fcn.00402541 @ 0x402595(x)
+|    `----> 0x004025ac      8d4dcc         lea ecx, [var_34h]
+|      ||   0x004025af      8d8568ffffff   lea eax, [ARG_0]
+|      ||   0x004025b5      51             push ecx
+|      ||   0x004025b6      6a00           push 0
+|      ||   0x004025b8      6a00           push 0
+|      ||   0x004025ba      6a00           push 0
+|      ||   0x004025bc      6a01           push 1                      ; 1
+|      ||   0x004025be      6800314000     push 0x403100               ; "U\x8b\xec\x83\xc4\u0738\xda\xe7D"
+|      ||   0x004025c3      6a00           push 0
+|      ||   0x004025c5      8d55fc         lea edx, [var_4h]
+|      ||   0x004025c8      66c745dc0800   mov word [var_24h], 8
+|      ||   0x004025ce      50             push eax
+|      ||   0x004025cf      52             push edx
+|      ||   0x004025d0      8bde           mov ebx, esi
+|      ||   0x004025d2      e897680300     call sub.cw3230mt.DLL__string__bctr_qpxc
+|      ||   0x004025d7      83c408         add esp, 8
+|      ||   0x004025da      ff45e8         inc dword [var_18h]
+|      ||   0x004025dd      8d4dfc         lea ecx, [var_4h]
+|      ||   0x004025e0      51             push ecx
+|      ||   0x004025e1      8d45f0         lea eax, [var_10h]
+|      ||   0x004025e4      50             push eax
+|      ||   0x004025e5      e8186b0300     call sub.bds52t.dll__TXBase__bctr_qrx6string
+|      ||   0x004025ea      83c408         add esp, 8
+|      ||   0x004025ed      8345e802       add dword [var_18h], 2
+|      ||   0x004025f1      66c745dc1400   mov word [var_24h], 0x14    ; 20
+|      ||   0x004025f7      ff4de8         dec dword [var_18h]
+|      ||   0x004025fa      6a02           push 2                      ; 2
+|      ||   0x004025fc      8d55fc         lea edx, [var_4h]
+|      ||   0x004025ff      52             push edx
+|      ||   0x00402600      e85f690300     call sub.cw3230mt.DLL__string__bdtr_qv
+|      ||   0x00402605      66c745dc0800   mov word [var_24h], 8
+|      ||   0x0040260b      c745f428e9..   mov dword [var_ch], 0x44e928
+|      ||   0x00402612      895df8         mov dword [var_8h], ebx
+|      ||   0x00402615      83c408         add esp, 8
+|      ||   0x00402618      8345e803       add dword [var_18h], 3
+|      ||   0x0040261c      8d4df0         lea ecx, [var_10h]
+|      ||   0x0040261f      51             push ecx
+|      ||   0x00402620      68ac304000     push 0x4030ac
+|      ||   0x00402625      e880680300     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|      ||   0x0040262a      83c424         add esp, 0x24
+|      ||   ; CODE XREFS from fcn.00402541 @ 0x40255e(x), 0x40256b(x)
+|      ``-> 0x0040262d      8b45cc         mov eax, dword [var_34h]
+|           0x00402630      64a300000000   mov dword fs:[0], eax
+|           0x00402636      5e             pop esi
+|           0x00402637      5b             pop ebx
+|           0x00402638      8be5           mov esp, ebp
+|           0x0040263a      5d             pop ebp
+\           0x0040263b      c3             ret

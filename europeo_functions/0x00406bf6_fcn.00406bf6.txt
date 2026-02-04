@@ -1,0 +1,32 @@
+            ; CALL XREF from fcn.00406ba2 @ 0x406bdb(x)
+/ 53: fcn.00406bf6 (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h, int32_t arg_14h, int32_t arg_18h);
+| `- args(sp[0x4..0x14])
+|           0x00406bf6      55             push ebp
+|           0x00406bf7      8bec           mov ebp, esp
+|           0x00406bf9      53             push ebx
+|           0x00406bfa      56             push esi
+|           0x00406bfb      57             push edi
+|           0x00406bfc      8b7d18         mov edi, dword [arg_18h]
+|           0x00406bff      8b7508         mov esi, dword [arg_8h]
+|           0x00406c02      8b5d14         mov ebx, dword [arg_14h]
+|           0x00406c05      3bfb           cmp edi, ebx
+|       ,=< 0x00406c07      761d           jbe 0x406c26
+|       |   ; CODE XREF from fcn.00406bf6 @ 0x406c24(x)
+|      .--> 0x00406c09      8b4605         mov eax, dword [esi + 5]
+|      :|   0x00406c0c      833c9800       cmp dword [eax + ebx*4], 0
+|     ,===< 0x00406c10      740f           je 0x406c21
+|     |:|   0x00406c12      ff7510         push dword [arg_10h]
+|     |:|   0x00406c15      8b5605         mov edx, dword [esi + 5]
+|     |:|   0x00406c18      ff349a         push dword [edx + ebx*4]
+|     |:|   0x00406c1b      ff550c         call dword [arg_ch]         ; 0xc ; 12
+|     |:|   0x00406c1e      83c408         add esp, 8
+|     |:|   ; CODE XREF from fcn.00406bf6 @ 0x406c10(x)
+|     `---> 0x00406c21      43             inc ebx
+|      :|   0x00406c22      3bfb           cmp edi, ebx
+|      `==< 0x00406c24      77e3           ja 0x406c09
+|       |   ; CODE XREF from fcn.00406bf6 @ 0x406c07(x)
+|       `-> 0x00406c26      5f             pop edi
+|           0x00406c27      5e             pop esi
+|           0x00406c28      5b             pop ebx
+|           0x00406c29      5d             pop ebp
+\           0x00406c2a      c3             ret

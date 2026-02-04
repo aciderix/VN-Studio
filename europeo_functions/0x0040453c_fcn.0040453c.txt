@@ -1,0 +1,33 @@
+            ; XREFS: CALL 0x0042530a  CALL 0x00425404  CALL 0x004276bf  
+            ; XREFS: CALL 0x0042780f  CALL 0x00428013  CALL 0x004281dc  
+            ; XREFS: CALL 0x0042844e  CALL 0x004285b9  CALL 0x004290d3  
+            ; XREFS: CALL 0x0042951b  CALL 0x004299cd  CALL 0x0042cfe7  
+/ 52: fcn.0040453c (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x0040453c      55             push ebp
+|           0x0040453d      8bec           mov ebp, esp
+|           0x0040453f      8b4508         mov eax, dword [arg_8h]
+|           0x00404542      8b10           mov edx, dword [eax]
+|           0x00404544      8b4a02         mov ecx, dword [edx + 2]
+|           0x00404547      803900         cmp byte [ecx], 0
+|       ,=< 0x0040454a      7504           jne 0x404550
+|       |   0x0040454c      33c0           xor eax, eax
+|       |   0x0040454e      5d             pop ebp
+|       |   0x0040454f      c3             ret
+|       |   ; CODE XREF from fcn.0040453c @ 0x40454a(x)
+|       `-> 0x00404550      8b00           mov eax, dword [eax]
+|           0x00404552      ff7002         push dword [eax + 2]        ; LPCSTR lpFileName
+|           0x00404555      e8dc4a0300     call sub.KERNEL32.dll_GetFileAttributesA ; DWORD GetFileAttributesA(LPCSTR lpFileName)
+|           0x0040455a      83f8ff         cmp eax, 0xffffffff
+|       ,=< 0x0040455d      7404           je 0x404563
+|       |   0x0040455f      a810           test al, 0x10               ; 16
+|      ,==< 0x00404561      7404           je 0x404567
+|      ||   ; CODE XREF from fcn.0040453c @ 0x40455d(x)
+|      |`-> 0x00404563      33d2           xor edx, edx
+|      |,=< 0x00404565      eb05           jmp 0x40456c
+|      ||   ; CODE XREF from fcn.0040453c @ 0x404561(x)
+|      `--> 0x00404567      ba01000000     mov edx, 1
+|       |   ; CODE XREF from fcn.0040453c @ 0x404565(x)
+|       `-> 0x0040456c      8bc2           mov eax, edx
+|           0x0040456e      5d             pop ebp
+\           0x0040456f      c3             ret

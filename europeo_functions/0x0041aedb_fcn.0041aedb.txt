@@ -1,0 +1,31 @@
+            ; XREFS: CALL 0x0041af50  CALL 0x0041afe5  CALL 0x0041b190  
+            ; XREFS: CALL 0x0041b1f9  CALL 0x0041b23e  CALL 0x0041b2ae  
+            ; XREFS: CALL 0x0041b524  CALL 0x0041b8b8  CALL 0x0041b910  
+            ; XREFS: CALL 0x0041b958  CALL 0x0041ba00  CALL 0x0041bba2  
+            ; XREFS: CALL 0x0041bc3c  CALL 0x0041bc73  CALL 0x0041bcb5  
+            ; XREFS: CALL 0x0041be2a  CALL 0x0041be5f  CALL 0x0041bf0a  
+            ; XREFS: CALL 0x0041bf4f  
+/ 49: fcn.0041aedb (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h, int32_t arg_14h);
+| `- args(sp[0x4..0x10])
+|           0x0041aedb      55             push ebp
+|           0x0041aedc      8bec           mov ebp, esp
+|           0x0041aede      53             push ebx
+|           0x0041aedf      56             push esi
+|           0x0041aee0      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041aee3      ff7514         push dword [arg_14h]
+|           0x0041aee6      ff7510         push dword [arg_10h]
+|           0x0041aee9      ff750c         push dword [arg_ch]
+|           0x0041aeec      ff7312         push dword [ebx + 0x12]
+|           0x0041aeef      e86ae90100     call sub.WINMM.dll_mciSendCommandA
+|           0x0041aef4      8bf0           mov esi, eax
+|           0x0041aef6      56             push esi
+|           0x0041aef7      53             push ebx
+|           0x0041aef8      e846ffffff     call fcn.0041ae43
+|           0x0041aefd      83c408         add esp, 8
+|           0x0041af00      85f6           test esi, esi
+|           0x0041af02      0f94c0         sete al
+|           0x0041af05      83e001         and eax, 1
+|           0x0041af08      5e             pop esi
+|           0x0041af09      5b             pop ebx
+|           0x0041af0a      5d             pop ebp
+\           0x0041af0b      c3             ret

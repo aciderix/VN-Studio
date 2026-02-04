@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042ecb9 @ +0x14a7(x), +0x14ba(x)
+/ 6: long sub.GDI32.dll_SetROP2 (HDC hdc, _BinaryDrawMode fnDrawMode);
+\           0x004397c8      ff25b05f4500   jmp dword [sym.imp.GDI32.dll_SetROP2] ; 0x455fb0

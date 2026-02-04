@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.004370b8 @ 0x437224(x)
+            ; CALL XREF from fcn.004372b9 @ 0x43731d(x)
+            ; CALL XREF from fcn.00437367 @ 0x4373cb(x)
+            ; CALL XREF from fcn.00437415 @ 0x437479(x)
+/ 6: BOOL sub.VERSION.dll_VerQueryValueA (LPCVOID pBlock, LPCSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen);
+\           0x00439876      ff2530604500   jmp dword [sym.imp.VERSION.dll_VerQueryValueA] ; 0x456030

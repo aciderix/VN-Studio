@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x0040560a  CALL 0x0040b3c9  CALL 0x00412d24  
+            ; XREFS: CALL 0x00414c1a  CALL 0x00415e01  CALL 0x00415e75  
+            ; XREFS: CALL 0x00415f0b  CALL 0x0041fceb  CALL 0x0041fd42  
+            ; XREFS: CALL 0x0041ff19  
+/ 6: sub.cw3230mt.DLL__sscanf ();
+\           0x00438d96      ff25cc584500   jmp dword [sym.imp.cw3230mt.DLL__sscanf] ; 0x4558cc

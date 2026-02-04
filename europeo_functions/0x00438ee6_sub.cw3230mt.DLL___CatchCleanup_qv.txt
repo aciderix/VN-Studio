@@ -1,0 +1,8 @@
+            ; XREFS: CALL 0x00401262  CALL 0x00403465  CALL 0x004037c8  
+            ; XREFS: CALL 0x0040396b  CALL 0x0041d5bb  CALL 0x0041d696  
+            ; XREFS: CALL 0x0041d78c  CALL 0x0041d87f  CALL 0x0042538d  
+            ; XREFS: CALL 0x00427799  CALL 0x004278e9  CALL 0x0042851c  
+            ; XREFS: CALL 0x00428687  CALL 0x00429831  CALL 0x0042cf8e  
+            ; XREFS: CALL 0x0042d1ac  CALL 0x004347ac  CALL 0x00438a5e  
+/ 6: sub.cw3230mt.DLL___CatchCleanup_qv ();
+\           0x00438ee6      ff25ac594500   jmp dword [sym.imp.cw3230mt.DLL___CatchCleanup_qv] ; 0x4559ac ; ">\x15\x05"

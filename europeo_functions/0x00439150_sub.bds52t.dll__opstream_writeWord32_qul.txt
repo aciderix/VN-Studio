@@ -1,0 +1,6 @@
+            ; CALL XREF from fcn.0040650b @ 0x406534(x)
+            ; CALL XREF from fcn.00429f02 @ 0x42a200(x)
+            ; CALL XREF from fcn.0042d318 @ 0x42d383(x)
+            ; CALL XREFS from fcn.00436271 @ 0x436284(x), 0x4362b1(x)
+/ 6: sub.bds52t.dll__opstream_writeWord32_qul ();
+\           0x00439150      ff25545b4500   jmp dword [sym.imp.bds52t.dll__opstream_writeWord32_qul] ; 0x455b54

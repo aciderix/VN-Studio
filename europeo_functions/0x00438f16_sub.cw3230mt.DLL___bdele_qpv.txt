@@ -1,0 +1,3 @@
+            ; XREFS(194)
+/ 6: sub.cw3230mt.DLL___bdele_qpv ();
+\           0x00438f16      ff25cc594500   jmp dword [sym.imp.cw3230mt.DLL___bdele_qpv] ; 0x4559cc ; "\n\x16\x05"

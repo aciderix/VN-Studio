@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00401358 @ 0x40145f(x)
+            ; CALL XREF from fcn.00401535 @ 0x4015d1(x)
+/ 6: LPVOID sub.KERNEL32.dll_LockResource (HGLOBAL hResData);
+\           0x00438fbe      ff25405a4500   jmp dword [sym.imp.KERNEL32.dll_LockResource] ; 0x455a40

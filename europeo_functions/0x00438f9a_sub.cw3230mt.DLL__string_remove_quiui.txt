@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004048f9 @ +0x181(x)
+/ 6: sub.cw3230mt.DLL__string_remove_quiui ();
+\           0x00438f9a      ff25245a4500   jmp dword [sym.imp.cw3230mt.DLL__string_remove_quiui] ; 0x455a24

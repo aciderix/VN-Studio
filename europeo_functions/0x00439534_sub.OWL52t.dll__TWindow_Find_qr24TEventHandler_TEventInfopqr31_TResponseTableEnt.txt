@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041b8d0 @ +0x16d(x)
+            ; CALL XREF from fcn.0042d858 @ +0x44(x)
+/ 6: sub.OWL52t.dll__TWindow_Find_qr24TEventHandler_TEventInfopqr31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfo_4bool ();
+\           0x00439534      ff25f45d4500   jmp dword [sym.imp.OWL52t.dll__TWindow_Find_qr24TEventHandler_TEventInfopqr31_TResponseTableEntry_t7GENERIC_r24TEventHandler_TEventInfo_4bool] ; 0x455df4

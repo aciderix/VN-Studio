@@ -1,0 +1,4 @@
+            ; CALL XREFS from fcn.0041ccdd @ 0x41cd6e(x), 0x41cda6(x)
+            ; CALL XREFS from fcn.0041f6ae @ 0x41f72d(x), 0x41f775(x)
+/ 6: sub.cw3230mt.DLL__ifstream__bdtr_qv ();
+\           0x00438e0e      ff251c594500   jmp dword [sym.imp.cw3230mt.DLL__ifstream__bdtr_qv] ; 0x45591c ; "B\x12\x05"

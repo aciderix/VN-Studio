@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00418f0f @ 0x418f31(x)
+/ 6: sub.WINMM.dll_timeEndPeriod ();
+\           0x0043984c      ff250c604500   jmp dword [sym.imp.WINMM.dll_timeEndPeriod] ; 0x45600c ; "fA\x05"

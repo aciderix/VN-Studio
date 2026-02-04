@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.004200cf @ 0x42047b(x), 0x421156(x)
+/ 6: sub.OWL52t.dll__TFont__bctr_qpx11tagLOGFONTA ();
+\           0x0043946e      ff25705d4500   jmp dword [sym.imp.OWL52t.dll__TFont__bctr_qpx11tagLOGFONTA] ; 0x455d70

@@ -1,0 +1,58 @@
+            ; CALL XREF from fcn.00404c08 @ 0x404c51(x)
+/ 115: fcn.00404b95 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00404b95      55             push ebp
+|           0x00404b96      8bec           mov ebp, esp
+|           0x00404b98      53             push ebx
+|           0x00404b99      8b5d08         mov ebx, dword [arg_8h]
+|           0x00404b9c      833b00         cmp dword [ebx], 0
+|       ,=< 0x00404b9f      750a           jne 0x404bab
+|       |   0x00404ba1      b8efa84300     mov eax, 0x43a8ef
+|       |   0x00404ba6      5b             pop ebx
+|       |   0x00404ba7      5d             pop ebp
+|       |   0x00404ba8      c3             ret
+|       |   ; CODE XREFS from fcn.00404b95 @ 0x404bb3(x), 0x404bbd(x), 0x404bc7(x)
+|    ...--> 0x00404ba9      ff03           inc dword [ebx]
+|    :::|   ; CODE XREF from fcn.00404b95 @ 0x404b9f(x)
+|    :::`-> 0x00404bab      8b13           mov edx, dword [ebx]
+|    :::    0x00404bad      0fbe0a         movsx ecx, byte [edx]
+|    :::    0x00404bb0      83f920         cmp ecx, 0x20               ; 32
+|    `====< 0x00404bb3      74f4           je 0x404ba9
+|     ::    0x00404bb5      8b03           mov eax, dword [ebx]
+|     ::    0x00404bb7      0fbe10         movsx edx, byte [eax]
+|     ::    0x00404bba      83fa0d         cmp edx, 0xd                ; 13
+|     `===< 0x00404bbd      74ea           je 0x404ba9
+|      :    0x00404bbf      8b0b           mov ecx, dword [ebx]
+|      :    0x00404bc1      0fbe01         movsx eax, byte [ecx]
+|      :    0x00404bc4      83f80a         cmp eax, 0xa                ; 10
+|      `==< 0x00404bc7      74e0           je 0x404ba9
+|           0x00404bc9      ff33           push dword [ebx]
+|           0x00404bcb      e898420300     call sub.cw3230mt.DLL__strlen
+|           0x00404bd0      59             pop ecx
+|           0x00404bd1      48             dec eax
+|       ,=< 0x00404bd2      eb07           jmp 0x404bdb
+|       |   ; CODE XREFS from fcn.00404b95 @ 0x404beb(x), 0x404bf6(x), 0x404c01(x)
+|    ...--> 0x00404bd4      8b13           mov edx, dword [ebx]
+|    :::|   0x00404bd6      c6040200       mov byte [edx + eax], 0
+|    :::|   0x00404bda      48             dec eax
+|    :::|   ; CODE XREF from fcn.00404b95 @ 0x404bd2(x)
+|    :::`-> 0x00404bdb      8b0b           mov ecx, dword [ebx]
+|    :::    0x00404bdd      803900         cmp byte [ecx], 0
+|    :::,=< 0x00404be0      7421           je 0x404c03
+|    :::|   0x00404be2      8b13           mov edx, dword [ebx]
+|    :::|   0x00404be4      0fbe0c02       movsx ecx, byte [edx + eax]
+|    :::|   0x00404be8      83f920         cmp ecx, 0x20               ; 32
+|    `====< 0x00404beb      74e7           je 0x404bd4
+|     ::|   0x00404bed      8b13           mov edx, dword [ebx]
+|     ::|   0x00404bef      0fbe0c02       movsx ecx, byte [edx + eax]
+|     ::|   0x00404bf3      83f90d         cmp ecx, 0xd                ; 13
+|     `===< 0x00404bf6      74dc           je 0x404bd4
+|      :|   0x00404bf8      8b13           mov edx, dword [ebx]
+|      :|   0x00404bfa      0fbe0c02       movsx ecx, byte [edx + eax]
+|      :|   0x00404bfe      83f90a         cmp ecx, 0xa                ; 10
+|      `==< 0x00404c01      74d1           je 0x404bd4
+|       |   ; CODE XREF from fcn.00404b95 @ 0x404be0(x)
+|       `-> 0x00404c03      8b03           mov eax, dword [ebx]
+|           0x00404c05      5b             pop ebx
+|           0x00404c06      5d             pop ebp
+\           0x00404c07      c3             ret

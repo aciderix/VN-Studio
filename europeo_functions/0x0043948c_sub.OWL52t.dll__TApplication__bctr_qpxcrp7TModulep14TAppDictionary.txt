@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00437ba4 @ 0x437c04(x)
+/ 6: sub.OWL52t.dll__TApplication__bctr_qpxcrp7TModulep14TAppDictionary ();
+\           0x0043948c      ff25845d4500   jmp dword [sym.imp.OWL52t.dll__TApplication__bctr_qpxcrp7TModulep14TAppDictionary] ; 0x455d84

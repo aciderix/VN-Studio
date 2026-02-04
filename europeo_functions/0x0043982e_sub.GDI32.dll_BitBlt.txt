@@ -1,0 +1,4 @@
+            ; XREFS: CALL 0x0041dbf7  CALL 0x0041dc4a  CALL 0x0041dddc  
+            ; XREFS: CALL 0x0042f951  CALL 0x0042fe00  CALL 0x004304e9  
+/ 6: bool sub.GDI32.dll_BitBlt (HDC hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, _TernaryDrawMode dwRop);
+\           0x0043982e      ff25f45f4500   jmp dword [sym.imp.GDI32.dll_BitBlt] ; 0x455ff4

@@ -1,0 +1,44 @@
+            ; CALL XREF from fcn.00401358 @ 0x4013ad(x)
+            ; CALL XREF from fcn.004017ca @ +0x50(x)
+/ 102: fcn.00401a18 (int32_t arg_8h, LPCSTR lpString2, int32_t arg_10h);
+| `- args(sp[0x4..0xc])
+|           0x00401a18      55             push ebp
+|           0x00401a19      8bec           mov ebp, esp
+|           0x00401a1b      53             push ebx
+|           0x00401a1c      56             push esi
+|           0x00401a1d      57             push edi
+|           0x00401a1e      803d90e344..   cmp byte [0x44e390], 0      ; [0x44e390:1]=0
+|           0x00401a25      8b7d08         mov edi, dword [arg_8h]
+|       ,=< 0x00401a28      7520           jne 0x401a4a
+|       |   0x00401a2a      689ae34400     push 0x44e39a               ; "CompareStringA"
+|       |   0x00401a2f      6891e34400     push 0x44e391               ; "kernel32" ; LPCSTR lpModuleName
+|       |   0x00401a34      e8f7750300     call sub.KERNEL32.dll_GetModuleHandleA ; HMODULE GetModuleHandleA(LPCSTR lpModuleName)
+|       |   0x00401a39      50             push eax                    ; HMODULE hModule
+|       |   0x00401a3a      e815760300     call sub.KERNEL32.dll_GetProcAddress ; FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
+|       |   0x00401a3f      a38ce34400     mov dword [0x44e38c], eax   ; [0x44e38c:4]=0
+|       |   0x00401a44      fe0590e34400   inc byte [0x44e390]         ; [0x44e390:1]=0
+|       |   ; CODE XREF from fcn.00401a18 @ 0x401a28(x)
+|       `-> 0x00401a4a      833d8ce344..   cmp dword [0x44e38c], 0     ; [0x44e38c:4]=0
+|       ,=< 0x00401a51      741a           je 0x401a6d
+|       |   0x00401a53      6aff           push 0xffffffffffffffff
+|       |   0x00401a55      ff750c         push dword [lpString2]
+|       |   0x00401a58      6aff           push 0xffffffffffffffff
+|       |   0x00401a5a      57             push edi
+|       |   0x00401a5b      6a03           push 3                      ; 3
+|       |   0x00401a5d      0fb74510       movzx eax, word [arg_10h]
+|       |   0x00401a61      50             push eax
+|       |   0x00401a62      ff158ce34400   call dword [0x44e38c]
+|       |   0x00401a68      83c0fe         add eax, 0xfffffffe
+|      ,==< 0x00401a6b      eb0c           jmp 0x401a79
+|      ||   ; CODE XREF from fcn.00401a18 @ 0x401a51(x)
+|      |`-> 0x00401a6d      8b5d0c         mov ebx, dword [lpString2]
+|      |    0x00401a70      8bf7           mov esi, edi
+|      |    0x00401a72      53             push ebx                    ; LPCSTR lpString2
+|      |    0x00401a73      56             push esi                    ; LPCSTR lpString1
+|      |    0x00401a74      e87b750300     call sub.KERNEL32.dll_lstrcmpiA ; int lstrcmpiA(LPCSTR lpString1, LPCSTR lpString2)
+|      |    ; CODE XREF from fcn.00401a18 @ 0x401a6b(x)
+|      `--> 0x00401a79      5f             pop edi
+|           0x00401a7a      5e             pop esi
+|           0x00401a7b      5b             pop ebx
+|           0x00401a7c      5d             pop ebp
+\           0x00401a7d      c3             ret

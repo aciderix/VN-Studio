@@ -1,0 +1,108 @@
+            ; CALL XREF from fcn.00401f16 @ 0x401fa6(x)
+            ; CALL XREF from fcn.00401fc8 @ 0x402051(x)
+            ; CALL XREF from fcn.0040206c @ 0x4020d0(x)
+/ 210: fcn.0040215c (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h, int32_t arg_14h, int32_t arg_18h, uint32_t arg_1ch, uint32_t arg_20h, uint32_t arg_24h, uint32_t arg_28h, uint32_t arg_2ch, uint32_t arg_30h);
+| `- args(sp[0x4..0x2c]) vars(10:sp[0x8..0x12c])
+|           0x0040215c      55             push ebp
+|           0x0040215d      8bec           mov ebp, esp
+|           0x0040215f      81c4d8feffff   add esp, 0xfffffed8
+|           0x00402165      53             push ebx
+|           0x00402166      56             push esi
+|           0x00402167      57             push edi
+|           0x00402168      33db           xor ebx, ebx
+|           0x0040216a      8b7d18         mov edi, dword [arg_18h]
+|           0x0040216d      8b7514         mov esi, dword [arg_14h]
+|           0x00402170      8b4d10         mov ecx, dword [arg_10h]
+|           0x00402173      8b550c         mov edx, dword [arg_ch]
+|           0x00402176      8b4508         mov eax, dword [arg_8h]
+|           0x00402179      c745fc0001..   mov dword [var_4h], pe_nt_image_headers32 ; 0x100
+|           0x00402180      895df8         mov dword [var_8h], ebx
+|           0x00402183      33db           xor ebx, ebx
+|           0x00402185      895df4         mov dword [var_ch], ebx
+|           0x00402188      33db           xor ebx, ebx
+|           0x0040218a      895df0         mov dword [var_10h], ebx
+|           0x0040218d      33db           xor ebx, ebx
+|           0x0040218f      895dec         mov dword [var_14h], ebx
+|           0x00402192      33db           xor ebx, ebx
+|           0x00402194      895de8         mov dword [var_18h], ebx
+|           0x00402197      33db           xor ebx, ebx
+|           0x00402199      895de4         mov dword [var_1ch], ebx
+|           0x0040219c      33db           xor ebx, ebx
+|           0x0040219e      895de0         mov dword [var_20h], ebx
+|           0x004021a1      837d3000       cmp dword [arg_30h], 0
+|       ,=< 0x004021a5      7405           je 0x4021ac
+|       |   0x004021a7      8b5d30         mov ebx, dword [arg_30h]
+|      ,==< 0x004021aa      eb03           jmp 0x4021af
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021a5(x)
+|      |`-> 0x004021ac      8d5dd8         lea ebx, [var_28h]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021aa(x)
+|      `--> 0x004021af      53             push ebx
+|           0x004021b0      837d2c00       cmp dword [arg_2ch], 0
+|       ,=< 0x004021b4      7405           je 0x4021bb
+|       |   0x004021b6      8b5d2c         mov ebx, dword [arg_2ch]
+|      ,==< 0x004021b9      eb03           jmp 0x4021be
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021b4(x)
+|      |`-> 0x004021bb      8d5de0         lea ebx, [var_20h]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021b9(x)
+|      `--> 0x004021be      53             push ebx
+|           0x004021bf      837d2800       cmp dword [arg_28h], 0
+|       ,=< 0x004021c3      7405           je 0x4021ca
+|       |   0x004021c5      8b5d28         mov ebx, dword [arg_28h]
+|      ,==< 0x004021c8      eb03           jmp 0x4021cd
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021c3(x)
+|      |`-> 0x004021ca      8d5de4         lea ebx, [var_1ch]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021c8(x)
+|      `--> 0x004021cd      53             push ebx
+|           0x004021ce      837d2400       cmp dword [arg_24h], 0
+|       ,=< 0x004021d2      7405           je 0x4021d9
+|       |   0x004021d4      8b5d24         mov ebx, dword [arg_24h]
+|      ,==< 0x004021d7      eb03           jmp 0x4021dc
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021d2(x)
+|      |`-> 0x004021d9      8d5de8         lea ebx, [var_18h]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021d7(x)
+|      `--> 0x004021dc      53             push ebx
+|           0x004021dd      837d2000       cmp dword [arg_20h], 0
+|       ,=< 0x004021e1      7405           je 0x4021e8
+|       |   0x004021e3      8b5d20         mov ebx, dword [arg_20h]
+|      ,==< 0x004021e6      eb03           jmp 0x4021eb
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021e1(x)
+|      |`-> 0x004021e8      8d5dec         lea ebx, [var_14h]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021e6(x)
+|      `--> 0x004021eb      53             push ebx
+|           0x004021ec      837d1c00       cmp dword [arg_1ch], 0
+|       ,=< 0x004021f0      7405           je 0x4021f7
+|       |   0x004021f2      8b5d1c         mov ebx, dword [arg_1ch]
+|      ,==< 0x004021f5      eb03           jmp 0x4021fa
+|      ||   ; CODE XREF from fcn.0040215c @ 0x4021f0(x)
+|      |`-> 0x004021f7      8d5df0         lea ebx, [var_10h]
+|      |    ; CODE XREF from fcn.0040215c @ 0x4021f5(x)
+|      `--> 0x004021fa      53             push ebx
+|           0x004021fb      85ff           test edi, edi
+|       ,=< 0x004021fd      7503           jne 0x402202
+|       |   0x004021ff      8d7df4         lea edi, [var_ch]
+|       |   ; CODE XREF from fcn.0040215c @ 0x4021fd(x)
+|       `-> 0x00402202      57             push edi
+|           0x00402203      85f6           test esi, esi
+|       ,=< 0x00402205      7503           jne 0x40220a
+|       |   0x00402207      8d75f8         lea esi, [var_8h]
+|       |   ; CODE XREF from fcn.0040215c @ 0x402205(x)
+|       `-> 0x0040220a      56             push esi
+|           0x0040220b      6a00           push 0
+|           0x0040220d      85c9           test ecx, ecx
+|       ,=< 0x0040220f      7503           jne 0x402214
+|       |   0x00402211      8d4dfc         lea ecx, [var_4h]
+|       |   ; CODE XREF from fcn.0040215c @ 0x40220f(x)
+|       `-> 0x00402214      51             push ecx
+|           0x00402215      85d2           test edx, edx
+|       ,=< 0x00402217      7506           jne 0x40221f
+|       |   0x00402219      8d95d8feffff   lea edx, [var_128h]
+|       |   ; CODE XREF from fcn.0040215c @ 0x402217(x)
+|       `-> 0x0040221f      52             push edx                    ; LPSTR lpClass
+|           0x00402220      ff30           push dword [eax]            ; HKEY hKey
+|           0x00402222      e879760300     call sub.ADVAPI32.dll_RegQueryInfoKeyA ; LSTATUS RegQueryInfoKeyA(HKEY hKey, LPSTR lpClass, LPDWORD lpcchClass, LPDWORD lpReserved, LPDWORD lpcSubKeys, LPDWORD lpcbMaxSubKeyLen, LPDWORD lpcbMaxClassLen, LPDWORD lpcValues, LPDWORD lpcbMaxValueNameLen, LPDWORD lpcbMaxValueLen, LPDWORD lpcbSecurityDescriptor, PFILETIME lpftLastWriteTime)
+|           0x00402227      5f             pop edi
+|           0x00402228      5e             pop esi
+|           0x00402229      5b             pop ebx
+|           0x0040222a      8be5           mov esp, ebp
+|           0x0040222c      5d             pop ebp
+\           0x0040222d      c3             ret

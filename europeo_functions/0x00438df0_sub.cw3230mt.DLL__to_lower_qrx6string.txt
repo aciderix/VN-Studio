@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00404212 @ 0x404386(x)
+/ 6: sub.cw3230mt.DLL__to_lower_qrx6string ();
+\           0x00438df0      ff2508594500   jmp dword [sym.imp.cw3230mt.DLL__to_lower_qrx6string] ; 0x455908

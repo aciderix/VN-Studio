@@ -1,0 +1,36 @@
+            ; CALL XREF from fcn.0042d8b6 @ +0x6bc(x)
+/ 91: fcn.00435e38 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(3:sp[0x8..0x2c])
+|           0x00435e38      55             push ebp
+|           0x00435e39      8bec           mov ebp, esp
+|           0x00435e3b      83c4d8         add esp, 0xffffffd8
+|           0x00435e3e      53             push ebx
+|           0x00435e3f      8b5d08         mov ebx, dword [arg_8h]
+|           0x00435e42      b8b0c04400     mov eax, 0x44c0b0
+|           0x00435e47      e8ccd7fcff     call fcn.00403618
+|           0x00435e4c      85db           test ebx, ebx
+|       ,=< 0x00435e4e      7434           je 0x435e84
+|       |   0x00435e50      8b13           mov edx, dword [ebx]
+|       |   0x00435e52      8955fc         mov dword [var_4h], edx
+|       |   0x00435e55      66c745e81400   mov word [var_18h], 0x14    ; 20
+|       |   0x00435e5b      6838a74200     push 0x42a738
+|       |   0x00435e60      6a19           push 0x19                   ; 25
+|       |   0x00435e62      6a00           push 0
+|       |   0x00435e64      6a08           push 8                      ; 8
+|       |   0x00435e66      ff75fc         push dword [var_4h]
+|       |   0x00435e69      e84ad8fcff     call fcn.004036b8
+|       |   ; CODE XREF from fcn.00435c88 @ +0x17f(x)
+|       |   0x00435e6e      83c414         add esp, 0x14
+|       |   0x00435e71      66c745e80800   mov word [var_18h], 8
+|       |   0x00435e77      f6450c01       test byte [arg_ch], 1
+|      ,==< 0x00435e7b      7407           je 0x435e84
+|      ||   0x00435e7d      53             push ebx
+|      ||   0x00435e7e      e893300000     call sub.cw3230mt.DLL___bdele_qpv
+|      ||   0x00435e83      59             pop ecx
+|      ||   ; CODE XREFS from fcn.00435e38 @ 0x435e4e(x), 0x435e7b(x)
+|      ``-> 0x00435e84      8b4dd8         mov ecx, dword [var_28h]
+|           0x00435e87      64890d0000..   mov dword fs:[0], ecx
+|           0x00435e8e      5b             pop ebx
+|           0x00435e8f      8be5           mov esp, ebp
+|           0x00435e91      5d             pop ebp
+\           0x00435e92      c3             ret

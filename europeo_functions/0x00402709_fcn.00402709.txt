@@ -1,0 +1,44 @@
+            ; CALL XREF from fcn.004027b3 @ +0x70(x)
+/ 101: fcn.00402709 (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(2:sp[0x18..0x28])
+|           0x00402709      55             push ebp
+|           0x0040270a      8bec           mov ebp, esp
+|           0x0040270c      83c4dc         add esp, 0xffffffdc
+|           0x0040270f      53             push ebx
+|           0x00402710      8d5d08         lea ebx, [arg_8h]
+|           0x00402713      b812e74400     mov eax, 0x44e712
+|           0x00402718      e8fb0e0000     call fcn.00403618
+|           0x0040271d      66c745ec0800   mov word [var_14h], 8
+|           0x00402723      8b13           mov edx, dword [ebx]
+|           0x00402725      8b4d0c         mov ecx, dword [arg_ch]
+|           0x00402728      890a           mov dword [edx], ecx
+|           0x0040272a      8b03           mov eax, dword [ebx]
+|           0x0040272c      33d2           xor edx, edx
+|           0x0040272e      895004         mov dword [eax + 4], edx
+|       ,=< 0x00402731      eb05           jmp 0x402738
+|       |   ; CODE XREF from fcn.00402709 @ 0x402748(x)
+|      .--> 0x00402733      8b0b           mov ecx, dword [ebx]
+|      :|   0x00402735      ff4104         inc dword [ecx + 4]
+|      :|   ; CODE XREF from fcn.00402709 @ 0x402731(x)
+|      :`-> 0x00402738      8b03           mov eax, dword [ebx]
+|      :    0x0040273a      8b0b           mov ecx, dword [ebx]
+|      :    0x0040273c      8b5004         mov edx, dword [eax + 4]
+|      :    0x0040273f      8b01           mov eax, dword [ecx]
+|      :    0x00402741      8d1452         lea edx, [edx + edx*2]
+|      :    0x00402744      833c9000       cmp dword [eax + edx*4], 0
+|      `==< 0x00402748      75e9           jne 0x402733
+|           0x0040274a      8b13           mov edx, dword [ebx]
+|           0x0040274c      8b4a04         mov ecx, dword [edx + 4]
+|           0x0040274f      c1e102         shl ecx, 2
+|           0x00402752      51             push ecx
+|           0x00402753      e8f8660300     call sub.cw3230mt.DLL___bnwa_qui
+|           0x00402758      59             pop ecx
+|           0x00402759      8b13           mov edx, dword [ebx]
+|           0x0040275b      894208         mov dword [edx + 8], eax
+|           0x0040275e      8b45dc         mov eax, dword [var_24h]
+|           0x00402761      64a300000000   mov dword fs:[0], eax
+|           0x00402767      8b03           mov eax, dword [ebx]
+|           0x00402769      5b             pop ebx
+|           0x0040276a      8be5           mov esp, ebp
+|           0x0040276c      5d             pop ebp
+\           0x0040276d      c3             ret

@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00426d33 @ 0x426e65(x)
+            ; CALL XREF from fcn.0042ecb9 @ +0x16de(x)
+            ; CALL XREF from fcn.004315bd @ +0xb1a(x)
+/ 6: sub.OWL52t.dll__TFont__bctr_qpxciiiiiucucucucucucucuc ();
+\           0x0043945c      ff25645d4500   jmp dword [sym.imp.OWL52t.dll__TFont__bctr_qpxciiiiiucucucucucucucuc] ; 0x455d64

@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.0041721d @ 0x4172df(x)
+            ; CALL XREF from fcn.0042999a @ 0x429a95(x)
+/ 6: sub.bds52t.dll__TPReadObjects__bctr_qv ();
+\           0x0043908a      ff25d05a4500   jmp dword [sym.imp.bds52t.dll__TPReadObjects__bctr_qv] ; 0x455ad0 ; "\\x1a\x05"

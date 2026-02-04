@@ -1,0 +1,65 @@
+            ; CALL XREFS from fcn.0041cdc2 @ 0x41ceb5(x), 0x41cec4(x), 0x41ced4(x), 0x41cee4(x)
+/ 189: fcn.0041cb6c (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8]) vars(5:sp[0x8..0x30])
+|           0x0041cb6c      55             push ebp
+|           0x0041cb6d      8bec           mov ebp, esp
+|           0x0041cb6f      83c4d4         add esp, 0xffffffd4
+|           0x0041cb72      53             push ebx
+|           0x0041cb73      56             push esi
+|           0x0041cb74      8b750c         mov esi, dword [arg_ch]
+|           0x0041cb77      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041cb7a      b894414400     mov eax, 0x444194
+|           0x0041cb7f      e8946afeff     call fcn.00403618
+|           0x0041cb84      663b7308       cmp si, word [ebx + 8]
+|       ,=< 0x0041cb88      0f8282000000   jb 0x41cc10
+|       |   0x0041cb8e      8d55d4         lea edx, [var_2ch]
+|       |   0x0041cb91      52             push edx
+|       |   0x0041cb92      6a00           push 0
+|       |   0x0041cb94      6a00           push 0
+|       |   0x0041cb96      6a00           push 0
+|       |   0x0041cb98      6a01           push 1                      ; 1
+|       |   0x0041cb9a      68e03b4000     push 0x403be0
+|       |   0x0041cb9f      6a00           push 0
+|       |   0x0041cba1      66c745e40800   mov word [var_1ch], 8
+|       |   0x0041cba7      6a19           push 0x19                   ; 25
+|       |   0x0041cba9      68ef424400     push 0x4442ef               ; "palette.cpp"
+|       |   0x0041cbae      68dc424400     push 0x4442dc               ; "index < NumEntries"
+|       |   0x0041cbb3      68fb424400     push 0x4442fb               ; "Precondition"
+|       |   0x0041cbb8      8d4dfc         lea ecx, [var_4h]
+|       |   0x0041cbbb      51             push ecx
+|       |   0x0041cbbc      e84fc30100     call sub.cw3230mt.DLL__xerror_MakeString_qpxct1t1ul
+|       |   0x0041cbc1      83c414         add esp, 0x14
+|       |   0x0041cbc4      8d45fc         lea eax, [var_4h]
+|       |   0x0041cbc7      50             push eax
+|       |   0x0041cbc8      ff45f0         inc dword [var_10h]
+|       |   0x0041cbcb      8d55f8         lea edx, [var_8h]
+|       |   0x0041cbce      52             push edx
+|       |   0x0041cbcf      e810c20100     call sub.cw3230mt.DLL__xmsg__bctr_qrx6string
+|       |   0x0041cbd4      83c408         add esp, 8
+|       |   0x0041cbd7      ff45f0         inc dword [var_10h]
+|       |   0x0041cbda      66c745e41400   mov word [var_1ch], 0x14    ; 20
+|       |   0x0041cbe0      ff4df0         dec dword [var_10h]
+|       |   0x0041cbe3      6a02           push 2                      ; 2
+|       |   0x0041cbe5      8d4dfc         lea ecx, [var_4h]
+|       |   0x0041cbe8      51             push ecx
+|       |   0x0041cbe9      e876c30100     call sub.cw3230mt.DLL__string__bdtr_qv
+|       |   0x0041cbee      83c408         add esp, 8
+|       |   0x0041cbf1      66c745e40800   mov word [var_1ch], 8
+|       |   0x0041cbf7      8345f002       add dword [var_10h], 2
+|       |   0x0041cbfb      8345f003       add dword [var_10h], 3
+|       |   0x0041cbff      8d45f8         lea eax, [var_8h]
+|       |   0x0041cc02      50             push eax
+|       |   0x0041cc03      68883b4000     push 0x403b88
+|       |   0x0041cc08      e89dc20100     call sub.cw3230mt.DLL___ThrowExceptionLDTC_qpvt1t1t1uiuiuipuct1
+|       |   0x0041cc0d      83c424         add esp, 0x24
+|       |   ; CODE XREF from fcn.0041cb6c @ 0x41cb88(x)
+|       `-> 0x0041cc10      0fb7c6         movzx eax, si
+|           0x0041cc13      c1e002         shl eax, 2
+|           0x0041cc16      034304         add eax, dword [ebx + 4]
+|           0x0041cc19      8b55d4         mov edx, dword [var_2ch]
+|           0x0041cc1c      6489150000..   mov dword fs:[0], edx
+|           0x0041cc23      5e             pop esi
+|           0x0041cc24      5b             pop ebx
+|           0x0041cc25      8be5           mov esp, ebp
+|           0x0041cc27      5d             pop ebp
+\           0x0041cc28      c3             ret

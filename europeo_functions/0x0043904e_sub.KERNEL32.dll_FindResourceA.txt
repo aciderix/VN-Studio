@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00401358 @ 0x4013f5(x)
+/ 6: HRSRC sub.KERNEL32.dll_FindResourceA (HMODULE hModule, LPCSTR lpName, LPCSTR lpType);
+\           0x0043904e      ff25a05a4500   jmp dword [sym.imp.KERNEL32.dll_FindResourceA] ; 0x455aa0

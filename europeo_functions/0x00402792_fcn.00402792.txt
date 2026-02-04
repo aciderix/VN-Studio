@@ -1,0 +1,21 @@
+            ; CALL XREF from fcn.004027b3 @ +0xd6(x)
+/ 33: fcn.00402792 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00402792      55             push ebp
+|           0x00402793      8bec           mov ebp, esp
+|           0x00402795      53             push ebx
+|           0x00402796      8b5508         mov edx, dword [arg_8h]
+|           0x00402799      8b4204         mov eax, dword [edx + 4]
+|       ,=< 0x0040279c      eb0f           jmp 0x4027ad
+|       |   ; CODE XREF from fcn.00402792 @ 0x4027ae(x)
+|      .--> 0x0040279e      8d0c40         lea ecx, [eax + eax*2]
+|      :|   0x004027a1      8b1a           mov ebx, dword [edx]
+|      :|   0x004027a3      8b4c8b04       mov ecx, dword [ebx + ecx*4 + 4]
+|      :|   0x004027a7      8b5a08         mov ebx, dword [edx + 8]
+|      :|   0x004027aa      890c83         mov dword [ebx + eax*4], ecx
+|      :|   ; CODE XREF from fcn.00402792 @ 0x40279c(x)
+|      :`-> 0x004027ad      48             dec eax
+|      `==< 0x004027ae      79ee           jns 0x40279e
+|           0x004027b0      5b             pop ebx
+|           0x004027b1      5d             pop ebp
+\           0x004027b2      c3             ret

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.0041aadc @ 0x41abf2(x)
+/ 6: sub.DDRAW.dll_DirectDrawCreate ();
+\           0x00439870      ff2528604500   jmp dword [sym.imp.DDRAW.dll_DirectDrawCreate] ; 0x456028

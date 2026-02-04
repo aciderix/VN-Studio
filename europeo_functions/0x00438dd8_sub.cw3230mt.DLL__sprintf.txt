@@ -1,0 +1,3 @@
+            ; XREFS(39)
+/ 6: sub.cw3230mt.DLL__sprintf ();
+\           0x00438dd8      ff25f8584500   jmp dword [sym.imp.cw3230mt.DLL__sprintf] ; 0x4558f8 ; "j\x11\x05"

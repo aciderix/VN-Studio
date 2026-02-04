@@ -1,0 +1,77 @@
+            ; CALL XREF from fcn.0041b38f @ +0x2f9(x)
+/ 167: fcn.0041b119 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(1:sp[0x8..0x8])
+|           0x0041b119      55             push ebp
+|           0x0041b11a      8bec           mov ebp, esp
+|           0x0041b11c      51             push ecx
+|           0x0041b11d      53             push ebx
+|           0x0041b11e      56             push esi
+|           0x0041b11f      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041b122      807b1000       cmp byte [ebx + 0x10], 0
+|       ,=< 0x0041b126      0f858f000000   jne 0x41b1bb
+|       |   0x0041b12c      53             push ebx
+|       |   0x0041b12d      8b03           mov eax, dword [ebx]
+|       |   0x0041b12f      ff500c         call dword [eax + 0xc]      ; 12
+|       |   0x0041b132      59             pop ecx
+|       |   0x0041b133      84c0           test al, al
+|      ,==< 0x0041b135      0f8580000000   jne 0x41b1bb
+|      ||   0x0041b13b      6a04           push 4                      ; 4
+|      ||   0x0041b13d      6a00           push 0
+|      ||   0x0041b13f      8d55fc         lea edx, [var_4h]
+|      ||   0x0041b142      52             push edx
+|      ||   0x0041b143      e896dc0100     call sub.cw3230mt.DLL__memset
+|      ||   0x0041b148      83c40c         add esp, 0xc
+|      ||   0x0041b14b      8b4b04         mov ecx, dword [ebx + 4]
+|      ||   0x0041b14e      8b410c         mov eax, dword [ecx + 0xc]
+|      ||   0x0041b151      8945fc         mov dword [var_4h], eax
+|      ||   0x0041b154      33f6           xor esi, esi
+|      ||   0x0041b156      837b1200       cmp dword [ebx + 0x12], 0
+|     ,===< 0x0041b15a      740c           je 0x41b168
+|     |||   0x0041b15c      f6431a01       test byte [ebx + 0x1a], 1
+|    ,====< 0x0041b160      740a           je 0x41b16c
+|    ||||   0x0041b162      f6431a02       test byte [ebx + 0x1a], 2
+|   ,=====< 0x0041b166      7504           jne 0x41b16c
+|   |||||   ; CODE XREF from fcn.0041b119 @ 0x41b15a(x)
+|   ||`---> 0x0041b168      33c0           xor eax, eax
+|   ||,===< 0x0041b16a      eb05           jmp 0x41b171
+|   |||||   ; CODE XREFS from fcn.0041b119 @ 0x41b160(x), 0x41b166(x)
+|   ``----> 0x0041b16c      b801000000     mov eax, 1
+|     |||   ; CODE XREF from fcn.0041b119 @ 0x41b16a(x)
+|     `---> 0x0041b171      84c0           test al, al
+|     ,===< 0x0041b173      7403           je 0x41b178
+|     |||   0x0041b175      83ce01         or esi, 1
+|     |||   ; CODE XREF from fcn.0041b119 @ 0x41b173(x)
+|     `---> 0x0041b178      f6431a01       test byte [ebx + 0x1a], 1
+|     ,===< 0x0041b17c      7403           je 0x41b181
+|     |||   0x0041b17e      83ce02         or esi, 2
+|     |||   ; CODE XREF from fcn.0041b119 @ 0x41b17c(x)
+|     `---> 0x0041b181      c6431101       mov byte [ebx + 0x11], 1
+|      ||   0x0041b185      8d55fc         lea edx, [var_4h]
+|      ||   0x0041b188      52             push edx
+|      ||   0x0041b189      56             push esi
+|      ||   0x0041b18a      6855080000     push 0x855                  ; 2133
+|      ||   0x0041b18f      53             push ebx
+|      ||   0x0041b190      e846fdffff     call fcn.0041aedb
+|      ||   0x0041b195      83c410         add esp, 0x10
+|      ||   0x0041b198      84c0           test al, al
+|     ,===< 0x0041b19a      7506           jne 0x41b1a2
+|     |||   0x0041b19c      c6431100       mov byte [ebx + 0x11], 0
+|    ,====< 0x0041b1a0      eb19           jmp 0x41b1bb
+|    ||||   ; CODE XREF from fcn.0041b119 @ 0x41b19a(x)
+|    |`---> 0x0041b1a2      837b1200       cmp dword [ebx + 0x12], 0
+|    |,===< 0x0041b1a6      740c           je 0x41b1b4
+|    ||||   0x0041b1a8      f6431a01       test byte [ebx + 0x1a], 1
+|   ,=====< 0x0041b1ac      740d           je 0x41b1bb
+|   |||||   0x0041b1ae      f6431a02       test byte [ebx + 0x1a], 2
+|  ,======< 0x0041b1b2      7507           jne 0x41b1bb
+|  ||||||   ; CODE XREF from fcn.0041b119 @ 0x41b1a6(x)
+|  |||`---> 0x0041b1b4      53             push ebx
+|  ||| ||   0x0041b1b5      8b0b           mov ecx, dword [ebx]
+|  ||| ||   0x0041b1b7      ff512c         call dword [ecx + 0x2c]     ; 44
+|  ||| ||   0x0041b1ba      59             pop ecx
+|  ||| ||   ; CODE XREFS from fcn.0041b119 @ 0x41b126(x), 0x41b135(x), 0x41b1a0(x), 0x41b1ac(x), 0x41b1b2(x)
+|  ```-``-> 0x0041b1bb      5e             pop esi
+|           0x0041b1bc      5b             pop ebx
+|           0x0041b1bd      59             pop ecx
+|           0x0041b1be      5d             pop ebp
+\           0x0041b1bf      c3             ret

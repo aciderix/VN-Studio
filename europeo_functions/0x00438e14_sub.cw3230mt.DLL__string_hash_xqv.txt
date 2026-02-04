@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.004053cb @ +0x4b(x)
+            ; CALL XREF from fcn.00405557 @ 0x405586(x)
+/ 6: sub.cw3230mt.DLL__string_hash_xqv ();
+\           0x00438e14      ff2520594500   jmp dword [sym.imp.cw3230mt.DLL__string_hash_xqv] ; 0x455920 ; "X\x12\x05"

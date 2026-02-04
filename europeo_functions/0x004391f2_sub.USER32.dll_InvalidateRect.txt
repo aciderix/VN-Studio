@@ -1,0 +1,3 @@
+            ; XREFS(22)
+/ 6: BOOL sub.USER32.dll_InvalidateRect (HWND hWnd, const RECT *lpRect, BOOL bErase);
+\           0x004391f2      ff25c45b4500   jmp dword [sym.imp.USER32.dll_InvalidateRect] ; 0x455bc4

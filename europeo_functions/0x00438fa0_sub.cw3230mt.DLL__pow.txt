@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004195cc @ 0x419643(x)
+/ 6: sub.cw3230mt.DLL__pow ();
+\           0x00438fa0      ff25285a4500   jmp dword [sym.imp.cw3230mt.DLL__pow] ; 0x455a28

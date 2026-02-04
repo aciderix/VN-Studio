@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00401358 @ 0x401442(x)
+            ; CALL XREF from fcn.00401535 @ 0x4015ba(x)
+/ 6: HGLOBAL sub.KERNEL32.dll_LoadResource (HMODULE hModule, HRSRC hResInfo);
+\           0x00439018      ff257c5a4500   jmp dword [sym.imp.KERNEL32.dll_LoadResource] ; 0x455a7c

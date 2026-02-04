@@ -1,0 +1,20 @@
+            ; XREFS: CALL 0x0042727a  CALL 0x004274fe  CALL 0x004279b9  
+            ; XREFS: CALL 0x00428866  CALL 0x00428ccd  CALL 0x00428e58  
+            ; XREFS: CALL 0x0042fb28  CALL 0x004306a2  CALL 0x00430b80  
+            ; XREFS: CALL 0x00431101  CALL 0x00431c87  CALL 0x00433b6e  
+            ; XREFS: CALL 0x00433fec  
+/ 34: fcn.0043353d (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x0043353d      55             push ebp
+|           0x0043353e      8bec           mov ebp, esp
+|           0x00433540      8b4508         mov eax, dword [arg_8h]
+|           0x00433543      83b8b20000..   cmp dword [eax + 0xb2], 0
+|       ,=< 0x0043354a      740b           je 0x433557
+|       |   0x0043354c      8b80b2000000   mov eax, dword [eax + 0xb2]
+|       |   0x00433552      dd401d         fld qword [eax + 0x1d]
+|      ,==< 0x00433555      eb06           jmp 0x43355d
+|      ||   ; CODE XREF from fcn.0043353d @ 0x43354a(x)
+|      |`-> 0x00433557      dd0561354300   fld qword [0x433561]
+|      |    ; CODE XREF from fcn.0043353d @ 0x433555(x)
+|      `--> 0x0043355d      5d             pop ebp
+\           0x0043355e      c3             ret

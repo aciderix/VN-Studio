@@ -1,0 +1,40 @@
+            ; CALL XREF from fcn.0040a2fe @ +0x251(x)
+            ; CALL XREFS from fcn.0040b6e0 @ 0x40b72e(x), 0x40b755(x)
+            ; CALL XREF from fcn.0040b990 @ 0x40d6c9(x)
+/ 58: fcn.00403a1b (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00403a1b      55             push ebp
+|           0x00403a1c      8bec           mov ebp, esp
+|           0x00403a1e      53             push ebx
+|           0x00403a1f      56             push esi
+|           0x00403a20      57             push edi
+|           0x00403a21      8b7d0c         mov edi, dword [arg_ch]
+|           0x00403a24      8b4508         mov eax, dword [arg_8h]
+|           0x00403a27      3b7808         cmp edi, dword [eax + 8]
+|       ,=< 0x00403a2a      731f           jae 0x403a4b
+|       |   0x00403a2c      8b5804         mov ebx, dword [eax + 4]
+|       |   0x00403a2f      33f6           xor esi, esi
+|      ,==< 0x00403a31      eb13           jmp 0x403a46
+|      ||   ; CODE XREF from fcn.00403a1b @ 0x403a49(x)
+|     .---> 0x00403a33      3bfe           cmp edi, esi
+|    ,====< 0x00403a35      7504           jne 0x403a3b
+|    |:||   0x00403a37      8bc3           mov eax, ebx
+|   ,=====< 0x00403a39      eb15           jmp 0x403a50
+|   ||:||   ; CODE XREF from fcn.00403a1b @ 0x403a35(x)
+|   |`----> 0x00403a3b      53             push ebx
+|   | :||   0x00403a3c      e827540300     call sub.cw3230mt.DLL__strlen
+|   | :||   0x00403a41      59             pop ecx
+|   | :||   0x00403a42      40             inc eax
+|   | :||   0x00403a43      03d8           add ebx, eax
+|   | :||   0x00403a45      46             inc esi
+|   | :||   ; CODE XREF from fcn.00403a1b @ 0x403a31(x)
+|   | :`--> 0x00403a46      803b00         cmp byte [ebx], 0
+|   | `===< 0x00403a49      75e8           jne 0x403a33
+|   |   |   ; CODE XREF from fcn.00403a1b @ 0x403a2a(x)
+|   |   `-> 0x00403a4b      b8d8a04300     mov eax, 0x43a0d8
+|   |       ; CODE XREF from fcn.00403a1b @ 0x403a39(x)
+|   `-----> 0x00403a50      5f             pop edi
+|           0x00403a51      5e             pop esi
+|           0x00403a52      5b             pop ebx
+|           0x00403a53      5d             pop ebp
+\           0x00403a54      c3             ret

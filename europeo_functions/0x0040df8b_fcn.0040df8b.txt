@@ -1,0 +1,31 @@
+            ; CALL XREF from fcn.0040e6fc @ +0x38f(x)
+            ; CODE XREF from fcn.0040f9e2 @ +0xdf9(x)
+/ 52: fcn.0040df8b (int32_t arg_8h, int32_t arg_ch, int32_t arg_10h);
+| `- args(sp[0x4..0xc]) vars(1:sp[0x8..0x8])
+|           0x0040df8b      55             push ebp
+|           0x0040df8c      8bec           mov ebp, esp
+|           0x0040df8e      51             push ecx
+|           0x0040df8f      53             push ebx
+|           0x0040df90      56             push esi
+|           0x0040df91      57             push edi
+|           0x0040df92      8b7d0c         mov edi, dword [arg_ch]
+|           0x0040df95      8b5d08         mov ebx, dword [arg_8h]
+|           0x0040df98      8d4310         lea eax, [ebx + 0x10]
+|           0x0040df9b      8945fc         mov dword [var_4h], eax
+|           0x0040df9e      8bf7           mov esi, edi
+|           0x0040dfa0      56             push esi
+|           0x0040dfa1      e8e0b10200     call sub.bds52t.dll__ipstream_readWord_qv
+|           0x0040dfa6      59             pop ecx
+|           0x0040dfa7      8b55fc         mov edx, dword [var_4h]
+|           0x0040dfaa      8902           mov dword [edx], eax
+|           0x0040dfac      ff7510         push dword [arg_10h]
+|           0x0040dfaf      57             push edi
+|           0x0040dfb0      53             push ebx
+|           0x0040dfb1      e83ef7ffff     call fcn.0040d6f4
+|           0x0040dfb6      83c40c         add esp, 0xc
+|           0x0040dfb9      5f             pop edi
+|           0x0040dfba      5e             pop esi
+|           0x0040dfbb      5b             pop ebx
+|           0x0040dfbc      59             pop ecx
+|           0x0040dfbd      5d             pop ebp
+\           0x0040dfbe      c3             ret

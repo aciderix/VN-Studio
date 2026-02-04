@@ -1,0 +1,4 @@
+            ; CALL XREFS from fcn.0043089a @ +0xc4e(x), +0xcb4(x)
+            ; CALL XREF from fcn.004315bd @ +0x16c(x)
+/ 6: sub.OWL52t.dll__TWindow_DefaultProcessing_qv ();
+\           0x004395b8      ff254c5e4500   jmp dword [sym.imp.OWL52t.dll__TWindow_DefaultProcessing_qv] ; 0x455e4c ; "B5\x05"

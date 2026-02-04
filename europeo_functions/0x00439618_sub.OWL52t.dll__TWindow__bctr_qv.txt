@@ -1,0 +1,7 @@
+            ; CALL XREF from fcn.0042ae50 @ 0x42aee3(x)
+            ; CALL XREF from fcn.0042b478 @ 0x42b50f(x)
+            ; CALL XREF from fcn.0042c4b4 @ 0x42c548(x)
+            ; CALL XREF from fcn.00436885 @ 0x436919(x)
+            ; CALL XREF from fcn.00437f61 @ +0x5f6(x)
+/ 6: sub.OWL52t.dll__TWindow__bctr_qv ();
+\           0x00439618      ff258c5e4500   jmp dword [sym.imp.OWL52t.dll__TWindow__bctr_qv] ; 0x455e8c

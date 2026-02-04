@@ -1,0 +1,32 @@
+            ; XREFS: CALL 0x0040a83e  CALL 0x0040a8d7  CALL 0x0040a962  
+            ; XREFS: CALL 0x0040de1e  CALL 0x0040f73f  CALL 0x0040f8b1  
+            ; XREFS: CALL 0x0040f960  CALL 0x0040fae6  CALL 0x00412e04  
+            ; XREFS: CALL 0x00412f44  CALL 0x004130d0  
+/ 50: fcn.0040b686 (uint32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x0040b686      55             push ebp
+|           0x0040b687      8bec           mov ebp, esp
+|           0x0040b689      53             push ebx
+|           0x0040b68a      8b450c         mov eax, dword [arg_ch]
+|           0x0040b68d      8b5d08         mov ebx, dword [arg_8h]
+|           0x0040b690      3bc3           cmp eax, ebx
+|       ,=< 0x0040b692      7505           jne 0x40b699
+|       |   0x0040b694      8bc3           mov eax, ebx
+|       |   0x0040b696      5b             pop ebx
+|       |   0x0040b697      5d             pop ebp
+|       |   0x0040b698      c3             ret
+|       |   ; CODE XREF from fcn.0040b686 @ 0x40b692(x)
+|       `-> 0x0040b699      8b5008         mov edx, dword [eax + 8]
+|           0x0040b69c      895308         mov dword [ebx + 8], edx
+|           0x0040b69f      83c00c         add eax, 0xc                ; 12
+|           0x0040b6a2      6aff           push 0xffffffffffffffff
+|           0x0040b6a4      6a00           push 0
+|           0x0040b6a6      50             push eax
+|           0x0040b6a7      8d530c         lea edx, [ebx + 0xc]
+|           0x0040b6aa      52             push edx
+|           0x0040b6ab      e854d80200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x0040b6b0      83c410         add esp, 0x10
+|           0x0040b6b3      8bc3           mov eax, ebx
+|           0x0040b6b5      5b             pop ebx
+|           0x0040b6b6      5d             pop ebp
+\           0x0040b6b7      c3             ret

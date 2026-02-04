@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0041cc49 @ 0x41cc5f(x), 0x41cc87(x), 0x41ccb8(x)
+/ 6: long sub.GDI32.dll_GetObjectA (HGDIOBJ hgdiobj, int cbBuffer, LPVOID lpvObject);
+\           0x00439810      ff25e05f4500   jmp dword [sym.imp.GDI32.dll_GetObjectA] ; 0x455fe0

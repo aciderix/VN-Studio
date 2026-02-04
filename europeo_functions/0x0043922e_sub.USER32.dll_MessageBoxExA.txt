@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00404e29 @ 0x404ea1(x)
+            ; CALL XREF from fcn.0043891a @ +0x136(x)
+/ 6: int sub.USER32.dll_MessageBoxExA (HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, WORD wLanguageId);
+\           0x0043922e      ff25ec5b4500   jmp dword [sym.imp.USER32.dll_MessageBoxExA] ; 0x455bec ; "& \x05"

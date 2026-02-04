@@ -1,0 +1,41 @@
+            ; XREFS: CALL 0x0041df93  CALL 0x0042728a  CALL 0x0042750e  
+            ; XREFS: CALL 0x004279cc  CALL 0x00431cae  CALL 0x00433b81  
+/ 97: fcn.00405119 (int32_t arg_8h, int32_t arg_14h);
+| `- args(sp[0x4..0x10])
+|           0x00405119      55             push ebp
+|           0x0040511a      8bec           mov ebp, esp
+|           0x0040511c      53             push ebx
+|           0x0040511d      56             push esi
+|           0x0040511e      8b7514         mov esi, dword [arg_14h]
+|           0x00405121      8b5d08         mov ebx, dword [arg_8h]
+|           0x00405124      dd450c         fld qword [ebp + 0xc]
+|           0x00405127      d81d7d514000   fcomp dword [0x40517d]
+|           0x0040512d      dfe0           fnstsw ax
+|           0x0040512f      9e             sahf
+|       ,=< 0x00405130      7436           je 0x405168
+|       |   0x00405132      db03           fild dword [ebx]
+|       |   0x00405134      dc4d0c         fmul qword [ebp + 0xc]
+|       |   0x00405137      e89e3d0300     call sub.cw3230mt.DLL___ftol
+|       |   0x0040513c      8903           mov dword [ebx], eax
+|       |   0x0040513e      db4304         fild dword [ebx + 4]
+|       |   0x00405141      dc4d0c         fmul qword [ebp + 0xc]
+|       |   0x00405144      e8913d0300     call sub.cw3230mt.DLL___ftol
+|       |   0x00405149      894304         mov dword [ebx + 4], eax
+|       |   0x0040514c      db4308         fild dword [ebx + 8]
+|       |   0x0040514f      dc4d0c         fmul qword [ebp + 0xc]
+|       |   0x00405152      e8833d0300     call sub.cw3230mt.DLL___ftol
+|       |   0x00405157      894308         mov dword [ebx + 8], eax
+|       |   0x0040515a      db430c         fild dword [ebx + 0xc]
+|       |   0x0040515d      dc4d0c         fmul qword [ebp + 0xc]
+|       |   0x00405160      e8753d0300     call sub.cw3230mt.DLL___ftol
+|       |   0x00405165      89430c         mov dword [ebx + 0xc], eax
+|       |   ; CODE XREF from fcn.00405119 @ 0x405130(x)
+|       `-> 0x00405168      ff7604         push dword [esi + 4]
+|           0x0040516b      ff36           push dword [esi]
+|           0x0040516d      53             push ebx
+|           0x0040516e      e8533f0300     call sub.bds52t.dll__TRect_Offset_qii
+|           0x00405173      83c40c         add esp, 0xc
+|           0x00405176      5e             pop esi
+|           0x00405177      5b             pop ebx
+|           0x00405178      5d             pop ebp
+\           0x00405179      c3             ret

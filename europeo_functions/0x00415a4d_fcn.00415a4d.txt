@@ -1,0 +1,22 @@
+            ; CALL XREF from fcn.00415a4d @ +0x2c6(x)
+/ 40: fcn.00415a4d (int32_t arg_8h, int32_t arg_ch);
+| `- args(sp[0x4..0x8])
+|           0x00415a4d      55             push ebp
+|           0x00415a4e      8bec           mov ebp, esp
+|           0x00415a50      53             push ebx
+|           0x00415a51      8b5d08         mov ebx, dword [arg_8h]
+|           0x00415a54      8b450c         mov eax, dword [arg_ch]
+|           0x00415a57      6aff           push 0xffffffffffffffff
+|           0x00415a59      6a00           push 0
+|           0x00415a5b      50             push eax
+|           0x00415a5c      8d5330         lea edx, [ebx + 0x30]
+|           0x00415a5f      52             push edx
+|           0x00415a60      e89f340200     call sub.cw3230mt.DLL__string_assign_qrx6stringuiui
+|           0x00415a65      83c410         add esp, 0x10
+|           0x00415a68      83c330         add ebx, 0x30               ; 48
+|           0x00415a6b      53             push ebx
+|           0x00415a6c      e83b350200     call sub.cw3230mt.DLL__string_to_lower_qv
+|           0x00415a71      59             pop ecx
+|           0x00415a72      5b             pop ebx
+|           0x00415a73      5d             pop ebp
+\           0x00415a74      c3             ret

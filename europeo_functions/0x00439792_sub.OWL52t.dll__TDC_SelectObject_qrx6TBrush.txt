@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00426d33 @ 0x426f8f(x)
+            ; CALL XREFS from fcn.0042ecb9 @ +0xdfe(x), +0x14ee(x)
+/ 6: sub.OWL52t.dll__TDC_SelectObject_qrx6TBrush ();
+\           0x00439792      ff25885f4500   jmp dword [sym.imp.OWL52t.dll__TDC_SelectObject_qrx6TBrush] ; 0x455f88 ; "6?\x05"

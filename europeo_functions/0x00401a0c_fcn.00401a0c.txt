@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00401826 @ +0x3d(x)
+            ; CALL XREF from fcn.00401a18 @ +0x68(x)
+/ 6: fcn.00401a0c ();
+|           0x00401a0c      e8d1750300     call sub.KERNEL32.dll_GetSystemDefaultLangID ; LANGID GetSystemDefaultLangID(void)
+\           0x00401a11      c3             ret

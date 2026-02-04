@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.00412168 @ +0xbcb(x)
+/ 6: sub.bds52t.dll__TRect_Normalize_qv ();
+\           0x004390d2      ff25005b4500   jmp dword [sym.imp.bds52t.dll__TRect_Normalize_qv] ; 0x455b00

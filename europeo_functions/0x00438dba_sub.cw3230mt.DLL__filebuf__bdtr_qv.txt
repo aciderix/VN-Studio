@@ -1,0 +1,6 @@
+            ; XREFS: CALL 0x004173a0  CALL 0x004174be  CALL 0x004177c5  
+            ; XREFS: CALL 0x00417ae9  CALL 0x00417fcc  CALL 0x00429b53  
+            ; XREFS: CALL 0x00429c79  CALL 0x00429ed8  CALL 0x0042a0ee  
+            ; XREFS: CALL 0x0042a303  CALL 0x0042a5ef  
+/ 6: sub.cw3230mt.DLL__filebuf__bdtr_qv ();
+\           0x00438dba      ff25e4584500   jmp dword [sym.imp.cw3230mt.DLL__filebuf__bdtr_qv] ; 0x4558e4

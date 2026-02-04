@@ -1,0 +1,4 @@
+            ; CALL XREF from fcn.00426d33 @ 0x426fc8(x)
+            ; CALL XREFS from fcn.0042ecb9 @ +0x67a(x), +0xd3d(x), +0xda4(x), +0xe34(x)
+/ 6: bool sub.GDI32.dll_PatBlt (HDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, _TernaryDrawMode dwRop);
+\           0x004397f2      ff25cc5f4500   jmp dword [sym.imp.GDI32.dll_PatBlt] ; 0x455fcc ; "t@\x05"

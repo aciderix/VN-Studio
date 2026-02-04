@@ -1,0 +1,5 @@
+            ; CALL XREF from fcn.00417031 @ 0x41718a(x)
+            ; CALL XREF from fcn.0041721d @ 0x4176c8(x)
+            ; CALL XREF from fcn.0042c654 @ +0x14a(x)
+/ 6: sub.OWL52t.dll__TGauge_SetRange_qii ();
+\           0x004392ee      ff25705c4500   jmp dword [sym.imp.OWL52t.dll__TGauge_SetRange_qii] ; 0x455c70

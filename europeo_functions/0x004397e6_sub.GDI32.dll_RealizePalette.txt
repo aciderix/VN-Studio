@@ -1,0 +1,4 @@
+            ; XREFS: CALL 0x00427940  CALL 0x00427a13  CALL 0x0042f475  
+            ; XREFS: CALL 0x0042f650  CALL 0x0042f70d  CALL 0x0043162e  
+/ 6: _gdi_error sub.GDI32.dll_RealizePalette ();
+\           0x004397e6      ff25c45f4500   jmp dword [sym.imp.GDI32.dll_RealizePalette] ; 0x455fc4 ; "T@\x05"

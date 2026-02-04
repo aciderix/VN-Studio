@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.00412168 @ +0x136(x), +0x154(x)
+/ 6: sub.OWL52t.dll__TRegion__bdtr_qv ();
+\           0x00439690      ff25dc5e4500   jmp dword [sym.imp.OWL52t.dll__TRegion__bdtr_qv] ; 0x455edc ; "l9\x05"

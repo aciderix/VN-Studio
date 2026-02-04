@@ -1,0 +1,12 @@
+            ; CALL XREF from fcn.004010c0 @ +0x28(x)
+/ 31: fcn.004010c0 ();
+|           0x004010c0      833d63a043..   cmp dword [0x43a063], 0     ; [0x43a063:4]=0
+|       ,=< 0x004010c7      7215           jb 0x4010de
+|       |   0x004010c9      ff3563a04300   push dword [0x43a063]       ; DWORD dwTlsIndex
+|       |   0x004010cf      e82c7f0300     call sub.KERNEL32.dll_TlsGetValue ; LPVOID TlsGetValue(DWORD dwTlsIndex)
+|       |   0x004010d4      0bc0           or eax, eax
+|      ,==< 0x004010d6      7406           je 0x4010de
+|      ||   0x004010d8      50             push eax                    ; HLOCAL hMem
+|      ||   0x004010d9      e86a7f0300     call sub.KERNEL32.dll_LocalFree ; HLOCAL LocalFree(HLOCAL hMem)
+|      ||   ; CODE XREFS from fcn.004010c0 @ 0x4010c7(x), 0x4010d6(x)
+\      ``-> 0x004010de      c3             ret

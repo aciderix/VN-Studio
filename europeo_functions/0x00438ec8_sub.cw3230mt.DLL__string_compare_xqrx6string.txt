@@ -1,0 +1,3 @@
+            ; XREFS(35)
+/ 6: sub.cw3230mt.DLL__string_compare_xqrx6string ();
+\           0x00438ec8      ff2598594500   jmp dword [sym.imp.cw3230mt.DLL__string_compare_xqrx6string] ; 0x455998

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004010f9 @ +0x19b(x)
+/ 6: sub.OWL52t.dll__TModule__bdtr_qv ();
+\           0x00439720      ff253c5f4500   jmp dword [sym.imp.OWL52t.dll__TModule__bdtr_qv] ; 0x455f3c ; "z<\x05"

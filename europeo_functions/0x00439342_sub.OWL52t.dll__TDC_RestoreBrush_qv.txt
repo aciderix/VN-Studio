@@ -1,0 +1,3 @@
+            ; CALL XREFS from fcn.0042ecb9 @ +0xe45(x), +0x155a(x)
+/ 6: sub.OWL52t.dll__TDC_RestoreBrush_qv ();
+\           0x00439342      ff25a85c4500   jmp dword [sym.imp.OWL52t.dll__TDC_RestoreBrush_qv] ; 0x455ca8

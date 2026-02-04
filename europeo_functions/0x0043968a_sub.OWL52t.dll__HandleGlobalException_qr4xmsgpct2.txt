@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004010f9 @ +0x14d(x)
+/ 6: sub.OWL52t.dll__HandleGlobalException_qr4xmsgpct2 ();
+\           0x0043968a      ff25d85e4500   jmp dword [sym.imp.OWL52t.dll__HandleGlobalException_qr4xmsgpct2] ; 0x455ed8 ; "F9\x05"

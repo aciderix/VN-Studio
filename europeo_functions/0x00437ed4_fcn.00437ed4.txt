@@ -1,0 +1,40 @@
+            ; CALL XREF from fcn.00437f61 @ 0x437f69(x)
+/ 73: fcn.00437ed4 (int32_t arg_8h);
+| `- args(sp[0x4..0x4])
+|           0x00437ed4      55             push ebp
+|           0x00437ed5      8bec           mov ebp, esp
+|           0x00437ed7      53             push ebx
+|           0x00437ed8      8b5d08         mov ebx, dword [arg_8h]
+|           0x00437edb      53             push ebx
+|           0x00437edc      e8d0ffffff     call fcn.00437eb1
+|           0x00437ee1      59             pop ecx
+|           0x00437ee2      85c0           test eax, eax
+|       ,=< 0x00437ee4      7432           je 0x437f18
+|       |   0x00437ee6      6a00           push 0
+|       |   0x00437ee8      53             push ebx
+|       |   0x00437ee9      e8c3ffffff     call fcn.00437eb1
+|       |   0x00437eee      59             pop ecx
+|       |   0x00437eef      50             push eax                    ; LPCSTR lpClassName
+|       |   0x00437ef0      e8d9120000     call sub.USER32.dll_FindWindowA ; HWND FindWindowA(LPCSTR lpClassName, LPCSTR lpWindowName)
+|       |   0x00437ef5      8bd8           mov ebx, eax
+|       |   0x00437ef7      85db           test ebx, ebx
+|      ,==< 0x00437ef9      741d           je 0x437f18
+|      ||   0x00437efb      53             push ebx                    ; HWND hWnd
+|      ||   0x00437efc      e8fd120000     call sub.USER32.dll_IsIconic ; BOOL IsIconic(HWND hWnd)
+|      ||   0x00437f01      85c0           test eax, eax
+|     ,===< 0x00437f03      7408           je 0x437f0d
+|     |||   0x00437f05      6a09           push 9                      ; 9 ; int nCmdShow
+|     |||   0x00437f07      53             push ebx                    ; HWND hWnd
+|     |||   0x00437f08      e875130000     call sub.USER32.dll_ShowWindow ; BOOL ShowWindow(HWND hWnd, int nCmdShow)
+|     |||   ; CODE XREF from fcn.00437ed4 @ 0x437f03(x)
+|     `---> 0x00437f0d      53             push ebx                    ; HWND hWnd
+|      ||   0x00437f0e      e881130000     call sub.USER32.dll_SetForegroundWindow ; BOOL SetForegroundWindow(HWND hWnd)
+|      ||   0x00437f13      b001           mov al, 1
+|      ||   0x00437f15      5b             pop ebx
+|      ||   0x00437f16      5d             pop ebp
+|      ||   0x00437f17      c3             ret
+|      ||   ; CODE XREFS from fcn.00437ed4 @ 0x437ee4(x), 0x437ef9(x)
+|      ``-> 0x00437f18      33c0           xor eax, eax
+|           0x00437f1a      5b             pop ebx
+|           0x00437f1b      5d             pop ebp
+\           0x00437f1c      c3             ret

@@ -1,0 +1,3 @@
+            ; CALL XREF from fcn.004370b8 @ 0x4371b4(x)
+/ 6: BOOL sub.USER32.dll_OemToCharA (LPCSTR pSrc, LPSTR pDst);
+\           0x00439264      ff25105c4500   jmp dword [sym.imp.USER32.dll_OemToCharA] ; 0x455c10

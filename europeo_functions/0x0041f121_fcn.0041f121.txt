@@ -1,0 +1,38 @@
+            ; DATA XREF from fcn.0041f302 @ 0x41f33f(r)
+            ; DATA XREF from fcn.0041f302 @ +0x18a(r)
+            ; CALL XREF from fcn.004200cf @ 0x4201a7(r)
+            ; DATA XREF from fcn.004232bc @ 0x42331e(r)
+/ 88: fcn.0041f121 (int32_t arg_8h);
+| `- args(sp[0x4..0x4]) vars(1:sp[0x28..0x28])
+|           0x0041f121      55             push ebp
+|           0x0041f122      8bec           mov ebp, esp
+|           0x0041f124      83c4dc         add esp, 0xffffffdc
+|           0x0041f127      53             push ebx
+|           0x0041f128      8b5d08         mov ebx, dword [arg_8h]
+|           0x0041f12b      b8f44c4400     mov eax, 0x444cf4
+|           0x0041f130      e8e344feff     call fcn.00403618
+|           0x0041f135      33d2           xor edx, edx
+|           0x0041f137      8913           mov dword [ebx], edx
+|           0x0041f139      33c9           xor ecx, ecx
+|           0x0041f13b      894b40         mov dword [ebx + 0x40], ecx
+|           0x0041f13e      8b15d85a4500   mov edx, dword [sym.imp.bds52t.dll__TColor_Black] ; [0x455ad8:4]=0x51a86 reloc.bds52t.dll__TColor_Black
+|           0x0041f144      8d4344         lea eax, [ebx + 0x44]
+|           0x0041f147      8b0a           mov ecx, dword [edx]
+|           0x0041f149      8908           mov dword [eax], ecx
+|           0x0041f14b      33c0           xor eax, eax
+|           0x0041f14d      894348         mov dword [ebx + 0x48], eax
+|           0x0041f150      33d2           xor edx, edx
+|           0x0041f152      89534c         mov dword [ebx + 0x4c], edx
+|           0x0041f155      c6435000       mov byte [ebx + 0x50], 0
+|           0x0041f159      c6435100       mov byte [ebx + 0x51], 0
+|           0x0041f15d      6a00           push 0
+|           0x0041f15f      53             push ebx
+|           0x0041f160      e8cc000000     call fcn.0041f231
+|           0x0041f165      83c408         add esp, 8
+|           0x0041f168      8b4ddc         mov ecx, dword [var_24h]
+|           0x0041f16b      64890d0000..   mov dword fs:[0], ecx
+|           0x0041f172      8bc3           mov eax, ebx
+|           0x0041f174      5b             pop ebx
+|           0x0041f175      8be5           mov esp, ebp
+|           0x0041f177      5d             pop ebp
+\           0x0041f178      c3             ret

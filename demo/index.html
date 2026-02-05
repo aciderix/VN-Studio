@@ -1752,6 +1752,12 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
+  // Reset auto-play flags on all commands so revisiting a scene replays setup videos/images
+  scene.commands.forEach(function(cmd) {
+    cmd.autoPlayedVideo = false;
+    cmd.autoShowedBmp = false;
+  });
+
   // Reset click-guard variable 'jeu' to 0 on scene entry
   // This variable is used in library scenes to prevent double-clicks:
   // Pattern: INC_VAR jeu 1 + IF jeu = 1 then runprj
@@ -1789,13 +1795,11 @@ function executeSceneCommands(scene) {
     }
   });
 
-  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
-  // This restores the correct visual state based on variables when returning to a scene
-  // (e.g., collected items should stay hidden even after leaving and returning)
-  // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
+  // Pass 1: Execute IF conditions with display actions from ALL commands (including interactive)
+  // This restores the correct visual state based on variables when entering/returning to a scene
+  // (e.g., helice.bmp must reappear in scene 6 and 23 if helice=1, even though the IF is inside
+  // an interactive command with a polygon - the display state depends on variables, not on click)
   scene.commands.forEach(function(cmd) {
-    // Skip interactive commands - their conditions should execute on click, not on entry
-    if (cmd.paramPairs.length > 0) return;
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();

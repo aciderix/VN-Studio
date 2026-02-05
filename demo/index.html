@@ -1611,10 +1611,14 @@ function playAvi(aviStr) {
     video.style.height = rect.height + 'px';
   }
 
-  video.addEventListener('ended', function() { closeVideo(); });
+  video.addEventListener('ended', function() {
+    if (currentVideo === video) closeVideo();
+  });
   video.addEventListener('error', function() {
     console.warn('AVI playback failed (codec not supported):', url);
-    closeVideo();
+    // Only close if this is still the active video - a stale error event from a
+    // previous video (e.g., casta2.avi) must not kill the current one (casta1.avi)
+    if (currentVideo === video) closeVideo();
   });
   // Click on video: if paused (autoplay blocked), try to play; if playing, close
   video.addEventListener('click', function() {
@@ -1650,10 +1654,14 @@ function playAvi(aviStr) {
 
 function closeVideo() {
   if (currentVideo) {
-    currentVideo.pause();
-    currentVideo.src = ''; // Stop loading
-    if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
-    currentVideo = null;
+    var vid = currentVideo;
+    currentVideo = null; // Clear reference FIRST to prevent stale event handlers from closing the next video
+    vid.pause();
+    // Remove all source elements and reset src to stop loading and prevent stale error events
+    while (vid.firstChild) vid.removeChild(vid.firstChild);
+    vid.removeAttribute('src');
+    vid.load(); // Force the browser to release the media resource
+    if (vid.parentNode) vid.parentNode.removeChild(vid);
   }
   pendingVideoPlay = null;
   waitingForVideoEnd = false; // Re-enable clicks
@@ -2376,6 +2384,8 @@ function resumeCommandProcessing(cmd, startIdx) {
           vid.removeEventListener('ended', onVideoEnd);
           vid.removeEventListener('error', onVideoEnd);
           vid.removeEventListener('click', onVideoEnd);
+          // Only act if this is still the active video (stale events from replaced videos must be ignored)
+          if (currentVideo !== vid) return;
           waitingForVideoEnd = false; // Re-enable clicks
           closeVideo();
           doNavigation(nav);

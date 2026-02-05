@@ -1774,41 +1774,54 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // Pass 0: Execute DIRECT display commands (addbmp/delbmp/showbmp/hidebmp) from ALL commands
-  // This sets up the initial visual state for overlay images defined in ANY command
-  // (e.g., scene 23 has ADDBMP qcasta.bmp inside an interactive command that must show on entry)
+  // Pass 0: Execute INIT/AFTERINIT commands from interactive commands (subIndex >= 2)
+  // The VND subIndex tells us which strings run on scene entry vs on click/hover.
+  // For non-interactive commands, all strings run on entry (handled in Pass 2).
+  // For interactive commands, only subIndex >= 2 strings run on entry:
+  //   - ADDBMP/DELBMP/SHOWBMP/HIDEBMP (display overlays like qcasta.bmp)
+  //   - PLAYAVI (scene setup videos like casta1.avi asking a question)
+  //   - PLAYWAV, CLOSEWAV (scene audio)
+  //   - SET_VAR (scene state setup like casta=1)
   scene.commands.forEach(function(cmd) {
-    var hasDirectAddbmp = cmd.strings.some(function(s) { return s.type === 27; });
-    var hasPlayavi = cmd.strings.some(function(s) { return s.type === 9; });
+    var isInteractive = cmd.paramPairs.length > 0;
 
     cmd.strings.forEach(function(s) {
-      // Execute direct display commands (not IF conditions with display)
+      // For interactive commands, only execute ONINIT (2) and AFTERINIT (3) strings
+      if (isInteractive && s.subIndex < 2) return;
+
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        // Direct display commands (ADDBMP, DELBMP, SHOWBMP, HIDEBMP)
+        executeStringCommand(s.type, s.string);
+      } else if (isInteractive && s.type === 9 && !cmd.autoPlayedVideo) {
+        // PLAYAVI from INIT/AFTERINIT of interactive command (e.g. casta1.avi in scene 23)
+        console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
+        cmd.autoPlayedVideo = true;
+        playAvi(s.string);
+      } else if (isInteractive && (s.type === 22 || s.type === 23 || s.type === 24)) {
+        // SET_VAR/INC_VAR/DEC_VAR from INIT/AFTERINIT
+        executeStringCommand(s.type, s.string);
+      } else if (isInteractive && s.type === 36) {
+        // CLOSEWAV from INIT/AFTERINIT
+        executeStringCommand(s.type, s.string);
+      } else if (isInteractive && s.type === 11) {
+        // PLAYWAV from INIT/AFTERINIT
         executeStringCommand(s.type, s.string);
       }
     });
-
-    // Special case: If interactive command has BOTH direct ADDBMP AND PLAYAVI,
-    // the PLAYAVI is likely scene setup audio/video that should play on entry.
-    // (e.g., scene 23: qcasta.bmp shows + casta1.avi plays the offer)
-    // But if PLAYAVI is alone with SCENE, it's a click transition animation.
-    if (cmd.paramPairs.length > 0 && hasDirectAddbmp && hasPlayavi) {
-      cmd.strings.forEach(function(s) {
-        if (s.type === 9 && !cmd.autoPlayedVideo) {
-          console.log('Pass 0: Auto-playing PLAYAVI (ADDBMP+PLAYAVI pattern):', s.string);
-          cmd.autoPlayedVideo = true;
-          playAvi(s.string);
-        }
-      });
-    }
   });
 
-  // Pass 1: Execute IF conditions with display actions from ALL commands (including interactive)
-  // This restores the correct visual state based on variables when entering/returning to a scene
-  // (e.g., helice.bmp must reappear in scene 6 and 23 if helice=1, even though the IF is inside
-  // an interactive command with a polygon - the display state depends on variables, not on click)
+  // Pass 1: Execute IF conditions with display actions that are marked for scene INIT
+  // The VND subIndex field determines WHEN a string command executes:
+  //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
+  // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
+  // For interactive commands, we ONLY process strings with subIndex >= 2 (ONINIT/AFTERINIT).
+  // This correctly restores overlays like helice.bmp (subIndex=2) while skipping click-only
+  // effects like femme.bmp (subIndex=1).
   scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
     cmd.strings.forEach(function(s) {
+      // For interactive commands, skip hover (0) and click (1) strings
+      if (isInteractive && s.subIndex < 2) return;
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
         // Only execute IF conditions that affect display state

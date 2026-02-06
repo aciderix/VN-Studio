@@ -2098,7 +2098,10 @@ function executeSceneCommands(scene) {
   //   - PLAYWAV, CLOSEWAV (scene audio)
   //   - SET_VAR, INC_VAR, DEC_VAR (scene state setup like casta=1)
   //   - IF conditions (nested IFs for transvecteur machine, etc.)
+  //   - PAUSE (type 16) delays between commands (e.g. transvecteur item reveal)
   var pass0DeferredNav = null; // Collect deferred navigation from ONINIT IFs
+  var pass0Queue = []; // Async queue for ONINIT strings with PAUSE support
+  var pass0HasPause = false;
   scene.commands.forEach(function(cmd) {
     var isInteractive = cmd.paramPairs.length > 0;
 
@@ -2106,73 +2109,103 @@ function executeSceneCommands(scene) {
       // For interactive commands, only execute ONINIT (2) and AFTERINIT (3) strings
       if (isInteractive && s.subIndex < 2) return;
 
-      if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
-        // Direct display commands (ADDBMP, DELBMP, SHOWBMP, HIDEBMP)
+      if (isInteractive) {
+        pass0Queue.push({ s: s, cmd: cmd });
+        if (s.type === 16) pass0HasPause = true;
+      } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        // Non-interactive direct display commands
         executeStringCommand(s.type, s.string);
-      } else if (isInteractive && s.type === 9 && !cmd.autoPlayedVideo) {
-        // PLAYAVI from INIT/AFTERINIT of interactive command (e.g. casta1.avi in scene 23)
-        console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
-        cmd.autoPlayedVideo = true;
-        playAvi(s.string);
-      } else if (isInteractive && (s.type === 22 || s.type === 23 || s.type === 24)) {
-        // SET_VAR/INC_VAR/DEC_VAR from INIT/AFTERINIT
-        executeStringCommand(s.type, s.string);
-      } else if (isInteractive && s.type === 36) {
-        // CLOSEWAV from INIT/AFTERINIT - SKIP
-        // goToScene already handles audio cleanup via stopAudioExcept().
-        // Executing CLOSEWAV here would kill audio that was intentionally kept,
-        // then string3 WAV re-creates it async, causing an audible cut.
-      } else if (isInteractive && s.type === 11) {
-        // PLAYWAV from INIT/AFTERINIT
-        executeStringCommand(s.type, s.string);
-      } else if (isInteractive && s.type === 21) {
-        // IF conditions from INIT/AFTERINIT (e.g. transvecteur machine checks)
-        // Resolve nested IFs fully, then execute or defer navigation
-        var action = evaluateIf(s.string);
-        // Resolve nested IFs: "if X then if Y then action" → "action"
-        while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
-          action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
-        }
-        if (action) {
-          var actLower = action.trim().split(/\s+/)[0].toLowerCase();
-          // Defer scene/runprj navigation (execute after all ONINIT processing + video)
-          if (actLower === 'scene') {
-            var idx = action.trim().split(/\s+/)[1];
-            if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: idx };
-          } else if (actLower === 'runprj') {
-            if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
-          } else {
-            executeAction(action);
-          }
-        }
       }
     });
   });
 
-  // Handle deferred navigation from Pass 0 ONINIT IFs (e.g. transvecteur machine → scene 12)
-  // Wait for auto-played video to finish before navigating
-  if (pass0DeferredNav) {
-    if (currentVideo) {
-      var nav0 = pass0DeferredNav;
-      var vid0 = currentVideo;
-      waitingForVideoEnd = true;
-      function onPass0VideoEnd(evt) {
-        if (evt && evt.type === 'error' && vid0.readyState > 0) return;
-        vid0.removeEventListener('ended', onPass0VideoEnd);
-        vid0.removeEventListener('error', onPass0VideoEnd);
-        vid0.removeEventListener('click', onPass0VideoEnd);
-        if (currentVideo !== vid0) return;
-        waitingForVideoEnd = false;
-        closeVideo();
-        doNavigation(nav0);
+  // Process a single ONINIT/AFTERINIT string from the queue
+  function executePass0Item(item) {
+    var s = item.s;
+    var cmd = item.cmd;
+    if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 9 && !cmd.autoPlayedVideo) {
+      console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
+      cmd.autoPlayedVideo = true;
+      playAvi(s.string);
+    } else if (s.type === 22 || s.type === 23 || s.type === 24) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 36) {
+      // CLOSEWAV from INIT/AFTERINIT - SKIP
+    } else if (s.type === 11) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+        action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
       }
-      vid0.addEventListener('ended', onPass0VideoEnd);
-      vid0.addEventListener('error', onPass0VideoEnd);
-      vid0.addEventListener('click', onPass0VideoEnd);
-    } else {
-      doNavigation(pass0DeferredNav);
+      if (action) {
+        var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+        if (actLower === 'scene') {
+          var idx = action.trim().split(/\s+/)[1];
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: idx };
+        } else if (actLower === 'runprj') {
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+        } else {
+          executeAction(action);
+        }
+      }
     }
-    pass0DeferredNav = null;
+    // type 16 (PAUSE) is handled as a delay in the queue runner, not here
+  }
+
+  // Finalize Pass 0: handle deferred navigation, then continue to Pass 1/2
+  function finalizePass0() {
+    if (pass0DeferredNav) {
+      if (currentVideo) {
+        var nav0 = pass0DeferredNav;
+        var vid0 = currentVideo;
+        waitingForVideoEnd = true;
+        function onPass0VideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid0.readyState > 0) return;
+          vid0.removeEventListener('ended', onPass0VideoEnd);
+          vid0.removeEventListener('error', onPass0VideoEnd);
+          vid0.removeEventListener('click', onPass0VideoEnd);
+          if (currentVideo !== vid0) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          doNavigation(nav0);
+        }
+        vid0.addEventListener('ended', onPass0VideoEnd);
+        vid0.addEventListener('error', onPass0VideoEnd);
+        vid0.addEventListener('click', onPass0VideoEnd);
+      } else {
+        doNavigation(pass0DeferredNav);
+      }
+      pass0DeferredNav = null;
+    }
+  }
+
+  if (pass0HasPause) {
+    // Async processing: execute items with PAUSE delays between them
+    var sceneGeneration = overlayGeneration; // Track if scene changed during async
+    (function runPass0Async(qi) {
+      if (qi >= pass0Queue.length || overlayGeneration !== sceneGeneration) {
+        finalizePass0();
+        render();
+        return;
+      }
+      var item = pass0Queue[qi];
+      if (item.s.type === 16) {
+        // PAUSE: delay, render current state, then continue
+        var ms = parseInt(item.s.string) || 300;
+        render();
+        setTimeout(function() { runPass0Async(qi + 1); }, ms);
+      } else {
+        executePass0Item(item);
+        runPass0Async(qi + 1);
+      }
+    })(0);
+  } else {
+    // Sync processing (fast path for most scenes)
+    pass0Queue.forEach(executePass0Item);
+    finalizePass0();
   }
 
   // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands
@@ -2772,6 +2805,42 @@ function handleCommandClick(cmd) {
     closeVideo();
   }
   resumeCommandProcessing(cmd, 0);
+  // After click processing, re-evaluate ONINIT display IFs to refresh overlays
+  // This handles cases like quiz scenes where clicking an answer changes a variable
+  // and another command's ONINIT IFs control which image is displayed
+  refreshOninitOverlays();
+}
+
+// Re-evaluate ONINIT/AFTERINIT IF conditions that control display overlays.
+// Called after clicks that may change variables affecting displayed images.
+function refreshOninitOverlays() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  scene.commands.forEach(function(cmd) {
+    if (cmd.paramPairs.length === 0) return; // Only interactive commands have ONINIT
+    cmd.strings.forEach(function(s) {
+      if (s.subIndex < 2) return; // Only ONINIT/AFTERINIT
+      if (s.type === 21) {
+        var lowerStr = s.string.toLowerCase();
+        if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp')) {
+          var action = evaluateIf(s.string);
+          // Resolve nested IFs
+          while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+            action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+          }
+          if (action) {
+            var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+            if (actLower === 'addbmp' || actLower === 'delbmp' ||
+                actLower === 'showbmp' || actLower === 'hidebmp') {
+              executeAction(action);
+            }
+          }
+        }
+      }
+    });
+  });
+  render();
 }
 
 function resumeCommandProcessing(cmd, startIdx) {

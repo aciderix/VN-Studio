@@ -1612,13 +1612,21 @@ function playAvi(aviStr) {
   }
 
   video.addEventListener('ended', function() {
-    if (currentVideo === video) closeVideo();
+    // If resumeCommandProcessing registered its own onVideoEnd handler (for
+    // deferred navigation), let that handler manage the close + navigate flow.
+    // We only close here for standalone video plays with no pending navigation.
+    if (currentVideo === video && !waitingForVideoEnd) closeVideo();
   });
   video.addEventListener('error', function() {
     console.warn('AVI playback failed (codec not supported):', url);
-    // Only close if this is still the active video - a stale error event from a
-    // previous video (e.g., casta2.avi) must not kill the current one (casta1.avi)
-    if (currentVideo === video) closeVideo();
+    // Only close if this is still the active video AND no source loaded successfully.
+    // When using <source> elements (webm + avi fallback), the browser fires 'error'
+    // on the <video> once all sources fail. If readyState > 0, a source is working
+    // (e.g. webm loaded fine) and we must NOT close - the onVideoEnd handler from
+    // resumeCommandProcessing will handle navigation when the video actually ends.
+    if (currentVideo === video && video.readyState === 0) {
+      closeVideo();
+    }
   });
   // Click on video: if paused (autoplay blocked), try to play; if playing, close
   video.addEventListener('click', function() {
@@ -1657,10 +1665,12 @@ function closeVideo() {
     var vid = currentVideo;
     currentVideo = null; // Clear reference FIRST to prevent stale event handlers from closing the next video
     vid.pause();
-    // Remove all source elements and reset src to stop loading and prevent stale error events
+    // Remove all source elements and reset src to stop loading
     while (vid.firstChild) vid.removeChild(vid.firstChild);
     vid.removeAttribute('src');
-    vid.load(); // Force the browser to release the media resource
+    // NOTE: Do NOT call vid.load() here - it triggers spurious 'error' events
+    // that can race with onVideoEnd handlers and prevent navigation.
+    // Removing from DOM is sufficient to release the resource.
     if (vid.parentNode) vid.parentNode.removeChild(vid);
   }
   pendingVideoPlay = null;
@@ -2393,7 +2403,12 @@ function resumeCommandProcessing(cmd, startIdx) {
         waitingForVideoEnd = true; // Block clicks while video plays
         var nav = deferredNav;
         var vid = currentVideo;
-        function onVideoEnd() {
+        function onVideoEnd(evt) {
+          // If this is an error event but a source is actively loaded (readyState > 0),
+          // ignore it — it's a source-level failure (e.g. AVI codec) while webm plays fine.
+          // We only want to act on 'ended' (natural finish), 'click' (user skip), or
+          // 'error' when ALL sources failed (readyState === 0).
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
           vid.removeEventListener('ended', onVideoEnd);
           vid.removeEventListener('error', onVideoEnd);
           vid.removeEventListener('click', onVideoEnd);

@@ -1183,6 +1183,7 @@ function executeRunPrj(runPrjStr) {
 
 // --- VARIABLES ---
 var gameVars = {}; // variable store: { name: value }
+var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function getVar(name) {
   return gameVars[name.toLowerCase()] || 0;
@@ -1301,6 +1302,19 @@ function executeAction(action) {
     // playtext x1 y1 x2 y2 flags text
     activePlayText = parts.slice(1).join(' ');
     render();
+  } else if (cmd === 'defcursor') {
+    // Set active cursor to an inventory item or reset to default
+    var cursorItem = parts[1] || '0';
+    if (cursorItem === '0' || cursorItem.toLowerCase().endsWith('.cur')) {
+      // Reset cursor to default
+      activeCursorItem = null;
+      canvas.style.cursor = '';
+    } else {
+      // Set cursor to inventory item (shows .cur icon)
+      activeCursorItem = cursorItem.toLowerCase();
+      var curUrl = '/game-data/barre/cur/' + activeCursorItem + '.cur';
+      canvas.style.cursor = 'url(' + curUrl + ') 16 16, pointer';
+    }
   } else if (cmd === 'pause') {
     // Pause N ms - used by DLL mini-games; they handle their own setTimeout
     // so this is a no-op when called via handleDllCommand
@@ -1547,6 +1561,10 @@ var DLL_HTML_MAP = {
   'inv.dll':      'dll/inv/inv-inventory.html',
   'pepe.dll':     'dll/pepe/pepe-game.html'
 };
+// Native sizes for DLL forms (width x height). Default is 640x400.
+var DLL_NATIVE_SIZE = {
+  'inv.dll': { w: 330, h: 337 }
+};
 var currentDllIframe = null;
 
 function runDll(dllName) {
@@ -1561,10 +1579,13 @@ function runDll(dllName) {
   var overlay = document.getElementById('dll-overlay');
   var iframe = document.getElementById('dll-iframe');
 
-  // Position over the canvas, scale iframe (DLL native: 640x400) to fit
+  // Use per-DLL native size (default 640x400 for mini-games)
+  var nativeSize = DLL_NATIVE_SIZE[key] || { w: 640, h: 400 };
+  var dllW = nativeSize.w, dllH = nativeSize.h;
+
+  // Position over the canvas, scale iframe to fit
   var rect = canvas.getBoundingClientRect();
   var contRect = container.getBoundingClientRect();
-  var dllW = 640, dllH = 400; // Original DLL form size
   var scale = Math.min(rect.width / dllW, rect.height / dllH);
 
   overlay.style.left = (rect.left - contRect.left) + 'px';
@@ -1587,7 +1608,7 @@ function runDll(dllName) {
       var iframeWin = iframe.contentWindow;
       // Look for known game objects and wire up onCommand callback
       var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
-                    iframeWin.probleme || iframeWin.inv || iframeWin.pepe || iframeWin.game;
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.game;
       if (gameObj && typeof gameObj.setOnCommand === 'function') {
         gameObj.setOnCommand(function(cmd) {
           console.log('DLL command:', cmd);
@@ -1599,6 +1620,20 @@ function runDll(dllName) {
         console.log('DLL command (global):', cmd);
         handleDllCommand(cmd);
       };
+
+      // Special: inventory DLL - pass owned items (gameVars where value = 1)
+      if (key === 'inv.dll' && iframeWin.inventory && typeof iframeWin.inventory.populateItems === 'function') {
+        var owned = [];
+        Object.keys(gameVars).forEach(function(v) {
+          if (gameVars[v] === 1 && iframeWin.ITEMS_TABLE && iframeWin.ITEMS_TABLE[v]) {
+            owned.push(v);
+          }
+        });
+        // Cursor icons path: /game-data/barre/cur/
+        var curPath = '/game-data/barre/cur/';
+        iframeWin.inventory.populateItems(owned, curPath);
+        console.log('INV: populated', owned.length, 'items:', owned);
+      }
     } catch (e) {
       console.warn('DLL iframe connect failed:', e.message);
     }
@@ -1891,7 +1926,7 @@ function executeStringCommand(strType, strValue) {
       render();
       break;
     case 26: // DEFCURSOR
-      // Could set cursor style, ignore for now
+      executeAction('defcursor ' + val);
       break;
     case 32: // UPDATE
       render();

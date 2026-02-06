@@ -10,8 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
-        /* IMPORTANT: Bloquer le scroll de la page entière */
+
         html, body {
             overflow: hidden;
             height: 100%;
@@ -19,13 +18,13 @@
             font-size: 8pt;
             background: #808080;
         }
-        
+
         body {
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        
+
         .inventory-window {
             width: 330px;
             height: 337px;
@@ -35,10 +34,9 @@
             background-color: #c0c0c0;
             border: 2px outset #ffffff;
             box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            /* Empêcher tout scroll sur la fenêtre */
             overflow: hidden;
         }
-        
+
         /* SysListView32 - Position exacte du DIALOG: (12, 14), taille (306, 266) */
         .item-list {
             position: absolute;
@@ -48,25 +46,14 @@
             height: 266px;
             background: #ffffff;
             border: 2px inset #808080;
-            /* SCROLL UNIQUEMENT ICI */
             overflow-y: auto;
             overflow-x: hidden;
         }
-        
-        /* Style scrollbar Windows 95 */
-        .item-list::-webkit-scrollbar {
-            width: 16px;
-        }
-        
-        .item-list::-webkit-scrollbar-track {
-            background: #c0c0c0;
-        }
-        
-        .item-list::-webkit-scrollbar-thumb {
-            background: #808080;
-            border: 2px outset #c0c0c0;
-        }
-        
+
+        .item-list::-webkit-scrollbar { width: 16px; }
+        .item-list::-webkit-scrollbar-track { background: #c0c0c0; }
+        .item-list::-webkit-scrollbar-thumb { background: #808080; border: 2px outset #c0c0c0; }
+
         .item-entry {
             display: flex;
             align-items: center;
@@ -75,16 +62,10 @@
             user-select: none;
             height: 36px;
         }
-        
-        .item-entry:hover {
-            background: #e0e0e0;
-        }
-        
-        .item-entry.selected {
-            background: #000080;
-            color: #ffffff;
-        }
-        
+
+        .item-entry:hover { background: #e0e0e0; }
+        .item-entry.selected { background: #000080; color: #ffffff; }
+
         .item-icon {
             width: 32px;
             height: 32px;
@@ -97,25 +78,20 @@
             justify-content: center;
             font-size: 18px;
         }
-        
+
         .item-icon img {
             max-width: 100%;
             max-height: 100%;
             display: block;
         }
-        
-        /* Cacher l'image si elle ne charge pas */
-        .item-icon img.error {
-            display: none;
-        }
-        
+
         .item-name {
             flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         /* Button - Position exacte du DIALOG: (63, 294), taille (204, 28) */
         .close-button {
             position: absolute;
@@ -129,12 +105,9 @@
             border: 2px outset #ffffff;
             cursor: pointer;
         }
-        
-        .close-button:active {
-            border: 2px inset #808080;
-        }
-        
-        /* Empty state */
+
+        .close-button:active { border: 2px inset #808080; }
+
         .empty-message {
             padding: 20px;
             text-align: center;
@@ -144,49 +117,16 @@
     </style>
 </head>
 <body>
-    <div class="inventory-window" id="inventoryWindow">
+    <div class="inventory-window">
         <div class="item-list" id="itemList">
-            <!-- Items are added dynamically -->
             <div class="empty-message" id="emptyMessage">Le sac est vide</div>
         </div>
         <button class="close-button" id="closeButton">Fermer le sac à dos</button>
     </div>
 
     <script>
-    /**
-     * VN-Studio Inventory System - Faithful HTML Port
-     * 
-     * IMPORTANT: Le DLL original ne gère PAS l'affichage conditionnel !
-     * C'est le MOTEUR VN-STUDIO qui:
-     * 1. Suit l'état des variables (item = 0, 1, ou 2)
-     * 2. Passe la liste des items POSSÉDÉS au DLL
-     * 3. Reçoit les commandes du DLL (set_var, defcursor)
-     * 
-     * Usage pour intégration:
-     * 
-     * const inventory = new VNInventory({
-     *     cursorPath: 'cur/',  // Chemin vers les fichiers .cur
-     *     onItemUsed: (internalName, displayName) => {
-     *         // Le DLL envoie: set_var [item] 2 + defcursor [item]
-     *         vnEngine.executeCommand(`set_var ${internalName} 2`);
-     *         vnEngine.executeCommand(`defcursor ${internalName}`);
-     *     },
-     *     onClose: () => {
-     *         // Le DLL envoie: defcursor 0
-     *         vnEngine.executeCommand('defcursor 0');
-     *     }
-     * });
-     * 
-     * // Le moteur VN doit appeler addItem pour chaque item possédé (où var = 1)
-     * inventory.addItem('clejaune');
-     * inventory.addItem('loupe');
-     * 
-     * // Quand l'item est utilisé (var = 2), le retirer
-     * inventory.removeItem('clejaune');
-     */
-
     // Table des items (87 items extraits du DLL)
-    const ITEMS_TABLE = {
+    var ITEMS_TABLE = {
         "ballon1": "Ballon",
         "bouee": "Bouée",
         "bout_plo": "Bouteille de plongée",
@@ -276,183 +216,94 @@
         "fioleangleterre": "Fiole"
     };
 
-    class VNInventory {
-        constructor(options = {}) {
-            this.options = {
-                cursorPath: options.cursorPath || 'cur/',
-                onItemUsed: options.onItemUsed || ((internal, display) => {
-                    console.log(`[VN Command] set_var ${internal} 2`);
-                    console.log(`[VN Command] defcursor ${internal}`);
-                }),
-                onClose: options.onClose || (() => {
-                    console.log('[VN Command] defcursor 0');
-                })
-            };
-            
-            this.items = new Map(); // internalName -> { displayName, iconUrl }
-            this.selectedItem = null;
-            
-            this.listEl = document.getElementById('itemList');
-            this.emptyEl = document.getElementById('emptyMessage');
-            this.closeBtn = document.getElementById('closeButton');
-            
-            this.closeBtn.addEventListener('click', () => this.close());
-            this.listEl.addEventListener('dblclick', (e) => this.onDoubleClick(e));
-        }
-        
-        /**
-         * Ajoute un item à l'inventaire
-         * Appelé par le moteur VN pour chaque item possédé (var = 1)
-         * @param {string} internalName - Nom interne (ex: 'clejaune')
-         * @param {string} iconUrl - URL de l'icône (optionnel)
-         */
-        addItem(internalName, iconUrl = null) {
-            if (this.items.has(internalName)) return;
-            
-            const displayName = ITEMS_TABLE[internalName] || internalName;
-            
-            // Chemin du curseur: cur/[item].cur
-            if (!iconUrl) {
-                iconUrl = `${this.options.cursorPath}${internalName}.cur`;
-            }
-            
-            this.items.set(internalName, { displayName, iconUrl });
-            this.render();
-            
-            // Envoyer set_var item 1 au moteur
-            console.log(`[VN Command] set_var ${internalName} 1`);
-        }
-        
-        /**
-         * Retire un item de l'inventaire
-         * @param {string} internalName - Nom interne
-         */
-        removeItem(internalName) {
-            this.items.delete(internalName);
-            if (this.selectedItem === internalName) {
-                this.selectedItem = null;
-            }
-            this.render();
-        }
-        
-        /**
-         * Sélectionne un item
-         */
-        selectItem(internalName) {
-            this.selectedItem = internalName;
-            this.render();
-        }
-        
-        /**
-         * Double-clic = utiliser l'item
-         */
-        onDoubleClick(e) {
-            const entry = e.target.closest('.item-entry');
-            if (entry) {
-                const internalName = entry.dataset.internal;
-                this.useItem(internalName);
-            }
-        }
-        
-        /**
-         * Utiliser un item (double-clic)
-         * Envoie: set_var [item] 2 + defcursor [item]
-         */
-        useItem(internalName) {
-            const item = this.items.get(internalName);
-            if (item) {
-                this.options.onItemUsed(internalName, item.displayName);
-            }
-        }
-        
-        /**
-         * Fermer l'inventaire
-         * Envoie: defcursor 0
-         */
-        close() {
-            this.options.onClose();
-        }
-        
-        /**
-         * Rendre la liste des items
-         */
-        render() {
-            // Vider la liste (sauf le message vide)
-            const entries = this.listEl.querySelectorAll('.item-entry');
-            entries.forEach(e => e.remove());
-            
-            if (this.items.size === 0) {
-                this.emptyEl.style.display = 'block';
-                return;
-            }
-            
-            this.emptyEl.style.display = 'none';
-            
-            for (const [internal, data] of this.items) {
-                const entry = document.createElement('div');
-                entry.className = 'item-entry' + (internal === this.selectedItem ? ' selected' : '');
-                entry.dataset.internal = internal;
-                
-                // Créer l'icône avec fallback propre
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'item-icon';
-                iconDiv.textContent = '📦'; // Fallback par défaut
-                
-                const img = document.createElement('img');
-                img.src = data.iconUrl;
-                img.alt = '';
-                img.onload = function() {
-                    // Image chargée: remplacer l'emoji par l'image
-                    iconDiv.textContent = '';
-                    iconDiv.appendChild(img);
-                };
-                img.onerror = function() {
-                    // Image non trouvée: garder l'emoji 📦
-                    // Ne rien faire, l'emoji est déjà là
-                };
-                
-                // Créer le nom
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'item-name';
-                nameSpan.textContent = data.displayName;
-                
-                entry.appendChild(iconDiv);
-                entry.appendChild(nameSpan);
-                
-                entry.addEventListener('click', () => this.selectItem(internal));
-                
-                this.listEl.appendChild(entry);
-            }
-        }
-        
-        /**
-         * Obtenir le nombre d'items
-         */
-        get count() {
-            return this.items.size;
-        }
-        
-        /**
-         * Vérifier si un item est possédé
-         */
-        hasItem(internalName) {
-            return this.items.has(internalName);
-        }
-        
-        /**
-         * Obtenir tous les noms internes
-         */
-        getItemNames() {
-            return Array.from(this.items.keys());
-        }
+    // Inventory using sendCommand pattern (same as other DLLs)
+    var onCommand = null;
+    var items = new Map();
+    var selectedItem = null;
+    var cursorBasePath = '';
+
+    var listEl = document.getElementById('itemList');
+    var emptyEl = document.getElementById('emptyMessage');
+
+    function sendCommand(cmd) {
+        console.log('[INV Command]', cmd);
+        if (onCommand) onCommand(cmd);
     }
 
-    // Instance globale
-    window.inventory = new VNInventory();
-    
-    // L'inventaire commence VIDE !
-    // C'est le moteur VN-Studio qui appelle inventory.addItem('clejaune') 
-    // quand le joueur ramasse un objet dans le jeu.
+    function setOnCommand(callback) {
+        onCommand = callback;
+    }
+
+    // Called by the engine after iframe loads to populate owned items
+    function populateItems(ownedItems, curPath) {
+        cursorBasePath = curPath || '';
+        ownedItems.forEach(function(name) {
+            if (ITEMS_TABLE[name] && !items.has(name)) {
+                items.set(name, {
+                    displayName: ITEMS_TABLE[name],
+                    iconUrl: cursorBasePath + name + '.cur'
+                });
+            }
+        });
+        renderList();
+    }
+
+    function renderList() {
+        listEl.querySelectorAll('.item-entry').forEach(function(e) { e.remove(); });
+
+        if (items.size === 0) {
+            emptyEl.style.display = 'block';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        items.forEach(function(data, internal) {
+            var entry = document.createElement('div');
+            entry.className = 'item-entry' + (internal === selectedItem ? ' selected' : '');
+            entry.dataset.internal = internal;
+
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'item-icon';
+
+            var img = document.createElement('img');
+            img.src = data.iconUrl;
+            img.alt = '';
+            img.onerror = function() { this.style.display = 'none'; };
+            iconDiv.appendChild(img);
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'item-name';
+            nameSpan.textContent = data.displayName;
+
+            entry.appendChild(iconDiv);
+            entry.appendChild(nameSpan);
+
+            entry.addEventListener('click', function() {
+                selectedItem = internal;
+                renderList();
+            });
+
+            entry.addEventListener('dblclick', function() {
+                // Double-click = use item: set_var item 2 + defcursor item
+                sendCommand('set_var ' + internal + ' 2');
+                sendCommand('defcursor ' + internal);
+                sendCommand('closedll');
+            });
+
+            listEl.appendChild(entry);
+        });
+    }
+
+    document.getElementById('closeButton').addEventListener('click', function() {
+        sendCommand('defcursor 0');
+        sendCommand('closedll');
+    });
+
+    // Expose API for engine integration
+    window.inventory = {
+        setOnCommand: setOnCommand,
+        populateItems: populateItems
+    };
     </script>
 </body>
 </html>

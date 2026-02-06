@@ -1234,17 +1234,23 @@ function setCursorItem(itemName) {
     return;
   }
   // Show indicator with item icon (.CUR from barre/cur/)
-  var curUrl = '/game-data/barre/cur/' + itemName + '.cur';
+  // Try uppercase .CUR first (original file extension), fallback to lowercase
+  var basePath = '/game-data/barre/cur/' + itemName;
   var img = document.createElement('img');
-  img.src = curUrl;
+  img.src = basePath + '.CUR';
   img.alt = itemName;
   img.onerror = function() {
-    // .CUR not loadable as image - show item name as fallback
-    indicator.innerHTML = '';
-    var lbl = document.createElement('span');
-    lbl.className = 'cursor-label';
-    lbl.textContent = itemName;
-    indicator.appendChild(lbl);
+    if (img.src.endsWith('.CUR')) {
+      // Try lowercase extension
+      img.src = basePath + '.cur';
+    } else {
+      // Both failed - show item name as text fallback
+      indicator.innerHTML = '';
+      var lbl = document.createElement('span');
+      lbl.className = 'cursor-label';
+      lbl.textContent = itemName;
+      indicator.appendChild(lbl);
+    }
   };
   indicator.innerHTML = '';
   indicator.appendChild(img);
@@ -1698,15 +1704,16 @@ function runDll(dllName) {
         handleDllCommand(cmd);
       };
 
-      // Special: inventory DLL - pass owned items (gameVars where value = 1)
+      // Special: inventory DLL - pass owned items (gameVars where value = 1 or 2)
+      // var=1: in bag, var=2: selected/in-hand (still owned, shown in inventory)
       if (key === 'inv.dll' && iframeWin.inventory && typeof iframeWin.inventory.populateItems === 'function') {
         var owned = [];
         Object.keys(gameVars).forEach(function(v) {
-          if (gameVars[v] === 1 && iframeWin.ITEMS_TABLE && iframeWin.ITEMS_TABLE[v]) {
+          if ((gameVars[v] === 1 || gameVars[v] === 2) && iframeWin.ITEMS_TABLE && iframeWin.ITEMS_TABLE[v]) {
             owned.push(v);
           }
         });
-        // Cursor icons path: /game-data/barre/cur/
+        // Cursor icons path: /game-data/barre/cur/ (files have .CUR extension)
         var curPath = '/game-data/barre/cur/';
         iframeWin.inventory.populateItems(owned, curPath);
         console.log('INV: populated', owned.length, 'items:', owned);

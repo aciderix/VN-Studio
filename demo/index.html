@@ -248,7 +248,7 @@
     /* Active inventory item indicator */
     #cursor-indicator {
       position: absolute;
-      bottom: 8px;
+      top: 8px;
       right: 8px;
       z-index: 18;
       width: 44px;
@@ -261,6 +261,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      pointer-events: auto;
     }
     #cursor-indicator img {
       max-width: 32px;
@@ -423,7 +424,7 @@
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
   <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
-  <div id="cursor-indicator" onclick="clearCursorItem()" title="Clic pour lâcher l'objet"></div>
+  <div id="cursor-indicator" onclick="event.stopPropagation(); clearCursorItem()" title="Clic pour lâcher l'objet"></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">

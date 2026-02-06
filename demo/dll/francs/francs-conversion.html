@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversion Francs - VN-Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            background: #000;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* Form1: ClientWidth=640, ClientHeight=400, Color=clNone */
+        .game-container {
+            width: 640px;
+            height: 400px;
+            position: relative;
+            background: transparent;
+        }
+        
+        /* imgBkgnd: Left=0, Top=0, Width=640, Height=400 */
+        .background {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 640px;
+            height: 400px;
+        }
+        
+        /* Labels - Comic Sans MS, transparent background */
+        .label {
+            position: absolute;
+            font-family: 'Comic Sans MS', cursive;
+            background: transparent;
+            white-space: pre-wrap;
+        }
+        
+        /* lblQuestion: Left=64, Top=88, Width=160, Height=78 */
+        /* Caption: "Combien font 100 francs français en euros ?" */
+        .lbl-question {
+            left: 64px;
+            top: 88px;
+            width: 160px;
+            height: 78px;
+            font-size: 14px;
+            color: #000000;
+        }
+        
+        /* lblAnswer1: Left=428, Top=52, Width=141, Height=26 */
+        /* Caption: "100 francs font" */
+        .lbl-answer1 {
+            left: 428px;
+            top: 52px;
+            width: 141px;
+            height: 26px;
+            font-size: 14px;
+            color: #000000;
+        }
+        
+        /* maskEdit: Left=428, Top=90, Width=65, Height=23 */
+        /* EditMask: 00,00;0;* */
+        .answer-input {
+            position: absolute;
+            left: 428px;
+            top: 90px;
+            width: 65px;
+            height: 23px;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #808080;
+            border-style: inset;
+            outline: none;
+        }
+        
+        /* lblAnswer2: Left=500, Top=88, Width=52, Height=26 */
+        /* Caption: "euros." */
+        .lbl-answer2 {
+            left: 500px;
+            top: 88px;
+            width: 52px;
+            height: 26px;
+            font-size: 14px;
+            color: #000000;
+        }
+        
+        /* lblComment: Left=508, Top=288, Width=97, Height=89 */
+        /* Caption: "Entre les chiffres au clavier." */
+        .lbl-comment {
+            left: 508px;
+            top: 288px;
+            width: 97px;
+            height: 89px;
+            font-size: 12px;
+            color: #000000;
+        }
+        
+        /* btnQuit: Left=16, Top=284, Width=81, Height=101 */
+        /* Zone cliquable pour quitter */
+        .btn-quit {
+            position: absolute;
+            left: 16px;
+            top: 284px;
+            width: 81px;
+            height: 101px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        
+        .btn-quit:hover {
+            opacity: 0.8;
+        }
+        
+        /* lblQuit: Left=100, Top=336, Width=70, Height=27 */
+        /* Caption: "Quitter" */
+        .lbl-quit {
+            left: 100px;
+            top: 336px;
+            width: 70px;
+            height: 27px;
+            font-size: 14px;
+            color: #000000;
+            cursor: pointer;
+        }
+        
+        .lbl-quit:hover {
+            text-decoration: underline;
+        }
+        
+        /* Feedback styling */
+        .feedback {
+            position: absolute;
+            left: 430px;
+            top: 120px;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            color: #008000;
+        }
+        
+        .feedback.wrong {
+            color: #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Image de fond -->
+        <img src="background.png" alt="Pièce Euro" class="background">
+        
+        <!-- Question dans la grande bulle gauche -->
+        <div class="label lbl-question">Combien font 100 francs français en euros ?</div>
+        
+        <!-- Zone de réponse dans la bulle droite haute -->
+        <div class="label lbl-answer1">100 francs font</div>
+        <input type="text" class="answer-input" id="answerInput" maxlength="5" placeholder="">
+        <div class="label lbl-answer2">euros.</div>
+        
+        <!-- Instruction dans la petite bulle droite basse -->
+        <div class="label lbl-comment">Entre les chiffres au clavier.</div>
+        
+        <!-- Bouton quitter (zone cliquable en bas à gauche) -->
+        <button class="btn-quit" id="btnQuit" title="Quitter"></button>
+        <div class="label lbl-quit" id="lblQuit">Quitter</div>
+        
+        <!-- Feedback -->
+        <div class="feedback" id="feedback"></div>
+    </div>
+    
+    <script>
+        /**
+         * Conversion Francs → Euros - Mini-jeu VN-Studio
+         * 
+         * Question: "Combien font 100 francs français en euros ?"
+         * 
+         * Réponse attendue: 15,24 (euros)
+         * Format: 00,00 (masque avec virgule)
+         * 
+         * Commandes VN-Studio:
+         * - Bonne réponse: Pause 1000, inc_var calc 1, scene 14
+         * - Mauvaise réponse: playwav essaye.wav 0
+         */
+        
+        const CORRECT_ANSWER = "15,24";
+        
+        // Callback pour envoyer des commandes au moteur VN-Studio
+        let vnCallback = null;
+        
+        function setVNCallback(callback) {
+            vnCallback = callback;
+        }
+        
+        function sendCommand(cmd) {
+            console.log('[VN-Studio]', cmd);
+            if (vnCallback) {
+                vnCallback(cmd);
+            }
+        }
+        
+        // Éléments DOM
+        const answerInput = document.getElementById('answerInput');
+        const feedback = document.getElementById('feedback');
+        const btnQuit = document.getElementById('btnQuit');
+        const lblQuit = document.getElementById('lblQuit');
+        
+        // État
+        let answered = false;
+        
+        // Formatage automatique avec virgule
+        function formatInput(value) {
+            // Enlever tout sauf les chiffres
+            let digits = value.replace(/[^0-9]/g, '');
+            
+            // Limiter à 4 chiffres
+            digits = digits.substring(0, 4);
+            
+            // Ajouter la virgule après les 2 premiers chiffres
+            if (digits.length > 2) {
+                return digits.substring(0, 2) + ',' + digits.substring(2);
+            }
+            return digits;
+        }
+        
+        // Validation de la réponse
+        function checkAnswer() {
+            if (answered) return;
+            
+            const answer = answerInput.value.trim();
+            
+            if (answer === CORRECT_ANSWER) {
+                answered = true;
+                feedback.textContent = "Bravo !";
+                feedback.className = "feedback correct";
+                answerInput.disabled = true;
+                
+                // Séquence de victoire
+                sendCommand("Pause 1000");
+                
+                setTimeout(() => {
+                    sendCommand("inc_var calc 1");
+                    sendCommand("scene 14");
+                }, 1000);
+                
+            } else if (answer.length >= 5) {
+                // Mauvaise réponse
+                feedback.textContent = "Essaie encore !";
+                feedback.className = "feedback wrong";
+                sendCommand("playwav essaye.wav 0");
+            }
+        }
+        
+        // Écouteurs d'événements
+        answerInput.addEventListener('input', function(e) {
+            // Formater avec virgule automatique
+            const formatted = formatInput(this.value);
+            this.value = formatted;
+            
+            // Reset feedback pendant la saisie
+            if (!answered) {
+                feedback.textContent = "";
+                feedback.className = "feedback";
+            }
+        });
+        
+        answerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        answerInput.addEventListener('blur', function() {
+            if (this.value.length >= 4) {
+                checkAnswer();
+            }
+        });
+        
+        // Bouton quitter
+        function handleQuit() {
+            sendCommand("scene 14");  // Ou une autre scène de sortie
+        }
+        
+        btnQuit.addEventListener('click', handleQuit);
+        lblQuit.addEventListener('click', handleQuit);
+        
+        // Focus initial sur le champ de saisie
+        answerInput.focus();
+        
+        // API pour intégration VN-Studio
+        window.francsGame = {
+            setCallback: setVNCallback,
+            reset: function() {
+                answered = false;
+                answerInput.value = "";
+                answerInput.disabled = false;
+                feedback.textContent = "";
+                feedback.className = "feedback";
+                answerInput.focus();
+            }
+        };
+    </script>
+</body>
+</html>

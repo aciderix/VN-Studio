@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Problème de Maths - VN-Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            background: #000;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* Form1: ClientWidth=640, ClientHeight=400, Color=clSilver */
+        .game-container {
+            width: 640px;
+            height: 400px;
+            position: relative;
+            background-color: #C0C0C0; /* clSilver */
+        }
+        
+        /* Image2: Left=0, Top=0, Width=640, Height=400 */
+        .background {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 640px;
+            height: 400px;
+        }
+        
+        /* Labels - Comic Sans MS, transparent background */
+        .label {
+            position: absolute;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 18px;
+            color: #000000;
+            background: transparent;
+            white-space: nowrap;
+        }
+        
+        /* Label1: Left=272, Top=24, Width=310, Height=26 */
+        .label1 {
+            left: 272px;
+            top: 24px;
+        }
+        
+        /* Label2: Left=280, Top=56, Width=299, Height=26 */
+        .label2 {
+            left: 280px;
+            top: 56px;
+        }
+        
+        /* Label3: Left=304, Top=88, Width=248, Height=26 */
+        .label3 {
+            left: 304px;
+            top: 88px;
+        }
+        
+        /* Label4: Left=304, Top=120, Width=268, Height=26 */
+        .label4 {
+            left: 304px;
+            top: 120px;
+        }
+        
+        /* Label5: Left=192, Top=360, Width=174, Height=26 (pensée) */
+        .label5 {
+            left: 192px;
+            top: 360px;
+        }
+        
+        /* Label6: Left=392, Top=280, Width=133, Height=26 */
+        .label6 {
+            left: 392px;
+            top: 280px;
+        }
+        
+        /* Label8: Left=464, Top=312, Width=60, Height=26 */
+        .label8 {
+            left: 464px;
+            top: 312px;
+        }
+        
+        /* Label7: Left=540, Top=360, Width=12, Height=26 (feedback) */
+        .label7 {
+            left: 540px;
+            top: 360px;
+            color: #000000;
+        }
+        
+        /* MaskEdit1: Left=424, Top=312, Width=33, Height=23 */
+        .answer-input {
+            position: absolute;
+            left: 424px;
+            top: 312px;
+            width: 33px;
+            height: 23px;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #808080;
+            outline: none;
+        }
+        
+        /* Image1: Left=4, Top=352, Width=53, Height=45 (bouton quitter) */
+        .quit-button {
+            position: absolute;
+            left: 4px;
+            top: 352px;
+            width: 53px;
+            height: 45px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        
+        .quit-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Image de fond -->
+        <img src="background.png" alt="Professeure" class="background">
+        
+        <!-- Énoncé du problème (dans la grande bulle) -->
+        <div class="label label1">Toto est parti en vacances en Italie</div>
+        <div class="label label2">avec 2000 francs belges. Sachant</div>
+        <div class="label label3">qu'il a dépensé 48000 lires,</div>
+        <div class="label label4">combien lui reste-t-il d'euros ?</div>
+        
+        <!-- Pensée de la prof -->
+        <div class="label label5">C'est facile, voyons!</div>
+        
+        <!-- Zone de réponse -->
+        <div class="label label6">La réponse est</div>
+        <input type="text" class="answer-input" id="answerInput" maxlength="2" placeholder="">
+        <div class="label label8">euros...</div>
+        
+        <!-- Feedback (bulle du personnage bleu) -->
+        <div class="label label7" id="feedback"></div>
+        
+        <!-- Bouton quitter (zone cliquable en bas à gauche) -->
+        <button class="quit-button" id="quitBtn" title="Quitter"></button>
+    </div>
+    
+    <script>
+        /**
+         * Problème de Maths - Mini-jeu VN-Studio
+         * 
+         * Problème: Toto part en Italie avec 2000 francs belges,
+         *           dépense 48000 lires. Combien reste en euros?
+         * 
+         * Réponse attendue: 23 (euros)
+         * 
+         * Commandes VN-Studio:
+         * - Bonne réponse: Pause 1500, inc_var math 1, scene 17
+         * - Mauvaise réponse: Aucune commande (affiche "Non...")
+         */
+        
+        const CORRECT_ANSWER = "23";
+        
+        // Callback pour envoyer des commandes au moteur VN-Studio
+        let vnCallback = null;
+        
+        function setVNCallback(callback) {
+            vnCallback = callback;
+        }
+        
+        function sendCommand(cmd) {
+            console.log('[VN-Studio]', cmd);
+            if (vnCallback) {
+                vnCallback(cmd);
+            }
+        }
+        
+        // Éléments DOM
+        const answerInput = document.getElementById('answerInput');
+        const feedback = document.getElementById('feedback');
+        const quitBtn = document.getElementById('quitBtn');
+        
+        // État
+        let answered = false;
+        
+        // Validation de la réponse
+        function checkAnswer() {
+            if (answered) return;
+            
+            const answer = answerInput.value.trim();
+            
+            if (answer === CORRECT_ANSWER) {
+                answered = true;
+                feedback.textContent = "OUI!";
+                answerInput.disabled = true;
+                
+                // Séquence de victoire
+                sendCommand("Pause 1500");
+                
+                setTimeout(() => {
+                    sendCommand("inc_var math 1");
+                    sendCommand("scene 17");
+                }, 1500);
+                
+            } else if (answer.length >= 2) {
+                // Mauvaise réponse
+                feedback.textContent = "Non...";
+            }
+        }
+        
+        // Écouteurs d'événements
+        answerInput.addEventListener('input', function(e) {
+            // Filtrer pour n'accepter que les chiffres
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Reset feedback pendant la saisie
+            if (!answered && this.value.length < 2) {
+                feedback.textContent = "";
+            }
+        });
+        
+        answerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        answerInput.addEventListener('blur', function() {
+            if (this.value.length >= 1) {
+                checkAnswer();
+            }
+        });
+        
+        // Bouton quitter
+        quitBtn.addEventListener('click', function() {
+            sendCommand("scene 18");
+        });
+        
+        // Focus initial sur le champ de saisie
+        answerInput.focus();
+        
+        // API pour intégration VN-Studio
+        window.mathProblem = {
+            setCallback: setVNCallback,
+            reset: function() {
+                answered = false;
+                answerInput.value = "";
+                answerInput.disabled = false;
+                feedback.textContent = "";
+                answerInput.focus();
+            }
+        };
+    </script>
+</body>
+</html>

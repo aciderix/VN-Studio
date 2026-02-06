@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VN-Studio Inventory - Faithful Port</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* IMPORTANT: Bloquer le scroll de la page entière */
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 8pt;
+            background: #808080;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .inventory-window {
+            width: 330px;
+            height: 337px;
+            position: relative;
+            background: url('inventory_bg.png') no-repeat;
+            background-size: 330px 314px;
+            background-color: #c0c0c0;
+            border: 2px outset #ffffff;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            /* Empêcher tout scroll sur la fenêtre */
+            overflow: hidden;
+        }
+        
+        /* SysListView32 - Position exacte du DIALOG: (12, 14), taille (306, 266) */
+        .item-list {
+            position: absolute;
+            left: 12px;
+            top: 14px;
+            width: 306px;
+            height: 266px;
+            background: #ffffff;
+            border: 2px inset #808080;
+            /* SCROLL UNIQUEMENT ICI */
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* Style scrollbar Windows 95 */
+        .item-list::-webkit-scrollbar {
+            width: 16px;
+        }
+        
+        .item-list::-webkit-scrollbar-track {
+            background: #c0c0c0;
+        }
+        
+        .item-list::-webkit-scrollbar-thumb {
+            background: #808080;
+            border: 2px outset #c0c0c0;
+        }
+        
+        .item-entry {
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            cursor: pointer;
+            user-select: none;
+            height: 36px;
+        }
+        
+        .item-entry:hover {
+            background: #e0e0e0;
+        }
+        
+        .item-entry.selected {
+            background: #000080;
+            color: #ffffff;
+        }
+        
+        .item-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            margin-right: 8px;
+            background: #c0c0c0;
+            border: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .item-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+        
+        /* Cacher l'image si elle ne charge pas */
+        .item-icon img.error {
+            display: none;
+        }
+        
+        .item-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Button - Position exacte du DIALOG: (63, 294), taille (204, 28) */
+        .close-button {
+            position: absolute;
+            left: 63px;
+            top: 294px;
+            width: 204px;
+            height: 28px;
+            font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 8pt;
+            background: #c0c0c0;
+            border: 2px outset #ffffff;
+            cursor: pointer;
+        }
+        
+        .close-button:active {
+            border: 2px inset #808080;
+        }
+        
+        /* Empty state */
+        .empty-message {
+            padding: 20px;
+            text-align: center;
+            color: #808080;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="inventory-window" id="inventoryWindow">
+        <div class="item-list" id="itemList">
+            <!-- Items are added dynamically -->
+            <div class="empty-message" id="emptyMessage">Le sac est vide</div>
+        </div>
+        <button class="close-button" id="closeButton">Fermer le sac à dos</button>
+    </div>
+
+    <script>
+    /**
+     * VN-Studio Inventory System - Faithful HTML Port
+     * 
+     * IMPORTANT: Le DLL original ne gère PAS l'affichage conditionnel !
+     * C'est le MOTEUR VN-STUDIO qui:
+     * 1. Suit l'état des variables (item = 0, 1, ou 2)
+     * 2. Passe la liste des items POSSÉDÉS au DLL
+     * 3. Reçoit les commandes du DLL (set_var, defcursor)
+     * 
+     * Usage pour intégration:
+     * 
+     * const inventory = new VNInventory({
+     *     cursorPath: 'cur/',  // Chemin vers les fichiers .cur
+     *     onItemUsed: (internalName, displayName) => {
+     *         // Le DLL envoie: set_var [item] 2 + defcursor [item]
+     *         vnEngine.executeCommand(`set_var ${internalName} 2`);
+     *         vnEngine.executeCommand(`defcursor ${internalName}`);
+     *     },
+     *     onClose: () => {
+     *         // Le DLL envoie: defcursor 0
+     *         vnEngine.executeCommand('defcursor 0');
+     *     }
+     * });
+     * 
+     * // Le moteur VN doit appeler addItem pour chaque item possédé (où var = 1)
+     * inventory.addItem('clejaune');
+     * inventory.addItem('loupe');
+     * 
+     * // Quand l'item est utilisé (var = 2), le retirer
+     * inventory.removeItem('clejaune');
+     */
+
+    // Table des items (87 items extraits du DLL)
+    const ITEMS_TABLE = {
+        "ballon1": "Ballon",
+        "bouee": "Bouée",
+        "bout_plo": "Bouteille de plongée",
+        "castagnette": "Castagnettes",
+        "ciseaux": "Ciseaux",
+        "clejaune": "Clé jaune",
+        "guitare": "Guitare",
+        "harpon": "Harpon",
+        "helice": "Hélice",
+        "loupe": "Loupe",
+        "masque": "Masque de plongée",
+        "masse": "Marteau",
+        "pain": "Pain",
+        "palme": "Palmes",
+        "photo": "Pellicule",
+        "piece": "Pièce en or",
+        "pier_berlin": "Pierre du mur de Berlin",
+        "raquette": "Raquette de tennis",
+        "ressort": "Ressort",
+        "cheval": "Petit cheval",
+        "ruban": "Ruban bleu et jaune",
+        "sabot1": "Sabot",
+        "sabot2": "Sabot",
+        "scotch": "Scotch",
+        "taillepierre": "Taille-pierre",
+        "ap_photo": "Appareil photographique",
+        "houblon": "Houblon",
+        "chewing": "Chewing-gum",
+        "cleverte": "Clé verte",
+        "partition": "Partition",
+        "laine": "Pelote de laine",
+        "tondeuse": "Tondeuse",
+        "tournevis": "Tournevis",
+        "cire": "Cire d'abeilles",
+        "chianti": "Bouteille de Chianti",
+        "rouedent": "Roue dentée",
+        "pierreor": "Pierre philosophale",
+        "papiercado": "Rouleau de papier",
+        "hotte": "Hotte du Père Noël",
+        "levure": "Sachet de levure",
+        "bouteille": "Bouteille vide",
+        "parfum": "Bouteille de parfum",
+        "rouge": "Rouge à lèvres",
+        "bisous": "Bisous",
+        "pince": "Pince",
+        "tulipejaune": "Tulipe jaune",
+        "tulipeorange": "Tulipe orange",
+        "tuliperouge": "Tulipe rouge",
+        "tulipeverte": "Tulipe verte",
+        "tulipeviolet": "Tulipe violette",
+        "farine": "Sac de farine",
+        "saliere": "Salière",
+        "bougie": "Bougie",
+        "seche": "Sèche-cheveux",
+        "clerouge": "Clé rouge",
+        "bout_eau": "Bouteille remplie d'eau",
+        "dorade": "Dorade",
+        "moule": "Moule",
+        "poivrouge": "Poivron rouge",
+        "poivjaune": "Poivron jaune",
+        "oignon": "Oignon",
+        "olive": "Bouteille d'huile d'olive",
+        "bouillon": "Bouillon de poulet",
+        "violon": "Violon",
+        "skate": "Skate",
+        "champagne": "Bouteille de champagne",
+        "fromage": "Fromage",
+        "bonnet": "Bonnet",
+        "huile": "Huile de moteur",
+        "orge": "Orge",
+        "burette": "Burette",
+        "allumette": "Allumette",
+        "chouetteor": "Chouette en or",
+        "chouette": "Chouette en fer",
+        "sirop": "Sirop pour la toux",
+        "fiolegrece": "Fiole",
+        "fiolegrece2": "Fiole",
+        "fioleecosse": "Fiole",
+        "fioleirlande": "Fiole",
+        "fioleespagne": "Fiole",
+        "fiolesuede": "Fiole",
+        "fiolefinlande": "Fiole",
+        "fioleautriche": "Fiole",
+        "fiolepaysbas": "Fiole",
+        "fioleespagne2": "Fiole",
+        "fioleitalie": "Fiole",
+        "fioleangleterre": "Fiole"
+    };
+
+    class VNInventory {
+        constructor(options = {}) {
+            this.options = {
+                cursorPath: options.cursorPath || 'cur/',
+                onItemUsed: options.onItemUsed || ((internal, display) => {
+                    console.log(`[VN Command] set_var ${internal} 2`);
+                    console.log(`[VN Command] defcursor ${internal}`);
+                }),
+                onClose: options.onClose || (() => {
+                    console.log('[VN Command] defcursor 0');
+                })
+            };
+            
+            this.items = new Map(); // internalName -> { displayName, iconUrl }
+            this.selectedItem = null;
+            
+            this.listEl = document.getElementById('itemList');
+            this.emptyEl = document.getElementById('emptyMessage');
+            this.closeBtn = document.getElementById('closeButton');
+            
+            this.closeBtn.addEventListener('click', () => this.close());
+            this.listEl.addEventListener('dblclick', (e) => this.onDoubleClick(e));
+        }
+        
+        /**
+         * Ajoute un item à l'inventaire
+         * Appelé par le moteur VN pour chaque item possédé (var = 1)
+         * @param {string} internalName - Nom interne (ex: 'clejaune')
+         * @param {string} iconUrl - URL de l'icône (optionnel)
+         */
+        addItem(internalName, iconUrl = null) {
+            if (this.items.has(internalName)) return;
+            
+            const displayName = ITEMS_TABLE[internalName] || internalName;
+            
+            // Chemin du curseur: cur/[item].cur
+            if (!iconUrl) {
+                iconUrl = `${this.options.cursorPath}${internalName}.cur`;
+            }
+            
+            this.items.set(internalName, { displayName, iconUrl });
+            this.render();
+            
+            // Envoyer set_var item 1 au moteur
+            console.log(`[VN Command] set_var ${internalName} 1`);
+        }
+        
+        /**
+         * Retire un item de l'inventaire
+         * @param {string} internalName - Nom interne
+         */
+        removeItem(internalName) {
+            this.items.delete(internalName);
+            if (this.selectedItem === internalName) {
+                this.selectedItem = null;
+            }
+            this.render();
+        }
+        
+        /**
+         * Sélectionne un item
+         */
+        selectItem(internalName) {
+            this.selectedItem = internalName;
+            this.render();
+        }
+        
+        /**
+         * Double-clic = utiliser l'item
+         */
+        onDoubleClick(e) {
+            const entry = e.target.closest('.item-entry');
+            if (entry) {
+                const internalName = entry.dataset.internal;
+                this.useItem(internalName);
+            }
+        }
+        
+        /**
+         * Utiliser un item (double-clic)
+         * Envoie: set_var [item] 2 + defcursor [item]
+         */
+        useItem(internalName) {
+            const item = this.items.get(internalName);
+            if (item) {
+                this.options.onItemUsed(internalName, item.displayName);
+            }
+        }
+        
+        /**
+         * Fermer l'inventaire
+         * Envoie: defcursor 0
+         */
+        close() {
+            this.options.onClose();
+        }
+        
+        /**
+         * Rendre la liste des items
+         */
+        render() {
+            // Vider la liste (sauf le message vide)
+            const entries = this.listEl.querySelectorAll('.item-entry');
+            entries.forEach(e => e.remove());
+            
+            if (this.items.size === 0) {
+                this.emptyEl.style.display = 'block';
+                return;
+            }
+            
+            this.emptyEl.style.display = 'none';
+            
+            for (const [internal, data] of this.items) {
+                const entry = document.createElement('div');
+                entry.className = 'item-entry' + (internal === this.selectedItem ? ' selected' : '');
+                entry.dataset.internal = internal;
+                
+                // Créer l'icône avec fallback propre
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'item-icon';
+                iconDiv.textContent = '📦'; // Fallback par défaut
+                
+                const img = document.createElement('img');
+                img.src = data.iconUrl;
+                img.alt = '';
+                img.onload = function() {
+                    // Image chargée: remplacer l'emoji par l'image
+                    iconDiv.textContent = '';
+                    iconDiv.appendChild(img);
+                };
+                img.onerror = function() {
+                    // Image non trouvée: garder l'emoji 📦
+                    // Ne rien faire, l'emoji est déjà là
+                };
+                
+                // Créer le nom
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'item-name';
+                nameSpan.textContent = data.displayName;
+                
+                entry.appendChild(iconDiv);
+                entry.appendChild(nameSpan);
+                
+                entry.addEventListener('click', () => this.selectItem(internal));
+                
+                this.listEl.appendChild(entry);
+            }
+        }
+        
+        /**
+         * Obtenir le nombre d'items
+         */
+        get count() {
+            return this.items.size;
+        }
+        
+        /**
+         * Vérifier si un item est possédé
+         */
+        hasItem(internalName) {
+            return this.items.has(internalName);
+        }
+        
+        /**
+         * Obtenir tous les noms internes
+         */
+        getItemNames() {
+            return Array.from(this.items.keys());
+        }
+    }
+
+    // Instance globale
+    window.inventory = new VNInventory();
+    
+    // L'inventaire commence VIDE !
+    // C'est le moteur VN-Studio qui appelle inventory.addItem('clejaune') 
+    // quand le joueur ramasse un objet dans le jeu.
+    </script>
+</body>
+</html>

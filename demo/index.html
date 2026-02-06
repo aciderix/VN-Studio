@@ -1183,6 +1183,7 @@ function executeRunPrj(runPrjStr) {
   }
   console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
   stopAllAudio();
+  clearCursorItem();
 
   currentBasePath = parsed.entry.base;
   var targetScene = parsed.sceneIndex;
@@ -1259,6 +1260,12 @@ function setCursorItem(itemName) {
 
 function clearCursorItem() {
   if (activeCursorItem) {
+    // Put the item back in the bag (var 2 → 1)
+    var key = activeCursorItem.toLowerCase();
+    if (gameVars[key] === 2) {
+      gameVars[key] = 1;
+      console.log('Cursor item returned to bag:', key, '2 → 1');
+    }
     setCursorItem(null);
   }
 }
@@ -3028,6 +3035,7 @@ function goToScene(index) {
   closeDll();
   closeSceneHtml();
   closeVideo();
+  clearCursorItem();
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];

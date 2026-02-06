@@ -263,7 +263,7 @@
         
         rotateWheel(wheelIndex, direction) {
             // Son de tic (fidèle à l'original)
-            this.sendCommand('playwav tic1.wav 8');
+            this.sendCommand('playwav tic1.wav 1');
             
             // Modifier la valeur (0-9 cyclique)
             this.wheels[wheelIndex] = (this.wheels[wheelIndex] + direction + 10) % 10;

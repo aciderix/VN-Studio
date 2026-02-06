@@ -230,28 +230,12 @@
       display: none;
       border: none;
       background: #000;
+      overflow: hidden;
     }
     #dll-overlay iframe {
-      width: 100%;
-      height: 100%;
       border: none;
+      transform-origin: 0 0;
     }
-    #dll-overlay .dll-close {
-      position: absolute;
-      top: 4px;
-      right: 8px;
-      cursor: pointer;
-      font-size: 22px;
-      color: #fff;
-      background: rgba(0,0,0,0.5);
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      line-height: 26px;
-      text-align: center;
-      z-index: 21;
-    }
-    #dll-overlay .dll-close:hover { background: rgba(200,0,0,0.8); }
     #html-overlay .html-close {
       position: absolute;
       top: 2px;
@@ -399,7 +383,7 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
-  <div id="dll-overlay"><span class="dll-close" onclick="closeDll()">&times;</span><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
@@ -1577,19 +1561,22 @@ function runDll(dllName) {
   var overlay = document.getElementById('dll-overlay');
   var iframe = document.getElementById('dll-iframe');
 
-  // Position over the canvas (640x400 game area, same as original DLL form)
+  // Position over the canvas, scale iframe (DLL native: 640x400) to fit
   var rect = canvas.getBoundingClientRect();
   var contRect = container.getBoundingClientRect();
-  var gameW = project ? project.header.width : 640;
-  var gameH = project ? project.header.height : 480;
-  var scaleX = rect.width / gameW;
-  var scaleY = rect.height / gameH;
+  var dllW = 640, dllH = 400; // Original DLL form size
+  var scale = Math.min(rect.width / dllW, rect.height / dllH);
 
   overlay.style.left = (rect.left - contRect.left) + 'px';
   overlay.style.top = (rect.top - contRect.top) + 'px';
   overlay.style.width = rect.width + 'px';
   overlay.style.height = rect.height + 'px';
   overlay.style.display = 'block';
+
+  // Set iframe to native DLL size, then CSS-scale to fit the overlay
+  iframe.style.width = dllW + 'px';
+  iframe.style.height = dllH + 'px';
+  iframe.style.transform = 'scale(' + scale + ')';
 
   iframe.src = htmlPath;
   currentDllIframe = iframe;

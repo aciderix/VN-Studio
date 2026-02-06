@@ -701,6 +701,7 @@ function screenToGame(clientX, clientY) {
 function render() {
   if (!project || currentSceneIndex < 0) return;
   var scene = project.scenes[currentSceneIndex];
+  if (!scene) return;
   var w = project.header.width;
   var h = project.header.height;
   var sceneW = getSceneWidth(scene);
@@ -2768,6 +2769,9 @@ function updateUI() {
 
 function loadVNDFile(arrayBuffer, fileName, skipFirstScene) {
   try {
+    // Reset scene index before replacing project to prevent stale index
+    // accessing non-existent scenes in the new project (render loop, etc.)
+    currentSceneIndex = 0;
     project = parseVND(arrayBuffer);
     console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
 

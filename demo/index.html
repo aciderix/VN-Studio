@@ -2816,6 +2816,7 @@ function handleCommandClick(cmd) {
 function refreshOninitOverlays() {
   if (!project || currentSceneIndex < 0) return;
   var scene = project.scenes[currentSceneIndex];
+  var deferredNav = null;
   scene.commands.forEach(function(cmd) {
     if (cmd.paramPairs.length === 0) return; // Only interactive commands have ONINIT
     cmd.strings.forEach(function(s) {
@@ -2823,7 +2824,8 @@ function refreshOninitOverlays() {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
         if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
-            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp')) {
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp') ||
+            lowerStr.includes('scene') || lowerStr.includes('runprj')) {
           var action = evaluateIf(s.string);
           // Resolve nested IFs
           while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
@@ -2834,6 +2836,9 @@ function refreshOninitOverlays() {
             if (actLower === 'addbmp' || actLower === 'delbmp' ||
                 actLower === 'showbmp' || actLower === 'hidebmp') {
               executeAction(action);
+            } else if (actLower === 'scene' || actLower === 'runprj') {
+              // Defer navigation until after all overlays processed
+              if (!deferredNav) deferredNav = action;
             }
           }
         }
@@ -2841,6 +2846,11 @@ function refreshOninitOverlays() {
     });
   });
   render();
+  // Execute deferred navigation after render
+  if (deferredNav) {
+    console.log('[refreshOninit] Deferred navigation:', deferredNav);
+    executeAction(deferredNav);
+  }
 }
 
 function resumeCommandProcessing(cmd, startIdx) {

@@ -2818,9 +2818,7 @@ function refreshOninitOverlays() {
   var scene = project.scenes[currentSceneIndex];
   var deferredNav = null;
   scene.commands.forEach(function(cmd) {
-    if (cmd.paramPairs.length === 0) return; // Only interactive commands have ONINIT
     cmd.strings.forEach(function(s) {
-      if (s.subIndex < 2) return; // Only ONINIT/AFTERINIT
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
         if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||

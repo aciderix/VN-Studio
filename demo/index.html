@@ -2635,6 +2635,10 @@ function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
   scrollX = 0;
+  // Clear recentlyStartedAudio so that sounds started during the same click
+  // that triggered navigation are NOT protected from being stopped.
+  // Only the target scene's own sounds should persist.
+  recentlyStartedAudio = {};
   // Smart audio: keep sounds that the new scene will also play
   var keepKeys = getSceneAutoWavKeys(project.scenes[index]);
   stopAudioExcept(keepKeys);

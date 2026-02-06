@@ -1,6 +1,6 @@
 # VN-Studio - Memoire Complete du Projet
 
-**Derniere mise a jour:** 2026-02-05
+**Derniere mise a jour:** 2026-02-06
 **Branche de travail:** claude/setup-project-context-XUsHC
 
 ---
@@ -454,7 +454,82 @@ Suffixes lettres: index = char - 'a' + 1 (d=direct, f=scene jump, h=tooltip, i=i
 
 ---
 
-## 12. CONVENTIONS
+## 12. DECOUVERTE CLE: subIndex (TIMING D'EXECUTION)
+
+### 12.1 Le champ subIndex
+
+Chaque string dans un TVNCommand a un champ `subIndex` (uint32) qui determine
+**quand** la commande s'execute. Ce champ etait deja parse correctement dans
+`readStringCollection()` mais n'etait jamais utilise par le moteur web.
+
+| subIndex | Nom | Quand |
+|----------|-----|-------|
+| 0 | ONFOCUS | Au survol (hover) du polygone |
+| 1 | ONCLICK | Au clic sur le polygone |
+| 2 | ONINIT | A l'entree dans la scene |
+| 3 | AFTERINIT | Apres l'init de la scene |
+
+### 12.2 Impact sur le moteur
+
+Les commandes interactives (celles avec `paramPairs.length > 0`, i.e. avec un polygone)
+contiennent souvent des strings avec differents subIndex. Exemple dans france.vnd:
+
+- Un hotspot peut avoir un ADDBMP avec subIndex=2 (afficher helice au chargement)
+  ET un PLAYBMP avec subIndex=1 (image au clic seulement)
+- Les commandes de type SET_VAR, PLAYAVI, etc. dans un hotspot avec subIndex=2
+  doivent s'executer automatiquement au chargement de la scene
+
+### 12.3 Implementation dans executeSceneCommands
+
+Pass 0 et Pass 1 filtrent maintenant avec `if (isInteractive && s.subIndex < 2) return;`
+pour ne pas executer les actions hover/clic au chargement de la scene.
+
+### 12.4 Reference binaire
+
+- `0x43f8cf` dans europeo.exe: Table des noms d'evenements
+  - EV_ONFOCUS, EV_ONCLICK, EV_ONINIT, EV_AFTERINIT
+- Le dispatcher de commande a `0x43177D` utilise le subIndex pour router
+
+---
+
+## 13. BUGS CORRIGES (SESSION 2026-02-05/06)
+
+### 13.1 Overlay persistence (helice.bmp)
+
+**Probleme:** `overlayImages = {}` dans `executeSceneCommands` effacait tous les overlays
+a chaque changement de scene. Les ADDBMP des commandes interactives n'etaient pas
+re-executes au retour dans une scene.
+
+**Fix:** Reset des flags `autoPlayedVideo`/`autoShowedBmp` sur chaque commande au debut
+de `executeSceneCommands`, et utilisation du subIndex pour determiner quelles commandes
+des hotspots interactifs doivent s'executer au chargement.
+
+### 13.2 Stale video error events
+
+**Probleme:** Les event handlers `error` d'une video precedente pouvaient tuer la video
+suivante si l'evenement arrivait apres le remplacement de `currentVideo`.
+
+**Fix:** Guard `if (currentVideo === video)` sur les handlers ended/error de playAvi.
+
+### 13.3 Race condition video error/navigation (CRITIQUE)
+
+**Probleme:** Quand une video est jouee avec double source (webm + avi fallback),
+le navigateur peut emettre un `error` sur `<video>` meme si le webm fonctionne.
+Deux handlers etaient enregistres sur le meme evenement:
+1. `playAvi` error handler → appelait `closeVideo()` → `currentVideo = null`
+2. `onVideoEnd` dans `resumeCommandProcessing` → voyait `currentVideo !== vid` → return
+
+La navigation (scene 6 → scene 23) n'etait jamais executee.
+
+**Fix (3 changements):**
+1. `playAvi` error handler: seulement fermer si `readyState === 0` (aucune source chargee)
+2. `playAvi` ended handler: defer a `onVideoEnd` si `waitingForVideoEnd === true`
+3. `onVideoEnd`: ignorer les events `error` si `readyState > 0` (source active)
+4. `closeVideo()`: retrait de `vid.load()` qui declenchait des events spurieux
+
+---
+
+## 14. CONVENTIONS
 
 - Francais pour commentaires et documentation
 - Types prefixes VN (VNScene, VNHotspot, etc.)

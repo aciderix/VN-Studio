@@ -1855,24 +1855,60 @@ function executeSceneCommands(scene) {
   });
 
   // Pass 2: Execute non-interactive commands (without polygons)
+  // These are auto-execute commands that run on scene load.
+  // Uses two-pass logic similar to resumeCommandProcessing:
+  // first execute all side-effects, then handle video+navigation deferral.
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
     if (cmd.paramPairs.length > 0) return;
 
+    var deferredNav = null;
+    var videoPlaying = false;
+
     cmd.strings.forEach(function(s) {
-      // Skip types handled interactively or already processed in Pass 0
-      if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
+      // Skip types handled interactively or in rendering
+      if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
+      // SCENE navigation - defer until after video (if any)
+      if (s.type === 6) {
+        if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
+        return;
+      }
+      // RUNPRJ navigation - defer similarly
+      if (s.type === 31) {
+        if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
+        return;
+      }
+
+      // PLAYAVI - play and track for deferral
+      if (s.type === 9) {
+        if (!videoPlaying) {
+          playAvi(s.string);
+          videoPlaying = true;
+        }
+        return;
+      }
+
       if (s.type === 21) {
-        // IF - evaluate and execute (skip display commands, already handled in first pass)
+        // IF - evaluate and execute (skip display commands, already handled in Pass 1)
         var action = evaluateIf(s.string);
         if (action) {
-          var actLower = action.toLowerCase().trim().split(/\s+/)[0];
-          if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
-              actLower !== 'showbmp' && actLower !== 'hidebmp') {
+          var actParts = action.trim().split(/\s+/);
+          var actLower = actParts[0].toLowerCase();
+          if (actLower === 'scene') {
+            if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'runprj') {
+            if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'playavi') {
+            if (!videoPlaying) {
+              playAvi(actParts.slice(1).join(' '));
+              videoPlaying = true;
+            }
+          } else if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
+                     actLower !== 'showbmp' && actLower !== 'hidebmp') {
             executeAction(action);
           }
         }
@@ -1881,6 +1917,34 @@ function executeSceneCommands(scene) {
 
       executeStringCommand(s.type, s.string);
     });
+
+    // Handle deferred navigation (with optional video wait)
+    if (deferredNav) {
+      if (videoPlaying && currentVideo) {
+        // Video playing - wait for it to end before navigating
+        waitingForVideoEnd = true;
+        var nav = deferredNav;
+        var vid = currentVideo;
+        function onVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onVideoEnd);
+          vid.removeEventListener('error', onVideoEnd);
+          vid.removeEventListener('click', onVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          doNavigation(nav);
+        }
+        vid.addEventListener('ended', onVideoEnd);
+        vid.addEventListener('error', onVideoEnd);
+        vid.addEventListener('click', onVideoEnd);
+      } else if (videoPlaying && pendingVideoPlay) {
+        waitingForVideoEnd = true;
+        pendingVideoNav = deferredNav;
+      } else {
+        doNavigation(deferredNav);
+      }
+    }
   });
 
   // Init variables from VND header (only if not already set)

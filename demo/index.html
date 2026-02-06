@@ -2096,7 +2096,9 @@ function executeSceneCommands(scene) {
   //   - ADDBMP/DELBMP/SHOWBMP/HIDEBMP (display overlays like qcasta.bmp)
   //   - PLAYAVI (scene setup videos like casta1.avi asking a question)
   //   - PLAYWAV, CLOSEWAV (scene audio)
-  //   - SET_VAR (scene state setup like casta=1)
+  //   - SET_VAR, INC_VAR, DEC_VAR (scene state setup like casta=1)
+  //   - IF conditions (nested IFs for transvecteur machine, etc.)
+  var pass0DeferredNav = null; // Collect deferred navigation from ONINIT IFs
   scene.commands.forEach(function(cmd) {
     var isInteractive = cmd.paramPairs.length > 0;
 
@@ -2123,22 +2125,65 @@ function executeSceneCommands(scene) {
       } else if (isInteractive && s.type === 11) {
         // PLAYWAV from INIT/AFTERINIT
         executeStringCommand(s.type, s.string);
+      } else if (isInteractive && s.type === 21) {
+        // IF conditions from INIT/AFTERINIT (e.g. transvecteur machine checks)
+        // Resolve nested IFs fully, then execute or defer navigation
+        var action = evaluateIf(s.string);
+        // Resolve nested IFs: "if X then if Y then action" → "action"
+        while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+          action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+        }
+        if (action) {
+          var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+          // Defer scene/runprj navigation (execute after all ONINIT processing + video)
+          if (actLower === 'scene') {
+            var idx = action.trim().split(/\s+/)[1];
+            if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: idx };
+          } else if (actLower === 'runprj') {
+            if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+          } else {
+            executeAction(action);
+          }
+        }
       }
     });
   });
 
-  // Pass 1: Execute IF conditions with display actions that are marked for scene INIT
+  // Handle deferred navigation from Pass 0 ONINIT IFs (e.g. transvecteur machine → scene 12)
+  // Wait for auto-played video to finish before navigating
+  if (pass0DeferredNav) {
+    if (currentVideo) {
+      var nav0 = pass0DeferredNav;
+      var vid0 = currentVideo;
+      waitingForVideoEnd = true;
+      function onPass0VideoEnd(evt) {
+        if (evt && evt.type === 'error' && vid0.readyState > 0) return;
+        vid0.removeEventListener('ended', onPass0VideoEnd);
+        vid0.removeEventListener('error', onPass0VideoEnd);
+        vid0.removeEventListener('click', onPass0VideoEnd);
+        if (currentVideo !== vid0) return;
+        waitingForVideoEnd = false;
+        closeVideo();
+        doNavigation(nav0);
+      }
+      vid0.addEventListener('ended', onPass0VideoEnd);
+      vid0.addEventListener('error', onPass0VideoEnd);
+      vid0.addEventListener('click', onPass0VideoEnd);
+    } else {
+      doNavigation(pass0DeferredNav);
+    }
+    pass0DeferredNav = null;
+  }
+
+  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands
+  // (Interactive command IFs are already fully handled in Pass 0)
   // The VND subIndex field determines WHEN a string command executes:
   //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
   // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
-  // For interactive commands, we ONLY process strings with subIndex >= 2 (ONINIT/AFTERINIT).
-  // This correctly restores overlays like helice.bmp (subIndex=2) while skipping click-only
-  // effects like femme.bmp (subIndex=1).
   scene.commands.forEach(function(cmd) {
     var isInteractive = cmd.paramPairs.length > 0;
+    if (isInteractive) return; // Already handled in Pass 0
     cmd.strings.forEach(function(s) {
-      // For interactive commands, skip hover (0) and click (1) strings
-      if (isInteractive && s.subIndex < 2) return;
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
         // Only execute IF conditions that affect display state

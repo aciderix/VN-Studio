@@ -1886,21 +1886,20 @@ function executeSceneCommands(scene) {
 
     var deferredNav = null;
     var videoPlaying = false;
-    var hadCloseWav = false;
     var deferredAudio = [];
+
+    // Check if a playwav string is looping/ambient (defer) vs one-shot SFX (play now)
+    function isLoopingWav(wavArgs) {
+      var parts = wavArgs.trim().split(/\s+/);
+      var loops = parseInt(parts[1]) || 1;
+      return loops > 1 || loops === 0;
+    }
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or in rendering
       if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
-
-      // CLOSEWAV - track for deferred audio decision
-      if (s.type === 36) {
-        hadCloseWav = true;
-        executeStringCommand(s.type, s.string);
-        return;
-      }
 
       // SCENE navigation - defer until after video (if any)
       if (s.type === 6) {
@@ -1922,9 +1921,10 @@ function executeSceneCommands(scene) {
         return;
       }
 
-      // PLAYWAV after CLOSEWAV+PLAYAVI - defer until video ends
-      // Without CLOSEWAV, the sound plays alongside the video
-      if (s.type === 11 && videoPlaying && hadCloseWav) {
+      // Looping PLAYWAV after PLAYAVI - defer until video ends
+      // Ambient/background music (loops>1) shouldn't play over video dialogue
+      // One-shot SFX (loops=1) play alongside the video
+      if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
         deferredAudio.push('playwav ' + s.string);
         return;
       }
@@ -1944,11 +1944,8 @@ function executeSceneCommands(scene) {
               playAvi(actParts.slice(1).join(' '));
               videoPlaying = true;
             }
-          } else if (actLower === 'playwav' && videoPlaying && hadCloseWav) {
+          } else if (actLower === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
             deferredAudio.push(action);
-          } else if (actLower === 'closewav') {
-            hadCloseWav = true;
-            executeAction(action);
           } else if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
                      actLower !== 'showbmp' && actLower !== 'hidebmp') {
             executeAction(action);
@@ -2455,8 +2452,15 @@ function resumeCommandProcessing(cmd, startIdx) {
   var deferredNav = null;   // { type:'scene'|'runprj', value:string }
   var deferredHtml = null;  // { value:string, idx:number }
   var videoPlaying = false;
-  var hadCloseWav = false;  // true if CLOSEWAV preceded PLAYAVI (defer PLAYWAV after video)
   var deferredAudio = [];   // PLAYWAV commands to execute after video ends
+
+  // Check if a playwav string represents looping/ambient audio (should defer during video)
+  // vs one-shot SFX like cling.wav (should play alongside video)
+  function isLoopingWav(wavArgs) {
+    var parts = wavArgs.trim().split(/\s+/);
+    var loops = parseInt(parts[1]) || 1;
+    return loops > 1 || loops === 0; // 0=infinite, >1=looping ambient
+  }
 
   for (var si = startIdx; si < cmd.strings.length; si++) {
     var s = cmd.strings[si];
@@ -2482,14 +2486,11 @@ function resumeCommandProcessing(cmd, startIdx) {
           }
         } else if (actCmd === 'prev') {
           if (!deferredNav) deferredNav = { type: 'prev', value: '' };
-        } else if (actCmd === 'playwav' && videoPlaying && hadCloseWav) {
-          // PLAYWAV from IF after CLOSEWAV+PLAYAVI - defer until video ends
-          // Only defer when CLOSEWAV preceded: the audio was stopped for the video
-          // and should resume after. Without CLOSEWAV, sound plays alongside video.
+        } else if (actCmd === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
+          // Looping PLAYWAV from IF after PLAYAVI - defer until video ends
+          // Ambient/background music shouldn't play over video dialogue
+          // One-shot SFX (loops=1, e.g. cling.wav) play alongside the video
           deferredAudio.push(action);
-        } else if (actCmd === 'closewav') {
-          hadCloseWav = true;
-          executeAction(action);
         } else {
           executeAction(action);
         }
@@ -2501,10 +2502,10 @@ function resumeCommandProcessing(cmd, startIdx) {
         playAvi(s.string);
         videoPlaying = true;
       }
-    } else if (s.type === 11 && videoPlaying && hadCloseWav) {
-      // PLAYWAV after CLOSEWAV+PLAYAVI - defer until video ends
-      // Pattern: CLOSEWAV → PLAYAVI → PLAYWAV (119 commands across all VNDs)
-      // Without CLOSEWAV, the sound plays alongside the video (e.g. cling.wav/cartoon.wav)
+    } else if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
+      // Looping PLAYWAV after PLAYAVI - defer until video ends
+      // Ambient/background music (loops>1) shouldn't play over video dialogue
+      // One-shot SFX (loops=1, e.g. cling.wav) play alongside the video
       deferredAudio.push('playwav ' + s.string);
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
@@ -2515,10 +2516,6 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 3) {
       // PREV - go back to previous scene
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
-    } else if (s.type === 36) {
-      // CLOSEWAV - track it so PLAYWAV after PLAYAVI gets deferred
-      hadCloseWav = true;
-      executeStringCommand(s.type, s.string);
     } else if (s.type === 38 || s.type === 39 || s.type === 7) {
       // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
     } else if (s.type === 27 && cmd.autoShowedBmp) {

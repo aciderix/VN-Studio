@@ -232,9 +232,48 @@
       background: #000;
       overflow: hidden;
     }
+    #dll-overlay.dll-transparent {
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     #dll-overlay iframe {
       border: none;
       transform-origin: 0 0;
+    }
+    #dll-overlay.dll-transparent iframe {
+      transform-origin: center center;
+    }
+    /* Active inventory item indicator */
+    #cursor-indicator {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      z-index: 18;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      border: 2px solid rgba(0,0,0,0.4);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    #cursor-indicator img {
+      max-width: 32px;
+      max-height: 32px;
+    }
+    #cursor-indicator .cursor-label {
+      font-size: 9px;
+      text-align: center;
+      color: #333;
+      max-width: 40px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     #html-overlay .html-close {
       position: absolute;
@@ -384,6 +423,7 @@
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
   <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div id="cursor-indicator" onclick="clearCursorItem()" title="Clic pour lâcher l'objet"></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
@@ -1185,6 +1225,38 @@ function executeRunPrj(runPrjStr) {
 var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
+function setCursorItem(itemName) {
+  activeCursorItem = itemName;
+  var indicator = document.getElementById('cursor-indicator');
+  if (!itemName) {
+    indicator.style.display = 'none';
+    indicator.innerHTML = '';
+    return;
+  }
+  // Show indicator with item icon (.CUR from barre/cur/)
+  var curUrl = '/game-data/barre/cur/' + itemName + '.cur';
+  var img = document.createElement('img');
+  img.src = curUrl;
+  img.alt = itemName;
+  img.onerror = function() {
+    // .CUR not loadable as image - show item name as fallback
+    indicator.innerHTML = '';
+    var lbl = document.createElement('span');
+    lbl.className = 'cursor-label';
+    lbl.textContent = itemName;
+    indicator.appendChild(lbl);
+  };
+  indicator.innerHTML = '';
+  indicator.appendChild(img);
+  indicator.style.display = 'flex';
+}
+
+function clearCursorItem() {
+  if (activeCursorItem) {
+    setCursorItem(null);
+  }
+}
+
 function getVar(name) {
   return gameVars[name.toLowerCase()] || 0;
 }
@@ -1306,14 +1378,9 @@ function executeAction(action) {
     // Set active cursor to an inventory item or reset to default
     var cursorItem = parts[1] || '0';
     if (cursorItem === '0' || cursorItem.toLowerCase().endsWith('.cur')) {
-      // Reset cursor to default
-      activeCursorItem = null;
-      canvas.style.cursor = '';
+      setCursorItem(null);
     } else {
-      // Set cursor to inventory item (shows .cur icon)
-      activeCursorItem = cursorItem.toLowerCase();
-      var curUrl = '/game-data/barre/cur/' + activeCursorItem + '.cur';
-      canvas.style.cursor = 'url(' + curUrl + ') 16 16, pointer';
+      setCursorItem(cursorItem.toLowerCase());
     }
   } else if (cmd === 'pause') {
     // Pause N ms - used by DLL mini-games; they handle their own setTimeout
@@ -1582,6 +1649,7 @@ function runDll(dllName) {
   // Use per-DLL native size (default 640x400 for mini-games)
   var nativeSize = DLL_NATIVE_SIZE[key] || { w: 640, h: 400 };
   var dllW = nativeSize.w, dllH = nativeSize.h;
+  var isDialog = !!DLL_NATIVE_SIZE[key]; // Smaller DLLs (inv) = dialog style
 
   // Position over the canvas, scale iframe to fit
   var rect = canvas.getBoundingClientRect();
@@ -1592,7 +1660,16 @@ function runDll(dllName) {
   overlay.style.top = (rect.top - contRect.top) + 'px';
   overlay.style.width = rect.width + 'px';
   overlay.style.height = rect.height + 'px';
-  overlay.style.display = 'block';
+
+  // Dialog-style DLLs (inv): transparent bg, centered iframe, scene visible behind
+  // Full-size DLLs (roue, etc.): opaque black bg, iframe scaled from top-left
+  if (isDialog) {
+    overlay.className = 'dll-transparent';
+    overlay.style.display = 'flex';
+  } else {
+    overlay.className = '';
+    overlay.style.display = 'block';
+  }
 
   // Set iframe to native DLL size, then CSS-scale to fit the overlay
   iframe.style.width = dllW + 'px';
@@ -1690,6 +1767,7 @@ function closeDll() {
   var overlay = document.getElementById('dll-overlay');
   var iframe = document.getElementById('dll-iframe');
   overlay.style.display = 'none';
+  overlay.className = '';
   iframe.src = 'about:blank';
   currentDllIframe = null;
 }

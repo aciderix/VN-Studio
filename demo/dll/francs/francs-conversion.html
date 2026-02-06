@@ -200,11 +200,11 @@
         
         // Callback pour envoyer des commandes au moteur VN-Studio
         let vnCallback = null;
-        
-        function setVNCallback(callback) {
+
+        function setOnCommand(callback) {
             vnCallback = callback;
         }
-        
+
         function sendCommand(cmd) {
             console.log('[VN-Studio]', cmd);
             if (vnCallback) {
@@ -291,7 +291,7 @@
         
         // Bouton quitter
         function handleQuit() {
-            sendCommand("scene 14");  // Ou une autre scène de sortie
+            sendCommand("closedll");
         }
         
         btnQuit.addEventListener('click', handleQuit);
@@ -301,8 +301,8 @@
         answerInput.focus();
         
         // API pour intégration VN-Studio
-        window.francsGame = {
-            setCallback: setVNCallback,
+        window.francs = {
+            setOnCommand: setOnCommand,
             reset: function() {
                 answered = false;
                 answerInput.value = "";

@@ -2533,7 +2533,7 @@ canvas.addEventListener('click', function(e) {
   // Convert hover-added images to permanent (user clicked, so they want to keep them)
   hoverAddedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
-  console.log('Canvas click at game coords:', pos.x, pos.y);
+  console.log('Canvas click at game coords:', pos.x, pos.y, 'waitingForVideoEnd=' + waitingForVideoEnd, 'currentVideo=' + !!currentVideo, 'castagnette=' + gameVars['castagnette']);
   // Find ALL commands at click point, execute side effects for all
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {

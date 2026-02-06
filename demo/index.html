@@ -651,17 +651,15 @@ var container = document.getElementById('canvas-container');
 function getSceneWidth(scene) {
   var w = project ? project.header.width : 640;
   if (!scene) return w;
-  // Utiliser la largeur de l'image de fond si chargée
+  // Utiliser la largeur de l'image de fond si chargée - cette valeur fait autorité
   var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
   if (resources[resKey] && resources[resKey].naturalWidth > w) {
     w = resources[resKey].naturalWidth;
   }
-  // Fallback: max X des polygones
-  scene.commands.forEach(function(cmd) {
-    cmd.paramPairs.forEach(function(p) {
-      if (p.a > w) w = p.a + 1;
-    });
-  });
+  // NOTE: On ne fait PAS de fallback sur les coords max des polygones.
+  // Certaines scenes (ex: couleurs1 scene 6) ont des polygones places
+  // volontairement hors du fond (x > bgWidth) qui ne doivent pas etendre
+  // la zone scrollable au-dela de l'image de fond reelle.
   return w;
 }
 
@@ -1628,13 +1626,18 @@ function playAvi(aviStr) {
       closeVideo();
     }
   });
-  // Click on video: if paused (autoplay blocked), try to play; if playing, close
+  // Click on video: if paused (autoplay blocked), try to play; if playing, skip
   video.addEventListener('click', function() {
     if (video.paused) {
       video.play().catch(function() { closeVideo(); });
-    } else {
+    } else if (!waitingForVideoEnd) {
+      // Only close directly if no deferred navigation is pending.
+      // When waitingForVideoEnd is true, onVideoEnd in resumeCommandProcessing
+      // will handle the close + navigation flow via its own click listener.
       closeVideo();
     }
+    // When waitingForVideoEnd is true, the onVideoEnd handler (also listening
+    // for 'click' on this element) will fire and handle close + navigate.
   });
 
   // Add to DOM immediately (needed for video events to work)
@@ -2159,20 +2162,6 @@ function findAllCommandsAtPoint(x, y) {
     var hasPairs = cmd.paramPairs.length >= 2;
     var inBounds = hasPairs && isPolygonInBounds(cmd.paramPairs, sceneW);
     var inPoly = inBounds && pointInPolygon(x, y, expandRect(cmd.paramPairs));
-    // Debug: log C5 specifically (index 5 in scene 6)
-    if (i === 5 && currentSceneIndex === 5) {
-      console.log('C5 check at (' + x + ',' + y + '): pairs=' + cmd.paramPairs.length +
-        ', inBounds=' + inBounds + ', inPoly=' + inPoly);
-      if (cmd.paramPairs.length > 0) {
-        var bounds = cmd.paramPairs.reduce(function(acc, p) {
-          return {
-            minX: Math.min(acc.minX, p.a), maxX: Math.max(acc.maxX, p.a),
-            minY: Math.min(acc.minY, p.b), maxY: Math.max(acc.maxY, p.b)
-          };
-        }, {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity});
-        console.log('C5 bounds: ' + bounds.minX + ',' + bounds.minY + ' -> ' + bounds.maxX + ',' + bounds.maxY);
-      }
-    }
     if (hasPairs && inBounds && inPoly) {
       result.push(cmd);
     }
@@ -2548,7 +2537,7 @@ canvas.addEventListener('click', function(e) {
   // Convert hover-added images to permanent (user clicked, so they want to keep them)
   hoverAddedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
-  console.log('Canvas click at game coords:', pos.x, pos.y, 'waitingForVideoEnd=' + waitingForVideoEnd, 'currentVideo=' + !!currentVideo, 'castagnette=' + gameVars['castagnette']);
+  console.log('Canvas click at game coords:', pos.x, pos.y);
   // Find ALL commands at click point, execute side effects for all
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {

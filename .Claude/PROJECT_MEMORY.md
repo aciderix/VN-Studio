@@ -527,6 +527,70 @@ La navigation (scene 6 → scene 23) n'etait jamais executee.
 3. `onVideoEnd`: ignorer les events `error` si `readyState > 0` (source active)
 4. `closeVideo()`: retrait de `vid.load()` qui declenchait des events spurieux
 
+### 13.4 Video click annulant la navigation
+
+**Probleme:** Clic pendant une video avec navigation pendante fermait la video
+sans executer onVideoEnd, annulant la navigation.
+
+**Fix:** playAvi click handler: ne ferme que si `!waitingForVideoEnd`.
+
+### 13.5 Scroll debordant hors background (couleurs1 scene 6)
+
+**Probleme:** `getSceneWidth()` utilisait les coordonnees max des polygones comme
+fallback, etendant la scene au-dela du background (polygones a x=1350-1869, bg=1280px).
+
+**Fix:** Suppression du fallback polygone - seule la largeur de l'image background est utilisee.
+
+### 13.6 Videos d'intro pays sans navigation (allem scene 7, etc.)
+
+**Probleme:** Pass 2 de `executeSceneCommands` ignorait SCENE (type 6). Les scenes
+d'intro (AFTERINIT PLAYAVI + SCENE) jouaient la video sans naviguer ensuite.
+
+**Fix:** Reecriture de Pass 2 avec pattern de navigation differee (meme logique
+que `resumeCommandProcessing`).
+
+### 13.7 Audio persistant entre scenes
+
+**Probleme:** `recentlyStartedAudio` protegeait les sons demarres dans le meme cycle
+de clic qui declenchait la navigation.
+
+**Fix:** Clear de `recentlyStartedAudio` au debut de `goToScene`.
+
+### 13.8 Audio differe apres video (CLOSEWAV -> PLAYAVI -> PLAYWAV)
+
+**Probleme:** 119 commandes avec pattern CLOSEWAV + PLAYAVI + PLAYWAV. Le PLAYWAV
+s'executait immediatement au lieu d'attendre la fin de la video.
+
+**Fix:** Ajout de `deferredAudio[]` dans resumeCommandProcessing et Pass 2.
+`waitingForVideoEnd = true` empeche le handler ended de playAvi de preempter.
+
+### 13.9 Crash cross-projet (reading 'fields' of undefined)
+
+**Probleme:** `loadVNDFile` remplacait le projet mais `currentSceneIndex` pointait
+encore sur l'ancienne valeur (belgique:16 pour allem avec 15 scenes).
+
+**Fix:** Reset `currentSceneIndex = 0` au debut de `loadVNDFile` + guard dans `render()`.
+
+### 13.10 Coupures audio au chargement de scene (CLOSEWAV ONINIT)
+
+**Probleme:** Pass 0 de `executeSceneCommands` executait CLOSEWAV (type 36) depuis
+les commandes interactives avec subIndex >= 2 (ONINIT/AFTERINIT). Cela tuait l'audio
+de fond que `goToScene` venait de preserver via `stopAudioExcept(keepKeys)`.
+Le string3 WAV relancait ensuite l'audio via `playWav()` mais `audio.play()` est
+asynchrone, causant une coupure audible.
+
+**Fix:** Skip de CLOSEWAV dans Pass 0 pour les commandes interactives.
+`goToScene` → `stopAudioExcept` gere deja le nettoyage audio a la transition.
+
+### 13.11 Audio differe perdu quand video echoue
+
+**Probleme:** Si `playAvi` echouait (toutes sources failed, readyState === 0),
+`closeVideo()` etait appele par le error handler, mais `onVideoEndAudio` voyait
+`currentVideo !== vid2` et retournait. Les PLAYWAV differes n'etaient jamais executes.
+
+**Fix:** Ajout d'un `else { executeDeferredAudio(); }` dans les deux endroits
+(resumeCommandProcessing et Pass 2) pour le cas `!currentVideo`.
+
 ---
 
 ## 14. CONVENTIONS

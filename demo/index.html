@@ -1815,8 +1815,10 @@ function executeSceneCommands(scene) {
         // SET_VAR/INC_VAR/DEC_VAR from INIT/AFTERINIT
         executeStringCommand(s.type, s.string);
       } else if (isInteractive && s.type === 36) {
-        // CLOSEWAV from INIT/AFTERINIT
-        executeStringCommand(s.type, s.string);
+        // CLOSEWAV from INIT/AFTERINIT - SKIP
+        // goToScene already handles audio cleanup via stopAudioExcept().
+        // Executing CLOSEWAV here would kill audio that was intentionally kept,
+        // then string3 WAV re-creates it async, causing an audible cut.
       } else if (isInteractive && s.type === 11) {
         // PLAYWAV from INIT/AFTERINIT
         executeStringCommand(s.type, s.string);
@@ -1978,6 +1980,9 @@ function executeSceneCommands(scene) {
         vid2.addEventListener('ended', onVideoEndAudio);
         vid2.addEventListener('error', onVideoEndAudio);
         vid2.addEventListener('click', onVideoEndAudio);
+      } else {
+        // No video actually loaded (all sources failed), execute audio immediately
+        executeDeferredAudio();
       }
     }
   });
@@ -2556,6 +2561,9 @@ function resumeCommandProcessing(cmd, startIdx) {
       vid2.addEventListener('ended', onVideoEndAudio);
       vid2.addEventListener('error', onVideoEndAudio);
       vid2.addEventListener('click', onVideoEndAudio);
+    } else {
+      // No video actually loaded (all sources failed), execute audio immediately
+      executeDeferredAudio();
     }
   }
 }

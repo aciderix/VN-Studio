@@ -1610,12 +1610,32 @@ function handleDllCommand(cmd) {
   var parts = cmd.trim().split(/\s+/);
   var action = parts[0].toLowerCase();
 
-  // scene navigation: close DLL first, then navigate
+  // scene navigation: close DLL, then navigate (wait for video if playing)
   if (action === 'scene') {
     closeDll();
     var idx = parseInt(parts[1]);
     if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
-      goToScene(idx - 1);
+      var sceneIdx = idx - 1;
+      // If a video is currently playing, wait for it to end before navigating
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid = currentVideo;
+        function onDllVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onDllVideoEnd);
+          vid.removeEventListener('error', onDllVideoEnd);
+          vid.removeEventListener('click', onDllVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          goToScene(sceneIdx);
+        }
+        vid.addEventListener('ended', onDllVideoEnd);
+        vid.addEventListener('error', onDllVideoEnd);
+        vid.addEventListener('click', onDllVideoEnd);
+      } else {
+        goToScene(sceneIdx);
+      }
     }
   } else if (action === 'closedll') {
     closeDll();

@@ -115,6 +115,7 @@
             width: 57px;
             height: 49px;
         }
+
         
         /* Labels pour afficher les chiffres - EXACTEMENT comme le DFM */
         /* Font: Century Gothic, Color: clBlue, Style: fsBold, Transparent: True */
@@ -193,8 +194,8 @@
         <button class="click-zone zone-r4-minus" data-wheel="3" data-dir="-1"></button>
         <button class="click-zone zone-r4-plus" data-wheel="3" data-dir="1"></button>
         
-        <!-- Bouton Reset -->
-        <button class="click-zone zone-reset" id="resetBtn"></button>
+        <!-- Bouton Quitter (spirale rouge) -->
+        <button class="click-zone zone-reset" id="quitBtn"></button>
     </div>
 
     <script>
@@ -253,11 +254,11 @@
                 });
             });
             
-            // Bouton reset
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                this.reset();
+            // Bouton quitter (spirale rouge)
+            document.getElementById('quitBtn').addEventListener('click', () => {
+                this.sendCommand('closedll');
             });
-            
+
             this.updateDisplay();
         }
         

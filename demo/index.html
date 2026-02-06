@@ -1962,6 +1962,7 @@ function executeSceneCommands(scene) {
     } else if (videoPlaying && deferredAudio.length > 0) {
       // Video playing with deferred audio but NO navigation
       if (currentVideo) {
+        waitingForVideoEnd = true; // Prevent playAvi's ended handler from closing video first
         var vid2 = currentVideo;
         function onVideoEndAudio(evt) {
           if (evt && evt.type === 'error' && vid2.readyState > 0) return;
@@ -1969,6 +1970,7 @@ function executeSceneCommands(scene) {
           vid2.removeEventListener('error', onVideoEndAudio);
           vid2.removeEventListener('click', onVideoEndAudio);
           if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
           closeVideo();
           executeDeferredAudio();
         }
@@ -2538,6 +2540,7 @@ function resumeCommandProcessing(cmd, startIdx) {
     // Video playing with deferred audio but NO navigation
     // Wait for video to end, then execute audio
     if (currentVideo) {
+      waitingForVideoEnd = true; // Prevent playAvi's ended handler from closing video first
       var vid2 = currentVideo;
       function onVideoEndAudio(evt) {
         if (evt && evt.type === 'error' && vid2.readyState > 0) return;
@@ -2545,6 +2548,7 @@ function resumeCommandProcessing(cmd, startIdx) {
         vid2.removeEventListener('error', onVideoEndAudio);
         vid2.removeEventListener('click', onVideoEndAudio);
         if (currentVideo !== vid2) return;
+        waitingForVideoEnd = false;
         closeVideo();
         executeDeferredAudio();
       }

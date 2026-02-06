@@ -1865,6 +1865,7 @@ function executeSceneCommands(scene) {
 
     var deferredNav = null;
     var videoPlaying = false;
+    var deferredAudio = [];
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or in rendering
@@ -1892,6 +1893,12 @@ function executeSceneCommands(scene) {
         return;
       }
 
+      // PLAYWAV after video started - defer until video ends
+      if (s.type === 11 && videoPlaying) {
+        deferredAudio.push('playwav ' + s.string);
+        return;
+      }
+
       if (s.type === 21) {
         // IF - evaluate and execute (skip display commands, already handled in Pass 1)
         var action = evaluateIf(s.string);
@@ -1907,6 +1914,8 @@ function executeSceneCommands(scene) {
               playAvi(actParts.slice(1).join(' '));
               videoPlaying = true;
             }
+          } else if (actLower === 'playwav' && videoPlaying) {
+            deferredAudio.push(action);
           } else if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
                      actLower !== 'showbmp' && actLower !== 'hidebmp') {
             executeAction(action);
@@ -1917,6 +1926,10 @@ function executeSceneCommands(scene) {
 
       executeStringCommand(s.type, s.string);
     });
+
+    function executeDeferredAudio() {
+      deferredAudio.forEach(function(action) { executeAction(action); });
+    }
 
     // Handle deferred navigation (with optional video wait)
     if (deferredNav) {
@@ -1933,6 +1946,7 @@ function executeSceneCommands(scene) {
           if (currentVideo !== vid) return;
           waitingForVideoEnd = false;
           closeVideo();
+          executeDeferredAudio();
           doNavigation(nav);
         }
         vid.addEventListener('ended', onVideoEnd);
@@ -1942,7 +1956,25 @@ function executeSceneCommands(scene) {
         waitingForVideoEnd = true;
         pendingVideoNav = deferredNav;
       } else {
+        executeDeferredAudio();
         doNavigation(deferredNav);
+      }
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      // Video playing with deferred audio but NO navigation
+      if (currentVideo) {
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
       }
     }
   });
@@ -2385,6 +2417,7 @@ function resumeCommandProcessing(cmd, startIdx) {
   var deferredNav = null;   // { type:'scene'|'runprj', value:string }
   var deferredHtml = null;  // { value:string, idx:number }
   var videoPlaying = false;
+  var deferredAudio = [];   // PLAYWAV commands to execute after video ends
 
   for (var si = startIdx; si < cmd.strings.length; si++) {
     var s = cmd.strings[si];
@@ -2410,6 +2443,9 @@ function resumeCommandProcessing(cmd, startIdx) {
           }
         } else if (actCmd === 'prev') {
           if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+        } else if (actCmd === 'playwav' && videoPlaying) {
+          // PLAYWAV from IF after video started - defer until video ends
+          deferredAudio.push(action);
         } else {
           executeAction(action);
         }
@@ -2421,6 +2457,10 @@ function resumeCommandProcessing(cmd, startIdx) {
         playAvi(s.string);
         videoPlaying = true;
       }
+    } else if (s.type === 11 && videoPlaying) {
+      // PLAYWAV after video started - defer until video ends
+      // Pattern: CLOSEWAV → PLAYAVI → PLAYWAV (119 commands across all VNDs)
+      deferredAudio.push('playwav ' + s.string);
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
     } else if (s.type === 31) {
@@ -2438,6 +2478,13 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else {
       executeStringCommand(s.type, s.string);
     }
+  }
+
+  // Helper: execute deferred audio commands (PLAYWAV after video)
+  function executeDeferredAudio() {
+    deferredAudio.forEach(function(action) {
+      executeAction(action);
+    });
   }
 
   // Now execute deferred HTML and/or navigation
@@ -2469,6 +2516,7 @@ function resumeCommandProcessing(cmd, startIdx) {
           if (currentVideo !== vid) return;
           waitingForVideoEnd = false; // Re-enable clicks
           closeVideo();
+          executeDeferredAudio();
           doNavigation(nav);
         }
         vid.addEventListener('ended', onVideoEnd);
@@ -2480,10 +2528,29 @@ function resumeCommandProcessing(cmd, startIdx) {
         pendingVideoNav = deferredNav;
       } else {
         // No video actually playing/pending, navigate now
+        executeDeferredAudio();
         doNavigation(deferredNav);
       }
     } else {
       doNavigation(deferredNav);
+    }
+  } else if (videoPlaying && deferredAudio.length > 0) {
+    // Video playing with deferred audio but NO navigation
+    // Wait for video to end, then execute audio
+    if (currentVideo) {
+      var vid2 = currentVideo;
+      function onVideoEndAudio(evt) {
+        if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+        vid2.removeEventListener('ended', onVideoEndAudio);
+        vid2.removeEventListener('error', onVideoEndAudio);
+        vid2.removeEventListener('click', onVideoEndAudio);
+        if (currentVideo !== vid2) return;
+        closeVideo();
+        executeDeferredAudio();
+      }
+      vid2.addEventListener('ended', onVideoEndAudio);
+      vid2.addEventListener('error', onVideoEndAudio);
+      vid2.addEventListener('click', onVideoEndAudio);
     }
   }
 }

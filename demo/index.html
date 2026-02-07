@@ -1291,6 +1291,27 @@ function setVar(name, val) {
   console.log('SET_VAR:', name, '=', val);
 }
 
+// Resolve <random N M> and <varname> tokens in a value string
+// Returns an integer
+function resolveValue(str) {
+  str = str.trim();
+  // <random N M> — random integer from M to N (inclusive)
+  var randomMatch = str.match(/^<random\s+(\d+)\s+(\d+)>$/i);
+  if (randomMatch) {
+    var hi = parseInt(randomMatch[1]);
+    var lo = parseInt(randomMatch[2]);
+    if (lo > hi) { var tmp = lo; lo = hi; hi = tmp; }
+    return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  }
+  // <varname> — resolve to variable value
+  var varRefMatch = str.match(/^<(\w+)>$/);
+  if (varRefMatch) {
+    return getVar(varRefMatch[1]);
+  }
+  // Plain number
+  return parseInt(str) || 0;
+}
+
 // --- IF EVALUATOR ---
 // Format: "variable op value then action [else action]"
 // Actions: "runprj path sceneIdx", "scene idx", "dec_var name val", "inc_var name val",
@@ -1303,13 +1324,13 @@ function evaluateIf(ifStr) {
   var condStr = ifStr.substring(0, thenIdx).trim();
   var rest = ifStr.substring(thenIdx + 6).trim();
 
-  // Parse condition: "variable op value"
-  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  // Parse condition: "variable op value" (value can be number or <varname>)
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
   if (!condMatch) return null;
 
   var varName = condMatch[1];
   var op = condMatch[2];
-  var val = parseInt(condMatch[3]);
+  var val = resolveValue(condMatch[3]);
   var actual = getVar(varName);
 
   var result = false;
@@ -1325,7 +1346,7 @@ function evaluateIf(ifStr) {
   // Split on " else " — careful: "else" can appear in action strings
   // Look for " else " that's followed by a known command keyword
   var elseIdx = -1;
-  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
   if (elseMatch) {
     elseIdx = rest.indexOf(elseMatch[0]);
   } else {
@@ -1347,6 +1368,22 @@ function evaluateIf(ifStr) {
   return result ? thenAction : elseAction;
 }
 
+// Execute a hotspot command: process ONCLICK (subIndex=1) strings of command N-1 (1-based).
+// Used for flow control: "hotspot 18" triggers the 18th command's click processing.
+function executeHotspot(n) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var cmdIdx = n - 1; // 1-based to 0-based
+  if (cmdIdx < 0 || cmdIdx >= scene.commands.length) {
+    console.log('Hotspot', n, '- command index', cmdIdx, 'out of range');
+    return;
+  }
+  var cmd = scene.commands[cmdIdx];
+  console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + cmd.strings.length + ' strings)');
+  // Process only ONCLICK (subIndex=1) strings from the target command
+  resumeCommandProcessing(cmd, 0);
+}
+
 // Execute an action string (from IF then/else branch)
 function executeAction(action) {
   if (!action) return;
@@ -1361,7 +1398,7 @@ function executeAction(action) {
       goToScene(idx - 1);
     }
   } else if (cmd === 'set_var') {
-    setVar(parts[1], parseInt(parts[2]) || 0);
+    setVar(parts[1], resolveValue(parts.slice(2).join(' ')));
   } else if (cmd === 'inc_var') {
     setVar(parts[1], getVar(parts[1]) + (parseInt(parts[2]) || 1));
   } else if (cmd === 'dec_var') {
@@ -1407,6 +1444,9 @@ function executeAction(action) {
     } else {
       setCursorItem(cursorItem.toLowerCase());
     }
+  } else if (cmd === 'hotspot') {
+    var hsIdx = parseInt(parts[1]);
+    if (!isNaN(hsIdx)) executeHotspot(hsIdx);
   } else if (cmd === 'pause') {
     // Pause N ms - used by DLL mini-games; they handle their own setTimeout
     // so this is a no-op when called via handleDllCommand
@@ -1517,6 +1557,8 @@ function addTextOverlay(val) {
   if (parts.length < 7) return;
   var name = parts[0].toLowerCase();
   var fontSize = parseInt(parts[1]) || 14;
+  // VND font sizes are Windows point sizes; scale up small sizes for readability
+  if (fontSize <= 12) fontSize = Math.max(fontSize * 2, 12);
   var x = parseInt(parts[2]) || 0;
   var y = parseInt(parts[3]) || 0;
   var w = parseInt(parts[4]) || 200;
@@ -1996,9 +2038,9 @@ function executeStringCommand(strType, strValue) {
     case 11: // PLAYWAV
       playWav(val);
       break;
-    case 22: // SET_VAR: "name value"
+    case 22: // SET_VAR: "name value" or "name <random N M>" or "name <varname>"
       var sp = val.split(/\s+/);
-      if (sp.length >= 2) setVar(sp[0], parseInt(sp[1]) || 0);
+      if (sp.length >= 2) setVar(sp[0], resolveValue(sp.slice(1).join(' ')));
       break;
     case 23: // INC_VAR: "name value"
       var ip = val.split(/\s+/);
@@ -2135,6 +2177,10 @@ function executeSceneCommands(scene) {
       // CLOSEWAV from INIT/AFTERINIT - SKIP
     } else if (s.type === 11) {
       executeStringCommand(s.type, s.string);
+    } else if (s.type === 7) {
+      // HOTSPOT: trigger another command's ONCLICK processing
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
     } else if (s.type === 21) {
       var action = evaluateIf(s.string);
       while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
@@ -2258,7 +2304,7 @@ function executeSceneCommands(scene) {
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or in rendering
-      if (s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
+      if (s.type === 38 || s.type === 39 || s.type === 3) return;
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
@@ -2287,6 +2333,13 @@ function executeSceneCommands(scene) {
       // One-shot SFX (loops=1) play alongside the video
       if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
         deferredAudio.push('playwav ' + s.string);
+        return;
+      }
+
+      // HOTSPOT: trigger another command's processing
+      if (s.type === 7) {
+        var hsIdx = parseInt(s.string);
+        if (!isNaN(hsIdx)) executeHotspot(hsIdx);
         return;
       }
 
@@ -2757,12 +2810,12 @@ function evaluateIfReadOnly(ifStr) {
   var condStr = ifStr.substring(0, thenIdx).trim();
   var rest = ifStr.substring(thenIdx + 6).trim();
 
-  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
   if (!condMatch) return null;
 
   var varName = condMatch[1];
   var op = condMatch[2];
-  var val = parseInt(condMatch[3]);
+  var val = resolveValue(condMatch[3]);
   var actual = getVar(varName);
 
   var result = false;
@@ -2776,7 +2829,7 @@ function evaluateIfReadOnly(ifStr) {
   }
 
   var elseIdx = -1;
-  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
   if (elseMatch) {
     elseIdx = rest.indexOf(elseMatch[0]);
   } else {
@@ -2924,8 +2977,12 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 3) {
       // PREV - go back to previous scene
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
-    } else if (s.type === 38 || s.type === 39 || s.type === 7) {
-      // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
+    } else if (s.type === 7) {
+      // HOTSPOT: trigger another command's processing
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 38 || s.type === 39) {
+      // PLAYTEXT, FONT - handled in render
     } else if (s.type === 27 && cmd.autoShowedBmp) {
       // Skip ADDBMP if it was auto-shown on scene load (ADDBMP+PREV pattern)
       console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);

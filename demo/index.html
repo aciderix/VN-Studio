@@ -3880,6 +3880,15 @@ canvas.addEventListener('touchend', function(e) {
   });
   if (navCmd) handleCommandClick(navCmd);
 
+  // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
+  // since there is no hover on touch devices. Set hoveredCmd to the
+  // first non-navigable tapped command (or navCmd) so render() draws
+  // its ONFOCUS PLAYTEXT overlays, giving visual feedback.
+  if (!navCmd && allCmds.length > 0) {
+    hoveredCmd = allCmds[0];
+    evaluateHoverEffects(allCmds[0]);
+  }
+
   render(); // Refresh display after action (e.g., item pickup)
 }, { passive: false });
 

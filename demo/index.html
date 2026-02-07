@@ -1609,11 +1609,10 @@ function playHtml(htmlStr) {
   if (parts.length < 1) return;
   var file = parts[0];
 
-  // Don't overwrite an already visible HTML overlay (first playhtml wins)
-  // This fixes bonus questions showing wrong HTM when multiple bonusX=1
-  var overlay = document.getElementById('html-overlay');
-  if (overlay.style.display === 'block') {
-    console.log('PLAYHTML skipped (overlay already visible):', file);
+  // Use scene-html (transparent, integrated) instead of html-overlay (white box)
+  var el = document.getElementById('scene-html');
+  if (el.style.display === 'block') {
+    console.log('PLAYHTML skipped (scene-html already visible):', file);
     return;
   }
 
@@ -1631,18 +1630,20 @@ function playHtml(htmlStr) {
   var url = resolveHtmlPath(file);
   console.log('PLAYHTML:', file, 'at', x, y, w, h);
 
-  // Position overlay relative to canvas
-  var rect = canvas.getBoundingClientRect();
-  var scaleX = rect.width / gameW;
-  var scaleY = rect.height / gameH;
+  var content = el.querySelector('.scene-html-content');
 
-  var content = overlay.querySelector('.html-content');
+  // Position relative to canvas
+  var canvasRect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var scaleX = canvasRect.width / gameW;
+  var scaleY = canvasRect.height / gameH;
 
-  overlay.style.left = (rect.left - container.getBoundingClientRect().left + x * scaleX) + 'px';
-  overlay.style.top = (rect.top - container.getBoundingClientRect().top + y * scaleY) + 'px';
-  overlay.style.width = (w * scaleX) + 'px';
-  overlay.style.height = (h * scaleY) + 'px';
-  overlay.style.display = 'block';
+  el.style.left = (canvasRect.left - contRect.left + x * scaleX) + 'px';
+  el.style.top = (canvasRect.top - contRect.top + y * scaleY) + 'px';
+  el.style.width = (w * scaleX) + 'px';
+  el.style.height = (h * scaleY) + 'px';
+  el.style.display = 'block';
+  content.style.fontSize = Math.max(10, Math.round(12 * scaleY)) + 'px';
 
   fetchLatin1(url).then(function(html) {
     var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
@@ -1856,6 +1857,8 @@ var pendingAfterHtml = null; // command to resume after HTML overlay closed
 
 function closeHtmlOverlay() {
   document.getElementById('html-overlay').style.display = 'none';
+  // Also close scene-html (used by playHtml for transparent PLAYHTML)
+  document.getElementById('scene-html').style.display = 'none';
   // Resume pending command processing or navigation
   if (pendingAfterHtml) {
     var pending = pendingAfterHtml;

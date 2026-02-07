@@ -2869,7 +2869,12 @@ function handleCommandClick(cmd) {
     console.log('Closing auto-played video on button click');
     closeVideo();
   }
-  resumeCommandProcessing(cmd, 0);
+  // Filter to ONCLICK strings only (subIndex=1) — don't re-run ONINIT (2) or ONFOCUS (0)
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  resumeCommandProcessing(filteredCmd, 0);
   // After click processing, re-evaluate ONINIT display IFs to refresh overlays
   // This handles cases like quiz scenes where clicking an answer changes a variable
   // and another command's ONINIT IFs control which image is displayed

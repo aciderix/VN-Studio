@@ -1436,7 +1436,7 @@ function executeAction(action) {
   } else if (cmd === 'playhtml') {
     playHtml(parts.slice(1).join(' '));
   } else if (cmd === 'playbmp') {
-    addBmpOverlay('_play_' + Date.now() + ' ' + parts.slice(1).join(' '));
+    addBmpOverlay('_playbmp ' + parts.slice(1).join(' '));
   } else if (cmd === 'addbmp') {
     addBmpOverlay(parts.slice(1).join(' '));
   } else if (cmd === 'delbmp') {
@@ -2122,9 +2122,9 @@ function executeStringCommand(strType, strValue) {
       break;
     case 10: // PLAYBMP (direct, not named overlay)
       // Format: "path flags x y" — similar to ADDBMP but unnamed
-      var bp = val.split(/\s+/);
-      if (bp.length >= 1) {
-        addBmpOverlay('_playbmp_' + Date.now() + ' ' + val);
+      // Use fixed name so each PLAYBMP replaces the previous one
+      if (val.split(/\s+/).length >= 1) {
+        addBmpOverlay('_playbmp ' + val);
       }
       break;
     case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"

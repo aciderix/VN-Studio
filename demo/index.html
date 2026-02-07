@@ -1370,8 +1370,13 @@ function evaluateIf(ifStr) {
 
 // Execute a hotspot command: process ONCLICK (subIndex=1) strings of command N-1 (1-based).
 // Used for flow control: "hotspot 18" triggers the 18th command's click processing.
+var _hotspotDepth = 0;
 function executeHotspot(n) {
   if (!project || currentSceneIndex < 0) return;
+  if (_hotspotDepth > 20) {
+    console.warn('Hotspot recursion limit reached (depth=' + _hotspotDepth + '), aborting hotspot', n);
+    return;
+  }
   var scene = project.scenes[currentSceneIndex];
   var cmdIdx = n - 1; // 1-based to 0-based
   if (cmdIdx < 0 || cmdIdx >= scene.commands.length) {
@@ -1379,9 +1384,16 @@ function executeHotspot(n) {
     return;
   }
   var cmd = scene.commands[cmdIdx];
-  console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + cmd.strings.length + ' strings)');
-  // Process only ONCLICK (subIndex=1) strings from the target command
-  resumeCommandProcessing(cmd, 0);
+  // Filter to ONCLICK strings only (subIndex=1) to avoid re-triggering ONINIT hotspots
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + onclickStrings.length + '/' + cmd.strings.length + ' ONCLICK strings)');
+  // Create a shallow copy with filtered strings for resumeCommandProcessing
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  _hotspotDepth++;
+  resumeCommandProcessing(filteredCmd, 0);
+  _hotspotDepth--;
 }
 
 // Execute an action string (from IF then/else branch)

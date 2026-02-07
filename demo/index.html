@@ -650,6 +650,20 @@ function expandRect(pairs) {
   return pairs;
 }
 
+// Compute polygon area using the Shoelace formula (works for any simple polygon)
+function polygonArea(pairs) {
+  var pts = expandRect(pairs);
+  var n = pts.length;
+  if (n < 3) return Infinity;
+  var area = 0;
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    area += pts[i].a * pts[j].b;
+    area -= pts[j].a * pts[i].b;
+  }
+  return Math.abs(area) / 2;
+}
+
 // Couleurs de polygones par type de commande
 var POLY_COLORS = {
   100: 'rgba(255,100,100,0.4)',
@@ -2736,6 +2750,10 @@ function findAllCommandsAtPoint(x, y) {
       }
     }
   }
+  // Sort by polygon area (smallest first) so the most specific polygon wins
+  result.sort(function(a, b) {
+    return polygonArea(a.paramPairs) - polygonArea(b.paramPairs);
+  });
   return result;
 }
 

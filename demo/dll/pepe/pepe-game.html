@@ -224,10 +224,11 @@
                 this.isCompleted = true;
                 this.feedback.textContent = "Tout ça !";
                 this.input.disabled = true;
-                
-                // Pause de 1000ms puis callback (comportement original)
+
+                // Pause de 1000ms puis set pepe=1 and navigate (comportement original)
                 setTimeout(() => {
                     if (this.onSuccess) {
+                        this.onSuccess("set_var pepe 1");
                         this.onSuccess(this.SUCCESS_COMMAND);
                     }
                     console.log(`[PepeGame] SUCCESS - Commande: "${this.SUCCESS_COMMAND}"`);
@@ -254,19 +255,23 @@
             }
         }
         
-        // Initialisation avec callbacks d'exemple
-        const game = new PepeGame({
-            onSuccess: (command) => {
-                console.log(`🎯 Succès ! Exécuter: ${command}`);
-                // Intégration: vnEngine.executeCommand(command);
+        // Initialisation
+        const game = new PepeGame();
+
+        // API pour intégration VN-Studio (engine looks for window.pepe.setOnCommand)
+        window.pepe = {
+            setOnCommand: function(callback) {
+                game.onSuccess = function(command) {
+                    callback(command);
+                };
+                game.onQuit = function() {
+                    callback("closedll");
+                };
             },
-            onQuit: () => {
-                console.log('👋 Quitter le mini-jeu');
-                // Intégration: closeMiniGame();
+            reset: function() {
+                game.reset();
             }
-        });
-        
-        window.pepeGame = game;
+        };
     </script>
 </body>
 </html>

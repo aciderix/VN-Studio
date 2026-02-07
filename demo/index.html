@@ -2818,7 +2818,10 @@ function refreshOninitOverlays() {
   var scene = project.scenes[currentSceneIndex];
   var deferredNav = null;
   scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
     cmd.strings.forEach(function(s) {
+      // For interactive commands, skip ONFOCUS/ONCLICK strings (subIndex 0/1)
+      if (isInteractive && s.subIndex < 2) return;
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
         if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||

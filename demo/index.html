@@ -2210,6 +2210,15 @@ function executeSceneCommands(scene) {
       // HOTSPOT: trigger another command's ONCLICK processing
       var hsIdx = parseInt(s.string);
       if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 6) {
+      // SCENE navigation from ONINIT/AFTERINIT - defer until after all Pass 0 items
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: s.string };
+    } else if (s.type === 31) {
+      // RUNPRJ from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: s.string };
+    } else if (s.type === 3) {
+      // PREV from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'prev', value: '' };
     } else if (s.type === 21) {
       var action = evaluateIf(s.string);
       while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {

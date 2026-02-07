@@ -2970,9 +2970,8 @@ function resumeCommandProcessing(cmd, startIdx) {
     return loops > 1 || loops === 0; // 0=infinite, >1=looping ambient
   }
 
-  for (var si = startIdx; si < cmd.strings.length; si++) {
-    var s = cmd.strings[si];
-
+  // Process a single string command (shared between sync and async paths)
+  function processOneString(s, si) {
     if (s.type === 21) {
       var action = evaluateIf(s.string);
       if (action) {
@@ -2985,9 +2984,6 @@ function resumeCommandProcessing(cmd, startIdx) {
         } else if (actCmd === 'runprj') {
           if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
         } else if (actCmd === 'playavi') {
-          // PLAYAVI from IF condition - execute and track for video deferral
-          // Skip if video was auto-played on scene load (PLAYAVI+PREV pattern)
-          // Skip if another video is already playing from this command
           if (!cmd.autoPlayedVideo && !videoPlaying) {
             playAvi(actParts.slice(1).join(' '));
             videoPlaying = true;
@@ -2995,25 +2991,17 @@ function resumeCommandProcessing(cmd, startIdx) {
         } else if (actCmd === 'prev') {
           if (!deferredNav) deferredNav = { type: 'prev', value: '' };
         } else if (actCmd === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
-          // Looping PLAYWAV from IF after PLAYAVI - defer until video ends
-          // Ambient/background music shouldn't play over video dialogue
-          // One-shot SFX (loops=1, e.g. cling.wav) play alongside the video
           deferredAudio.push(action);
         } else {
           executeAction(action);
         }
       }
     } else if (s.type === 9) {
-      // Skip PLAYAVI if video was auto-played on scene load (PLAYAVI+PREV pattern)
-      // Skip if another video is already playing from this command
       if (!cmd.autoPlayedVideo && !videoPlaying) {
         playAvi(s.string);
         videoPlaying = true;
       }
     } else if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
-      // Looping PLAYWAV after PLAYAVI - defer until video ends
-      // Ambient/background music (loops>1) shouldn't play over video dialogue
-      // One-shot SFX (loops=1, e.g. cling.wav) play alongside the video
       deferredAudio.push('playwav ' + s.string);
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
@@ -3022,17 +3010,16 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 13) {
       if (!deferredHtml) deferredHtml = { value: s.string, idx: si };
     } else if (s.type === 3) {
-      // PREV - go back to previous scene
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
     } else if (s.type === 7) {
-      // HOTSPOT: trigger another command's processing
       var hsIdx = parseInt(s.string);
       if (!isNaN(hsIdx)) executeHotspot(hsIdx);
     } else if (s.type === 38 || s.type === 39) {
       // PLAYTEXT, FONT - handled in render
     } else if (s.type === 27 && cmd.autoShowedBmp) {
-      // Skip ADDBMP if it was auto-shown on scene load (ADDBMP+PREV pattern)
       console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
+    } else if (s.type === 16) {
+      // PAUSE - handled by async runner, skip in sync path
     } else {
       executeStringCommand(s.type, s.string);
     }
@@ -3045,76 +3032,103 @@ function resumeCommandProcessing(cmd, startIdx) {
     });
   }
 
-  // Now execute deferred HTML and/or navigation
-  if (deferredHtml) {
-    playHtml(deferredHtml.value);
-    if (deferredNav) {
-      // HTML shown + navigation pending: navigate when HTML is closed
-      pendingAfterHtml = { nav: deferredNav };
-    } else {
-      pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
-    }
-  } else if (deferredNav) {
-    if (videoPlaying) {
-      if (currentVideo) {
-        // Video is playing in DOM - wait for it to end
-        waitingForVideoEnd = true; // Block clicks while video plays
-        var nav = deferredNav;
-        var vid = currentVideo;
-        function onVideoEnd(evt) {
-          // If this is an error event but a source is actively loaded (readyState > 0),
-          // ignore it — it's a source-level failure (e.g. AVI codec) while webm plays fine.
-          // We only want to act on 'ended' (natural finish), 'click' (user skip), or
-          // 'error' when ALL sources failed (readyState === 0).
-          if (evt && evt.type === 'error' && vid.readyState > 0) return;
-          vid.removeEventListener('ended', onVideoEnd);
-          vid.removeEventListener('error', onVideoEnd);
-          vid.removeEventListener('click', onVideoEnd);
-          // Only act if this is still the active video (stale events from replaced videos must be ignored)
-          if (currentVideo !== vid) return;
-          waitingForVideoEnd = false; // Re-enable clicks
-          closeVideo();
-          executeDeferredAudio();
-          doNavigation(nav);
-        }
-        vid.addEventListener('ended', onVideoEnd);
-        vid.addEventListener('error', onVideoEnd);
-        vid.addEventListener('click', onVideoEnd);
-      } else if (pendingVideoPlay) {
-        // Video autoplay was blocked - store nav for when video plays via unlock
-        waitingForVideoEnd = true;
-        pendingVideoNav = deferredNav;
+  // Finalize: handle deferred HTML and/or navigation after all strings processed
+  function finalize() {
+    if (deferredHtml) {
+      playHtml(deferredHtml.value);
+      if (deferredNav) {
+        pendingAfterHtml = { nav: deferredNav };
       } else {
-        // No video actually playing/pending, navigate now
-        executeDeferredAudio();
+        pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
+      }
+    } else if (deferredNav) {
+      if (videoPlaying) {
+        if (currentVideo) {
+          waitingForVideoEnd = true;
+          var nav = deferredNav;
+          var vid = currentVideo;
+          function onVideoEnd(evt) {
+            if (evt && evt.type === 'error' && vid.readyState > 0) return;
+            vid.removeEventListener('ended', onVideoEnd);
+            vid.removeEventListener('error', onVideoEnd);
+            vid.removeEventListener('click', onVideoEnd);
+            if (currentVideo !== vid) return;
+            waitingForVideoEnd = false;
+            closeVideo();
+            executeDeferredAudio();
+            doNavigation(nav);
+          }
+          vid.addEventListener('ended', onVideoEnd);
+          vid.addEventListener('error', onVideoEnd);
+          vid.addEventListener('click', onVideoEnd);
+        } else if (pendingVideoPlay) {
+          waitingForVideoEnd = true;
+          pendingVideoNav = deferredNav;
+        } else {
+          executeDeferredAudio();
+          doNavigation(deferredNav);
+        }
+      } else {
         doNavigation(deferredNav);
       }
-    } else {
-      doNavigation(deferredNav);
-    }
-  } else if (videoPlaying && deferredAudio.length > 0) {
-    // Video playing with deferred audio but NO navigation
-    // Wait for video to end, then execute audio
-    if (currentVideo) {
-      waitingForVideoEnd = true; // Prevent playAvi's ended handler from closing video first
-      var vid2 = currentVideo;
-      function onVideoEndAudio(evt) {
-        if (evt && evt.type === 'error' && vid2.readyState > 0) return;
-        vid2.removeEventListener('ended', onVideoEndAudio);
-        vid2.removeEventListener('error', onVideoEndAudio);
-        vid2.removeEventListener('click', onVideoEndAudio);
-        if (currentVideo !== vid2) return;
-        waitingForVideoEnd = false;
-        closeVideo();
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
+      } else {
         executeDeferredAudio();
       }
-      vid2.addEventListener('ended', onVideoEndAudio);
-      vid2.addEventListener('error', onVideoEndAudio);
-      vid2.addEventListener('click', onVideoEndAudio);
-    } else {
-      // No video actually loaded (all sources failed), execute audio immediately
-      executeDeferredAudio();
     }
+  }
+
+  // Check if any string has PAUSE (type 16) — if so, use async processing
+  var hasPause = false;
+  for (var pi = startIdx; pi < cmd.strings.length; pi++) {
+    if (cmd.strings[pi].type === 16) { hasPause = true; break; }
+  }
+
+  if (hasPause) {
+    // Async processing: pause at PAUSE commands, render, then continue
+    waitingForVideoEnd = true; // Block clicks during pause sequence
+    (function runAsync(si) {
+      if (si >= cmd.strings.length) {
+        waitingForVideoEnd = false;
+        finalize();
+        render();
+        return;
+      }
+      var s = cmd.strings[si];
+      if (s.type === 16) {
+        var ms = parseInt(s.string) || 300;
+        // Clear imagesAddedThisClick so DELBMP after PAUSE can remove
+        // images that were added before the pause (they've been visible)
+        imagesAddedThisClick = {};
+        render();
+        setTimeout(function() { runAsync(si + 1); }, ms);
+      } else {
+        processOneString(s, si);
+        runAsync(si + 1);
+      }
+    })(startIdx);
+  } else {
+    // Sync processing (fast path — no PAUSE in this command)
+    for (var si = startIdx; si < cmd.strings.length; si++) {
+      processOneString(cmd.strings[si], si);
+    }
+    finalize();
   }
 }
 
@@ -3848,6 +3862,9 @@ canvas.addEventListener('touchend', function(e) {
 
   if (touchMoved || !project || currentSceneIndex < 0) return;
 
+  // Block taps while PAUSE sequence or video is playing
+  if (waitingForVideoEnd) return;
+
   // Tap = clic - use same logic as desktop click (find ALL overlapping commands)
   var touch = e.changedTouches[0];
   var pos = screenToGame(touch.clientX, touch.clientY);
@@ -3882,9 +3899,10 @@ canvas.addEventListener('touchend', function(e) {
 
   // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
   // since there is no hover on touch devices. Set hoveredCmd to the
-  // first non-navigable tapped command (or navCmd) so render() draws
-  // its ONFOCUS PLAYTEXT overlays, giving visual feedback.
-  if (!navCmd && allCmds.length > 0) {
+  // first non-navigable tapped command so render() draws its ONFOCUS
+  // PLAYTEXT overlays, giving visual feedback.
+  // Skip if async processing (PAUSE) is running — it manages its own display.
+  if (!navCmd && !waitingForVideoEnd && allCmds.length > 0) {
     hoveredCmd = allCmds[0];
     evaluateHoverEffects(allCmds[0]);
   }

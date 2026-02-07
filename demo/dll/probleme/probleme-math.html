@@ -240,17 +240,19 @@
             }
         });
         
-        // Bouton quitter
+        // Bouton quitter — ferme le DLL et retourne à la scène en cours
         quitBtn.addEventListener('click', function() {
-            sendCommand("scene 18");
+            sendCommand("closedll");
         });
         
         // Focus initial sur le champ de saisie
         answerInput.focus();
         
         // API pour intégration VN-Studio
-        window.mathProblem = {
-            setCallback: setVNCallback,
+        window.probleme = {
+            setOnCommand: function(callback) {
+                vnCallback = callback;
+            },
             reset: function() {
                 answered = false;
                 answerInput.value = "";

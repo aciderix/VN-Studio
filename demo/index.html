@@ -1933,6 +1933,13 @@ function handleDllCommand(cmd) {
     sceneHistory = [];
     clearCursorItem();
     executeRunPrj('frontal\\start.vnp 3');
+  } else if (action === 'newgame') {
+    closeDll();
+    // Nouvelle partie: reset complet et demarrage couleurs1 scene 1
+    gameVars = {};
+    sceneHistory = [];
+    clearCursorItem();
+    executeRunPrj('couleurs1\\couleurs1.vnp 1');
   } else if (action === 'runprj') {
     closeDll();
     executeRunPrj(parts.slice(1).join(' '));

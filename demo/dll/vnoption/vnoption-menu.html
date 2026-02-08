@@ -258,7 +258,7 @@ function onQuit() {
 function onNewGame() {
   showConfirm('Commencer une nouvelle partie ?\nLa progression en cours sera perdue.', function(yes) {
     if (yes) {
-      sendCommand('quit');
+      sendCommand('newgame');
     }
   });
 }

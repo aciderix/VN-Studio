@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VN-Studio Inventory - Faithful Port</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 8pt;
+            background: transparent;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inventory-window {
+            width: 330px;
+            height: 337px;
+            position: relative;
+            background: url('inventory_bg.png') no-repeat;
+            background-size: 330px 314px;
+            background-color: #c0c0c0;
+            border: 2px outset #ffffff;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* SysListView32 - Position exacte du DIALOG: (12, 14), taille (306, 266) */
+        .item-list {
+            position: absolute;
+            left: 12px;
+            top: 14px;
+            width: 306px;
+            height: 266px;
+            background: #ffffff;
+            border: 2px inset #808080;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .item-list::-webkit-scrollbar { width: 16px; }
+        .item-list::-webkit-scrollbar-track { background: #c0c0c0; }
+        .item-list::-webkit-scrollbar-thumb { background: #808080; border: 2px outset #c0c0c0; }
+
+        .item-entry {
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            cursor: pointer;
+            user-select: none;
+            height: 36px;
+        }
+
+        .item-entry:hover { background: #e0e0e0; }
+        .item-entry.selected { background: #000080; color: #ffffff; }
+
+        .item-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            margin-right: 8px;
+            background: #c0c0c0;
+            border: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .item-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        .item-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Button - Position exacte du DIALOG: (63, 294), taille (204, 28) */
+        .close-button {
+            position: absolute;
+            left: 63px;
+            top: 294px;
+            width: 204px;
+            height: 28px;
+            font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 8pt;
+            background: #c0c0c0;
+            border: 2px outset #ffffff;
+            cursor: pointer;
+        }
+
+        .close-button:active { border: 2px inset #808080; }
+
+        .empty-message {
+            padding: 20px;
+            text-align: center;
+            color: #808080;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="inventory-window">
+        <div class="item-list" id="itemList">
+            <div class="empty-message" id="emptyMessage">Le sac est vide</div>
+        </div>
+        <button class="close-button" id="closeButton">Fermer le sac à dos</button>
+    </div>
+
+    <script>
+    // Table des items (87 items extraits du DLL)
+    var ITEMS_TABLE = {
+        "ballon1": "Ballon",
+        "bouee": "Bouée",
+        "bout_plo": "Bouteille de plongée",
+        "castagnette": "Castagnettes",
+        "ciseaux": "Ciseaux",
+        "clejaune": "Clé jaune",
+        "guitare": "Guitare",
+        "harpon": "Harpon",
+        "helice": "Hélice",
+        "loupe": "Loupe",
+        "masque": "Masque de plongée",
+        "masse": "Marteau",
+        "pain": "Pain",
+        "palme": "Palmes",
+        "photo": "Pellicule",
+        "piece": "Pièce en or",
+        "pier_berlin": "Pierre du mur de Berlin",
+        "raquette": "Raquette de tennis",
+        "ressort": "Ressort",
+        "cheval": "Petit cheval",
+        "ruban": "Ruban bleu et jaune",
+        "sabot1": "Sabot",
+        "sabot2": "Sabot",
+        "scotch": "Scotch",
+        "taillepierre": "Taille-pierre",
+        "ap_photo": "Appareil photographique",
+        "houblon": "Houblon",
+        "chewing": "Chewing-gum",
+        "cleverte": "Clé verte",
+        "partition": "Partition",
+        "laine": "Pelote de laine",
+        "tondeuse": "Tondeuse",
+        "tournevis": "Tournevis",
+        "cire": "Cire d'abeilles",
+        "chianti": "Bouteille de Chianti",
+        "rouedent": "Roue dentée",
+        "pierreor": "Pierre philosophale",
+        "papiercado": "Rouleau de papier",
+        "hotte": "Hotte du Père Noël",
+        "levure": "Sachet de levure",
+        "bouteille": "Bouteille vide",
+        "parfum": "Bouteille de parfum",
+        "rouge": "Rouge à lèvres",
+        "bisous": "Bisous",
+        "pince": "Pince",
+        "tulipejaune": "Tulipe jaune",
+        "tulipeorange": "Tulipe orange",
+        "tuliperouge": "Tulipe rouge",
+        "tulipeverte": "Tulipe verte",
+        "tulipeviolet": "Tulipe violette",
+        "farine": "Sac de farine",
+        "saliere": "Salière",
+        "bougie": "Bougie",
+        "seche": "Sèche-cheveux",
+        "clerouge": "Clé rouge",
+        "bout_eau": "Bouteille remplie d'eau",
+        "dorade": "Dorade",
+        "moule": "Moule",
+        "poivrouge": "Poivron rouge",
+        "poivjaune": "Poivron jaune",
+        "oignon": "Oignon",
+        "olive": "Bouteille d'huile d'olive",
+        "bouillon": "Bouillon de poulet",
+        "violon": "Violon",
+        "skate": "Skate",
+        "champagne": "Bouteille de champagne",
+        "fromage": "Fromage",
+        "bonnet": "Bonnet",
+        "huile": "Huile de moteur",
+        "orge": "Orge",
+        "burette": "Burette",
+        "allumette": "Allumette",
+        "chouetteor": "Chouette en or",
+        "chouette": "Chouette en fer",
+        "sirop": "Sirop pour la toux",
+        "fiolegrece": "Fiole",
+        "fiolegrece2": "Fiole",
+        "fioleecosse": "Fiole",
+        "fioleirlande": "Fiole",
+        "fioleespagne": "Fiole",
+        "fiolesuede": "Fiole",
+        "fiolefinlande": "Fiole",
+        "fioleautriche": "Fiole",
+        "fiolepaysbas": "Fiole",
+        "fioleespagne2": "Fiole",
+        "fioleitalie": "Fiole",
+        "fioleangleterre": "Fiole"
+    };
+
+    // Inventory using sendCommand pattern (same as other DLLs)
+    var onCommand = null;
+    var items = new Map();
+    var selectedItem = null;
+    var cursorBasePath = '';
+
+    var listEl = document.getElementById('itemList');
+    var emptyEl = document.getElementById('emptyMessage');
+
+    function sendCommand(cmd) {
+        console.log('[INV Command]', cmd);
+        if (onCommand) onCommand(cmd);
+    }
+
+    function setOnCommand(callback) {
+        onCommand = callback;
+    }
+
+    // Called by the engine after iframe loads to populate owned items
+    function populateItems(ownedItems, curPath) {
+        cursorBasePath = curPath || '';
+        ownedItems.forEach(function(name) {
+            if (ITEMS_TABLE[name] && !items.has(name)) {
+                items.set(name, {
+                    displayName: ITEMS_TABLE[name],
+                    iconUrl: cursorBasePath + name + '.CUR'
+                });
+            }
+        });
+        renderList();
+    }
+
+    function renderList() {
+        listEl.querySelectorAll('.item-entry').forEach(function(e) { e.remove(); });
+
+        if (items.size === 0) {
+            emptyEl.style.display = 'block';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        items.forEach(function(data, internal) {
+            var entry = document.createElement('div');
+            entry.className = 'item-entry' + (internal === selectedItem ? ' selected' : '');
+            entry.dataset.internal = internal;
+
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'item-icon';
+
+            var img = document.createElement('img');
+            img.src = data.iconUrl;
+            img.alt = '';
+            img.onerror = function() { this.style.display = 'none'; };
+            iconDiv.appendChild(img);
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'item-name';
+            nameSpan.textContent = data.displayName;
+
+            entry.appendChild(iconDiv);
+            entry.appendChild(nameSpan);
+
+            entry.addEventListener('click', function() {
+                selectedItem = internal;
+                renderList();
+            });
+
+            entry.addEventListener('dblclick', function() {
+                // Double-click = use item: set_var item 2 + defcursor item
+                sendCommand('set_var ' + internal + ' 2');
+                sendCommand('defcursor ' + internal);
+                sendCommand('closedll');
+            });
+
+            listEl.appendChild(entry);
+        });
+    }
+
+    document.getElementById('closeButton').addEventListener('click', function() {
+        sendCommand('defcursor 0');
+        sendCommand('closedll');
+    });
+
+    // Expose API for engine integration
+    window.inventory = {
+        setOnCommand: setOnCommand,
+        populateItems: populateItems
+    };
+    </script>
+</body>
+</html>

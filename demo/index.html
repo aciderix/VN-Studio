@@ -223,6 +223,56 @@
       display: none;
       overflow: auto;
     }
+    /* DLL mini-game overlay (iframe-based) */
+    #dll-overlay {
+      position: absolute;
+      z-index: 20;
+      display: none;
+      border: none;
+      background: #000;
+      overflow: hidden;
+    }
+    #dll-overlay.dll-transparent {
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #dll-overlay iframe {
+      border: none;
+      transform-origin: 0 0;
+    }
+    #dll-overlay.dll-transparent iframe {
+      transform-origin: center center;
+    }
+    /* Active inventory item indicator */
+    #cursor-indicator {
+      position: absolute;
+      z-index: 18;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(0,0,0,0.25);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #cursor-indicator img {
+      max-width: 22px;
+      max-height: 22px;
+    }
+    #cursor-indicator .cursor-label {
+      font-size: 7px;
+      text-align: center;
+      color: #333;
+      max-width: 26px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     #html-overlay .html-close {
       position: absolute;
       top: 2px;
@@ -370,6 +420,8 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
+  <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div id="cursor-indicator"></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
   <div id="dropzone">
@@ -598,6 +650,20 @@ function expandRect(pairs) {
   return pairs;
 }
 
+// Compute polygon area using the Shoelace formula (works for any simple polygon)
+function polygonArea(pairs) {
+  var pts = expandRect(pairs);
+  var n = pts.length;
+  if (n < 3) return Infinity;
+  var area = 0;
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    area += pts[i].a * pts[j].b;
+    area -= pts[j].a * pts[i].b;
+  }
+  return Math.abs(area) / 2;
+}
+
 // Couleurs de polygones par type de commande
 var POLY_COLORS = {
   100: 'rgba(255,100,100,0.4)',
@@ -651,17 +717,15 @@ var container = document.getElementById('canvas-container');
 function getSceneWidth(scene) {
   var w = project ? project.header.width : 640;
   if (!scene) return w;
-  // Utiliser la largeur de l'image de fond si chargée
+  // Utiliser la largeur de l'image de fond si chargée - cette valeur fait autorité
   var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
   if (resources[resKey] && resources[resKey].naturalWidth > w) {
     w = resources[resKey].naturalWidth;
   }
-  // Fallback: max X des polygones
-  scene.commands.forEach(function(cmd) {
-    cmd.paramPairs.forEach(function(p) {
-      if (p.a > w) w = p.a + 1;
-    });
-  });
+  // NOTE: On ne fait PAS de fallback sur les coords max des polygones.
+  // Certaines scenes (ex: couleurs1 scene 6) ont des polygones places
+  // volontairement hors du fond (x > bgWidth) qui ne doivent pas etendre
+  // la zone scrollable au-dela de l'image de fond reelle.
   return w;
 }
 
@@ -678,6 +742,7 @@ function resizeCanvas() {
   canvas.style.width = dispW + 'px';
   canvas.style.height = dispH + 'px';
 
+  positionCursorIndicator();
   render();
 }
 
@@ -703,6 +768,7 @@ function screenToGame(clientX, clientY) {
 function render() {
   if (!project || currentSceneIndex < 0) return;
   var scene = project.scenes[currentSceneIndex];
+  if (!scene) return;
   var w = project.header.width;
   var h = project.header.height;
   var sceneW = getSceneWidth(scene);
@@ -943,6 +1009,9 @@ function render() {
     ctx.fillStyle = 'rgba(233,69,96,0.7)';
     ctx.fillRect(barX, barY, barW, barH);
   }
+
+  // Keep video overlay in sync with scroll position
+  updateVideoPosition(currentVideo);
 }
 
 // =============================================================================
@@ -1127,6 +1196,7 @@ function executeRunPrj(runPrjStr) {
   }
   console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
   stopAllAudio();
+  clearCursorItem();
 
   currentBasePath = parsed.entry.base;
   var targetScene = parsed.sceneIndex;
@@ -1167,6 +1237,64 @@ function executeRunPrj(runPrjStr) {
 
 // --- VARIABLES ---
 var gameVars = {}; // variable store: { name: value }
+var activeCursorItem = null; // inventory item selected as cursor (defcursor)
+
+function setCursorItem(itemName) {
+  activeCursorItem = itemName;
+  var indicator = document.getElementById('cursor-indicator');
+  if (!itemName) {
+    indicator.style.display = 'none';
+    indicator.innerHTML = '';
+    return;
+  }
+  // Show indicator with item icon (.CUR from barre/cur/)
+  // Try uppercase .CUR first (original file extension), fallback to lowercase
+  var basePath = '/game-data/barre/cur/' + itemName;
+  var img = document.createElement('img');
+  img.src = basePath + '.CUR';
+  img.alt = itemName;
+  img.onerror = function() {
+    if (img.src.endsWith('.CUR')) {
+      // Try lowercase extension
+      img.src = basePath + '.cur';
+    } else {
+      // Both failed - show item name as text fallback
+      indicator.innerHTML = '';
+      var lbl = document.createElement('span');
+      lbl.className = 'cursor-label';
+      lbl.textContent = itemName;
+      indicator.appendChild(lbl);
+    }
+  };
+  indicator.innerHTML = '';
+  indicator.appendChild(img);
+  indicator.style.display = 'flex';
+  positionCursorIndicator();
+}
+
+function positionCursorIndicator() {
+  var indicator = document.getElementById('cursor-indicator');
+  if (indicator.style.display === 'none') return;
+  var canvasRect = canvas.getBoundingClientRect();
+  var containerRect = container.getBoundingClientRect();
+  // Position top-right of the canvas area, with a small margin
+  var topOffset = canvasRect.top - containerRect.top + 6;
+  var rightOffset = containerRect.right - canvasRect.right + 6;
+  indicator.style.top = topOffset + 'px';
+  indicator.style.right = rightOffset + 'px';
+}
+
+function clearCursorItem() {
+  if (activeCursorItem) {
+    // Put the item back in the bag (var 2 → 1)
+    var key = activeCursorItem.toLowerCase();
+    if (gameVars[key] === 2) {
+      gameVars[key] = 1;
+      console.log('Cursor item returned to bag:', key, '2 → 1');
+    }
+    setCursorItem(null);
+  }
+}
 
 function getVar(name) {
   return gameVars[name.toLowerCase()] || 0;
@@ -1175,6 +1303,27 @@ function getVar(name) {
 function setVar(name, val) {
   gameVars[name.toLowerCase()] = val;
   console.log('SET_VAR:', name, '=', val);
+}
+
+// Resolve <random N M> and <varname> tokens in a value string
+// Returns an integer
+function resolveValue(str) {
+  str = str.trim();
+  // <random N M> — random integer from M to N (inclusive)
+  var randomMatch = str.match(/^<random\s+(\d+)\s+(\d+)>$/i);
+  if (randomMatch) {
+    var hi = parseInt(randomMatch[1]);
+    var lo = parseInt(randomMatch[2]);
+    if (lo > hi) { var tmp = lo; lo = hi; hi = tmp; }
+    return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  }
+  // <varname> — resolve to variable value
+  var varRefMatch = str.match(/^<(\w+)>$/);
+  if (varRefMatch) {
+    return getVar(varRefMatch[1]);
+  }
+  // Plain number
+  return parseInt(str) || 0;
 }
 
 // --- IF EVALUATOR ---
@@ -1189,13 +1338,13 @@ function evaluateIf(ifStr) {
   var condStr = ifStr.substring(0, thenIdx).trim();
   var rest = ifStr.substring(thenIdx + 6).trim();
 
-  // Parse condition: "variable op value"
-  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  // Parse condition: "variable op value" (value can be number or <varname>)
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
   if (!condMatch) return null;
 
   var varName = condMatch[1];
   var op = condMatch[2];
-  var val = parseInt(condMatch[3]);
+  var val = resolveValue(condMatch[3]);
   var actual = getVar(varName);
 
   var result = false;
@@ -1211,7 +1360,7 @@ function evaluateIf(ifStr) {
   // Split on " else " — careful: "else" can appear in action strings
   // Look for " else " that's followed by a known command keyword
   var elseIdx = -1;
-  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
   if (elseMatch) {
     elseIdx = rest.indexOf(elseMatch[0]);
   } else {
@@ -1233,6 +1382,34 @@ function evaluateIf(ifStr) {
   return result ? thenAction : elseAction;
 }
 
+// Execute a hotspot command: process ONCLICK (subIndex=1) strings of command N-1 (1-based).
+// Used for flow control: "hotspot 18" triggers the 18th command's click processing.
+var _hotspotDepth = 0;
+function executeHotspot(n) {
+  if (!project || currentSceneIndex < 0) return;
+  if (_hotspotDepth > 20) {
+    console.warn('Hotspot recursion limit reached (depth=' + _hotspotDepth + '), aborting hotspot', n);
+    return;
+  }
+  var scene = project.scenes[currentSceneIndex];
+  var cmdIdx = n - 1; // 1-based to 0-based
+  if (cmdIdx < 0 || cmdIdx >= scene.commands.length) {
+    console.log('Hotspot', n, '- command index', cmdIdx, 'out of range');
+    return;
+  }
+  var cmd = scene.commands[cmdIdx];
+  // Filter to ONCLICK strings only (subIndex=1) to avoid re-triggering ONINIT hotspots
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + onclickStrings.length + '/' + cmd.strings.length + ' ONCLICK strings)');
+  // Create a shallow copy with filtered strings for resumeCommandProcessing
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  _hotspotDepth++;
+  resumeCommandProcessing(filteredCmd, 0);
+  _hotspotDepth--;
+}
+
 // Execute an action string (from IF then/else branch)
 function executeAction(action) {
   if (!action) return;
@@ -1247,7 +1424,7 @@ function executeAction(action) {
       goToScene(idx - 1);
     }
   } else if (cmd === 'set_var') {
-    setVar(parts[1], parseInt(parts[2]) || 0);
+    setVar(parts[1], resolveValue(parts.slice(2).join(' ')));
   } else if (cmd === 'inc_var') {
     setVar(parts[1], getVar(parts[1]) + (parseInt(parts[2]) || 1));
   } else if (cmd === 'dec_var') {
@@ -1259,7 +1436,7 @@ function executeAction(action) {
   } else if (cmd === 'playhtml') {
     playHtml(parts.slice(1).join(' '));
   } else if (cmd === 'playbmp') {
-    addBmpOverlay('_play_' + Date.now() + ' ' + parts.slice(1).join(' '));
+    addBmpOverlay('_playbmp ' + parts.slice(1).join(' '));
   } else if (cmd === 'addbmp') {
     addBmpOverlay(parts.slice(1).join(' '));
   } else if (cmd === 'delbmp') {
@@ -1272,8 +1449,10 @@ function executeAction(action) {
     stopAllAudio();
   } else if (cmd === 'addtext') {
     addTextOverlay(parts.slice(1).join(' '));
+  } else if (cmd === 'rundll') {
+    runDll(parts.slice(1).join(' '));
   } else if (cmd === 'closedll') {
-    // DLL not supported, ignore
+    closeDll();
   } else if (cmd === 'font') {
     // Font change from IF action - store for next playtext
     activePlayTextFont = parts.slice(1).join(' ');
@@ -1283,6 +1462,20 @@ function executeAction(action) {
     // playtext x1 y1 x2 y2 flags text
     activePlayText = parts.slice(1).join(' ');
     render();
+  } else if (cmd === 'defcursor') {
+    // Set active cursor to an inventory item or reset to default
+    var cursorItem = parts[1] || '0';
+    if (cursorItem === '0' || cursorItem.toLowerCase().endsWith('.cur')) {
+      setCursorItem(null);
+    } else {
+      setCursorItem(cursorItem.toLowerCase());
+    }
+  } else if (cmd === 'hotspot') {
+    var hsIdx = parseInt(parts[1]);
+    if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+  } else if (cmd === 'pause') {
+    // Pause N ms - used by DLL mini-games; they handle their own setTimeout
+    // so this is a no-op when called via handleDllCommand
   } else if (cmd === 'if') {
     // Nested IF: "if var op val then action"
     var nestedAction = evaluateIf(parts.slice(1).join(' '));
@@ -1390,6 +1583,8 @@ function addTextOverlay(val) {
   if (parts.length < 7) return;
   var name = parts[0].toLowerCase();
   var fontSize = parseInt(parts[1]) || 14;
+  // VND font sizes are Windows point sizes; scale up small sizes for readability
+  if (fontSize <= 12) fontSize = Math.max(fontSize * 2, 12);
   var x = parseInt(parts[2]) || 0;
   var y = parseInt(parts[3]) || 0;
   var w = parseInt(parts[4]) || 200;
@@ -1428,11 +1623,10 @@ function playHtml(htmlStr) {
   if (parts.length < 1) return;
   var file = parts[0];
 
-  // Don't overwrite an already visible HTML overlay (first playhtml wins)
-  // This fixes bonus questions showing wrong HTM when multiple bonusX=1
-  var overlay = document.getElementById('html-overlay');
-  if (overlay.style.display === 'block') {
-    console.log('PLAYHTML skipped (overlay already visible):', file);
+  // Use scene-html (transparent, integrated) instead of html-overlay (white box)
+  var el = document.getElementById('scene-html');
+  if (el.style.display === 'block') {
+    console.log('PLAYHTML skipped (scene-html already visible):', file);
     return;
   }
 
@@ -1450,18 +1644,20 @@ function playHtml(htmlStr) {
   var url = resolveHtmlPath(file);
   console.log('PLAYHTML:', file, 'at', x, y, w, h);
 
-  // Position overlay relative to canvas
-  var rect = canvas.getBoundingClientRect();
-  var scaleX = rect.width / gameW;
-  var scaleY = rect.height / gameH;
+  var content = el.querySelector('.scene-html-content');
 
-  var content = overlay.querySelector('.html-content');
+  // Position relative to canvas
+  var canvasRect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var scaleX = canvasRect.width / gameW;
+  var scaleY = canvasRect.height / gameH;
 
-  overlay.style.left = (rect.left - container.getBoundingClientRect().left + x * scaleX) + 'px';
-  overlay.style.top = (rect.top - container.getBoundingClientRect().top + y * scaleY) + 'px';
-  overlay.style.width = (w * scaleX) + 'px';
-  overlay.style.height = (h * scaleY) + 'px';
-  overlay.style.display = 'block';
+  el.style.left = (canvasRect.left - contRect.left + x * scaleX) + 'px';
+  el.style.top = (canvasRect.top - contRect.top + y * scaleY) + 'px';
+  el.style.width = (w * scaleX) + 'px';
+  el.style.height = (h * scaleY) + 'px';
+  el.style.display = 'block';
+  content.style.fontSize = Math.max(10, Math.round(12 * scaleY)) + 'px';
 
   fetchLatin1(url).then(function(html) {
     var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
@@ -1516,10 +1712,167 @@ function closeSceneHtml() {
   document.getElementById('scene-html').style.display = 'none';
 }
 
+// --- DLL MINI-GAMES (loaded as HTML in iframe) ---
+// Maps DLL filename (lowercase) to HTML path relative to /demo/dll/
+var DLL_HTML_MAP = {
+  'roue.dll':     'dll/roue/roue-coffre.html',
+  'francs.dll':   'dll/francs/francs-conversion.html',
+  'memory.dll':   'dll/memory/memory-game.html',
+  'probleme.dll': 'dll/probleme/probleme-math.html',
+  'inv.dll':      'dll/inv/inv-inventory.html',
+  'pepe.dll':     'dll/pepe/pepe-game.html'
+};
+// Native sizes for DLL forms (width x height). Default is 640x400.
+var DLL_NATIVE_SIZE = {
+  'inv.dll': { w: 330, h: 337 }
+};
+var currentDllIframe = null;
+
+function runDll(dllName) {
+  var key = dllName.toLowerCase().replace(/.*[\\\/]/, ''); // strip path, keep filename
+  var htmlPath = DLL_HTML_MAP[key];
+  if (!htmlPath) {
+    console.warn('RUNDLL: no HTML port for', dllName);
+    return;
+  }
+  console.log('RUNDLL:', dllName, '→', htmlPath);
+
+  var overlay = document.getElementById('dll-overlay');
+  var iframe = document.getElementById('dll-iframe');
+
+  // Use per-DLL native size (default 640x400 for mini-games)
+  var nativeSize = DLL_NATIVE_SIZE[key] || { w: 640, h: 400 };
+  var dllW = nativeSize.w, dllH = nativeSize.h;
+  var isDialog = !!DLL_NATIVE_SIZE[key]; // Smaller DLLs (inv) = dialog style
+
+  // Position over the canvas, scale iframe to fit
+  var rect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var scale = Math.min(rect.width / dllW, rect.height / dllH);
+
+  overlay.style.left = (rect.left - contRect.left) + 'px';
+  overlay.style.top = (rect.top - contRect.top) + 'px';
+  overlay.style.width = rect.width + 'px';
+  overlay.style.height = rect.height + 'px';
+
+  // Dialog-style DLLs (inv): transparent bg, centered iframe, scene visible behind
+  // Full-size DLLs (roue, etc.): opaque black bg, iframe scaled from top-left
+  if (isDialog) {
+    overlay.className = 'dll-transparent';
+    overlay.style.display = 'flex';
+  } else {
+    overlay.className = '';
+    overlay.style.display = 'block';
+  }
+
+  // Set iframe to native DLL size, then CSS-scale to fit the overlay
+  iframe.style.width = dllW + 'px';
+  iframe.style.height = dllH + 'px';
+  iframe.style.transform = 'scale(' + scale + ')';
+
+  iframe.src = htmlPath;
+  currentDllIframe = iframe;
+
+  // When iframe loads, connect the mini-game's sendCommand to our engine
+  iframe.onload = function() {
+    try {
+      var iframeWin = iframe.contentWindow;
+      // Look for known game objects and wire up onCommand callback
+      var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.game;
+      if (gameObj && typeof gameObj.setOnCommand === 'function') {
+        gameObj.setOnCommand(function(cmd) {
+          console.log('DLL command:', cmd);
+          handleDllCommand(cmd);
+        });
+      }
+      // Also provide a global callback the iframe can use
+      iframeWin.__vnCommand = function(cmd) {
+        console.log('DLL command (global):', cmd);
+        handleDllCommand(cmd);
+      };
+
+      // Special: inventory DLL - pass owned items (gameVars where value = 1 or 2)
+      // var=1: in bag, var=2: selected/in-hand (still owned, shown in inventory)
+      if (key === 'inv.dll' && iframeWin.inventory && typeof iframeWin.inventory.populateItems === 'function') {
+        var owned = [];
+        Object.keys(gameVars).forEach(function(v) {
+          if ((gameVars[v] === 1 || gameVars[v] === 2) && iframeWin.ITEMS_TABLE && iframeWin.ITEMS_TABLE[v]) {
+            owned.push(v);
+          }
+        });
+        // Cursor icons path: /game-data/barre/cur/ (files have .CUR extension)
+        var curPath = '/game-data/barre/cur/';
+        iframeWin.inventory.populateItems(owned, curPath);
+        console.log('INV: populated', owned.length, 'items:', owned);
+      }
+    } catch (e) {
+      console.warn('DLL iframe connect failed:', e.message);
+    }
+  };
+}
+
+function handleDllCommand(cmd) {
+  if (!cmd) return;
+  var parts = cmd.trim().split(/\s+/);
+  var action = parts[0].toLowerCase();
+
+  // scene navigation: close DLL, then navigate (wait for video if playing)
+  if (action === 'scene') {
+    closeDll();
+    var idx = parseInt(parts[1]);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      var sceneIdx = idx - 1;
+      // If a video is currently playing, wait for it to end before navigating
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid = currentVideo;
+        function onDllVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onDllVideoEnd);
+          vid.removeEventListener('error', onDllVideoEnd);
+          vid.removeEventListener('click', onDllVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          goToScene(sceneIdx);
+        }
+        vid.addEventListener('ended', onDllVideoEnd);
+        vid.addEventListener('error', onDllVideoEnd);
+        vid.addEventListener('click', onDllVideoEnd);
+      } else {
+        goToScene(sceneIdx);
+      }
+    }
+  } else if (action === 'closedll') {
+    closeDll();
+  } else if (action === 'playavi') {
+    // Hide DLL overlay so the video is visible (DLL z-index 20 > video z-index 16)
+    // Don't fully close (src=about:blank) because subsequent DLL callbacks (inc_var, scene)
+    // still need to fire from the iframe's setTimeout
+    document.getElementById('dll-overlay').style.display = 'none';
+    executeAction(cmd);
+  } else {
+    // Other commands: playwav, inc_var, set_var, pause, etc.
+    executeAction(cmd);
+  }
+}
+
+function closeDll() {
+  var overlay = document.getElementById('dll-overlay');
+  var iframe = document.getElementById('dll-iframe');
+  overlay.style.display = 'none';
+  overlay.className = '';
+  iframe.src = 'about:blank';
+  currentDllIframe = null;
+}
+
 var pendingAfterHtml = null; // command to resume after HTML overlay closed
 
 function closeHtmlOverlay() {
   document.getElementById('html-overlay').style.display = 'none';
+  // Also close scene-html (used by playHtml for transparent PLAYHTML)
+  document.getElementById('scene-html').style.display = 'none';
   // Resume pending command processing or navigation
   if (pendingAfterHtml) {
     var pending = pendingAfterHtml;
@@ -1557,6 +1910,35 @@ function resolveAviPath(aviRef) {
   return '/game-data/' + currentBasePath + aviDir + normalized;
 }
 
+// Update video DOM element position to account for scroll and canvas resize
+function updateVideoPosition(video) {
+  if (!video) return;
+  var rect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = rect.width / gameW;
+  var scaleY = rect.height / gameH;
+  var x1 = video._gameX1 || 0;
+  var y1 = video._gameY1 || 0;
+  var x2 = video._gameX2 || 0;
+  var y2 = video._gameY2 || 0;
+
+  if (x2 > x1 && y2 > y1) {
+    // Positioned overlay: account for scrollX in game coordinates
+    video.style.left = (rect.left - contRect.left + (x1 - scrollX) * scaleX) + 'px';
+    video.style.top = (rect.top - contRect.top + y1 * scaleY) + 'px';
+    video.style.width = ((x2 - x1) * scaleX) + 'px';
+    video.style.height = ((y2 - y1) * scaleY) + 'px';
+  } else {
+    // Fullscreen over canvas
+    video.style.left = (rect.left - contRect.left) + 'px';
+    video.style.top = (rect.top - contRect.top) + 'px';
+    video.style.width = rect.width + 'px';
+    video.style.height = rect.height + 'px';
+  }
+}
+
 function playAvi(aviStr) {
   // Format: "filename flags [x1 y1 x2 y2]"
   var parts = aviStr.trim().split(/\s+/);
@@ -1574,12 +1956,6 @@ function playAvi(aviStr) {
 
   closeVideo();
 
-  var rect = canvas.getBoundingClientRect();
-  var gameW = project ? project.header.width : 640;
-  var gameH = project ? project.header.height : 480;
-  var scaleX = rect.width / gameW;
-  var scaleY = rect.height / gameH;
-
   var video = document.createElement('video');
   video.playsInline = true;
   video.setAttribute('playsinline', ''); // iOS requires attribute
@@ -1596,33 +1972,42 @@ function playAvi(aviStr) {
   video.style.zIndex = '16';
   video.style.background = '#000';
 
-  var contRect = container.getBoundingClientRect();
-  if (x2 > x1 && y2 > y1) {
-    // Positioned overlay: x1,y1 = top-left, x2,y2 = bottom-right in game coords
-    video.style.left = (rect.left - contRect.left + x1 * scaleX) + 'px';
-    video.style.top = (rect.top - contRect.top + y1 * scaleY) + 'px';
-    video.style.width = ((x2 - x1) * scaleX) + 'px';
-    video.style.height = ((y2 - y1) * scaleY) + 'px';
-  } else {
-    // Fullscreen over canvas
-    video.style.left = (rect.left - contRect.left) + 'px';
-    video.style.top = (rect.top - contRect.top) + 'px';
-    video.style.width = rect.width + 'px';
-    video.style.height = rect.height + 'px';
-  }
+  // Store game coordinates for scroll-aware repositioning
+  video._gameX1 = x1;
+  video._gameY1 = y1;
+  video._gameX2 = x2;
+  video._gameY2 = y2;
+  updateVideoPosition(video);
 
-  video.addEventListener('ended', function() { closeVideo(); });
+  video.addEventListener('ended', function() {
+    // If resumeCommandProcessing registered its own onVideoEnd handler (for
+    // deferred navigation), let that handler manage the close + navigate flow.
+    // We only close here for standalone video plays with no pending navigation.
+    if (currentVideo === video && !waitingForVideoEnd) closeVideo();
+  });
   video.addEventListener('error', function() {
     console.warn('AVI playback failed (codec not supported):', url);
-    closeVideo();
+    // Only close if this is still the active video AND no source loaded successfully.
+    // When using <source> elements (webm + avi fallback), the browser fires 'error'
+    // on the <video> once all sources fail. If readyState > 0, a source is working
+    // (e.g. webm loaded fine) and we must NOT close - the onVideoEnd handler from
+    // resumeCommandProcessing will handle navigation when the video actually ends.
+    if (currentVideo === video && video.readyState === 0) {
+      closeVideo();
+    }
   });
-  // Click on video: if paused (autoplay blocked), try to play; if playing, close
+  // Click on video: if paused (autoplay blocked), try to play; if playing, skip
   video.addEventListener('click', function() {
     if (video.paused) {
       video.play().catch(function() { closeVideo(); });
-    } else {
+    } else if (!waitingForVideoEnd) {
+      // Only close directly if no deferred navigation is pending.
+      // When waitingForVideoEnd is true, onVideoEnd in resumeCommandProcessing
+      // will handle the close + navigation flow via its own click listener.
       closeVideo();
     }
+    // When waitingForVideoEnd is true, the onVideoEnd handler (also listening
+    // for 'click' on this element) will fire and handle close + navigate.
   });
 
   // Add to DOM immediately (needed for video events to work)
@@ -1650,10 +2035,16 @@ function playAvi(aviStr) {
 
 function closeVideo() {
   if (currentVideo) {
-    currentVideo.pause();
-    currentVideo.src = ''; // Stop loading
-    if (currentVideo.parentNode) currentVideo.parentNode.removeChild(currentVideo);
-    currentVideo = null;
+    var vid = currentVideo;
+    currentVideo = null; // Clear reference FIRST to prevent stale event handlers from closing the next video
+    vid.pause();
+    // Remove all source elements and reset src to stop loading
+    while (vid.firstChild) vid.removeChild(vid.firstChild);
+    vid.removeAttribute('src');
+    // NOTE: Do NOT call vid.load() here - it triggers spurious 'error' events
+    // that can race with onVideoEnd handlers and prevent navigation.
+    // Removing from DOM is sufficient to release the resource.
+    if (vid.parentNode) vid.parentNode.removeChild(vid);
   }
   pendingVideoPlay = null;
   waitingForVideoEnd = false; // Re-enable clicks
@@ -1676,9 +2067,9 @@ function executeStringCommand(strType, strValue) {
     case 11: // PLAYWAV
       playWav(val);
       break;
-    case 22: // SET_VAR: "name value"
+    case 22: // SET_VAR: "name value" or "name <random N M>" or "name <varname>"
       var sp = val.split(/\s+/);
-      if (sp.length >= 2) setVar(sp[0], parseInt(sp[1]) || 0);
+      if (sp.length >= 2) setVar(sp[0], resolveValue(sp.slice(1).join(' ')));
       break;
     case 23: // INC_VAR: "name value"
       var ip = val.split(/\s+/);
@@ -1710,13 +2101,16 @@ function executeStringCommand(strType, strValue) {
       render();
       break;
     case 26: // DEFCURSOR
-      // Could set cursor style, ignore for now
+      executeAction('defcursor ' + val);
       break;
     case 32: // UPDATE
       render();
       break;
     case 33: // RUNDLL
-      console.log('RUNDLL (not implemented):', val);
+      runDll(val);
+      break;
+    case 37: // CLOSEDLL
+      closeDll();
       break;
     case 40: // REM (comment)
       break;
@@ -1728,9 +2122,9 @@ function executeStringCommand(strType, strValue) {
       break;
     case 10: // PLAYBMP (direct, not named overlay)
       // Format: "path flags x y" — similar to ADDBMP but unnamed
-      var bp = val.split(/\s+/);
-      if (bp.length >= 1) {
-        addBmpOverlay('_playbmp_' + Date.now() + ' ' + val);
+      // Use fixed name so each PLAYBMP replaces the previous one
+      if (val.split(/\s+/).length >= 1) {
+        addBmpOverlay('_playbmp ' + val);
       }
       break;
     case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"
@@ -1752,6 +2146,12 @@ function executeSceneCommands(scene) {
   overlayGeneration++;
   playhtmlTriggered = false; // reset for new scene
 
+  // Reset auto-play flags on all commands so revisiting a scene replays setup videos/images
+  scene.commands.forEach(function(cmd) {
+    cmd.autoPlayedVideo = false;
+    cmd.autoShowedBmp = false;
+  });
+
   // Reset click-guard variable 'jeu' to 0 on scene entry
   // This variable is used in library scenes to prevent double-clicks:
   // Pattern: INC_VAR jeu 1 + IF jeu = 1 then runprj
@@ -1760,42 +2160,146 @@ function executeSceneCommands(scene) {
     gameVars['jeu'] = 0;
   }
 
-  // Pass 0: Execute DIRECT display commands (addbmp/delbmp/showbmp/hidebmp) from ALL commands
-  // This sets up the initial visual state for overlay images defined in ANY command
-  // (e.g., scene 23 has ADDBMP qcasta.bmp inside an interactive command that must show on entry)
+  // Pass 0: Execute INIT/AFTERINIT commands from interactive commands (subIndex >= 2)
+  // The VND subIndex tells us which strings run on scene entry vs on click/hover.
+  // For non-interactive commands, all strings run on entry (handled in Pass 2).
+  // For interactive commands, only subIndex >= 2 strings run on entry:
+  //   - ADDBMP/DELBMP/SHOWBMP/HIDEBMP (display overlays like qcasta.bmp)
+  //   - PLAYAVI (scene setup videos like casta1.avi asking a question)
+  //   - PLAYWAV, CLOSEWAV (scene audio)
+  //   - SET_VAR, INC_VAR, DEC_VAR (scene state setup like casta=1)
+  //   - IF conditions (nested IFs for transvecteur machine, etc.)
+  //   - PAUSE (type 16) delays between commands (e.g. transvecteur item reveal)
+  var pass0DeferredNav = null; // Collect deferred navigation from ONINIT IFs
+  var pass0Queue = []; // Async queue for ONINIT strings with PAUSE support
+  var pass0HasPause = false;
   scene.commands.forEach(function(cmd) {
-    var hasDirectAddbmp = cmd.strings.some(function(s) { return s.type === 27; });
-    var hasPlayavi = cmd.strings.some(function(s) { return s.type === 9; });
+    var isInteractive = cmd.paramPairs.length > 0;
 
     cmd.strings.forEach(function(s) {
-      // Execute direct display commands (not IF conditions with display)
-      if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+      // For interactive commands, only execute ONINIT (2) and AFTERINIT (3) strings
+      if (isInteractive && s.subIndex < 2) return;
+
+      if (isInteractive) {
+        pass0Queue.push({ s: s, cmd: cmd });
+        if (s.type === 16) pass0HasPause = true;
+      } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        // Non-interactive direct display commands
         executeStringCommand(s.type, s.string);
       }
     });
-
-    // Special case: If interactive command has BOTH direct ADDBMP AND PLAYAVI,
-    // the PLAYAVI is likely scene setup audio/video that should play on entry.
-    // (e.g., scene 23: qcasta.bmp shows + casta1.avi plays the offer)
-    // But if PLAYAVI is alone with SCENE, it's a click transition animation.
-    if (cmd.paramPairs.length > 0 && hasDirectAddbmp && hasPlayavi) {
-      cmd.strings.forEach(function(s) {
-        if (s.type === 9 && !cmd.autoPlayedVideo) {
-          console.log('Pass 0: Auto-playing PLAYAVI (ADDBMP+PLAYAVI pattern):', s.string);
-          cmd.autoPlayedVideo = true;
-          playAvi(s.string);
-        }
-      });
-    }
   });
 
-  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands only
-  // This restores the correct visual state based on variables when returning to a scene
-  // (e.g., collected items should stay hidden even after leaving and returning)
-  // Interactive commands (with polygons) should only execute their IF conditions on CLICK, not on scene entry
+  // Process a single ONINIT/AFTERINIT string from the queue
+  function executePass0Item(item) {
+    var s = item.s;
+    var cmd = item.cmd;
+    if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 9 && !cmd.autoPlayedVideo) {
+      console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
+      cmd.autoPlayedVideo = true;
+      playAvi(s.string);
+    } else if (s.type === 22 || s.type === 23 || s.type === 24) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 36) {
+      // CLOSEWAV from INIT/AFTERINIT - SKIP
+    } else if (s.type === 11) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 7) {
+      // HOTSPOT: trigger another command's ONCLICK processing
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 6) {
+      // SCENE navigation from ONINIT/AFTERINIT - defer until after all Pass 0 items
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: s.string };
+    } else if (s.type === 31) {
+      // RUNPRJ from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: s.string };
+    } else if (s.type === 3) {
+      // PREV from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'prev', value: '' };
+    } else if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+        action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+      }
+      if (action) {
+        var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+        if (actLower === 'scene') {
+          var idx = action.trim().split(/\s+/)[1];
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: idx };
+        } else if (actLower === 'runprj') {
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+        } else {
+          executeAction(action);
+        }
+      }
+    }
+    // type 16 (PAUSE) is handled as a delay in the queue runner, not here
+  }
+
+  // Finalize Pass 0: handle deferred navigation, then continue to Pass 1/2
+  function finalizePass0() {
+    if (pass0DeferredNav) {
+      if (currentVideo) {
+        var nav0 = pass0DeferredNav;
+        var vid0 = currentVideo;
+        waitingForVideoEnd = true;
+        function onPass0VideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid0.readyState > 0) return;
+          vid0.removeEventListener('ended', onPass0VideoEnd);
+          vid0.removeEventListener('error', onPass0VideoEnd);
+          vid0.removeEventListener('click', onPass0VideoEnd);
+          if (currentVideo !== vid0) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          doNavigation(nav0);
+        }
+        vid0.addEventListener('ended', onPass0VideoEnd);
+        vid0.addEventListener('error', onPass0VideoEnd);
+        vid0.addEventListener('click', onPass0VideoEnd);
+      } else {
+        doNavigation(pass0DeferredNav);
+      }
+      pass0DeferredNav = null;
+    }
+  }
+
+  if (pass0HasPause) {
+    // Async processing: execute items with PAUSE delays between them
+    var sceneGeneration = overlayGeneration; // Track if scene changed during async
+    (function runPass0Async(qi) {
+      if (qi >= pass0Queue.length || overlayGeneration !== sceneGeneration) {
+        finalizePass0();
+        render();
+        return;
+      }
+      var item = pass0Queue[qi];
+      if (item.s.type === 16) {
+        // PAUSE: delay, render current state, then continue
+        var ms = parseInt(item.s.string) || 300;
+        render();
+        setTimeout(function() { runPass0Async(qi + 1); }, ms);
+      } else {
+        executePass0Item(item);
+        runPass0Async(qi + 1);
+      }
+    })(0);
+  } else {
+    // Sync processing (fast path for most scenes)
+    pass0Queue.forEach(executePass0Item);
+    finalizePass0();
+  }
+
+  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands
+  // (Interactive command IFs are already fully handled in Pass 0)
+  // The VND subIndex field determines WHEN a string command executes:
+  //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
+  // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
   scene.commands.forEach(function(cmd) {
-    // Skip interactive commands - their conditions should execute on click, not on entry
-    if (cmd.paramPairs.length > 0) return;
+    var isInteractive = cmd.paramPairs.length > 0;
+    if (isInteractive) return; // Already handled in Pass 0
     cmd.strings.forEach(function(s) {
       if (s.type === 21) {
         var lowerStr = s.string.toLowerCase();
@@ -1817,24 +2321,85 @@ function executeSceneCommands(scene) {
   });
 
   // Pass 2: Execute non-interactive commands (without polygons)
+  // These are auto-execute commands that run on scene load.
+  // Uses two-pass logic similar to resumeCommandProcessing:
+  // first execute all side-effects, then handle video+navigation deferral.
   scene.commands.forEach(function(cmd) {
     // Only execute commands without polygons (auto-execute on scene load)
     // Commands with polygons are interactive (click/hover)
     if (cmd.paramPairs.length > 0) return;
 
+    var deferredNav = null;
+    var videoPlaying = false;
+    var deferredAudio = [];
+
+    // Check if a playwav string is looping/ambient (defer) vs one-shot SFX (play now)
+    function isLoopingWav(wavArgs) {
+      var parts = wavArgs.trim().split(/\s+/);
+      var loops = parseInt(parts[1]) || 1;
+      return loops > 1 || loops === 0;
+    }
+
     cmd.strings.forEach(function(s) {
-      // Skip types handled interactively or already processed in Pass 0
-      if (s.type === 6 || s.type === 38 || s.type === 39 || s.type === 3 || s.type === 7) return;
+      // Skip types handled interactively or in rendering
+      if (s.type === 38 || s.type === 39 || s.type === 3) return;
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
+      // SCENE navigation - defer until after video (if any)
+      if (s.type === 6) {
+        if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
+        return;
+      }
+      // RUNPRJ navigation - defer similarly
+      if (s.type === 31) {
+        if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
+        return;
+      }
+
+      // PLAYAVI - play and track for deferral
+      if (s.type === 9) {
+        if (!videoPlaying) {
+          playAvi(s.string);
+          videoPlaying = true;
+        }
+        return;
+      }
+
+      // Looping PLAYWAV after PLAYAVI - defer until video ends
+      // Ambient/background music (loops>1) shouldn't play over video dialogue
+      // One-shot SFX (loops=1) play alongside the video
+      if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
+        deferredAudio.push('playwav ' + s.string);
+        return;
+      }
+
+      // HOTSPOT: trigger another command's processing
+      if (s.type === 7) {
+        var hsIdx = parseInt(s.string);
+        if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+        return;
+      }
+
       if (s.type === 21) {
-        // IF - evaluate and execute (skip display commands, already handled in first pass)
+        // IF - evaluate and execute (skip display commands, already handled in Pass 1)
         var action = evaluateIf(s.string);
         if (action) {
-          var actLower = action.toLowerCase().trim().split(/\s+/)[0];
-          if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
-              actLower !== 'showbmp' && actLower !== 'hidebmp') {
+          var actParts = action.trim().split(/\s+/);
+          var actLower = actParts[0].toLowerCase();
+          if (actLower === 'scene') {
+            if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'runprj') {
+            if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'playavi') {
+            if (!videoPlaying) {
+              playAvi(actParts.slice(1).join(' '));
+              videoPlaying = true;
+            }
+          } else if (actLower === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
+            deferredAudio.push(action);
+          } else if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
+                     actLower !== 'showbmp' && actLower !== 'hidebmp') {
             executeAction(action);
           }
         }
@@ -1843,6 +2408,62 @@ function executeSceneCommands(scene) {
 
       executeStringCommand(s.type, s.string);
     });
+
+    function executeDeferredAudio() {
+      deferredAudio.forEach(function(action) { executeAction(action); });
+    }
+
+    // Handle deferred navigation (with optional video wait)
+    if (deferredNav) {
+      if (videoPlaying && currentVideo) {
+        // Video playing - wait for it to end before navigating
+        waitingForVideoEnd = true;
+        var nav = deferredNav;
+        var vid = currentVideo;
+        function onVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onVideoEnd);
+          vid.removeEventListener('error', onVideoEnd);
+          vid.removeEventListener('click', onVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+          doNavigation(nav);
+        }
+        vid.addEventListener('ended', onVideoEnd);
+        vid.addEventListener('error', onVideoEnd);
+        vid.addEventListener('click', onVideoEnd);
+      } else if (videoPlaying && pendingVideoPlay) {
+        waitingForVideoEnd = true;
+        pendingVideoNav = deferredNav;
+      } else {
+        executeDeferredAudio();
+        doNavigation(deferredNav);
+      }
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      // Video playing with deferred audio but NO navigation
+      if (currentVideo) {
+        waitingForVideoEnd = true; // Prevent playAvi's ended handler from closing video first
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
+      } else {
+        // No video actually loaded (all sources failed), execute audio immediately
+        executeDeferredAudio();
+      }
+    }
   });
 
   // Init variables from VND header (only if not already set)
@@ -2124,20 +2745,6 @@ function findAllCommandsAtPoint(x, y) {
     var hasPairs = cmd.paramPairs.length >= 2;
     var inBounds = hasPairs && isPolygonInBounds(cmd.paramPairs, sceneW);
     var inPoly = inBounds && pointInPolygon(x, y, expandRect(cmd.paramPairs));
-    // Debug: log C5 specifically (index 5 in scene 6)
-    if (i === 5 && currentSceneIndex === 5) {
-      console.log('C5 check at (' + x + ',' + y + '): pairs=' + cmd.paramPairs.length +
-        ', inBounds=' + inBounds + ', inPoly=' + inPoly);
-      if (cmd.paramPairs.length > 0) {
-        var bounds = cmd.paramPairs.reduce(function(acc, p) {
-          return {
-            minX: Math.min(acc.minX, p.a), maxX: Math.max(acc.maxX, p.a),
-            minY: Math.min(acc.minY, p.b), maxY: Math.max(acc.maxY, p.b)
-          };
-        }, {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity});
-        console.log('C5 bounds: ' + bounds.minX + ',' + bounds.minY + ' -> ' + bounds.maxX + ',' + bounds.maxY);
-      }
-    }
     if (hasPairs && inBounds && inPoly) {
       result.push(cmd);
     }
@@ -2152,6 +2759,10 @@ function findAllCommandsAtPoint(x, y) {
       }
     }
   }
+  // Sort by polygon area (smallest first) so the most specific polygon wins
+  result.sort(function(a, b) {
+    return polygonArea(a.paramPairs) - polygonArea(b.paramPairs);
+  });
   return result;
 }
 
@@ -2241,12 +2852,12 @@ function evaluateIfReadOnly(ifStr) {
   var condStr = ifStr.substring(0, thenIdx).trim();
   var rest = ifStr.substring(thenIdx + 6).trim();
 
-  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(-?\d+)$/);
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
   if (!condMatch) return null;
 
   var varName = condMatch[1];
   var op = condMatch[2];
-  var val = parseInt(condMatch[3]);
+  var val = resolveValue(condMatch[3]);
   var actual = getVar(varName);
 
   var result = false;
@@ -2260,7 +2871,7 @@ function evaluateIfReadOnly(ifStr) {
   }
 
   var elseIdx = -1;
-  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|if)\s/i);
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
   if (elseMatch) {
     elseIdx = rest.indexOf(elseMatch[0]);
   } else {
@@ -2288,7 +2899,59 @@ function handleCommandClick(cmd) {
     console.log('Closing auto-played video on button click');
     closeVideo();
   }
-  resumeCommandProcessing(cmd, 0);
+  // Filter to ONCLICK strings only (subIndex=1) — don't re-run ONINIT (2) or ONFOCUS (0)
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  resumeCommandProcessing(filteredCmd, 0);
+  // After click processing, re-evaluate ONINIT display IFs to refresh overlays
+  // This handles cases like quiz scenes where clicking an answer changes a variable
+  // and another command's ONINIT IFs control which image is displayed
+  refreshOninitOverlays();
+}
+
+// Re-evaluate ONINIT/AFTERINIT IF conditions that control display overlays.
+// Called after clicks that may change variables affecting displayed images.
+function refreshOninitOverlays() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var deferredNav = null;
+  scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
+    cmd.strings.forEach(function(s) {
+      // For interactive commands, skip ONFOCUS/ONCLICK strings (subIndex 0/1)
+      if (isInteractive && s.subIndex < 2) return;
+      if (s.type === 21) {
+        var lowerStr = s.string.toLowerCase();
+        if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp') ||
+            lowerStr.includes('scene') || lowerStr.includes('runprj')) {
+          var action = evaluateIf(s.string);
+          // Resolve nested IFs
+          while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+            action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+          }
+          if (action) {
+            var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+            if (actLower === 'addbmp' || actLower === 'delbmp' ||
+                actLower === 'showbmp' || actLower === 'hidebmp') {
+              executeAction(action);
+            } else if (actLower === 'scene' || actLower === 'runprj') {
+              // Defer navigation until after all overlays processed
+              if (!deferredNav) deferredNav = action;
+            }
+          }
+        }
+      }
+    });
+  });
+  render();
+  // Execute deferred navigation after render
+  if (deferredNav) {
+    console.log('[refreshOninit] Deferred navigation:', deferredNav);
+    executeAction(deferredNav);
+  }
 }
 
 function resumeCommandProcessing(cmd, startIdx) {
@@ -2297,10 +2960,18 @@ function resumeCommandProcessing(cmd, startIdx) {
   var deferredNav = null;   // { type:'scene'|'runprj', value:string }
   var deferredHtml = null;  // { value:string, idx:number }
   var videoPlaying = false;
+  var deferredAudio = [];   // PLAYWAV commands to execute after video ends
 
-  for (var si = startIdx; si < cmd.strings.length; si++) {
-    var s = cmd.strings[si];
+  // Check if a playwav string represents looping/ambient audio (should defer during video)
+  // vs one-shot SFX like cling.wav (should play alongside video)
+  function isLoopingWav(wavArgs) {
+    var parts = wavArgs.trim().split(/\s+/);
+    var loops = parseInt(parts[1]) || 1;
+    return loops > 1 || loops === 0; // 0=infinite, >1=looping ambient
+  }
 
+  // Process a single string command (shared between sync and async paths)
+  function processOneString(s, si) {
     if (s.type === 21) {
       var action = evaluateIf(s.string);
       if (action) {
@@ -2313,26 +2984,25 @@ function resumeCommandProcessing(cmd, startIdx) {
         } else if (actCmd === 'runprj') {
           if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
         } else if (actCmd === 'playavi') {
-          // PLAYAVI from IF condition - execute and track for video deferral
-          // Skip if video was auto-played on scene load (PLAYAVI+PREV pattern)
-          // Skip if another video is already playing from this command
           if (!cmd.autoPlayedVideo && !videoPlaying) {
             playAvi(actParts.slice(1).join(' '));
             videoPlaying = true;
           }
         } else if (actCmd === 'prev') {
           if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+        } else if (actCmd === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
+          deferredAudio.push(action);
         } else {
           executeAction(action);
         }
       }
     } else if (s.type === 9) {
-      // Skip PLAYAVI if video was auto-played on scene load (PLAYAVI+PREV pattern)
-      // Skip if another video is already playing from this command
       if (!cmd.autoPlayedVideo && !videoPlaying) {
         playAvi(s.string);
         videoPlaying = true;
       }
+    } else if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
+      deferredAudio.push('playwav ' + s.string);
     } else if (s.type === 6) {
       if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
     } else if (s.type === 31) {
@@ -2340,56 +3010,125 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 13) {
       if (!deferredHtml) deferredHtml = { value: s.string, idx: si };
     } else if (s.type === 3) {
-      // PREV - go back to previous scene
       if (!deferredNav) deferredNav = { type: 'prev', value: '' };
-    } else if (s.type === 38 || s.type === 39 || s.type === 7) {
-      // PLAYTEXT, FONT, HOTSPOT - handled in render or ignored
+    } else if (s.type === 7) {
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 38 || s.type === 39) {
+      // PLAYTEXT, FONT - handled in render
     } else if (s.type === 27 && cmd.autoShowedBmp) {
-      // Skip ADDBMP if it was auto-shown on scene load (ADDBMP+PREV pattern)
       console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
+    } else if (s.type === 16) {
+      // PAUSE - handled by async runner, skip in sync path
     } else {
       executeStringCommand(s.type, s.string);
     }
   }
 
-  // Now execute deferred HTML and/or navigation
-  if (deferredHtml) {
-    playHtml(deferredHtml.value);
-    if (deferredNav) {
-      // HTML shown + navigation pending: navigate when HTML is closed
-      pendingAfterHtml = { nav: deferredNav };
-    } else {
-      pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
-    }
-  } else if (deferredNav) {
-    if (videoPlaying) {
-      if (currentVideo) {
-        // Video is playing in DOM - wait for it to end
-        waitingForVideoEnd = true; // Block clicks while video plays
-        var nav = deferredNav;
-        var vid = currentVideo;
-        function onVideoEnd() {
-          vid.removeEventListener('ended', onVideoEnd);
-          vid.removeEventListener('error', onVideoEnd);
-          vid.removeEventListener('click', onVideoEnd);
-          waitingForVideoEnd = false; // Re-enable clicks
-          closeVideo();
-          doNavigation(nav);
-        }
-        vid.addEventListener('ended', onVideoEnd);
-        vid.addEventListener('error', onVideoEnd);
-        vid.addEventListener('click', onVideoEnd);
-      } else if (pendingVideoPlay) {
-        // Video autoplay was blocked - store nav for when video plays via unlock
-        waitingForVideoEnd = true;
-        pendingVideoNav = deferredNav;
+  // Helper: execute deferred audio commands (PLAYWAV after video)
+  function executeDeferredAudio() {
+    deferredAudio.forEach(function(action) {
+      executeAction(action);
+    });
+  }
+
+  // Finalize: handle deferred HTML and/or navigation after all strings processed
+  function finalize() {
+    if (deferredHtml) {
+      playHtml(deferredHtml.value);
+      if (deferredNav) {
+        pendingAfterHtml = { nav: deferredNav };
       } else {
-        // No video actually playing/pending, navigate now
+        pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
+      }
+    } else if (deferredNav) {
+      if (videoPlaying) {
+        if (currentVideo) {
+          waitingForVideoEnd = true;
+          var nav = deferredNav;
+          var vid = currentVideo;
+          function onVideoEnd(evt) {
+            if (evt && evt.type === 'error' && vid.readyState > 0) return;
+            vid.removeEventListener('ended', onVideoEnd);
+            vid.removeEventListener('error', onVideoEnd);
+            vid.removeEventListener('click', onVideoEnd);
+            if (currentVideo !== vid) return;
+            waitingForVideoEnd = false;
+            closeVideo();
+            executeDeferredAudio();
+            doNavigation(nav);
+          }
+          vid.addEventListener('ended', onVideoEnd);
+          vid.addEventListener('error', onVideoEnd);
+          vid.addEventListener('click', onVideoEnd);
+        } else if (pendingVideoPlay) {
+          waitingForVideoEnd = true;
+          pendingVideoNav = deferredNav;
+        } else {
+          executeDeferredAudio();
+          doNavigation(deferredNav);
+        }
+      } else {
         doNavigation(deferredNav);
       }
-    } else {
-      doNavigation(deferredNav);
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
+      } else {
+        executeDeferredAudio();
+      }
     }
+  }
+
+  // Check if any string has PAUSE (type 16) — if so, use async processing
+  var hasPause = false;
+  for (var pi = startIdx; pi < cmd.strings.length; pi++) {
+    if (cmd.strings[pi].type === 16) { hasPause = true; break; }
+  }
+
+  if (hasPause) {
+    // Async processing: pause at PAUSE commands, render, then continue
+    waitingForVideoEnd = true; // Block clicks during pause sequence
+    (function runAsync(si) {
+      if (si >= cmd.strings.length) {
+        waitingForVideoEnd = false;
+        finalize();
+        render();
+        return;
+      }
+      var s = cmd.strings[si];
+      if (s.type === 16) {
+        var ms = parseInt(s.string) || 300;
+        // Clear imagesAddedThisClick so DELBMP after PAUSE can remove
+        // images that were added before the pause (they've been visible)
+        imagesAddedThisClick = {};
+        render();
+        setTimeout(function() { runAsync(si + 1); }, ms);
+      } else {
+        processOneString(s, si);
+        runAsync(si + 1);
+      }
+    })(startIdx);
+  } else {
+    // Sync processing (fast path — no PAUSE in this command)
+    for (var si = startIdx; si < cmd.strings.length; si++) {
+      processOneString(cmd.strings[si], si);
+    }
+    finalize();
   }
 }
 
@@ -2540,12 +3279,18 @@ function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
   currentSceneIndex = index;
   scrollX = 0;
+  // Clear recentlyStartedAudio so that sounds started during the same click
+  // that triggered navigation are NOT protected from being stopped.
+  // Only the target scene's own sounds should persist.
+  recentlyStartedAudio = {};
   // Smart audio: keep sounds that the new scene will also play
   var keepKeys = getSceneAutoWavKeys(project.scenes[index]);
   stopAudioExcept(keepKeys);
   closeHtmlOverlay();
+  closeDll();
   closeSceneHtml();
   closeVideo();
+  clearCursorItem();
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];
@@ -2598,6 +3343,9 @@ function updateUI() {
 
 function loadVNDFile(arrayBuffer, fileName, skipFirstScene) {
   try {
+    // Reset scene index before replacing project to prevent stale index
+    // accessing non-existent scenes in the new project (render loop, etc.)
+    currentSceneIndex = 0;
     project = parseVND(arrayBuffer);
     console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
 
@@ -3114,6 +3862,9 @@ canvas.addEventListener('touchend', function(e) {
 
   if (touchMoved || !project || currentSceneIndex < 0) return;
 
+  // Block taps while PAUSE sequence or video is playing
+  if (waitingForVideoEnd) return;
+
   // Tap = clic - use same logic as desktop click (find ALL overlapping commands)
   var touch = e.changedTouches[0];
   var pos = screenToGame(touch.clientX, touch.clientY);
@@ -3145,6 +3896,16 @@ canvas.addEventListener('touchend', function(e) {
     return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
   });
   if (navCmd) handleCommandClick(navCmd);
+
+  // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
+  // since there is no hover on touch devices. Set hoveredCmd to the
+  // first non-navigable tapped command so render() draws its ONFOCUS
+  // PLAYTEXT overlays, giving visual feedback.
+  // Skip if async processing (PAUSE) is running — it manages its own display.
+  if (!navCmd && !waitingForVideoEnd && allCmds.length > 0) {
+    hoveredCmd = allCmds[0];
+    evaluateHoverEffects(allCmds[0]);
+  }
 
   render(); // Refresh display after action (e.g., item pickup)
 }, { passive: false });

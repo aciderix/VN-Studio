@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VN-Studio Coffre-Fort - Port Fidèle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            background: #000;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Form1: ClientWidth=640, ClientHeight=400 */
+        .game-container {
+            width: 640px;
+            height: 400px;
+            position: relative;
+            background: url('coffre_bg.png') no-repeat;
+            background-size: 640px 480px;
+            /* Image1: Left=-6, Top=-78 (signed bytes from DFM) */
+            background-position: -6px -78px;
+        }
+        
+        /* Zones cliquables - invisibles, positionnées exactement comme le DFM */
+        .click-zone {
+            position: absolute;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            /* Debug: décommenter pour voir les zones */
+            /* background: rgba(255,0,0,0.3); */
+        }
+        
+        /* ROUE 1 (gauche) - Image2 et Image3 */
+        /* Image3: haut de la roue = -1 */
+        .zone-r1-minus {
+            left: 52px;
+            top: 148px;
+            width: 105px;
+            height: 45px;
+        }
+        /* Image2: bas de la roue = +1 */
+        .zone-r1-plus {
+            left: 49px;
+            top: 198px;
+            width: 109px;
+            height: 58px;
+        }
+        
+        /* ROUE 2 (haut) - Image4 et Image5 */
+        /* Image5: haut = -1 */
+        .zone-r2-minus {
+            left: 229px;
+            top: 87px;
+            width: 71px;
+            height: 44px;
+        }
+        /* Image4: bas = +1 */
+        .zone-r2-plus {
+            left: 230px;
+            top: 132px;
+            width: 69px;
+            height: 37px;
+        }
+        
+        /* ROUE 3 (bas) - Image6 et Image7 */
+        /* Image7: haut = -1 */
+        .zone-r3-minus {
+            left: 300px;
+            top: 219px;
+            width: 107px;
+            height: 64px;
+        }
+        /* Image6: bas = +1 */
+        .zone-r3-plus {
+            left: 302px;
+            top: 284px;
+            width: 106px;
+            height: 48px;
+        }
+        
+        /* ROUE 4 (droite) - Image8 et Image9 */
+        /* Image9: haut = -1 */
+        .zone-r4-minus {
+            left: 390px;
+            top: 47px;
+            width: 87px;
+            height: 44px;
+        }
+        /* Image8: bas = +1 */
+        .zone-r4-plus {
+            left: 391px;
+            top: 92px;
+            width: 88px;
+            height: 43px;
+        }
+        
+        /* Image10: Bouton Reset */
+        .zone-reset {
+            left: 8px;
+            top: 336px;
+            width: 57px;
+            height: 49px;
+        }
+
+        
+        /* Labels pour afficher les chiffres - EXACTEMENT comme le DFM */
+        /* Font: Century Gothic, Color: clBlue, Style: fsBold, Transparent: True */
+        .digit-label {
+            position: absolute;
+            font-family: 'Century Gothic', sans-serif;
+            font-weight: bold;
+            color: blue; /* clBlue */
+            text-align: center;
+            pointer-events: none;
+            background: transparent;
+        }
+        
+        /* Label1: Left=106, Top=156, Width=13, Height=28, Font.Height=-24 */
+        .label-1 {
+            left: 106px;
+            top: 156px;
+            width: 13px;
+            height: 28px;
+            font-size: 24px;
+            line-height: 28px;
+        }
+        
+        /* Label2: Left=266, Top=102, Width=9, Height=19, Font.Height=-16 */
+        .label-2 {
+            left: 266px;
+            top: 102px;
+            width: 9px;
+            height: 19px;
+            font-size: 16px;
+            line-height: 19px;
+        }
+        
+        /* Label3: Left=358, Top=240, Width=13, Height=28, Font.Height=-24 */
+        .label-3 {
+            left: 358px;
+            top: 240px;
+            width: 13px;
+            height: 28px;
+            font-size: 24px;
+            line-height: 28px;
+        }
+        
+        /* Label4: Left=434, Top=62, Width=12, Height=25, Font.Height=-21 */
+        .label-4 {
+            left: 434px;
+            top: 62px;
+            width: 12px;
+            height: 25px;
+            font-size: 21px;
+            line-height: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Labels pour afficher les chiffres -->
+        <div class="digit-label label-1" id="digit1">0</div>
+        <div class="digit-label label-2" id="digit2">0</div>
+        <div class="digit-label label-3" id="digit3">0</div>
+        <div class="digit-label label-4" id="digit4">0</div>
+        
+        <!-- Zones cliquables ROUE 1 -->
+        <button class="click-zone zone-r1-minus" data-wheel="0" data-dir="-1"></button>
+        <button class="click-zone zone-r1-plus" data-wheel="0" data-dir="1"></button>
+        
+        <!-- Zones cliquables ROUE 2 -->
+        <button class="click-zone zone-r2-minus" data-wheel="1" data-dir="-1"></button>
+        <button class="click-zone zone-r2-plus" data-wheel="1" data-dir="1"></button>
+        
+        <!-- Zones cliquables ROUE 3 -->
+        <button class="click-zone zone-r3-minus" data-wheel="2" data-dir="-1"></button>
+        <button class="click-zone zone-r3-plus" data-wheel="2" data-dir="1"></button>
+        
+        <!-- Zones cliquables ROUE 4 -->
+        <button class="click-zone zone-r4-minus" data-wheel="3" data-dir="-1"></button>
+        <button class="click-zone zone-r4-plus" data-wheel="3" data-dir="1"></button>
+        
+        <!-- Bouton Quitter (spirale rouge) -->
+        <button class="click-zone zone-reset" id="quitBtn"></button>
+    </div>
+
+    <script>
+    /**
+     * VN-Studio Coffre-Fort - Port HTML Fidèle au TForm1
+     * 
+     * LAYOUT ORIGINAL (extrait du DFM):
+     * - Form: 640×400 px
+     * - Image1 (fond): offset (-250, -178) pour afficher la partie visible
+     * - 4 Labels pour les chiffres aux positions exactes
+     * - 8 zones cliquables (2 par roue: haut=-1, bas=+1)
+     * - 1 bouton reset
+     * 
+     * LOGIQUE (extraite de l'assembleur):
+     * - Combinaison secrète: "1999"
+     * - Son "tic1.wav" à chaque clic
+     * - Sur succès: Pause 1000 → playwav ouvre.wav → Playavi coffreouvre.avi
+     *               → inc_var milleeuro 1 → inc_var score 1000 → scene 19
+     */
+    
+    class VNCoffre {
+        constructor() {
+            // État des 4 roues (chiffres 0-9)
+            this.wheels = [0, 0, 0, 0];
+            
+            // Combinaison secrète
+            this.SECRET_CODE = "1999";
+            
+            // État du jeu
+            this.isOpen = false;
+            
+            // Callbacks pour VN-Studio
+            this.onCommand = null;
+            
+            // Éléments DOM
+            this.digitLabels = [
+                document.getElementById('digit1'),
+                document.getElementById('digit2'),
+                document.getElementById('digit3'),
+                document.getElementById('digit4')
+            ];
+            
+            this.init();
+        }
+        
+        init() {
+            // Gestion des clics sur les zones
+            document.querySelectorAll('.click-zone[data-wheel]').forEach(zone => {
+                zone.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!this.isOpen) {
+                        const wheelIndex = parseInt(zone.dataset.wheel);
+                        const direction = parseInt(zone.dataset.dir);
+                        this.rotateWheel(wheelIndex, direction);
+                    }
+                });
+            });
+            
+            // Bouton quitter (spirale rouge)
+            document.getElementById('quitBtn').addEventListener('click', () => {
+                this.sendCommand('closedll');
+            });
+
+            this.updateDisplay();
+        }
+        
+        rotateWheel(wheelIndex, direction) {
+            // Son de tic (fidèle à l'original)
+            this.sendCommand('playwav tic1.wav 1');
+            
+            // Modifier la valeur (0-9 cyclique)
+            this.wheels[wheelIndex] = (this.wheels[wheelIndex] + direction + 10) % 10;
+            
+            this.updateDisplay();
+            this.checkCode();
+        }
+        
+        updateDisplay() {
+            // Mettre à jour les labels (fidèle au comportement Delphi)
+            this.digitLabels.forEach((label, index) => {
+                label.textContent = this.wheels[index];
+            });
+        }
+        
+        checkCode() {
+            const currentCode = this.wheels.join('');
+            
+            if (currentCode === this.SECRET_CODE && !this.isOpen) {
+                this.openSafe();
+            }
+        }
+        
+        openSafe() {
+            this.isOpen = true;
+            
+            // Séquence de victoire EXACTE (extraite de 0x0043f2f4)
+            this.sendCommand('Pause 1000');
+            
+            setTimeout(() => {
+                this.sendCommand('playwav ouvre.wav 0');
+                this.sendCommand('Playavi coffreouvre.avi');
+                this.sendCommand('inc_var milleeuro 1');
+                this.sendCommand('inc_var score 1000');
+                
+                // Changement de scène après délai pour l'animation
+                setTimeout(() => {
+                    this.sendCommand('scene 19');
+                }, 2000);
+                
+            }, 1000);
+        }
+        
+        reset() {
+            this.wheels = [0, 0, 0, 0];
+            this.isOpen = false;
+            this.updateDisplay();
+        }
+        
+        sendCommand(cmd) {
+            console.log('[VN-Studio Command]', cmd);
+            if (this.onCommand) {
+                this.onCommand(cmd);
+            }
+        }
+        
+        // API pour VN-Studio
+        setOnCommand(callback) {
+            this.onCommand = callback;
+        }
+    }
+    
+    // Initialisation
+    window.coffre = new VNCoffre();
+    </script>
+</body>
+</html>

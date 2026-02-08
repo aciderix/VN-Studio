@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory - VN-Studio Ecosse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            background: #000;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* Form1: ClientWidth=640, ClientHeight=400, Color=clBtnFace */
+        .game-container {
+            width: 640px;
+            height: 400px;
+            position: relative;
+            background: #c0c0c0; /* clBtnFace */
+        }
+        
+        /* Grille 4x4 de cartes - positions exactes du DFM */
+        /* Taille cadre: 65×45 px */
+        .card {
+            position: absolute;
+            width: 65px;
+            height: 45px;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #c0c0c0; /* fond visible pour images plus petites */
+        }
+        
+        .card img {
+            max-width: 65px;
+            max-height: 45px;
+            width: auto;
+            height: auto;
+            /* Les faces sont plus petites que le cadre, ne pas étirer */
+        }
+        
+        .card:hover {
+            transform: scale(1.02);
+        }
+        
+        .card.flipped,
+        .card.matched {
+            cursor: default;
+        }
+        
+        .card.matched {
+            opacity: 0.6;
+        }
+        
+        /* Row 1 (Top=104): positions (128, 200, 272, 344) */
+        .card[data-pos="0"] { left: 128px; top: 104px; }
+        .card[data-pos="1"] { left: 200px; top: 104px; }
+        .card[data-pos="2"] { left: 272px; top: 104px; }
+        .card[data-pos="3"] { left: 344px; top: 104px; }
+        
+        /* Row 2 (Top=152): positions (128, 200, 272, 344) */
+        .card[data-pos="4"] { left: 128px; top: 152px; }
+        .card[data-pos="5"] { left: 200px; top: 152px; }
+        .card[data-pos="6"] { left: 272px; top: 152px; }
+        .card[data-pos="7"] { left: 344px; top: 152px; }
+        
+        /* Row 3 (Top=200): positions (128, 200, 272, 344) */
+        .card[data-pos="8"] { left: 128px; top: 200px; }
+        .card[data-pos="9"] { left: 200px; top: 200px; }
+        .card[data-pos="10"] { left: 272px; top: 200px; }
+        .card[data-pos="11"] { left: 344px; top: 200px; }
+        
+        /* Row 4 (Top=248): positions (128, 200, 272, 344) */
+        .card[data-pos="12"] { left: 128px; top: 248px; }
+        .card[data-pos="13"] { left: 200px; top: 248px; }
+        .card[data-pos="14"] { left: 272px; top: 248px; }
+        .card[data-pos="15"] { left: 344px; top: 248px; }
+        
+        /* Message BRAVO */
+        .bravo-message {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 48px;
+            font-weight: bold;
+            color: #FF0000;
+            text-shadow: 2px 2px 4px #000;
+            display: none;
+            z-index: 100;
+        }
+        
+        .bravo-message.visible {
+            display: block;
+        }
+        
+        /* Titre */
+        .title {
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 24px;
+            color: #000080;
+        }
+        
+        /* Score / Tentatives */
+        .score {
+            position: absolute;
+            left: 500px;
+            top: 350px;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <div class="title">Memory</div>
+        
+        <!-- 16 cartes générées par JavaScript -->
+        
+        <div class="bravo-message" id="bravoMessage">BRAVO</div>
+        
+        <div class="score">
+            Tentatives: <span id="attempts">0</span>
+        </div>
+    </div>
+    
+    <script>
+        /**
+         * Memory Game - VN-Studio Ecosse
+         * 
+         * Grille 4×4 (16 cartes = 8 paires)
+         * Positions exactes extraites du DFM TForm1
+         * 
+         * Tailles des images:
+         * - Cadre carte: 65×45 px
+         * - Dos: 65×45 px
+         * - Faces: variables (36×39 à 52×45), centrées dans le cadre
+         * 
+         * Commandes VN-Studio à la victoire:
+         * - playwav bravo.wav 8
+         * - Pause 1000
+         * - inc_var MEMORY 1
+         * - scene 34
+         * 
+         * Sortie sans victoire:
+         * - Pause 1000
+         * - scene 35
+         */
+        
+        // 8 motifs de cartes (thème écossais)
+        const CARD_FACES = [
+            'images/face_01.png', // Chardon (50×45)
+            'images/face_02.png', // Mouette (51×45)
+            'images/face_03.png', // Motif 3 (36×39)
+            'images/face_04.png', // Motif 4 (52×43)
+            'images/face_05.png', // Pièce (41×43)
+            'images/face_06.png', // Motif 6 (50×32)
+            'images/face_07.png', // Motif 7 (50×28)
+            'images/face_08.png'  // Motif 8 (39×37)
+        ];
+        
+        const CARD_BACK = 'images/card_dos.png'; // 65×45
+        
+        // État du jeu
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let attempts = 0;
+        let isLocked = false;
+        
+        // Callback VN-Studio
+        let vnCallback = null;
+        
+        function setVNCallback(callback) {
+            vnCallback = callback;
+        }
+        
+        function sendCommand(cmd) {
+            console.log('[VN-Studio]', cmd);
+            if (vnCallback) {
+                vnCallback(cmd);
+            }
+        }
+        
+        // Mélanger un tableau (Fisher-Yates)
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        // Initialiser le jeu
+        function initGame() {
+            const container = document.getElementById('gameContainer');
+            
+            // Supprimer les anciennes cartes
+            document.querySelectorAll('.card').forEach(c => c.remove());
+            
+            // Créer les paires (8 motifs × 2 = 16 cartes)
+            const pairIndices = [];
+            for (let i = 0; i < 8; i++) {
+                pairIndices.push(i, i);
+            }
+            
+            // Mélanger
+            const shuffled = shuffle(pairIndices);
+            
+            // Créer les cartes
+            cards = [];
+            for (let i = 0; i < 16; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.pos = i;
+                card.dataset.face = shuffled[i];
+                
+                // Utiliser une balise img pour un meilleur contrôle de taille
+                const img = document.createElement('img');
+                img.src = CARD_BACK;
+                img.alt = 'Carte';
+                card.appendChild(img);
+                
+                card.addEventListener('click', () => flipCard(i));
+                container.appendChild(card);
+                cards.push({
+                    element: card,
+                    imgElement: img,
+                    faceIndex: shuffled[i],
+                    isFlipped: false,
+                    isMatched: false
+                });
+            }
+            
+            // Reset état
+            flippedCards = [];
+            matchedPairs = 0;
+            attempts = 0;
+            isLocked = false;
+            document.getElementById('attempts').textContent = '0';
+            document.getElementById('bravoMessage').classList.remove('visible');
+        }
+        
+        // Retourner une carte
+        function flipCard(index) {
+            if (isLocked) return;
+            
+            const card = cards[index];
+            if (card.isFlipped || card.isMatched) return;
+            
+            // Retourner la carte
+            card.isFlipped = true;
+            card.imgElement.src = CARD_FACES[card.faceIndex];
+            card.element.classList.add('flipped');
+            flippedCards.push(index);
+            
+            // Si 2 cartes retournées
+            if (flippedCards.length === 2) {
+                isLocked = true;
+                attempts++;
+                document.getElementById('attempts').textContent = attempts;
+                
+                const card1 = cards[flippedCards[0]];
+                const card2 = cards[flippedCards[1]];
+                
+                if (card1.faceIndex === card2.faceIndex) {
+                    // Paire trouvée !
+                    card1.isMatched = true;
+                    card2.isMatched = true;
+                    card1.element.classList.add('matched');
+                    card2.element.classList.add('matched');
+                    matchedPairs++;
+                    
+                    flippedCards = [];
+                    isLocked = false;
+                    
+                    // Victoire ?
+                    if (matchedPairs === 8) {
+                        victory();
+                    }
+                } else {
+                    // Pas une paire - retourner après délai
+                    setTimeout(() => {
+                        card1.isFlipped = false;
+                        card2.isFlipped = false;
+                        card1.imgElement.src = CARD_BACK;
+                        card2.imgElement.src = CARD_BACK;
+                        card1.element.classList.remove('flipped');
+                        card2.element.classList.remove('flipped');
+                        flippedCards = [];
+                        isLocked = false;
+                    }, 1000); // Timer délai retournement
+                }
+            }
+        }
+        
+        // Victoire
+        function victory() {
+            document.getElementById('bravoMessage').classList.add('visible');
+            
+            // Commandes VN-Studio
+            sendCommand("playwav bravo.wav 8");
+            
+            setTimeout(() => {
+                sendCommand("Pause 1000");
+                sendCommand("inc_var MEMORY 1");
+                sendCommand("scene 34");
+            }, 1000);
+        }
+        
+        // Abandon / Fermeture
+        function quit() {
+            sendCommand("Pause 1000");
+            sendCommand("scene 35");
+        }
+        
+        // Initialiser au chargement
+        initGame();
+        
+        // API pour intégration VN-Studio
+        window.memoryGame = {
+            setCallback: setVNCallback,
+            reset: initGame,
+            quit: quit,
+            getAttempts: () => attempts
+        };
+    </script>
+</body>
+</html>

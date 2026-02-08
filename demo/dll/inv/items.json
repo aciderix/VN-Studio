@@ -1,0 +1,350 @@
+[
+  {
+    "internal": "ballon1",
+    "display": "Ballon"
+  },
+  {
+    "internal": "bouee",
+    "display": "Bouée"
+  },
+  {
+    "internal": "bout_plo",
+    "display": "Bouteille de plongée"
+  },
+  {
+    "internal": "castagnette",
+    "display": "Castagnettes"
+  },
+  {
+    "internal": "ciseaux",
+    "display": "Ciseaux"
+  },
+  {
+    "internal": "clejaune",
+    "display": "Clé jaune"
+  },
+  {
+    "internal": "guitare",
+    "display": "Guitare"
+  },
+  {
+    "internal": "harpon",
+    "display": "Harpon"
+  },
+  {
+    "internal": "helice",
+    "display": "Hélice"
+  },
+  {
+    "internal": "loupe",
+    "display": "Loupe"
+  },
+  {
+    "internal": "masque",
+    "display": "Masque"
+  },
+  {
+    "internal": "masse",
+    "display": "Masse"
+  },
+  {
+    "internal": "pain",
+    "display": "Pain"
+  },
+  {
+    "internal": "palme",
+    "display": "Palme"
+  },
+  {
+    "internal": "photo",
+    "display": "Photo"
+  },
+  {
+    "internal": "piece",
+    "display": "Pièce"
+  },
+  {
+    "internal": "pier_berlin",
+    "display": "Pierre de Berlin"
+  },
+  {
+    "internal": "raquette",
+    "display": "Raquette"
+  },
+  {
+    "internal": "ressort",
+    "display": "Ressort"
+  },
+  {
+    "internal": "cheval",
+    "display": "Cheval"
+  },
+  {
+    "internal": "ruban",
+    "display": "Ruban"
+  },
+  {
+    "internal": "sabot1",
+    "display": "Sabot"
+  },
+  {
+    "internal": "sabot2",
+    "display": "Sabot"
+  },
+  {
+    "internal": "scotch",
+    "display": "Scotch"
+  },
+  {
+    "internal": "taillepierre",
+    "display": "Taille-pierre"
+  },
+  {
+    "internal": "ap_photo",
+    "display": "Appareil photographique"
+  },
+  {
+    "internal": "houblon",
+    "display": "Houblon"
+  },
+  {
+    "internal": "chewing",
+    "display": "Chewing-gum"
+  },
+  {
+    "internal": "cleverte",
+    "display": "Clé verte"
+  },
+  {
+    "internal": "partition",
+    "display": "Partition"
+  },
+  {
+    "internal": "laine",
+    "display": "Pelote de laine"
+  },
+  {
+    "internal": "tondeuse",
+    "display": "Tondeuse"
+  },
+  {
+    "internal": "tournevis",
+    "display": "Tournevis"
+  },
+  {
+    "internal": "cire",
+    "display": "Cire d'abeilles"
+  },
+  {
+    "internal": "chianti",
+    "display": "Bouteille de Chianti"
+  },
+  {
+    "internal": "rouedent",
+    "display": "Roue dentée"
+  },
+  {
+    "internal": "pierreor",
+    "display": "Pierre philosophale"
+  },
+  {
+    "internal": "papiercado",
+    "display": "Rouleau de papier"
+  },
+  {
+    "internal": "hotte",
+    "display": "Hotte du Père Noël"
+  },
+  {
+    "internal": "levure",
+    "display": "Sachet de levure"
+  },
+  {
+    "internal": "bouteille",
+    "display": "Bouteille vide"
+  },
+  {
+    "internal": "parfum",
+    "display": "Bouteille de parfum"
+  },
+  {
+    "internal": "rouge",
+    "display": "Rouge à lèvres"
+  },
+  {
+    "internal": "bisous",
+    "display": "Bisous"
+  },
+  {
+    "internal": "pince",
+    "display": "Pince"
+  },
+  {
+    "internal": "tulipejaune",
+    "display": "Tulipe jaune"
+  },
+  {
+    "internal": "tulipeorange",
+    "display": "Tulipe orange"
+  },
+  {
+    "internal": "tuliperouge",
+    "display": "Tulipe rouge"
+  },
+  {
+    "internal": "tulipeverte",
+    "display": "Tulipe verte"
+  },
+  {
+    "internal": "tulipeviolet",
+    "display": "Tulipe violette"
+  },
+  {
+    "internal": "farine",
+    "display": "Sac de farine"
+  },
+  {
+    "internal": "saliere",
+    "display": "Salière"
+  },
+  {
+    "internal": "bougie",
+    "display": "Bougie"
+  },
+  {
+    "internal": "seche",
+    "display": "Sèche-cheveux"
+  },
+  {
+    "internal": "clerouge",
+    "display": "Clé rouge"
+  },
+  {
+    "internal": "bout_eau",
+    "display": "Bouteille remplie d'eau"
+  },
+  {
+    "internal": "dorade",
+    "display": "Dorade"
+  },
+  {
+    "internal": "moule",
+    "display": "Moule"
+  },
+  {
+    "internal": "poivrouge",
+    "display": "Poivron rouge"
+  },
+  {
+    "internal": "poivjaune",
+    "display": "Poivron jaune"
+  },
+  {
+    "internal": "oignon",
+    "display": "Oignon"
+  },
+  {
+    "internal": "olive",
+    "display": "Bouteille d'huile d'olive"
+  },
+  {
+    "internal": "bouillon",
+    "display": "Bouillon de poulet"
+  },
+  {
+    "internal": "violon",
+    "display": "Violon"
+  },
+  {
+    "internal": "skate",
+    "display": "Skate"
+  },
+  {
+    "internal": "champagne",
+    "display": "Bouteille de champagne"
+  },
+  {
+    "internal": "fromage",
+    "display": "Fromage"
+  },
+  {
+    "internal": "bonnet",
+    "display": "Bonnet"
+  },
+  {
+    "internal": "huile",
+    "display": "Huile de moteur"
+  },
+  {
+    "internal": "orge",
+    "display": "Orge"
+  },
+  {
+    "internal": "burette",
+    "display": "Burette"
+  },
+  {
+    "internal": "allumette",
+    "display": "Allumette"
+  },
+  {
+    "internal": "chouetteor",
+    "display": "Chouette en or"
+  },
+  {
+    "internal": "chouette",
+    "display": "Chouette en fer"
+  },
+  {
+    "internal": "sirop",
+    "display": "Sirop pour la toux"
+  },
+  {
+    "internal": "fiolegrece",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fiolegrece2",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleecosse",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleirlande",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleespagne",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fiolesuede",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fiolefinlande",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleautriche",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fiolepaysbas",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleespagne2",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleitalie",
+    "display": "Fiole"
+  },
+  {
+    "internal": "fioleangleterre",
+    "display": "Fiole"
+  }
+]

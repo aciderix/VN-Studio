@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Tour Eiffel - pepe.dll Port</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 640px;
+            height: 400px;
+            background-image: url('background.png');
+            background-size: cover;
+            border: 2px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        /* Police Comic Sans MS comme dans l'original */
+        .label {
+            position: absolute;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 18px;
+            color: #000;
+        }
+        
+        /* Question - 4 lignes positionnées exactement comme le DFM */
+        .q1 { left: 400px; top: 88px; }
+        .q2 { left: 376px; top: 120px; }
+        .q3 { left: 376px; top: 152px; }
+        .q4 { left: 416px; top: 184px; }
+        
+        /* "Il y a" avant le champ */
+        .label-ilya {
+            left: 424px;
+            top: 224px;
+        }
+        
+        /* "marches" après le champ */
+        .label-marches {
+            left: 456px;
+            top: 256px;
+        }
+        
+        /* Champ de saisie - position exacte du DFM */
+        .answer-input {
+            position: absolute;
+            left: 488px;
+            top: 224px;
+            width: 49px;
+            height: 23px;
+            font-size: 18px;
+            font-family: 'Comic Sans MS', cursive;
+            color: blue;  /* clBlue dans le DFM */
+            text-align: left;
+            border: none;
+            background: #fff;
+            padding: 0 2px;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+        }
+        
+        /* Zone de feedback - position exacte du DFM */
+        .feedback {
+            position: absolute;
+            left: 376px;
+            top: 344px;
+            width: 169px;
+            height: 57px;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 18px;
+            color: #000;
+            text-align: center;
+            word-wrap: break-word;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        
+        /* Zone cliquable Quitter - position exacte du DFM */
+        .quit-zone {
+            position: absolute;
+            left: 8px;
+            top: 296px;
+            width: 73px;
+            height: 97px;
+            cursor: pointer;
+        }
+        
+        /* Texte "Quitter" - apparaît au survol comme dans l'original */
+        .quit-label {
+            position: absolute;
+            left: 84px;
+            top: 360px;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            visibility: hidden;
+        }
+        
+        .quit-zone:hover + .quit-label,
+        .quit-label:hover {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- Question (4 lignes - positions exactes du DFM) -->
+        <div class="label q1">Combien y a t-il de</div>
+        <div class="label q2">marches pour monter</div>
+        <div class="label q3">au dernier étage de la</div>
+        <div class="label q4">tour Eiffel ?</div>
+        
+        <!-- "Il y a" avant le champ -->
+        <div class="label label-ilya">Il y a</div>
+        
+        <!-- Champ de saisie -->
+        <input type="text" 
+               class="answer-input" 
+               id="answerInput" 
+               maxlength="4" 
+               autocomplete="off">
+        
+        <!-- "marches" après le champ -->
+        <div class="label label-marches">marches</div>
+        
+        <!-- Zone de feedback -->
+        <div class="feedback" id="feedback">euh...</div>
+        
+        <!-- Zone Quitter (invisible) -->
+        <div class="quit-zone" id="quitZone"></div>
+        <!-- Texte Quitter (apparaît au survol) -->
+        <div class="quit-label" id="quitLabel">Quitter</div>
+    </div>
+
+    <script>
+        /**
+         * Port HTML FIDÈLE de pepe.dll - Mini-jeu Quiz Tour Eiffel
+         * 
+         * INTÉGRATION INGAME :
+         * - Quand l'utilisateur trouve la bonne réponse : callback onSuccess("scene 22")
+         * - Quand l'utilisateur clique sur Quitter : callback onQuit()
+         */
+        
+        class PepeGame {
+            constructor(options = {}) {
+                this.CORRECT_ANSWER = 1652;
+                this.SUCCESS_COMMAND = "scene 22";
+                this.PAUSE_DURATION = 1000;
+                
+                // Callbacks pour l'intégration
+                this.onSuccess = options.onSuccess || null;
+                this.onQuit = options.onQuit || null;
+                
+                // État
+                this.isCompleted = false;
+                
+                // Éléments DOM
+                this.input = document.getElementById('answerInput');
+                this.feedback = document.getElementById('feedback');
+                this.quitZone = document.getElementById('quitZone');
+                
+                this.init();
+            }
+            
+            init() {
+                this.input.addEventListener('input', (e) => this.handleInput(e));
+                this.quitZone.addEventListener('click', () => this.handleQuit());
+                
+                // Filtrer les caractères non numériques
+                this.input.addEventListener('keypress', (e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+                
+                this.input.focus();
+            }
+            
+            handleInput(e) {
+                if (this.isCompleted) return;
+                
+                const value = this.input.value.trim();
+                
+                if (value === '') {
+                    this.feedback.textContent = 'euh...';
+                    return;
+                }
+                
+                const num = parseInt(value, 10);
+                
+                if (isNaN(num)) {
+                    this.feedback.textContent = 'euh...';
+                    return;
+                }
+                
+                if (num === this.CORRECT_ANSWER) {
+                    this.handleSuccess();
+                } else if (num < this.CORRECT_ANSWER) {
+                    this.feedback.textContent = "Non... Essaye encore ! Je crois qu'il y en a plus.";
+                } else {
+                    this.feedback.textContent = "Non... Essaye encore ! Il me semble qu'il y en a moins.";
+                }
+            }
+            
+            handleSuccess() {
+                this.isCompleted = true;
+                this.feedback.textContent = "Tout ça !";
+                this.input.disabled = true;
+
+                // Pause de 1000ms puis set pepe=1 and navigate (comportement original)
+                setTimeout(() => {
+                    if (this.onSuccess) {
+                        this.onSuccess("set_var pepe 1");
+                        this.onSuccess(this.SUCCESS_COMMAND);
+                    }
+                    console.log(`[PepeGame] SUCCESS - Commande: "${this.SUCCESS_COMMAND}"`);
+                }, this.PAUSE_DURATION);
+            }
+            
+            handleQuit() {
+                console.log('[PepeGame] QUIT - Aucune commande envoyée');
+                if (this.onQuit) {
+                    this.onQuit();
+                }
+            }
+            
+            reset() {
+                this.isCompleted = false;
+                this.input.disabled = false;
+                this.input.value = '';
+                this.feedback.textContent = 'euh...';
+                this.input.focus();
+            }
+            
+            destroy() {
+                document.getElementById('gameContainer').style.display = 'none';
+            }
+        }
+        
+        // Initialisation
+        const game = new PepeGame();
+
+        // API pour intégration VN-Studio (engine looks for window.pepe.setOnCommand)
+        window.pepe = {
+            setOnCommand: function(callback) {
+                game.onSuccess = function(command) {
+                    callback(command);
+                };
+                game.onQuit = function() {
+                    callback("closedll");
+                };
+            },
+            reset: function() {
+                game.reset();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -3258,7 +3258,7 @@ canvas.addEventListener('click', function(e) {
   hoverAddedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
   console.log('Canvas click at game coords:', pos.x, pos.y);
-  // Find ALL commands at click point, execute side effects for all
+  // Find all commands at click point (sorted by area, smallest first)
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {
     console.log('No commands found at click point');
@@ -3268,19 +3268,13 @@ canvas.addEventListener('click', function(e) {
     var scene = project.scenes[currentSceneIndex];
     return 'C' + scene.commands.indexOf(c);
   }).join(', '));
-  // Execute non-navigable commands first (set_var, addbmp, etc.)
-  allCmds.forEach(function(cmd) {
-    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-    if (!hasNav) handleCommandClick(cmd);
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // This prevents large "error zone" polygons from firing when a small "correct answer"
+  // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
-  // Then execute the navigable command (if any)
-  var navCmd = allCmds.find(function(cmd) {
-    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-  });
-  if (navCmd) handleCommandClick(navCmd);
-  else if (allCmds.length > 0) {
-    // All were non-navigable, already handled above
-  }
+  if (clickCmd) handleCommandClick(clickCmd);
 });
 
 // =============================================================================
@@ -3898,23 +3892,20 @@ canvas.addEventListener('touchend', function(e) {
   }
   console.log('Touch found', allCmds.length, 'command(s) at tap point');
 
-  // Execute non-navigable commands first (set_var, addbmp, etc.)
-  allCmds.forEach(function(cmd) {
-    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-    if (!hasNav) handleCommandClick(cmd);
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // This prevents large "error zone" polygons from firing when a small "correct answer"
+  // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
-  // Then execute the navigable command (if any)
-  var navCmd = allCmds.find(function(cmd) {
-    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-  });
-  if (navCmd) handleCommandClick(navCmd);
+  if (clickCmd) handleCommandClick(clickCmd);
 
   // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
   // since there is no hover on touch devices. Set hoveredCmd to the
   // first non-navigable tapped command so render() draws its ONFOCUS
   // PLAYTEXT overlays, giving visual feedback.
   // Show even during PAUSE sequences so player sees which button they tapped.
-  if (!navCmd && allCmds.length > 0) {
+  if (allCmds.length > 0) {
     hoveredCmd = allCmds[0];
     evaluateHoverEffects(allCmds[0]);
   }
@@ -4020,14 +4011,10 @@ document.querySelector('#scene-html .scene-html-content').addEventListener('clic
     imagesAddedThisClick = {};
     // Simulate canvas click by directly calling the click handler logic
     if (!waitingForVideoEnd) {
-      cmds.forEach(function(cmd) {
-        var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-        if (!hasNav) handleCommandClick(cmd);
+      var clickCmd = cmds.find(function(cmd) {
+        return cmd.strings.some(function(s) { return s.subIndex === 1; });
       });
-      var navCmd = cmds.find(function(cmd) {
-        return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-      });
-      if (navCmd) handleCommandClick(navCmd);
+      if (clickCmd) handleCommandClick(clickCmd);
     }
   }
 });

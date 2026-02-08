@@ -1421,6 +1421,27 @@ function executeHotspot(n) {
 // Flag pour PAUSE inline dans les IF - lu par le runner async de resumeCommandProcessing
 var pendingPauseMs = 0;
 
+// Relancer le WAV de fond de la scène s'il a été stoppé (CLOSEWAV) et qu'on ne navigue pas
+function restoreSceneWav() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  if (!scene.fields.string3) return; // Pas de WAV de scène
+  var wavFile = scene.fields.string3;
+  var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+  var existing = audioElements[wavKey];
+  if (existing && !existing.paused && !existing.ended) return; // Déjà en cours
+  var loops = scene.fields.val2 || 1;
+  // Attendre la fin du son en cours avant de relancer l'ambiance
+  waitForAudioThenDelay(0, function() {
+    // Re-vérifier qu'on est toujours sur la même scène
+    if (!project || currentSceneIndex < 0) return;
+    var curScene = project.scenes[currentSceneIndex];
+    if (curScene !== scene) return;
+    console.log('Restoring scene WAV:', wavFile);
+    playWav(wavFile + ' ' + loops);
+  });
+}
+
 // Attendre la fin du son en cours avant d'appliquer un delai
 // Si un son non-bouclé est en cours, attend sa fin puis ajoute le delai
 function waitForAudioThenDelay(ms, callback) {
@@ -3171,7 +3192,9 @@ function resumeCommandProcessing(cmd, startIdx) {
     (function runAsync(si) {
       if (si >= cmd.strings.length) {
         waitingForVideoEnd = false;
+        var willNavigate = !!deferredNav || !!deferredHtml;
         finalize();
+        if (!willNavigate) restoreSceneWav();
         render();
         return;
       }
@@ -3202,7 +3225,9 @@ function resumeCommandProcessing(cmd, startIdx) {
     for (var si = startIdx; si < cmd.strings.length; si++) {
       processOneString(cmd.strings[si], si);
     }
+    var willNavigate = !!deferredNav || !!deferredHtml;
     finalize();
+    if (!willNavigate) restoreSceneWav();
   }
 }
 

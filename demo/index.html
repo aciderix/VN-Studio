@@ -1426,6 +1426,7 @@ var pendingPauseMs = 0;
 // Relancer le WAV de fond de la scène s'il a été stoppé (CLOSEWAV) et qu'on ne navigue pas
 function restoreSceneWav() {
   if (!project || currentSceneIndex < 0) return;
+  if (currentVideo) return; // Ne pas relancer pendant une vidéo
   var scene = project.scenes[currentSceneIndex];
   if (!scene.fields.string3) return; // Pas de WAV de scène
   var wavFile = scene.fields.string3;
@@ -2041,7 +2042,9 @@ function playAvi(aviStr) {
   video.appendChild(srcAvi);
   video.style.position = 'absolute';
   video.style.zIndex = '16';
-  video.style.background = 'transparent';
+  // Vidéos avec coordonnées = overlay (transparent), sans coordonnées = plein écran (fond noir)
+  var isOverlay = (x1 !== 0 || y1 !== 0 || x2 !== 0 || y2 !== 0);
+  video.style.background = isOverlay ? 'transparent' : '#000';
 
   // Store game coordinates for scroll-aware repositioning
   video._gameX1 = x1;

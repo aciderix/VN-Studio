@@ -1028,6 +1028,7 @@ function render() {
 
 // --- AUDIO ---
 var audioElements = {}; // key -> HTMLAudioElement
+var masterVolume = 1.0; // Volume global (0.0 - 1.0), modifiable par vnoption
 var lastNonLoopingAudio = null; // Dernier son non-bouclé joué (pour PAUSE apres PLAYWAV)
 var audioUnlocked = false;
 var pendingAudioPlays = []; // audio elements waiting for user gesture
@@ -1118,6 +1119,7 @@ function playWav(wavStr) {
   }
 
   var audio = new Audio(url);
+  audio.volume = masterVolume;
   audio.loop = (loops > 1 || loops === 0); // 0 = infinite
   audioElements[key] = audio;
   if (!audio.loop) lastNonLoopingAudio = audio;
@@ -1793,11 +1795,13 @@ var DLL_HTML_MAP = {
   'probleme.dll': 'dll/probleme/probleme-math.html',
   'inv.dll':      'dll/inv/inv-inventory.html',
   'pepe.dll':     'dll/pepe/pepe-game.html',
-  'frog.dll':     'dll/frog/frog-simon.html'
+  'frog.dll':     'dll/frog/frog-simon.html',
+  'vnoption.dll': 'dll/vnoption/vnoption-menu.html'
 };
 // Native sizes for DLL forms (width x height). Default is 640x400.
 var DLL_NATIVE_SIZE = {
-  'inv.dll': { w: 330, h: 337 }
+  'inv.dll': { w: 330, h: 337 },
+  'vnoption.dll': { w: 250, h: 278 }
 };
 var currentDllIframe = null;
 
@@ -1852,7 +1856,8 @@ function runDll(dllName) {
       var iframeWin = iframe.contentWindow;
       // Look for known game objects and wire up onCommand callback
       var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
-                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog || iframeWin.game;
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog ||
+                    iframeWin.vnoption || iframeWin.game;
       if (gameObj && typeof gameObj.setOnCommand === 'function') {
         gameObj.setOnCommand(function(cmd) {
           console.log('DLL command:', cmd);
@@ -1919,6 +1924,13 @@ function handleDllCommand(cmd) {
     }
   } else if (action === 'closedll') {
     closeDll();
+  } else if (action === 'quit') {
+    closeDll();
+    // Retour a l'ecran titre (frontal/start)
+    executeRunPrj('frontal\\start.vnp 1');
+  } else if (action === 'runprj') {
+    closeDll();
+    executeRunPrj(parts.slice(1).join(' '));
   } else if (action === 'playavi') {
     // Hide DLL overlay so the video is visible (DLL z-index 20 > video z-index 16)
     // Don't fully close (src=about:blank) because subsequent DLL callbacks (inc_var, scene)

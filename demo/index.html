@@ -1408,8 +1408,9 @@ function executeHotspot(n) {
     return;
   }
   var cmd = scene.commands[cmdIdx];
-  // Filter to ONCLICK strings only (subIndex=1) to avoid re-triggering ONINIT hotspots
+  // Filter to ONCLICK strings (subIndex=1) if available, else use all strings
   var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
   console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + onclickStrings.length + '/' + cmd.strings.length + ' ONCLICK strings)');
   // Create a shallow copy with filtered strings for resumeCommandProcessing
   var filteredCmd = {};
@@ -3024,8 +3025,10 @@ function handleCommandClick(cmd) {
     console.log('Closing auto-played video on button click');
     closeVideo();
   }
-  // Filter to ONCLICK strings only (subIndex=1) — don't re-run ONINIT (2) or ONFOCUS (0)
+  // Filter to ONCLICK strings (subIndex=1) if available.
+  // Fallback: if NO strings have subIndex=1 (e.g. biblio hymnes), use ALL strings.
   var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
   var filteredCmd = {};
   for (var k in cmd) filteredCmd[k] = cmd[k];
   filteredCmd.strings = onclickStrings;
@@ -3402,9 +3405,15 @@ canvas.addEventListener('click', function(e) {
   // Execute only the most specific (smallest) command that has ONCLICK strings.
   // This prevents large "error zone" polygons from firing when a small "correct answer"
   // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
   var clickCmd = allCmds.find(function(cmd) {
     return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
+  }
   if (clickCmd) handleCommandClick(clickCmd);
 });
 
@@ -4024,11 +4033,15 @@ canvas.addEventListener('touchend', function(e) {
   console.log('Touch found', allCmds.length, 'command(s) at tap point');
 
   // Execute only the most specific (smallest) command that has ONCLICK strings.
-  // This prevents large "error zone" polygons from firing when a small "correct answer"
-  // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
   var clickCmd = allCmds.find(function(cmd) {
     return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
+  }
   if (clickCmd) handleCommandClick(clickCmd);
 
   // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
@@ -4145,6 +4158,11 @@ document.querySelector('#scene-html .scene-html-content').addEventListener('clic
       var clickCmd = cmds.find(function(cmd) {
         return cmd.strings.some(function(s) { return s.subIndex === 1; });
       });
+      if (!clickCmd) {
+        clickCmd = cmds.find(function(cmd) {
+          return cmd.strings.length > 0;
+        });
+      }
       if (clickCmd) handleCommandClick(clickCmd);
     }
   }

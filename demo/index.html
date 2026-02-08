@@ -1720,7 +1720,8 @@ var DLL_HTML_MAP = {
   'memory.dll':   'dll/memory/memory-game.html',
   'probleme.dll': 'dll/probleme/probleme-math.html',
   'inv.dll':      'dll/inv/inv-inventory.html',
-  'pepe.dll':     'dll/pepe/pepe-game.html'
+  'pepe.dll':     'dll/pepe/pepe-game.html',
+  'frog.dll':     'dll/frog/frog-simon.html'
 };
 // Native sizes for DLL forms (width x height). Default is 640x400.
 var DLL_NATIVE_SIZE = {
@@ -1779,7 +1780,7 @@ function runDll(dllName) {
       var iframeWin = iframe.contentWindow;
       // Look for known game objects and wire up onCommand callback
       var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
-                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.game;
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog || iframeWin.game;
       if (gameObj && typeof gameObj.setOnCommand === 'function') {
         gameObj.setOnCommand(function(cmd) {
           console.log('DLL command:', cmd);

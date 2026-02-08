@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=640, height=400">
+    <title>Frog Simon - VN-Studio Ecosse Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 640px;
+            height: 400px;
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+        }
+        
+        /* Background - Image9 at (0, 0) */
+        .background {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 640px;
+            height: 400px;
+            z-index: 0;
+        }
+        
+        /* Dialogue bubble - Image20 at (132, 203) */
+        .dialogue-bubble {
+            position: absolute;
+            left: 132px;
+            top: 203px;
+            width: 146px;
+            height: 133px;
+            z-index: 5;
+        }
+        
+        /* Visual frog images (mouth open state) - HIDDEN by default */
+        .frog-visual {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            display: none; /* HIDDEN BY DEFAULT - only shown when frog sings */
+        }
+        
+        /* Show frog when active (singing) */
+        .frog-visual.singing {
+            display: block;
+        }
+        
+        /* Image1 - Frog 1 at (127, 96) */
+        .frog1 { left: 127px; top: 96px; width: 68px; height: 53px; }
+        /* Image2 - Frog 2 at (543, 7) */
+        .frog2 { left: 543px; top: 7px; width: 83px; height: 58px; }
+        /* Image3 - Orange frog (decorative) at (585, 157) - NEVER SHOWN */
+        .frog3-orange { left: 585px; top: 157px; width: 78px; height: 70px; display: none !important; }
+        /* Image4 - Frog 4 at (306, 148) */
+        .frog4 { left: 306px; top: 148px; width: 61px; height: 44px; }
+        /* Image5 - Frog 5 at (125, 19) */
+        .frog5 { left: 125px; top: 19px; width: 56px; height: 65px; }
+        /* Image6 - Frog 6 at (402, 95) */
+        .frog6 { left: 402px; top: 95px; width: 60px; height: 56px; }
+        /* Image7 - Frog 7 at (426, 239) */
+        .frog7 { left: 426px; top: 239px; width: 64px; height: 63px; }
+        
+        /* Clickable zones (invisible overlays) */
+        .click-zone {
+            position: absolute;
+            z-index: 10;
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        /* Image10 - Click zone for Frog 1 */
+        .zone-frog1 { left: 115px; top: 89px; width: 89px; height: 74px; }
+        /* Image17 - Click zone for Frog 2 */
+        .zone-frog2 { left: 536px; top: 3px; width: 93px; height: 78px; }
+        /* Image12 - Click zone for Frog 3 (DISABLED - orange frog) */
+        .zone-frog3 { display: none; } /* Visible=false in DFM */
+        /* Image13 - Click zone for Frog 4 */
+        .zone-frog4 { left: 287px; top: 142px; width: 79px; height: 61px; }
+        /* Image14 - Click zone for Frog 5 */
+        .zone-frog5 { left: 92px; top: 3px; width: 84px; height: 74px; }
+        /* Image15 - Click zone for Frog 6 */
+        .zone-frog6 { left: 390px; top: 82px; width: 78px; height: 73px; }
+        /* Image16 - Click zone for Frog 7 */
+        .zone-frog7 { left: 428px; top: 222px; width: 80px; height: 77px; }
+        
+        /* Image18 - Button zone (566, 339) */
+        .zone-button { left: 566px; top: 339px; width: 62px; height: 58px; }
+        
+        /* Image19 - Dialogue zone for starting (192, 305) */
+        .zone-dialogue { left: 192px; top: 305px; width: 118px; height: 93px; }
+        
+        /* Text labels - MS Sans Serif */
+        .label {
+            position: absolute;
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+            color: black;
+            z-index: 15;
+        }
+        
+        /* Message display area inside bubble */
+        .message-area {
+            position: absolute;
+            left: 145px;
+            top: 230px;
+            width: 120px;
+            text-align: center;
+            font-size: 12px;
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+            z-index: 20;
+        }
+        
+        /* Hidden elements */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Background - Image9 -->
+        <img src="images/img_01_640x400.png" class="background" alt="Pond background">
+        
+        <!-- Visual frogs (mouth open states) - HIDDEN by default, shown only when singing -->
+        <img id="frog1" src="images/img_03_68x53.png" class="frog-visual frog1" alt="Frog 1">
+        <img id="frog2" src="images/img_04_83x58.png" class="frog-visual frog2" alt="Frog 2">
+        <!-- Orange frog never shown -->
+        <img id="frog4" src="images/img_06_61x44.png" class="frog-visual frog4" alt="Frog 4">
+        <img id="frog5" src="images/img_07_56x65.png" class="frog-visual frog5" alt="Frog 5">
+        <img id="frog6" src="images/img_08_60x56.png" class="frog-visual frog6" alt="Frog 6">
+        <img id="frog7" src="images/img_09_64x63.png" class="frog-visual frog7" alt="Frog 7">
+        
+        <!-- Dialogue bubble - Image20 -->
+        <img src="images/img_02_146x133.png" class="dialogue-bubble" alt="Dialogue bubble">
+        
+        <!-- Clickable zones -->
+        <div class="click-zone zone-frog1" data-frog="1" onclick="handleFrogClick(1)"></div>
+        <div class="click-zone zone-frog2" data-frog="2" onclick="handleFrogClick(2)"></div>
+        <!-- zone-frog3 is disabled (orange frog not playable) -->
+        <div class="click-zone zone-frog4" data-frog="4" onclick="handleFrogClick(4)"></div>
+        <div class="click-zone zone-frog5" data-frog="5" onclick="handleFrogClick(5)"></div>
+        <div class="click-zone zone-frog6" data-frog="6" onclick="handleFrogClick(6)"></div>
+        <div class="click-zone zone-frog7" data-frog="7" onclick="handleFrogClick(7)"></div>
+        
+        <!-- Start zone (dialogue bubble area) -->
+        <div class="click-zone zone-dialogue" id="startZone" onclick="startGame()"></div>
+        
+        <!-- Button zone (quit) -->
+        <div class="click-zone zone-button" onclick="quitGame()"></div>
+        
+        <!-- Message area inside bubble -->
+        <div class="message-area" id="messageArea">
+            <div id="msg1">Clique sur moi</div>
+            <div id="msg2">pour commencer</div>
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // FROG SIMON - VN-Studio Ecosse Demo
+        // Progressive Simon game with random sequence
+        // 6 playable frogs (1, 2, 4, 5, 6, 7)
+        // Orange frog (3) is decorative only
+        // ============================================
+        
+        // Game state
+        let gameState = 'waiting'; // waiting, demo, playing, won, lost
+        let sequence = [];
+        let playerIndex = 0;
+        let round = 0;
+        const MAX_ROUNDS = 8;
+        
+        // Playable frogs (no frog 3 - orange is decorative)
+        const PLAYABLE_FROGS = [1, 2, 4, 5, 6, 7];
+        
+        // Sound mapping for each frog
+        const frogSounds = {
+            1: 'g1.wav',
+            2: 'g2.wav',
+            4: 'g4.wav',
+            5: 'g5.wav',
+            6: 'g6.wav',
+            7: 'g7.wav'
+        };
+        
+        // Audio elements
+        let currentSound = null;
+        
+        // VN-Studio callback system
+        let vnCallback = null;
+
+        function setOnCommand(callback) {
+            vnCallback = callback;
+        }
+
+        function vnCommand(cmd) {
+            console.log('[VN-Studio]', cmd);
+            if (vnCallback) {
+                vnCallback(cmd);
+            } else if (window.__vnCommand) {
+                window.__vnCommand(cmd);
+            }
+        }
+        
+        // Play sound for a frog
+        function playFrogSound(frogNum) {
+            if (currentSound) {
+                currentSound.pause();
+                currentSound.currentTime = 0;
+            }
+            
+            vnCommand(`closewav`);
+            vnCommand(`pause 200`);
+            
+            const soundFile = frogSounds[frogNum];
+            if (soundFile) {
+                vnCommand(`playwav ${soundFile} 0`);
+                currentSound = new Audio('sounds/' + soundFile);
+                currentSound.play().catch(e => console.log('Audio error:', e));
+            }
+        }
+        
+        // Show frog singing (mouth open image visible)
+        function showFrogSinging(frogNum, show) {
+            const frogEl = document.getElementById('frog' + frogNum);
+            if (frogEl) {
+                if (show) {
+                    frogEl.classList.add('singing');
+                } else {
+                    frogEl.classList.remove('singing');
+                }
+            }
+        }
+        
+        // Animate a single frog (show + sound + hide)
+        async function animateFrog(frogNum) {
+            showFrogSinging(frogNum, true);
+            playFrogSound(frogNum);
+            
+            // Keep visible during sound (approx 500ms)
+            await sleep(500);
+            
+            showFrogSinging(frogNum, false);
+            await sleep(200);
+        }
+        
+        // Sleep helper
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Update message in dialogue bubble
+        function showMessage(line1, line2 = '') {
+            document.getElementById('msg1').textContent = line1;
+            document.getElementById('msg2').textContent = line2 || '';
+        }
+        
+        // Start game when clicking bubble
+        function startGame() {
+            if (gameState !== 'waiting') return;
+            
+            gameState = 'demo';
+            sequence = [];
+            round = 0;
+            playerIndex = 0;
+            
+            // Ambient music command (handled by VN-Studio engine)
+            vnCommand('playwav cartoon.wav 1');
+            
+            // Add first random frog to sequence and play demo
+            addToSequenceAndDemo();
+        }
+        
+        // Add a new frog to sequence and play the demo
+        async function addToSequenceAndDemo() {
+            // Add random frog (1, 2, 4, 5, 6, 7)
+            const randomFrog = PLAYABLE_FROGS[Math.floor(Math.random() * PLAYABLE_FROGS.length)];
+            sequence.push(randomFrog);
+            round++;
+            
+            // Show "regarde" message
+            showMessage('regarde');
+            await sleep(500);
+            
+            // Play the full sequence
+            for (let i = 0; i < sequence.length; i++) {
+                await animateFrog(sequence[i]);
+            }
+            
+            // Ready for player input
+            await sleep(300);
+            showMessage('puis répète...', 'à toi de jouer!');
+            gameState = 'playing';
+            playerIndex = 0;
+        }
+        
+        // Handle player clicking a frog
+        async function handleFrogClick(frogNum) {
+            if (gameState !== 'playing') return;
+            
+            // Animate the clicked frog
+            showFrogSinging(frogNum, true);
+            playFrogSound(frogNum);
+            
+            const expectedFrog = sequence[playerIndex];
+            
+            if (frogNum === expectedFrog) {
+                // Correct!
+                showMessage('vrai', 'bien vu!');
+                
+                await sleep(500);
+                showFrogSinging(frogNum, false);
+                
+                playerIndex++;
+                
+                // Check if sequence complete
+                if (playerIndex >= sequence.length) {
+                    // Round complete!
+                    if (round >= MAX_ROUNDS) {
+                        // VICTORY!
+                        gameState = 'won';
+                        await handleVictory();
+                    } else {
+                        // Next round - add another frog
+                        await sleep(500);
+                        await addToSequenceAndDemo();
+                    }
+                }
+            } else {
+                // Wrong!
+                await sleep(500);
+                showFrogSinging(frogNum, false);
+                await handleDefeat();
+            }
+        }
+        
+        // Handle victory
+        async function handleVictory() {
+            showMessage('Bravo!', 'Gagné!');
+            
+            // VN-Studio victory commands
+            vnCommand('pause 1000');
+            await sleep(1000);
+            vnCommand('set_var frog 1');
+            vnCommand('inc_var score 010');
+            vnCommand('closewav');
+            vnCommand('scene 10');
+        }
+        
+        // Handle defeat
+        async function handleDefeat() {
+            gameState = 'lost';
+            showMessage('faux', 'Perdu !!!');
+            
+            // VN-Studio defeat command
+            vnCommand('dec_var score 10');
+            
+            await sleep(1500);
+            
+            showMessage('Essaye encore');
+            
+            await sleep(1000);
+            
+            // Restart with same sequence position
+            gameState = 'playing';
+            playerIndex = 0;
+            
+            // Replay current sequence
+            showMessage('regarde');
+            await sleep(500);
+            
+            for (let i = 0; i < sequence.length; i++) {
+                await animateFrog(sequence[i]);
+            }
+            
+            await sleep(300);
+            showMessage('puis répète...', 'à toi de jouer!');
+        }
+        
+        // Quit game
+        function quitGame() {
+            // Stop sounds
+            if (currentSound) {
+                currentSound.pause();
+                currentSound = null;
+            }
+vnCommand('scene 10');
+            
+            // Reset to waiting state
+            gameState = 'waiting';
+            sequence = [];
+            round = 0;
+            playerIndex = 0;
+            
+            // Hide all frogs
+            PLAYABLE_FROGS.forEach(num => showFrogSinging(num, false));
+            
+            showMessage('Clique sur moi', 'pour commencer');
+        }
+        
+        // Expose API for VN-Studio engine integration
+        window.frog = {
+            setOnCommand: setOnCommand,
+            reset: function() {
+                gameState = 'waiting';
+                sequence = [];
+                round = 0;
+                playerIndex = 0;
+                PLAYABLE_FROGS.forEach(function(num) { showFrogSinging(num, false); });
+                showMessage('Clique sur moi', 'pour commencer');
+            },
+            quit: quitGame
+        };
+
+        // Initialize
+        console.log('Frog Simon - VN-Studio Ecosse Demo loaded');
+        console.log('6 playable frogs: 1, 2, 4, 5, 6, 7');
+        console.log('Orange frog (3) is decorative only');
+    </script>
+</body>
+</html>

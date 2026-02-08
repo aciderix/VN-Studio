@@ -6,7 +6,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  width: 250px; height: 278px;
+  width: 250px; height: 240px;
   overflow: hidden;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
   font-size: 8pt;
@@ -16,8 +16,9 @@ body {
 /* Fond metallique bleu */
 .panel {
   position: absolute;
-  width: 250px; height: 278px;
+  width: 250px; height: 240px;
   background: url('background.bmp') no-repeat;
+  background-size: 250px 240px;
   display: none;
 }
 .panel.active { display: block; }
@@ -26,9 +27,9 @@ body {
 .menu-btn {
   position: absolute;
   left: 23px;
-  width: 204px; height: 26px;
+  width: 204px; height: 24px;
   background: url('btn_normal.bmp') no-repeat;
-  background-size: 204px 26px;
+  background-size: 204px 24px;
   border: none;
   cursor: pointer;
   color: #fff;
@@ -36,7 +37,7 @@ body {
   font-size: 8pt;
   font-weight: normal;
   text-align: center;
-  line-height: 26px;
+  line-height: 24px;
   outline: none;
 }
 .menu-btn:hover, .menu-btn:focus {
@@ -70,14 +71,14 @@ body {
 }
 .vol-close {
   position: absolute;
-  left: 23px; top: 90px;
+  left: 23px; top: 86px;
 }
 
 /* Panel Save/Load */
 .save-list {
   position: absolute;
   left: 18px; top: 18px;
-  width: 210px; height: 192px;
+  width: 210px; height: 158px;
   background: #fff;
   border: 1px inset #888;
   overflow-y: auto;
@@ -90,29 +91,34 @@ body {
 }
 .save-list .item:hover { background: #cce; }
 .save-list .item.selected { background: #4466aa; color: #fff; }
-.save-list .empty { color: #888; padding: 8px; font-style: italic; }
+.save-list .item .detail { font-size: 7pt; color: #666; }
+.save-list .item.selected .detail { color: #cce; }
 
-.save-ok {
+.save-btns {
   position: absolute;
-  left: 30px; top: 230px;
+  left: 18px; top: 182px;
+  width: 210px;
+  display: flex;
+  gap: 6px;
 }
-.save-cancel {
-  position: absolute;
-  left: 140px; top: 230px;
+.save-btns .menu-btn {
+  position: static;
+  width: 66px;
+  font-size: 7pt;
 }
 
 /* Confirm dialog */
 .confirm-overlay {
   position: absolute;
   top: 0; left: 0;
-  width: 250px; height: 278px;
+  width: 250px; height: 240px;
   background: rgba(0,0,0,0.5);
   display: none;
   z-index: 10;
 }
 .confirm-box {
   position: absolute;
-  top: 80px; left: 25px;
+  top: 60px; left: 25px;
   width: 200px;
   background: #c0c0c0;
   border: 2px outset #ddd;
@@ -132,18 +138,21 @@ body {
   font-size: 8pt;
   cursor: pointer;
 }
+
+/* Hidden file input for import */
+#importFile { display: none; }
 </style>
 </head>
 <body>
 
 <!-- Panel 1: Menu Principal -->
 <div id="panelMenu" class="panel active">
-  <button class="menu-btn" style="top:21px" onclick="onNewGame()">Nouvelle partie</button>
-  <button class="menu-btn" style="top:72px" onclick="onLoad()">Charger une partie...</button>
-  <button class="menu-btn" style="top:104px" onclick="onSave()">Sauvegarder la partie...</button>
-  <button class="menu-btn" style="top:150px" onclick="showPanel('panelVolume')">Volume sonore...</button>
-  <button class="menu-btn" style="top:197px" onclick="onClose()">Revenir au jeu en cours</button>
-  <button class="menu-btn" style="top:231px" onclick="onQuit()">Quitter le jeu</button>
+  <button class="menu-btn" style="top:12px" onclick="onNewGame()">Nouvelle partie</button>
+  <button class="menu-btn" style="top:42px" onclick="onLoad()">Charger une partie...</button>
+  <button class="menu-btn" style="top:72px" onclick="onSave()">Sauvegarder la partie...</button>
+  <button class="menu-btn" style="top:102px" onclick="showPanel('panelVolume')">Volume sonore...</button>
+  <button class="menu-btn" style="top:144px" onclick="onClose()">Revenir au jeu en cours</button>
+  <button class="menu-btn" style="top:174px" onclick="onQuit()">Retour au menu principal</button>
 </div>
 
 <!-- Panel 2: Volume -->
@@ -158,15 +167,21 @@ body {
 <!-- Panel 3: Charger -->
 <div id="panelLoad" class="panel">
   <div id="loadList" class="save-list"></div>
-  <button class="menu-btn save-ok" style="width:80px" onclick="doLoad()">OK</button>
-  <button class="menu-btn save-cancel" style="width:80px" onclick="showPanel('panelMenu')">Annuler</button>
+  <div class="save-btns">
+    <button class="menu-btn" onclick="doLoad()">Charger</button>
+    <button class="menu-btn" onclick="doImport()">Importer</button>
+    <button class="menu-btn" onclick="showPanel('panelMenu')">Annuler</button>
+  </div>
 </div>
 
 <!-- Panel 4: Sauvegarder -->
 <div id="panelSave" class="panel">
   <div id="saveList" class="save-list"></div>
-  <button class="menu-btn save-ok" style="width:80px" onclick="doSave()">OK</button>
-  <button class="menu-btn save-cancel" style="width:80px" onclick="showPanel('panelMenu')">Annuler</button>
+  <div class="save-btns">
+    <button class="menu-btn" onclick="doSave()">Sauver</button>
+    <button class="menu-btn" onclick="doExport()">Exporter</button>
+    <button class="menu-btn" onclick="showPanel('panelMenu')">Annuler</button>
+  </div>
 </div>
 
 <!-- Confirmation overlay -->
@@ -179,6 +194,9 @@ body {
     </div>
   </div>
 </div>
+
+<!-- Import file input -->
+<input type="file" id="importFile" accept=".json,.sav" onchange="handleImport(this)">
 
 <script>
 // Communication avec le moteur VN
@@ -227,11 +245,10 @@ function onClose() {
   sendCommand('closedll');
 }
 
-// === Quitter le jeu ===
+// === Retour au menu principal (frontal/start) ===
 function onQuit() {
-  showConfirm('Quitter le jeu ?', function(yes) {
+  showConfirm('Retourner au menu principal ?', function(yes) {
     if (yes) {
-      sendCommand('closedll');
       sendCommand('quit');
     }
   });
@@ -241,16 +258,13 @@ function onQuit() {
 function onNewGame() {
   showConfirm('Commencer une nouvelle partie ?\nLa progression en cours sera perdue.', function(yes) {
     if (yes) {
-      sendCommand('closedll');
-      // Reinitialiser : retour au frontal (start)
-      sendCommand('runprj frontal\\start.vnp 1');
+      sendCommand('quit');
     }
   });
 }
 
 // === Volume ===
 function initVolume() {
-  // Lire le volume actuel depuis le parent
   var vol = 100;
   try {
     if (parent && parent.masterVolume !== undefined) {
@@ -282,19 +296,45 @@ var SAVE_PREFIX = 'europeo_save_';
 var MAX_SLOTS = 10;
 var selectedSlot = -1;
 
+// Lire l'etat complet du jeu depuis le parent
+function getGameState() {
+  var state = { gameVars: {}, sceneIndex: 0, vnpPath: '', vndName: '', cursorItem: null };
+  try {
+    if (parent && parent !== window) {
+      state.gameVars = JSON.parse(JSON.stringify(parent.gameVars || {}));
+      state.sceneIndex = parent.currentSceneIndex || 0;
+      if (parent.currentVNDEntry) {
+        state.vnpPath = parent.currentVNDEntry.vnp || '';
+        state.vndName = parent.currentVNDEntry.name || '';
+      }
+      state.cursorItem = parent.activeCursorItem || null;
+    }
+  } catch(e) {}
+  return state;
+}
+
+// Nom lisible du module
+function moduleName(name) {
+  var names = {
+    'couleurs1': 'Europe', 'start': 'Accueil', 'allem': 'Allemagne',
+    'angleterre': 'Angleterre', 'autr': 'Autriche', 'belge': 'Belgique',
+    'biblio': 'Biblioth\xe8que', 'danem': 'Danemark', 'ecosse': '\xc9cosse',
+    'espa': 'Espagne', 'finlan': 'Finlande', 'france': 'France',
+    'grece': 'Gr\xe8ce', 'holl': 'Hollande', 'irland': 'Irlande',
+    'italie': 'Italie', 'portu': 'Portugal', 'suede': 'Su\xe8de'
+  };
+  return names[name] || name;
+}
+
 function getSaves() {
   var saves = [];
   for (var i = 0; i < MAX_SLOTS; i++) {
     var raw = localStorage.getItem(SAVE_PREFIX + i);
     if (raw) {
-      try {
-        var s = JSON.parse(raw);
-        saves.push({ slot: i, date: s.date || '?', name: s.name || 'Partie ' + (i+1), data: s });
-      } catch(e) {
-        saves.push({ slot: i, date: '?', name: 'Partie ' + (i+1) + ' (corrompue)', data: null });
-      }
+      try { saves.push({ slot: i, data: JSON.parse(raw) }); }
+      catch(e) { saves.push({ slot: i, data: null }); }
     } else {
-      saves.push({ slot: i, date: null, name: null, data: null });
+      saves.push({ slot: i, data: null });
     }
   }
   return saves;
@@ -309,13 +349,16 @@ function renderSaveList(listId, allowEmpty) {
     var div = document.createElement('div');
     div.className = 'item';
     if (s.data) {
-      var d = s.date ? new Date(s.date).toLocaleString('fr-FR') : '?';
-      div.textContent = 'Emplacement ' + (s.slot+1) + ' - ' + d;
+      var d = s.data.date ? new Date(s.data.date).toLocaleString('fr-FR') : '?';
+      var loc = moduleName(s.data.vndName || s.data.scenePath || '?');
+      var sc = (s.data.sceneIndex || 0) + 1;
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> ' + loc + ' - Sc\xe8ne ' + sc +
+                      '<br><span class="detail">' + d + '</span>';
     } else if (allowEmpty) {
-      div.textContent = 'Emplacement ' + (s.slot+1) + ' - (vide)';
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> (vide)';
     } else {
-      div.textContent = 'Emplacement ' + (s.slot+1) + ' - (vide)';
-      div.style.color = '#aaa';
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> <span class="detail">(vide)</span>';
+      div.style.opacity = '0.4';
     }
     div.onclick = function() {
       if (!allowEmpty && !s.data) return;
@@ -339,29 +382,49 @@ function onLoad() {
 
 function doSave() {
   if (selectedSlot < 0) return;
+  var state = getGameState();
+  var saveData = {
+    version: 1,
+    date: new Date().toISOString(),
+    gameVars: state.gameVars,
+    sceneIndex: state.sceneIndex,
+    vnpPath: state.vnpPath,
+    vndName: state.vndName,
+    cursorItem: state.cursorItem
+  };
+  localStorage.setItem(SAVE_PREFIX + selectedSlot, JSON.stringify(saveData));
+  showPanel('panelMenu');
+}
+
+function restoreFromSave(s) {
   try {
-    var gameVars = {};
-    var scenePath = '';
-    var sceneIndex = 0;
-    var basePath = '';
     if (parent && parent !== window) {
-      gameVars = JSON.parse(JSON.stringify(parent.gameVars || {}));
-      sceneIndex = parent.currentSceneIndex || 0;
-      basePath = parent.currentBasePath || '';
-      if (parent.currentVNDEntry) scenePath = parent.currentVNDEntry.name || '';
+      // Restaurer les variables
+      Object.keys(parent.gameVars).forEach(function(k) { delete parent.gameVars[k]; });
+      if (s.gameVars) {
+        Object.keys(s.gameVars).forEach(function(k) {
+          parent.gameVars[k] = s.gameVars[k];
+        });
+      }
+      // Restaurer le curseur
+      if (s.cursorItem) {
+        sendCommand('defcursor ' + s.cursorItem);
+      } else {
+        sendCommand('defcursor 0');
+      }
+      sendCommand('closedll');
+      // Naviguer vers la scene sauvegardee via RUNPRJ
+      var vnp = s.vnpPath || '';
+      if (!vnp && s.basePath && s.scenePath) {
+        // Compatibilite avec anciennes sauvegardes (v0)
+        vnp = s.basePath + s.scenePath + '.vnp';
+      }
+      if (vnp) {
+        sendCommand('runprj ' + vnp + ' ' + ((s.sceneIndex || 0) + 1));
+      }
     }
-    var saveData = {
-      date: new Date().toISOString(),
-      name: 'Partie ' + (selectedSlot+1),
-      gameVars: gameVars,
-      sceneIndex: sceneIndex,
-      basePath: basePath,
-      scenePath: scenePath
-    };
-    localStorage.setItem(SAVE_PREFIX + selectedSlot, JSON.stringify(saveData));
-    showPanel('panelMenu');
   } catch(e) {
-    console.error('Save failed:', e);
+    console.error('Load failed:', e);
   }
 }
 
@@ -370,26 +433,55 @@ function doLoad() {
   var raw = localStorage.getItem(SAVE_PREFIX + selectedSlot);
   if (!raw) return;
   try {
-    var s = JSON.parse(raw);
-    // Restaurer les variables
-    if (parent && parent !== window && s.gameVars) {
-      // Vider les variables actuelles
-      Object.keys(parent.gameVars).forEach(function(k) { delete parent.gameVars[k]; });
-      // Restaurer les variables sauvegardees
-      Object.keys(s.gameVars).forEach(function(k) {
-        parent.gameVars[k] = s.gameVars[k];
-      });
-      sendCommand('defcursor 0');
-      sendCommand('closedll');
-      // Naviguer vers la scene sauvegardee
-      if (s.scenePath && s.basePath) {
-        var vnpPath = s.basePath + s.scenePath.replace(/\.vnd$/i, '.vnp');
-        sendCommand('runprj ' + vnpPath + ' ' + (s.sceneIndex + 1));
-      }
-    }
+    restoreFromSave(JSON.parse(raw));
   } catch(e) {
-    console.error('Load failed:', e);
+    console.error('Load parse failed:', e);
   }
+}
+
+// === Export: telecharger la sauvegarde en fichier JSON ===
+function doExport() {
+  if (selectedSlot < 0) return;
+  var raw = localStorage.getItem(SAVE_PREFIX + selectedSlot);
+  if (!raw) return;
+  var blob = new Blob([raw], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var s = JSON.parse(raw);
+  var name = 'europeo_' + (moduleName(s.vndName || '').replace(/\s/g, '_') || 'save') +
+             '_s' + ((s.sceneIndex || 0) + 1) + '.json';
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+// === Import: charger un fichier de sauvegarde ===
+function doImport() {
+  document.getElementById('importFile').click();
+}
+
+function handleImport(input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var s = JSON.parse(e.target.result);
+      if (!s.gameVars || !s.vnpPath) {
+        alert('Fichier de sauvegarde invalide.');
+        return;
+      }
+      showConfirm('Charger cette sauvegarde ?\n' + moduleName(s.vndName || '') +
+                   ' - Sc\xe8ne ' + ((s.sceneIndex || 0) + 1), function(yes) {
+        if (yes) restoreFromSave(s);
+      });
+    } catch(err) {
+      alert('Erreur: fichier invalide.');
+    }
+  };
+  reader.readAsText(input.files[0]);
+  input.value = ''; // reset pour pouvoir reimporter le meme fichier
 }
 </script>
 </body>

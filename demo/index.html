@@ -886,14 +886,17 @@ function render() {
       }
     }
     if (fontSize < 6) fontSize = 12;
-    // Ensure text is readable on dark background: convert dark colors to white
+    // Sanitize color: fix invalid hex chars (e.g. #bbrrff -> #bb00ff)
     if (fontColor) {
-      var hex = fontColor.replace('#', '');
+      var hex = fontColor.replace('#', '').replace(/[^0-9a-fA-F]/g, '0');
+      if (hex.length < 6) hex = (hex + '000000').substring(0, 6);
+      fontColor = '#' + hex;
       var r = parseInt(hex.substr(0, 2), 16) || 0;
       var g = parseInt(hex.substr(2, 2), 16) || 0;
       var b = parseInt(hex.substr(4, 2), 16) || 0;
       var luminance = (0.299 * r + 0.587 * g + 0.114 * b);
-      if (luminance < 128) fontColor = '#ffffff';
+      // Only override near-black to white; keep colored text as-is (blue #0000ff has luminance 29)
+      if (luminance < 20) fontColor = '#ffffff';
     }
 
     ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
@@ -941,13 +944,16 @@ function render() {
     }
   }
 
-  // PLAYTEXT overlay pour la commande survolée
+  // PLAYTEXT overlay pour la commande survolée (ONFOCUS strings only)
   if (hoveredCmd) {
-    var fontStr = hoveredCmd.strings.find(function(s) { return s.type === 39; });
+    var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
+    var fontStr = hoveredCmd.strings.find(function(s) {
+      return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
+    });
     var fontVal = fontStr ? fontStr.string : null;
-    // Render ALL type 38 strings (multiple lines at different positions)
+    // Render ONFOCUS type 38 strings (subIndex=0 for interactive commands)
     hoveredCmd.strings.forEach(function(s) {
-      if (s.type === 38 && s.string) {
+      if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
         renderPlayTextBox(s.string, fontVal);
       }
     });
@@ -2813,11 +2819,16 @@ canvas.addEventListener('mousemove', function(e) {
 // Evaluate IF conditions on a command for HOVER (visual effects only: playtext, addbmp, delbmp, showbmp, hidebmp)
 function evaluateHoverEffects(cmd) {
   activePlayTexts = [];
-  // Get font from command
-  var fontStr = cmd.strings.find(function(s) { return s.type === 39; });
+  // Get font from ONFOCUS strings only (subIndex=0)
+  var isInteractive = cmd.paramPairs && cmd.paramPairs.length > 0;
+  var fontStr = cmd.strings.find(function(s) {
+    return s.type === 39 && (!isInteractive || s.subIndex === 0);
+  });
   var font = fontStr ? fontStr.string : null;
 
   cmd.strings.forEach(function(s) {
+    // Only process ONFOCUS strings (subIndex=0) for hover - skip ONCLICK/ONINIT
+    if (isInteractive && s.subIndex !== 0) return;
     if (s.type === 21) {
       var action = evaluateIfReadOnly(s.string);
       if (!action) return;
@@ -3902,8 +3913,8 @@ canvas.addEventListener('touchend', function(e) {
   // since there is no hover on touch devices. Set hoveredCmd to the
   // first non-navigable tapped command so render() draws its ONFOCUS
   // PLAYTEXT overlays, giving visual feedback.
-  // Skip if async processing (PAUSE) is running — it manages its own display.
-  if (!navCmd && !waitingForVideoEnd && allCmds.length > 0) {
+  // Show even during PAUSE sequences so player sees which button they tapped.
+  if (!navCmd && allCmds.length > 0) {
     hoveredCmd = allCmds[0];
     evaluateHoverEffects(allCmds[0]);
   }

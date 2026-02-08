@@ -3440,6 +3440,10 @@ canvas.addEventListener('click', function(e) {
 
 function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
+  // Frontal/start scene 1 = "Quitter" (QUIT) - pas de sens sur le web, rester sur scene 3 (Frontal)
+  if (currentVNDEntry && currentVNDEntry.name === 'start' && index === 0) {
+    index = 2; // scene 3 (0-indexed = 2)
+  }
   currentSceneIndex = index;
   scrollX = 0;
   // Clear recentlyStartedAudio so that sounds started during the same click

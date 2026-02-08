@@ -1028,7 +1028,7 @@ function render() {
 
 // --- AUDIO ---
 var audioElements = {}; // key -> HTMLAudioElement
-var masterVolume = 1.0; // Volume global (0.0 - 1.0), modifiable par vnoption
+var masterVolume = parseFloat(localStorage.getItem('europeo_volume')) || 1.0; // Volume global persistant
 var lastNonLoopingAudio = null; // Dernier son non-bouclé joué (pour PAUSE apres PLAYWAV)
 var audioUnlocked = false;
 var pendingAudioPlays = []; // audio elements waiting for user gesture
@@ -4191,6 +4191,12 @@ document.querySelector('#scene-html .scene-html-content').addEventListener('clic
 
 // Initial resize
 resizeCanvas();
+
+// Chargement automatique: frontal/start scene 3 (menu principal)
+executeRunPrj('frontal\\start.vnp 3');
+// Mettre le select sur 'start'
+var startIdx = VND_LIST.findIndex(function(e) { return e.name === 'start'; });
+if (startIdx >= 0) vndSelect.value = startIdx;
 </script>
 
 <!-- Debug elements outside canvas-container for reliable mobile positioning -->

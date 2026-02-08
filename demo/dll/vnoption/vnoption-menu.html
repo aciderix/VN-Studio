@@ -280,6 +280,7 @@ function onVolumeChange(val) {
   try {
     if (parent && parent !== window) {
       parent.masterVolume = val / 100;
+      try { localStorage.setItem('europeo_volume', val / 100); } catch(e2) {}
       // Appliquer aux audio en cours
       var audios = parent.audioElements || {};
       Object.keys(audios).forEach(function(k) {

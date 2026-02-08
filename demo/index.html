@@ -702,7 +702,8 @@ var scrollX = 0; // offset de scroll horizontal pour scènes larges
 var activePlayText = null; // text from IF-triggered playtext actions
 var activePlayTextFont = null; // font for activePlayText
 var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
-var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color }
+var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
+var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
 var toolbarSceneIndex = -1; // index of the "Toolbar" scene
 
 var canvas = document.getElementById('game-canvas');
@@ -984,7 +985,8 @@ function render() {
         var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
           return String(getVar(vname));
         });
-        ctx.font = 'bold ' + ot.fontSize + 'px "Comic Sans MS", sans-serif';
+        var fontFamily = ot.family || 'Comic Sans MS';
+        ctx.font = 'bold ' + ot.fontSize + 'px "' + fontFamily + '", sans-serif';
         ctx.fillStyle = ot.color;
         ctx.textAlign = 'start';
         ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
@@ -1507,8 +1509,9 @@ function executeAction(action) {
   } else if (cmd === 'closedll') {
     closeDll();
   } else if (cmd === 'font') {
-    // Font change from IF action - store for next playtext
+    // Font change from IF action - store for next playtext and ADDTEXT
     activePlayTextFont = parts.slice(1).join(' ');
+    setFont(parts.slice(1).join(' '));
   } else if (cmd === 'invalidate' || cmd === 'update') {
     render();
   } else if (cmd === 'playtext') {
@@ -1632,22 +1635,34 @@ function hideBmpOverlay(name) {
   if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
 }
 
+function setFont(val) {
+  // Format: "size style color fontfamily" e.g. "18 0 #ffffff Comic sans MS"
+  var parts = val.trim().split(/\s+/);
+  if (parts.length >= 1) currentTextFont.size = parseInt(parts[0]) || 18;
+  if (parts.length >= 2) currentTextFont.style = parseInt(parts[1]) || 0;
+  if (parts.length >= 3) currentTextFont.color = parts[2] || '#ffffff';
+  if (parts.length >= 4) currentTextFont.family = parts.slice(3).join(' ') || 'Comic Sans MS';
+  console.log('FONT:', currentTextFont.size + 'px', currentTextFont.color, currentTextFont.family);
+}
+
 function addTextOverlay(val) {
-  // Format: "name fontSize x y w h flags <varname>" or "name fontSize x y w h flags text"
+  // Format: "name layer x y x2 y2 flags text" (layer=display layer, not font size)
   var parts = val.trim().split(/\s+/);
   if (parts.length < 7) return;
   var name = parts[0].toLowerCase();
-  var fontSize = parseInt(parts[1]) || 14;
-  // VND font sizes are Windows point sizes; scale up small sizes for readability
-  if (fontSize <= 12) fontSize = Math.max(fontSize * 2, 12);
+  // parts[1] = layer (display layer, same as ADDBMP)
   var x = parseInt(parts[2]) || 0;
   var y = parseInt(parts[3]) || 0;
   var w = parseInt(parts[4]) || 200;
   var h = parseInt(parts[5]) || 30;
   // parts[6] = flags
   var textPart = parts.slice(7).join(' ');
-  overlayTexts[name] = { text: textPart, fontSize: fontSize, x: x, y: y, w: w, h: h, color: '#ffffff' };
-  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y);
+  overlayTexts[name] = {
+    text: textPart, fontSize: currentTextFont.size,
+    x: x, y: y, w: w, h: h,
+    color: currentTextFont.color, family: currentTextFont.family
+  };
+  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y, 'font:', currentTextFont.size + 'px', currentTextFont.family);
   render();
 }
 
@@ -2183,10 +2198,13 @@ function executeStringCommand(strType, strValue) {
         addBmpOverlay('_playbmp ' + val);
       }
       break;
-    case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"
+    case 41: // ADDTEXT: "name layer x y x2 y2 flags text"
       addTextOverlay(val);
       break;
-    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 39 (FONT), 3 (PREV), 7 (HOTSPOT)
+    case 39: // FONT: "size style color fontfamily"
+      setFont(val);
+      break;
+    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 3 (PREV), 7 (HOTSPOT)
     default:
       break;
   }
@@ -2250,7 +2268,9 @@ function executeSceneCommands(scene) {
   function executePass0Item(item) {
     var s = item.s;
     var cmd = item.cmd;
-    if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+    if (s.type === 39) {
+      setFont(s.string);
+    } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
       executeStringCommand(s.type, s.string);
     } else if (s.type === 9 && !cmd.autoPlayedVideo) {
       console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
@@ -2398,7 +2418,8 @@ function executeSceneCommands(scene) {
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or in rendering
-      if (s.type === 38 || s.type === 39 || s.type === 3) return;
+      if (s.type === 38 || s.type === 3) return;
+      if (s.type === 39) { setFont(s.string); return; }
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
@@ -2684,13 +2705,20 @@ function isToolbarVisible() {
 }
 
 function executeToolbar() {
-  // Execute the toolbar scene's C0 command strings to add barre overlay + conditional icons
+  // Execute the toolbar scene's C0 ONINIT strings (subIndex >= 2) to add barre overlay + conditional icons
+  // ONFOCUS (sub=0) strings like ordi.bmp/textetm.bmp only show on hover, not on init
+  // ONCLICK (sub=1) strings like RUNDLL vnoption.dll only run on click
   if (toolbarSceneIndex < 0 || !project) return;
   var tbScene = project.scenes[toolbarSceneIndex];
   if (!tbScene || !tbScene.commands.length) return;
   var cmd = tbScene.commands[0]; // C0 is the main toolbar setup command
   cmd.strings.forEach(function(s) {
-    if (s.type === 39 || s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.subIndex < 2) return; // Only ONINIT (2) and AFTERINIT (3)
+    if (s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.type === 39) {
+      setFont(s.string);
+      return;
+    }
     if (s.type === 21) {
       var action = evaluateIf(s.string);
       if (action) executeAction(action);
@@ -2878,7 +2906,20 @@ function evaluateHoverEffects(cmd) {
   cmd.strings.forEach(function(s) {
     // Only process ONFOCUS strings (subIndex=0) for hover - skip ONCLICK/ONINIT
     if (isInteractive && s.subIndex !== 0) return;
-    if (s.type === 21) {
+    // Direct display commands (ADDBMP, DELBMP, HIDEBMP, SHOWBMP)
+    if (s.type === 27) {
+      var imgName = s.string.trim().split(/\s+/)[0].toLowerCase();
+      if (imgName && !overlayImages[imgName]) {
+        hoverAddedImages[imgName] = true;
+      }
+      addBmpOverlay(s.string);
+    } else if (s.type === 28) {
+      delBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 29) {
+      hideBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 30) {
+      showBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 21) {
       var action = evaluateIfReadOnly(s.string);
       if (!action) return;
       var parts = action.trim().split(/\s+/);
@@ -2888,10 +2929,10 @@ function evaluateHoverEffects(cmd) {
       } else if (act === 'addbmp') {
         // Track this as a hover-added image ONLY if it doesn't already exist
         // (existing images are persistent from scene entry and shouldn't be removed on unhover)
-        var imgName = parts[1] ? parts[1].toLowerCase() : '';
-        if (imgName && !overlayImages[imgName]) {
-          hoverAddedImages[imgName] = true;
-          console.log('HOVER adding NEW image:', imgName);
+        var imgNameIf = parts[1] ? parts[1].toLowerCase() : '';
+        if (imgNameIf && !overlayImages[imgNameIf]) {
+          hoverAddedImages[imgNameIf] = true;
+          console.log('HOVER adding NEW image:', imgNameIf);
         }
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {

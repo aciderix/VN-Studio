@@ -2903,8 +2903,28 @@ function evaluateIfReadOnly(ifStr) {
   return result ? thenAction : elseAction;
 }
 
+// Polygones orphelins/debug dans les données originales du jeu à ignorer au clic
+// suede s1 C5: raccourci debug dans le ciel vers scène récompense (scene 14)
+// couleurs1 s5 C2: zone de sortie redondante sans label
+var BLOCKED_CLICKS = [
+  { base: 'suede/', scene: 0, cmd: 5 },
+  { base: 'couleurs1/', scene: 4, cmd: 2 }
+];
+
 // Action commune clic / tap
 function handleCommandClick(cmd) {
+  // Ignorer les polygones debug/orphelins identifiés dans les données originales
+  if (project && currentSceneIndex >= 0) {
+    var scene = project.scenes[currentSceneIndex];
+    var cmdIdx = scene.commands.indexOf(cmd);
+    var blocked = BLOCKED_CLICKS.some(function(b) {
+      return currentBasePath === b.base && currentSceneIndex === b.scene && cmdIdx === b.cmd;
+    });
+    if (blocked) {
+      console.log('Click ignored: blocked debug polygon C' + cmdIdx + ' in ' + currentBasePath + ' scene ' + (currentSceneIndex + 1));
+      return;
+    }
+  }
   console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
   // If this command had auto-played video and video is still playing, close it first
   if (cmd.autoPlayedVideo && currentVideo) {

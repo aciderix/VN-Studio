@@ -1416,6 +1416,9 @@ function executeHotspot(n) {
   _hotspotDepth--;
 }
 
+// Flag pour PAUSE inline dans les IF - lu par le runner async de resumeCommandProcessing
+var pendingPauseMs = 0;
+
 // Execute an action string (from IF then/else branch)
 function executeAction(action) {
   if (!action) return;
@@ -1480,8 +1483,10 @@ function executeAction(action) {
     var hsIdx = parseInt(parts[1]);
     if (!isNaN(hsIdx)) executeHotspot(hsIdx);
   } else if (cmd === 'pause') {
-    // Pause N ms - used by DLL mini-games; they handle their own setTimeout
-    // so this is a no-op when called via handleDllCommand
+    // PAUSE inline dans un IF: signaler au runner async via pendingPauseMs
+    var ms = parseInt(parts[1]) || 300;
+    pendingPauseMs = ms;
+    console.log('PAUSE (inline):', ms + 'ms');
   } else if (cmd === 'if') {
     // Nested IF: "if var op val then action"
     var nestedAction = evaluateIf(parts.slice(1).join(' '));
@@ -3126,10 +3131,15 @@ function resumeCommandProcessing(cmd, startIdx) {
     }
   }
 
-  // Check if any string has PAUSE (type 16) — if so, use async processing
+  // Check if any string has PAUSE (type 16 ou inline dans IF) — if so, use async processing
   var hasPause = false;
+  pendingPauseMs = 0; // Reset au debut de chaque commande
   for (var pi = startIdx; pi < cmd.strings.length; pi++) {
     if (cmd.strings[pi].type === 16) { hasPause = true; break; }
+    // Detecter aussi PAUSE inline dans les IF (ex: "seche = 0 then pause 1000")
+    if (cmd.strings[pi].type === 21 && /\bthen\s+pause\s+\d/i.test(cmd.strings[pi].string)) {
+      hasPause = true; break;
+    }
   }
 
   if (hasPause) {
@@ -3152,7 +3162,16 @@ function resumeCommandProcessing(cmd, startIdx) {
         setTimeout(function() { runAsync(si + 1); }, ms);
       } else {
         processOneString(s, si);
-        runAsync(si + 1);
+        // Verifier si processOneString a declenche un PAUSE inline (via executeAction)
+        if (pendingPauseMs > 0) {
+          var pms = pendingPauseMs;
+          pendingPauseMs = 0;
+          imagesAddedThisClick = {};
+          render();
+          setTimeout(function() { runAsync(si + 1); }, pms);
+        } else {
+          runAsync(si + 1);
+        }
       }
     })(startIdx);
   } else {

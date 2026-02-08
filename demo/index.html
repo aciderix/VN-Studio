@@ -1026,6 +1026,7 @@ function render() {
 
 // --- AUDIO ---
 var audioElements = {}; // key -> HTMLAudioElement
+var lastNonLoopingAudio = null; // Dernier son non-bouclé joué (pour PAUSE apres PLAYWAV)
 var audioUnlocked = false;
 var pendingAudioPlays = []; // audio elements waiting for user gesture
 var audioContext = null;
@@ -1117,6 +1118,7 @@ function playWav(wavStr) {
   var audio = new Audio(url);
   audio.loop = (loops > 1 || loops === 0); // 0 = infinite
   audioElements[key] = audio;
+  if (!audio.loop) lastNonLoopingAudio = audio;
   recentlyStartedAudio[key] = true;
   audio.play().catch(function(e) {
     if (e.name === 'NotAllowedError') {
@@ -1418,6 +1420,27 @@ function executeHotspot(n) {
 
 // Flag pour PAUSE inline dans les IF - lu par le runner async de resumeCommandProcessing
 var pendingPauseMs = 0;
+
+// Attendre la fin du son en cours avant d'appliquer un delai
+// Si un son non-bouclé est en cours, attend sa fin puis ajoute le delai
+function waitForAudioThenDelay(ms, callback) {
+  if (lastNonLoopingAudio && !lastNonLoopingAudio.paused && !lastNonLoopingAudio.ended) {
+    var audio = lastNonLoopingAudio;
+    var onEnd = function() {
+      audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('error', onEnd);
+      if (ms > 0) {
+        setTimeout(callback, ms);
+      } else {
+        callback();
+      }
+    };
+    audio.addEventListener('ended', onEnd);
+    audio.addEventListener('error', onEnd);
+  } else {
+    setTimeout(callback, ms);
+  }
+}
 
 // Execute an action string (from IF then/else branch)
 function executeAction(action) {
@@ -3159,7 +3182,7 @@ function resumeCommandProcessing(cmd, startIdx) {
         // images that were added before the pause (they've been visible)
         imagesAddedThisClick = {};
         render();
-        setTimeout(function() { runAsync(si + 1); }, ms);
+        waitForAudioThenDelay(ms, function() { runAsync(si + 1); });
       } else {
         processOneString(s, si);
         // Verifier si processOneString a declenche un PAUSE inline (via executeAction)
@@ -3168,7 +3191,7 @@ function resumeCommandProcessing(cmd, startIdx) {
           pendingPauseMs = 0;
           imagesAddedThisClick = {};
           render();
-          setTimeout(function() { runAsync(si + 1); }, pms);
+          waitForAudioThenDelay(pms, function() { runAsync(si + 1); });
         } else {
           runAsync(si + 1);
         }

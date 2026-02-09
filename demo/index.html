@@ -2295,9 +2295,10 @@ function executeSceneCommands(scene) {
       if (isInteractive) {
         pass0Queue.push({ s: s, cmd: cmd });
         if (s.type === 16) pass0HasPause = true;
-      } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
-        // Non-interactive direct display commands
-        executeStringCommand(s.type, s.string);
+      } else {
+        // Non-interactive (AUTO) commands: queue all strings for processing
+        pass0Queue.push({ s: s, cmd: cmd });
+        if (s.type === 16) pass0HasPause = true;
       }
     });
   });
@@ -2349,6 +2350,12 @@ function executeSceneCommands(scene) {
           executeAction(action);
         }
       }
+    } else if (s.type === 25 || s.type === 32) {
+      // INVALIDATE / UPDATE from ONINIT
+      render();
+    } else if (s.type === 33) {
+      // RUNDLL from ONINIT (e.g. costume.dll in italie scene 31)
+      runDll(s.string);
     }
     // type 16 (PAUSE) is handled as a delay in the queue runner, not here
   }

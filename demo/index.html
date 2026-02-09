@@ -1796,12 +1796,16 @@ var DLL_HTML_MAP = {
   'inv.dll':      'dll/inv/inv-inventory.html',
   'pepe.dll':     'dll/pepe/pepe-game.html',
   'frog.dll':     'dll/frog/frog-simon.html',
-  'vnoption.dll': 'dll/vnoption/vnoption-menu.html'
+  'vnoption.dll': 'dll/vnoption/vnoption-menu.html',
+  'bateau.dll':   'dll/bateau/bateau-game.html',
+  'costume.dll':  'dll/costume/costume.html',
+  'euro32.dll':   'dll/euro32/calculatrice.html'
 };
 // Native sizes for DLL forms (width x height). Default is 640x400.
 var DLL_NATIVE_SIZE = {
   'inv.dll': { w: 330, h: 337 },
-  'vnoption.dll': { w: 250, h: 240 }
+  'vnoption.dll': { w: 250, h: 240 },
+  'euro32.dll': { w: 177, h: 291 }
 };
 var currentDllIframe = null;
 
@@ -1859,7 +1863,8 @@ function runDll(dllName) {
       // Look for known game objects and wire up onCommand callback
       var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
                     iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog ||
-                    iframeWin.vnoption || iframeWin.game;
+                    iframeWin.vnoption || iframeWin.bateau || iframeWin.costume || iframeWin.calculatrice ||
+                    iframeWin.game;
       if (gameObj && typeof gameObj.setOnCommand === 'function') {
         gameObj.setOnCommand(function(cmd) {
           console.log('DLL command:', cmd);
@@ -1894,7 +1899,12 @@ function runDll(dllName) {
 
 function handleDllCommand(cmd) {
   if (!cmd) return;
-  var parts = cmd.trim().split(/\s+/);
+  // Strip 'playcmd' prefix (used by some DLLs like bateau.dll)
+  var cleaned = cmd.trim();
+  if (cleaned.toLowerCase().indexOf('playcmd ') === 0) {
+    cleaned = cleaned.substring(8);
+  }
+  var parts = cleaned.split(/\s+/);
   var action = parts[0].toLowerCase();
 
   // scene navigation: close DLL, then navigate (wait for video if playing)
@@ -1948,10 +1958,10 @@ function handleDllCommand(cmd) {
     // Don't fully close (src=about:blank) because subsequent DLL callbacks (inc_var, scene)
     // still need to fire from the iframe's setTimeout
     document.getElementById('dll-overlay').style.display = 'none';
-    executeAction(cmd);
+    executeAction(cleaned);
   } else {
     // Other commands: playwav, inc_var, set_var, pause, etc.
-    executeAction(cmd);
+    executeAction(cleaned);
   }
 }
 

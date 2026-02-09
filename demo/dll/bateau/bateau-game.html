@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bateau - Jeu de Drag & Drop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        .game-container {
+            position: relative;
+            width: 640px;
+            height: 400px;
+            background-image: url('Image_1.png');
+            background-size: cover;
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .chrono {
+            position: absolute;
+            left: 110px;
+            top: 48px;
+            width: 43px;
+            height: 33px;
+            background: transparent;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+        }
+        .bulle {
+            position: absolute;
+            left: 28px;
+            top: 28px;
+            width: 149px;
+            height: 70px;
+            pointer-events: none;
+        }
+        .draggable {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .draggable:active { cursor: grabbing; }
+        .draggable.dragging { 
+            opacity: 0.8; 
+            z-index: 1000;
+        }
+        .drop-zone {
+            position: absolute;
+            /* Debug: border: 2px dashed rgba(255,255,0,0.3); */
+        }
+        .result-label {
+            position: absolute;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 64px;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        #gagne {
+            left: 192px;
+            top: 150px;
+            color: #FF0000;
+        }
+        #perdu {
+            left: 200px;
+            top: 142px;
+            color: #0000FF;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- Chronomètre -->
+        <div class="chrono" id="chrono">45</div>
+        
+        <!-- Bulle du capitaine -->
+        <img src="Image_10.png" class="bulle" alt="Bulle">
+        
+        <!-- Zones de dépôt (invisibles) -->
+        <!-- Belgique zones -->
+        <div class="drop-zone" id="zone_belg_1" data-country="belgique" style="left:124px;top:188px;width:69px;height:77px;"></div>
+        <div class="drop-zone" id="zone_belg_2" data-country="belgique" style="left:40px;top:144px;width:145px;height:121px;"></div>
+        
+        <!-- Autriche zones -->
+        <div class="drop-zone" id="zone_aut_1" data-country="autriche" style="left:120px;top:272px;width:49px;height:125px;"></div>
+        <div class="drop-zone" id="zone_aut_2" data-country="autriche" style="left:48px;top:272px;width:121px;height:121px;"></div>
+        
+        <!-- Angleterre -->
+        <div class="drop-zone" id="zone_ang" data-country="angleterre" style="left:356px;top:60px;width:133px;height:101px;"></div>
+        
+        <!-- Grèce -->
+        <div class="drop-zone" id="zone_gre" data-country="grece" style="left:488px;top:160px;width:73px;height:105px;"></div>
+        
+        <!-- Pays-Bas -->
+        <div class="drop-zone" id="zone_pays" data-country="paysbas" style="left:360px;top:168px;width:121px;height:113px;"></div>
+        
+        <!-- Italie -->
+        <div class="drop-zone" id="zone_ita" data-country="italie" style="left:184px;top:240px;width:119px;height:113px;"></div>
+        
+        <!-- Objets déplaçables -->
+        <img src="Image_2.png" class="draggable" id="sculpt" data-target="belgique" style="left:0px;top:302px;width:43px;height:85px;" alt="Manneken Pis">
+        <img src="Image_3.png" class="draggable" id="violon" data-target="autriche" style="left:192px;top:342px;width:118px;height:46px;" alt="Violon">
+        <img src="Image_4.png" class="draggable" id="bouteille" data-target="italie" style="left:335px;top:309px;width:59px;height:82px;" alt="Chianti">
+        <img src="Image_5.png" class="draggable" id="chap_2" data-target="paysbas" style="left:425px;top:284px;width:88px;height:71px;" alt="Chapeau Pays-Bas">
+        <img src="Image_6.png" class="draggable" id="cheval" data-target="grece" style="left:568px;top:111px;width:71px;height:78px;" alt="Cheval de Troie">
+        <img src="Image_7.png" class="draggable" id="chap_1" data-target="autriche" style="left:296px;top:80px;width:51px;height:68px;" alt="Chapeau Tyrolien">
+        <img src="Image_8.png" class="draggable" id="art" data-target="belgique" style="left:223px;top:44px;width:68px;height:77px;" alt="Atomium">
+        <img src="Image_9.png" class="draggable" id="bus" data-target="angleterre" style="left:306px;top:240px;width:100px;height:61px;" alt="Bus Rouge">
+        
+        <!-- Labels de résultat -->
+        <div class="result-label" id="gagne">GAGNE</div>
+        <div class="result-label" id="perdu">PERDU</div>
+    </div>
+
+    <script>
+        // Configuration du jeu - Extrait du DLL original
+        const INITIAL_TIME = 45; // Valeur extraite: 45 secondes
+        const WIN_COMMAND = 'scene 22';
+        const LOSE_COMMAND = 'scene 21';
+        const RESULT_DELAY = 3000; // 0xBB8 = 3000ms
+
+        // État du jeu
+        let timeLeft = INITIAL_TIME;
+        let timerInterval = null;
+        let gameEnded = false;
+        let placedObjects = {};
+        
+        // Correspondances pays -> objets attendus
+        const countryObjects = {
+            'belgique': ['sculpt', 'art'],      // Manneken Pis + Atomium
+            'autriche': ['violon', 'chap_1'],   // Violon + Chapeau tyrolien
+            'angleterre': ['bus'],               // Bus rouge
+            'italie': ['bouteille'],             // Chianti
+            'grece': ['cheval'],                 // Cheval de Troie
+            'paysbas': ['chap_2']                // Chapeau Pays-Bas
+        };
+
+        // VN-Studio callback system
+        var vnCallback = null;
+
+        function setOnCommand(callback) {
+            vnCallback = callback;
+        }
+
+        function vnCommand(cmd) {
+            console.log('[VN-Studio]', cmd);
+            if (vnCallback) {
+                vnCallback(cmd);
+            } else if (window.__vnCommand) {
+                window.__vnCommand(cmd);
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initDragAndDrop();
+            startTimer();
+            // Commande de musique de fond (comme dans l'original)
+            vnCommand('playwav music2.wav 2');
+        });
+
+        function initDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable');
+            
+            draggables.forEach(draggable => {
+                // Événements souris
+                draggable.addEventListener('mousedown', startDrag);
+                
+                // Événements tactiles
+                draggable.addEventListener('touchstart', startDrag, { passive: false });
+            });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', endDrag);
+        }
+
+        let currentDraggable = null;
+        let offsetX = 0, offsetY = 0;
+        let startX = 0, startY = 0;
+
+        function startDrag(e) {
+            if (gameEnded) return;
+            
+            e.preventDefault();
+            currentDraggable = e.target;
+            currentDraggable.classList.add('dragging');
+            
+            const rect = currentDraggable.getBoundingClientRect();
+            const containerRect = document.getElementById('gameContainer').getBoundingClientRect();
+            
+            if (e.type === 'touchstart') {
+                offsetX = e.touches[0].clientX - rect.left;
+                offsetY = e.touches[0].clientY - rect.top;
+            } else {
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+            }
+            
+            startX = parseInt(currentDraggable.style.left);
+            startY = parseInt(currentDraggable.style.top);
+        }
+
+        function drag(e) {
+            if (!currentDraggable || gameEnded) return;
+            
+            e.preventDefault();
+            
+            const containerRect = document.getElementById('gameContainer').getBoundingClientRect();
+            let clientX, clientY;
+            
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let newX = clientX - containerRect.left - offsetX;
+            let newY = clientY - containerRect.top - offsetY;
+            
+            // Limites du container
+            newX = Math.max(0, Math.min(newX, 640 - currentDraggable.offsetWidth));
+            newY = Math.max(0, Math.min(newY, 400 - currentDraggable.offsetHeight));
+            
+            currentDraggable.style.left = newX + 'px';
+            currentDraggable.style.top = newY + 'px';
+        }
+
+        function endDrag(e) {
+            if (!currentDraggable || gameEnded) return;
+            
+            currentDraggable.classList.remove('dragging');
+            
+            // Vérifier si l'objet est dans une zone valide
+            const objectId = currentDraggable.id;
+            const targetCountry = currentDraggable.dataset.target;
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            let validDrop = false;
+            
+            // Centre de l'objet
+            const objRect = currentDraggable.getBoundingClientRect();
+            const objCenterX = objRect.left + objRect.width / 2;
+            const objCenterY = objRect.top + objRect.height / 2;
+            
+            dropZones.forEach(zone => {
+                const zoneRect = zone.getBoundingClientRect();
+                const zoneCountry = zone.dataset.country;
+                
+                // Vérifier si le centre de l'objet est dans la zone
+                if (objCenterX >= zoneRect.left && objCenterX <= zoneRect.right &&
+                    objCenterY >= zoneRect.top && objCenterY <= zoneRect.bottom) {
+                    
+                    if (zoneCountry === targetCountry) {
+                        // Placement correct
+                        validDrop = true;
+                        placedObjects[objectId] = zoneCountry;
+                        currentDraggable.style.pointerEvents = 'none';
+                        currentDraggable.style.opacity = '0.7';
+                    }
+                }
+            });
+            
+            currentDraggable = null;
+            
+            // Vérifier victoire immédiate si tous les objets sont bien placés
+            if (validDrop && checkWinCondition()) {
+                endGame();
+            }
+        }
+
+        function startTimer() {
+            updateChronoDisplay();
+            timerInterval = setInterval(() => {
+                if (gameEnded) return;
+                
+                timeLeft--;
+                updateChronoDisplay();
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function updateChronoDisplay() {
+            document.getElementById('chrono').textContent = timeLeft;
+        }
+
+        function checkWinCondition() {
+            // Vérifier que tous les objets requis sont bien placés
+            for (const [country, objects] of Object.entries(countryObjects)) {
+                for (const obj of objects) {
+                    if (placedObjects[obj] !== country) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function endGame() {
+            if (gameEnded) return;
+            gameEnded = true;
+            
+            clearInterval(timerInterval);
+            
+            // Fermer le son en cours
+            vnCommand('closewav');
+            
+            const isWin = checkWinCondition();
+            
+            if (isWin) {
+                document.getElementById('gagne').style.display = 'block';
+                // Délai avant d'envoyer la commande (comme dans l'original: 3000ms)
+                setTimeout(() => {
+                    vnCommand(WIN_COMMAND);
+                }, RESULT_DELAY);
+            } else {
+                document.getElementById('perdu').style.display = 'block';
+                setTimeout(() => {
+                    vnCommand(LOSE_COMMAND);
+                }, RESULT_DELAY);
+            }
+        }
+        // Expose API for VN-Studio engine integration
+        window.bateau = {
+            setOnCommand: setOnCommand,
+            reset: function() {
+                gameEnded = false;
+                timeLeft = INITIAL_TIME;
+                placedObjects = {};
+                if (timerInterval) clearInterval(timerInterval);
+                document.getElementById('gagne').style.display = 'none';
+                document.getElementById('perdu').style.display = 'none';
+                document.querySelectorAll('.draggable').forEach(function(d) {
+                    d.style.pointerEvents = '';
+                    d.style.opacity = '1';
+                });
+            },
+            quit: function() {
+                if (timerInterval) clearInterval(timerInterval);
+                vnCommand('scene 21');
+            }
+        };
+    </script>
+</body>
+</html>

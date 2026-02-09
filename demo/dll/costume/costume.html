@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Costume - Jeu d'habillage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #000; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            touch-action: none;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 640px;
+            height: 400px;
+            background: url('Image_1.png') no-repeat 0 0;
+            background-size: 640px 400px;
+        }
+        
+        /* Zones de drop invisibles - positions exactes DLL */
+        .drop-zone {
+            position: absolute;
+            /* border: 2px dashed rgba(255,255,255,0.3); */ /* Debug */
+        }
+        
+        /* Zones chapeaux (3 personnages) */
+        #zone-chap-1 { left: 40px; top: 14px; width: 111px; height: 107px; }
+        #zone-chap-2 { left: 182px; top: 14px; width: 109px; height: 107px; }
+        #zone-chap-3 { left: 332px; top: 14px; width: 123px; height: 107px; }
+        
+        /* Zones hauts */
+        #zone-haut-1 { left: 2px; top: 120px; width: 167px; height: 131px; }
+        #zone-haut-2 { left: 168px; top: 120px; width: 135px; height: 131px; }
+        #zone-haut-3 { left: 302px; top: 120px; width: 185px; height: 131px; }
+        
+        /* Zones bas */
+        #zone-bas-1 { left: 2px; top: 250px; width: 167px; height: 145px; }
+        #zone-bas-2 { left: 168px; top: 250px; width: 135px; height: 143px; }
+        #zone-bas-3 { left: 302px; top: 250px; width: 185px; height: 141px; }
+        
+        /* Items draggables sur l'étagère */
+        .shelf-item {
+            position: absolute;
+            cursor: grab;
+            z-index: 10;
+            touch-action: none;
+        }
+        .shelf-item:active { cursor: grabbing; }
+        .shelf-item.hidden { display: none; }
+        
+        /* Positions initiales sur l'étagère (droite de l'écran) - positions DLL */
+        #item-1 { left: 505px; top: 140px; } /* bas_1 - pantalon jaune */
+        #item-2 { left: 496px; top: 167px; } /* bas_2 - short */
+        #item-3 { left: 504px; top: 142px; } /* bas_3 - pantalon bordeaux */
+        #item-4 { left: 487px; top: 151px; } /* haut_1 - t-shirt rayé */
+        #item-5 { left: 479px; top: 149px; } /* haut_2 - chemise verte */
+        #item-6 { left: 471px; top: 130px; } /* haut_3 - chemise ceinture */
+        #item-7 { left: 505px; top: 187px; } /* chap_1 - chapeau bleu */
+        #item-8 { left: 520px; top: 179px; } /* chap_2 - petit chapeau */
+        #item-9 { left: 514px; top: 193px; } /* chap_3 - chapeau bandeau */
+        
+        /* Items placés sur les personnages */
+        .placed-item {
+            position: absolute;
+            display: none;
+            z-index: 5;
+            cursor: pointer;
+        }
+        
+        /* Ghost pendant le drag */
+        #drag-ghost {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.8;
+            display: none;
+        }
+        
+        /* Chrono */
+        #chrono {
+            position: absolute;
+            left: 560px;
+            top: 8px;
+            width: 70px;
+            height: 30px;
+            background: #222;
+            border: 2px solid #888;
+            border-radius: 4px;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 26px;
+        }
+        
+        /* Bouton quitter */
+        #btn-quitter {
+            position: absolute;
+            left: 560px;
+            top: 360px;
+            width: 70px;
+            height: 30px;
+            background: #c00;
+            border: 2px solid #800;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #btn-quitter:hover { background: #f00; }
+        
+        /* Messages victoire/défaite */
+        #gagne, #perdu {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 48px;
+            font-weight: bold;
+            border-radius: 10px;
+            display: none;
+            z-index: 200;
+        }
+        #gagne { background: #0a0; color: #fff; }
+        #perdu { background: #a00; color: #fff; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Zones de drop -->
+        <div id="zone-chap-1" class="drop-zone" data-type="chap" data-perso="1"></div>
+        <div id="zone-chap-2" class="drop-zone" data-type="chap" data-perso="2"></div>
+        <div id="zone-chap-3" class="drop-zone" data-type="chap" data-perso="3"></div>
+        <div id="zone-haut-1" class="drop-zone" data-type="haut" data-perso="1"></div>
+        <div id="zone-haut-2" class="drop-zone" data-type="haut" data-perso="2"></div>
+        <div id="zone-haut-3" class="drop-zone" data-type="haut" data-perso="3"></div>
+        <div id="zone-bas-1" class="drop-zone" data-type="bas" data-perso="1"></div>
+        <div id="zone-bas-2" class="drop-zone" data-type="bas" data-perso="2"></div>
+        <div id="zone-bas-3" class="drop-zone" data-type="bas" data-perso="3"></div>
+        
+        <!-- Items sur l'étagère - Mapping exact DLL -->
+        <img id="item-1" class="shelf-item" src="Image_4.png" data-item="1" data-type="bas">
+        <img id="item-2" class="shelf-item" src="Image_3.png" data-item="2" data-type="bas">
+        <img id="item-3" class="shelf-item" src="Image_2.png" data-item="3" data-type="bas">
+        <img id="item-4" class="shelf-item" src="Image_9.png" data-item="4" data-type="haut">
+        <img id="item-5" class="shelf-item" src="Image_8.png" data-item="5" data-type="haut">
+        <img id="item-6" class="shelf-item" src="Image_10.png" data-item="6" data-type="haut">
+        <img id="item-7" class="shelf-item" src="Image_7.png" data-item="7" data-type="chap">
+        <img id="item-8" class="shelf-item" src="Image_5.png" data-item="8" data-type="chap">
+        <img id="item-9" class="shelf-item" src="Image_6.png" data-item="9" data-type="chap">
+        
+        <!-- Items placés sur les personnages - Convention: placed-{itemId}-{perso} -->
+        <!-- Personnage 1 (gauche) -->
+        <img id="placed-1-1" class="placed-item" src="Image_4.png" data-item="1" style="left:34px;top:232px;">
+        <img id="placed-2-1" class="placed-item" src="Image_3.png" data-item="2" style="left:26px;top:228px;">
+        <img id="placed-3-1" class="placed-item" src="Image_2.png" data-item="3" style="left:32px;top:230px;">
+        <img id="placed-4-1" class="placed-item" src="Image_9.png" data-item="4" style="left:16px;top:126px;">
+        <img id="placed-5-1" class="placed-item" src="Image_8.png" data-item="5" style="left:10px;top:126px;">
+        <img id="placed-6-1" class="placed-item" src="Image_10.png" data-item="6" style="left:12px;top:126px;">
+        <img id="placed-7-1" class="placed-item" src="Image_7.png" data-item="7" style="left:46px;top:48px;">
+        <img id="placed-8-1" class="placed-item" src="Image_5.png" data-item="8" style="left:54px;top:20px;">
+        <img id="placed-9-1" class="placed-item" src="Image_6.png" data-item="9" style="left:44px;top:50px;">
+        
+        <!-- Personnage 2 (milieu) -->
+        <img id="placed-1-2" class="placed-item" src="Image_4.png" data-item="1" style="left:180px;top:232px;">
+        <img id="placed-2-2" class="placed-item" src="Image_3.png" data-item="2" style="left:172px;top:228px;">
+        <img id="placed-3-2" class="placed-item" src="Image_2.png" data-item="3" style="left:178px;top:230px;">
+        <img id="placed-4-2" class="placed-item" src="Image_9.png" data-item="4" style="left:162px;top:126px;">
+        <img id="placed-5-2" class="placed-item" src="Image_8.png" data-item="5" style="left:156px;top:126px;">
+        <img id="placed-6-2" class="placed-item" src="Image_10.png" data-item="6" style="left:163px;top:126px;">
+        <img id="placed-7-2" class="placed-item" src="Image_7.png" data-item="7" style="left:192px;top:52px;">
+        <img id="placed-8-2" class="placed-item" src="Image_5.png" data-item="8" style="left:200px;top:24px;">
+        <img id="placed-9-2" class="placed-item" src="Image_6.png" data-item="9" style="left:190px;top:50px;">
+        
+        <!-- Personnage 3 (droite) -->
+        <img id="placed-1-3" class="placed-item" src="Image_4.png" data-item="1" style="left:327px;top:232px;">
+        <img id="placed-2-3" class="placed-item" src="Image_3.png" data-item="2" style="left:318px;top:222px;">
+        <img id="placed-3-3" class="placed-item" src="Image_2.png" data-item="3" style="left:326px;top:230px;">
+        <img id="placed-4-3" class="placed-item" src="Image_9.png" data-item="4" style="left:310px;top:126px;">
+        <img id="placed-5-3" class="placed-item" src="Image_8.png" data-item="5" style="left:302px;top:128px;">
+        <img id="placed-6-3" class="placed-item" src="Image_10.png" data-item="6" style="left:304px;top:126px;">
+        <img id="placed-7-3" class="placed-item" src="Image_7.png" data-item="7" style="left:338px;top:52px;">
+        <img id="placed-8-3" class="placed-item" src="Image_5.png" data-item="8" style="left:346px;top:22px;">
+        <img id="placed-9-3" class="placed-item" src="Image_6.png" data-item="9" style="left:338px;top:50px;">
+        
+        <!-- Ghost pour le drag -->
+        <img id="drag-ghost" src="">
+        
+        <!-- UI -->
+        <div id="chrono">60</div>
+        <button id="btn-quitter">Quitter</button>
+        
+        <!-- Messages -->
+        <div id="gagne">GAGNÉ !</div>
+        <div id="perdu">PERDU !</div>
+    </div>
+
+    <script>
+    // VN-Studio callback system
+    var vnCallback = null;
+
+    function setOnCommand(callback) {
+        vnCallback = callback;
+    }
+
+    function vnCommand(cmd) {
+        console.log('[VN-Studio]', cmd);
+        if (vnCallback) {
+            vnCallback(cmd);
+        } else if (window.__vnCommand) {
+            window.__vnCommand(cmd);
+        }
+    }
+
+    // === ÉTAT DU JEU ===
+    let gameActive = true;
+    let timeLeft = 60;
+    let timerInterval;
+    
+    // État des placements : grid[perso][type] = itemId ou null
+    const grid = {
+        p1: { bas: null, haut: null, chap: null },
+        p2: { bas: null, haut: null, chap: null },
+        p3: { bas: null, haut: null, chap: null }
+    };
+    
+    // État du drag
+    let dragging = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    
+    const container = document.getElementById('game-container');
+    const ghost = document.getElementById('drag-ghost');
+    const shelfItems = document.querySelectorAll('.shelf-item');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    
+    // === TIMER ===
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            timeLeft--;
+            document.getElementById('chrono').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                defeat();
+            }
+        }, 1000);
+    }
+    
+    // === DRAG & DROP ===
+    function getContainerOffset() {
+        const rect = container.getBoundingClientRect();
+        return { x: rect.left, y: rect.top };
+    }
+    
+    function startDrag(itemId, clientX, clientY) {
+        if (!gameActive) return;
+        
+        const item = document.getElementById('item-' + itemId);
+        if (!item || item.classList.contains('hidden')) return;
+        
+        dragging = {
+            id: itemId,
+            type: item.dataset.type,
+            src: item.src
+        };
+        
+        const rect = item.getBoundingClientRect();
+        const offset = getContainerOffset();
+        
+        dragOffsetX = clientX - rect.left;
+        dragOffsetY = clientY - rect.top;
+        
+        ghost.src = item.src;
+        ghost.style.width = item.offsetWidth + 'px';
+        ghost.style.height = item.offsetHeight + 'px';
+        ghost.style.display = 'block';
+        
+        updateGhostPosition(clientX, clientY);
+        
+        item.style.opacity = '0.3';
+    }
+    
+    function updateGhostPosition(clientX, clientY) {
+        const offset = getContainerOffset();
+        ghost.style.left = (clientX - offset.x - dragOffsetX) + 'px';
+        ghost.style.top = (clientY - offset.y - dragOffsetY) + 'px';
+    }
+    
+    function endDrag(clientX, clientY) {
+        if (!dragging) return;
+        
+        const offset = getContainerOffset();
+        const dropX = clientX - offset.x;
+        const dropY = clientY - offset.y;
+        
+        // Trouver la zone de drop (utiliser coordonnées viewport directement)
+        let targetZone = null;
+        dropZones.forEach(zone => {
+            const rect = zone.getBoundingClientRect();
+            
+            if (clientX >= rect.left && clientX <= rect.right &&
+                clientY >= rect.top && clientY <= rect.bottom) {
+                if (zone.dataset.type === dragging.type) {
+                    targetZone = zone;
+                }
+            }
+        });
+        
+        if (targetZone) {
+            placeItem(dragging.id, targetZone.dataset.perso, dragging.type);
+        }
+        
+        // Reset
+        const item = document.getElementById('item-' + dragging.id);
+        if (item) item.style.opacity = '1';
+        
+        ghost.style.display = 'none';
+        dragging = null;
+        
+        checkWin();
+    }
+    
+    function placeItem(itemId, perso, type) {
+        const persoKey = 'p' + perso;
+        
+        // Retirer l'ancien item de cette zone
+        const oldItem = grid[persoKey][type];
+        if (oldItem !== null) {
+            returnToShelf(oldItem);
+        }
+        
+        // Placer le nouvel item
+        grid[persoKey][type] = itemId;
+        
+        // Cacher l'item sur l'étagère
+        document.getElementById('item-' + itemId).classList.add('hidden');
+        
+        // Afficher l'item placé - Convention: placed-{itemId}-{perso}
+        const placedEl = document.getElementById('placed-' + itemId + '-' + perso);
+        if (placedEl) {
+            placedEl.style.display = 'block';
+        }
+    }
+    
+    function returnToShelf(itemId) {
+        // Remettre l'item sur l'étagère
+        document.getElementById('item-' + itemId).classList.remove('hidden');
+        
+        // Cacher tous les placements de cet item (placed-{itemId}-1, placed-{itemId}-2, placed-{itemId}-3)
+        for (let p = 1; p <= 3; p++) {
+            const el = document.getElementById('placed-' + itemId + '-' + p);
+            if (el) el.style.display = 'none';
+        }
+        
+        // Retirer de la grille
+        for (const perso of ['p1', 'p2', 'p3']) {
+            for (const type of ['bas', 'haut', 'chap']) {
+                if (grid[perso][type] === itemId) {
+                    grid[perso][type] = null;
+                }
+            }
+        }
+    }
+    
+    // === VICTOIRE / DÉFAITE ===
+    function checkWin() {
+        // Solution correcte (visuelle) :
+        // ESPAGNE (gauche/p1) : pantalon bordeaux (3), chemise ceinture (6), chapeau rouge (9)
+        // ITALIE (milieu/p2) : pantalon jaune (1), t-shirt rayé (4), chapeau bleu (7)
+        // ECOSSE (droite/p3) : kilt carreaux (2), chemise verte (5), chapeau vert (8)
+        
+        const p1Ok = (grid.p1.bas === 3 && grid.p1.haut === 6 && grid.p1.chap === 9);
+        const p2Ok = (grid.p2.bas === 1 && grid.p2.haut === 4 && grid.p2.chap === 7);
+        const p3Ok = (grid.p3.bas === 2 && grid.p3.haut === 5 && grid.p3.chap === 8);
+        
+        console.log('checkWin:', JSON.stringify(grid), {p1Ok, p2Ok, p3Ok});
+
+        if (p1Ok && p2Ok && p3Ok) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            document.getElementById('gagne').style.display = 'block';
+            // Envoi au moteur : victoire
+            setTimeout(function() {
+                vnCommand('inc_var COSTUME 1');
+                vnCommand('scene 25');
+            }, 1500);
+        }
+    }
+
+    function defeat() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        document.getElementById('perdu').style.display = 'block';
+        // Envoi au moteur : defaite
+        setTimeout(function() {
+            vnCommand('scene 26');
+        }, 1500);
+    }
+    
+    function quit() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        // Envoi au moteur : quitter (retour scene precedente)
+        vnCommand('closedll');
+    }
+
+    // === EVENT LISTENERS ===
+    
+    // Mouse events pour les items de l'étagère
+    shelfItems.forEach(item => {
+        item.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const itemId = parseInt(item.dataset.item);
+            startDrag(itemId, e.clientX, e.clientY);
+        });
+        
+        item.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const itemId = parseInt(item.dataset.item);
+            startDrag(itemId, touch.clientX, touch.clientY);
+        }, { passive: false });
+    });
+    
+    // Click sur items placés pour les retirer
+    document.querySelectorAll('.placed-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (!gameActive) return;
+            const itemId = parseInt(item.dataset.item);
+            returnToShelf(itemId);
+        });
+        
+        item.addEventListener('touchend', (e) => {
+            if (!gameActive) return;
+            e.preventDefault();
+            const itemId = parseInt(item.dataset.item);
+            returnToShelf(itemId);
+        });
+    });
+    
+    // Mouse move/up global
+    document.addEventListener('mousemove', (e) => {
+        if (dragging) {
+            e.preventDefault();
+            updateGhostPosition(e.clientX, e.clientY);
+        }
+    });
+    
+    document.addEventListener('mouseup', (e) => {
+        if (dragging) {
+            endDrag(e.clientX, e.clientY);
+        }
+    });
+    
+    // Touch move/end global
+    document.addEventListener('touchmove', (e) => {
+        if (dragging) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateGhostPosition(touch.clientX, touch.clientY);
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', (e) => {
+        if (dragging) {
+            const touch = e.changedTouches[0];
+            endDrag(touch.clientX, touch.clientY);
+        }
+    });
+    
+    // Bouton quitter
+    document.getElementById('btn-quitter').addEventListener('click', quit);
+    
+    // Démarrer le jeu
+    startTimer();
+
+    // Expose API for VN-Studio engine integration
+    window.costume = {
+        setOnCommand: setOnCommand,
+        reset: function() {
+            gameActive = true;
+            timeLeft = 60;
+            if (timerInterval) clearInterval(timerInterval);
+            grid.p1 = { bas: null, haut: null, chap: null };
+            grid.p2 = { bas: null, haut: null, chap: null };
+            grid.p3 = { bas: null, haut: null, chap: null };
+            document.getElementById('gagne').style.display = 'none';
+            document.getElementById('perdu').style.display = 'none';
+            document.querySelectorAll('.placed-item').forEach(function(el) { el.style.display = 'none'; });
+            document.querySelectorAll('.shelf-item').forEach(function(el) { el.classList.remove('hidden'); el.style.opacity = '1'; });
+            document.getElementById('chrono').textContent = '60';
+            startTimer();
+        },
+        quit: quit
+    };
+    </script>
+</body>
+</html>

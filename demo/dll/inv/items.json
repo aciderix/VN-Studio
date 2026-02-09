@@ -1,7 +1,19 @@
 [
   {
+    "internal": "ail",
+    "display": "Ail"
+  },
+  {
+    "internal": "api",
+    "display": "Tenue d'apiculteur"
+  },
+  {
     "internal": "ballon1",
     "display": "Ballon"
+  },
+  {
+    "internal": "bus",
+    "display": "Bus miniature"
   },
   {
     "internal": "bouee",
@@ -16,7 +28,7 @@
     "display": "Castagnettes"
   },
   {
-    "internal": "ciseaux",
+    "internal": "ciseau",
     "display": "Ciseaux"
   },
   {
@@ -146,6 +158,10 @@
   {
     "internal": "pierreor",
     "display": "Pierre philosophale"
+  },
+  {
+    "internal": "riz",
+    "display": "Riz"
   },
   {
     "internal": "papiercado",

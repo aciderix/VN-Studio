@@ -1,0 +1,4223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VN-Studio Demo - Virtual Navigator Renderer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      touch-action: none;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Barre du haut */
+    #toolbar {
+      background: #16213e;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #0f3460;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+    #toolbar h1 {
+      font-size: 14px;
+      color: #e94560;
+      margin-right: 8px;
+    }
+    #toolbar button, #toolbar select {
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #toolbar button:hover { background: #533483; }
+    #toolbar label {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #toolbar input[type="checkbox"] { accent-color: #e94560; }
+    #scene-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Hamburger menu for mobile */
+    #burger-btn {
+      display: none;
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    #burger-btn:hover { background: #533483; }
+    #burger-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+    }
+    #burger-menu.open { display: flex; }
+    #burger-menu-content {
+      background: #16213e;
+      width: 280px;
+      max-width: 85vw;
+      height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #burger-menu-content button,
+    #burger-menu-content select {
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #533483;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      text-align: left;
+    }
+    #burger-menu-content button:hover { background: #533483; }
+    #burger-menu-content label {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+    #burger-menu-content .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #533483;
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+    }
+    #burger-menu-content .menu-header h2 {
+      color: #e94560;
+      font-size: 16px;
+    }
+    #burger-close {
+      background: transparent;
+      border: none;
+      color: #e0e0e0;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px 8px;
+      width: auto !important;
+    }
+    #burger-menu-content .menu-section {
+      border-top: 1px solid #333;
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+    #burger-menu-content .menu-section-title {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 800px) {
+      #burger-btn { display: block; }
+      #toolbar .desktop-only { display: none; }
+      #toolbar { gap: 8px; padding: 8px; }
+      #toolbar h1 { font-size: 12px; margin-right: 4px; }
+    }
+
+    /* Zone de rendu - remplit tout l'espace restant */
+    #canvas-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    #game-canvas {
+      image-rendering: auto;
+      cursor: default;
+      touch-action: none;
+    }
+
+    /* Fullscreen */
+    body.fullscreen #toolbar { display: none; }
+    body.fullscreen #canvas-container { height: 100vh; }
+
+    /* Panneau latéral scènes */
+    #scene-list {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 220px;
+      background: rgba(22, 33, 62, 0.95);
+      overflow-y: auto;
+      font-size: 11px;
+      z-index: 5;
+      border-right: 1px solid #0f3460;
+      display: none;
+    }
+    #scene-list.visible { display: block; }
+    #scene-list .scene-item {
+      padding: 6px 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #0f3460;
+    }
+    #scene-list .scene-item:hover { background: #0f3460; }
+    #scene-list .scene-item.active { background: #533483; color: #fff; }
+    #scene-list .scene-item .scene-name { font-weight: bold; }
+    #scene-list .scene-item .scene-meta { color: #888; font-size: 10px; }
+
+    /* Info tooltip */
+    #tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      pointer-events: none;
+      display: none;
+      z-index: 20;
+      max-width: 300px;
+      font-family: monospace;
+    }
+
+    /* PLAYHTML overlay */
+    #html-overlay {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #333;
+      z-index: 15;
+      display: none;
+      overflow: auto;
+    }
+    /* DLL mini-game overlay (iframe-based) */
+    #dll-overlay {
+      position: absolute;
+      z-index: 20;
+      display: none;
+      border: none;
+      background: #000;
+      overflow: hidden;
+    }
+    #dll-overlay.dll-transparent {
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #dll-overlay iframe {
+      border: none;
+      transform-origin: 0 0;
+    }
+    #dll-overlay.dll-transparent iframe {
+      transform-origin: center center;
+    }
+    /* Active inventory item indicator */
+    #cursor-indicator {
+      position: absolute;
+      z-index: 18;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(0,0,0,0.25);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #cursor-indicator img {
+      max-width: 22px;
+      max-height: 22px;
+    }
+    #cursor-indicator .cursor-label {
+      font-size: 7px;
+      text-align: center;
+      color: #333;
+      max-width: 26px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #html-overlay .html-close {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #333;
+      z-index: 1;
+      background: rgba(255,255,255,0.8);
+      padding: 0 4px;
+    }
+    #html-overlay .html-content {
+      padding: 8px;
+      font-family: 'Comic Sans MS', sans-serif;
+      font-size: 12px;
+      color: #000;
+      overflow: auto;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Loading screen overlay */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #loading-overlay.visible { display: flex; }
+    #loading-bar-bg {
+      width: 300px;
+      height: 12px;
+      background: #333;
+      border: 1px solid #555;
+      margin-top: 20px;
+    }
+    #loading-bar-fill {
+      height: 100%;
+      background: #e94560;
+      width: 0%;
+      transition: width 0.1s;
+    }
+    #loading-text {
+      color: #888;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* Drop zone */
+    #dropzone {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      background: rgba(26, 26, 46, 0.95);
+    }
+    #dropzone.hidden { display: none; }
+    #dropzone h2 { color: #e94560; margin-bottom: 16px; }
+    #dropzone p { color: #888; margin: 4px 0; font-size: 14px; }
+    #dropzone .drop-area {
+      border: 2px dashed #533483;
+      border-radius: 12px;
+      padding: 40px 60px;
+      text-align: center;
+      cursor: pointer;
+    }
+    #dropzone .drop-area:hover { border-color: #e94560; }
+    #dropzone .drop-area.dragover { background: rgba(83, 52, 131, 0.3); border-color: #e94560; }
+  </style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button id="burger-btn" onclick="openBurgerMenu()">&#9776;</button>
+  <h1>VN-Studio</h1>
+  <select id="vnd-select"><option value="">-- Charger VND --</option></select>
+  <button id="btn-load" class="desktop-only">Fichier local</button>
+  <button id="btn-load-res" class="desktop-only">Ressources locales</button>
+  <button id="btn-scenes" class="desktop-only">Scènes</button>
+  <button id="btn-prev">&larr;</button>
+  <select id="scene-select"></select>
+  <button id="btn-next">&rarr;</button>
+  <label class="desktop-only"><input type="checkbox" id="chk-polygons" checked> Polygones</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-labels" checked> Labels</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-fill"> Remplir</label>
+  <button id="btn-fullscreen" class="desktop-only">Plein écran</button>
+  <button id="btn-debug" class="desktop-only">Debug</button>
+  <span id="scene-info"></span>
+</div>
+
+<!-- Burger menu for mobile -->
+<div id="burger-menu" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="burger-menu-content">
+    <div class="menu-header">
+      <h2>Menu</h2>
+      <button id="burger-close" onclick="document.getElementById('burger-menu').classList.remove('open')">&times;</button>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Fichiers</div>
+      <button onclick="document.getElementById('btn-load').click();document.getElementById('burger-menu').classList.remove('open')">Fichier local</button>
+      <button onclick="document.getElementById('btn-load-res').click();document.getElementById('burger-menu').classList.remove('open')">Ressources locales</button>
+      <button onclick="document.getElementById('btn-scenes').click();document.getElementById('burger-menu').classList.remove('open')">Liste des scènes</button>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Affichage</div>
+      <label><input type="checkbox" id="chk-polygons-mobile" checked onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
+      <label><input type="checkbox" id="chk-labels-mobile" checked onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
+      <label><input type="checkbox" id="chk-fill-mobile" onchange="document.getElementById('chk-fill').checked=this.checked;document.getElementById('chk-fill').dispatchEvent(new Event('change'))"> Remplir polygones</label>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Outils</div>
+      <button onclick="document.getElementById('btn-fullscreen').click();document.getElementById('burger-menu').classList.remove('open')">Plein écran</button>
+      <button onclick="document.getElementById('btn-debug').click();document.getElementById('burger-menu').classList.remove('open')">Debug Panel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Debug panel -->
+<div id="debug-panel" style="display:none;position:fixed;right:0;top:0;bottom:0;width:360px;background:rgba(0,0,0,0.92);color:#0f0;font:11px monospace;z-index:50;overflow:auto;padding:8px;border-left:2px solid #333;">
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+    <button onclick="debugClearLog()" style="font-size:10px;padding:2px 6px;">Clear</button>
+    <button onclick="debugDumpVars()" style="font-size:10px;padding:2px 6px;">Vars</button>
+    <button onclick="debugDumpScene()" style="font-size:10px;padding:2px 6px;">Scene</button>
+    <button onclick="debugDumpCmds()" style="font-size:10px;padding:2px 6px;">Cmds</button>
+    <input id="debug-var-name" placeholder="var" style="width:60px;font-size:10px;padding:2px;">
+    <input id="debug-var-val" placeholder="val" style="width:40px;font-size:10px;padding:2px;">
+    <button onclick="debugSetVar()" style="font-size:10px;padding:2px 6px;">Set</button>
+  </div>
+  <div id="debug-log" style="white-space:pre-wrap;word-break:break-all;"></div>
+</div>
+
+<div id="canvas-container">
+  <canvas id="game-canvas" width="640" height="480"></canvas>
+  <div id="scene-list"></div>
+  <div id="tooltip"></div>
+  <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
+  <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin allow-downloads"></iframe></div>
+  <div id="cursor-indicator"></div>
+  <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
+  <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
+  <div id="dropzone">
+    <div class="drop-area" id="drop-area">
+      <h2>VN-Studio Demo</h2>
+      <p>Glissez un fichier .vnd ici</p>
+      <p>ou cliquez pour sélectionner</p>
+      <p style="margin-top:16px;font-size:11px;color:#666">
+        Optionnel: glissez aussi un dossier de ressources (BMP, WAV)
+      </p>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".vnd" style="display:none">
+<input type="file" id="res-input" webkitdirectory style="display:none">
+
+<script>
+// =============================================================================
+// VND PARSER (inline, exact copy of parse-vnd-universal.js logic)
+// =============================================================================
+
+function readBS(buf, o) {
+  if (o + 4 > buf.byteLength) return null;
+  var view = new DataView(buf);
+  var len = view.getUint32(o, true);
+  if (len === 0) return { s: '', l: 4 };
+  if (len > 100000 || o + 4 + len > buf.byteLength) return null;
+  var bytes = new Uint8Array(buf, o + 4, len);
+  var s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return { s: s, l: 4 + len };
+}
+
+function readObject(buf, view, p) {
+  var type = view.getUint32(p, true); p += 4;
+  var bs = readBS(buf, p);
+  var str = bs ? bs.s : '';
+  p += bs ? bs.l : 4;
+  return { type: type, string: str, endPos: p };
+}
+
+function readStringCollection(buf, view, p) {
+  var count = view.getUint32(p, true); p += 4;
+  var items = [];
+  for (var i = 0; i < count; i++) {
+    var subIndex = view.getUint32(p, true); p += 4;
+    var obj = readObject(buf, view, p);
+    items.push({ subIndex: subIndex, type: obj.type, string: obj.string });
+    p = obj.endPos;
+  }
+  return { items: items, endPos: p };
+}
+
+function readCommand(buf, view, p, streamVersion) {
+  var strCol = readStringCollection(buf, view, p);
+  p = strCol.endPos;
+  var commandType = view.getUint32(p, true); p += 4;
+  var paramPairCount = view.getUint32(p, true); p += 4;
+  var paramPairs = [];
+  if (paramPairCount > 0 && paramPairCount < 10000) {
+    for (var i = 0; i < paramPairCount; i++) {
+      var a = view.getInt32(p, true); p += 4;
+      var b = view.getInt32(p, true); p += 4;
+      paramPairs.push({ a: a, b: b });
+    }
+  }
+  var flags = 0;
+  if (streamVersion >= 0x2000c) {
+    flags = view.getUint32(p, true); p += 4;
+  }
+  return { strings: strCol.items, commandType: commandType, paramPairCount: paramPairCount, paramPairs: paramPairs, flags: flags, endPos: p };
+}
+
+function readContentCollection(buf, view, p, sv) {
+  var count = view.getUint32(p, true); p += 4;
+  var cmds = [];
+  for (var i = 0; i < count; i++) {
+    var cmd = readCommand(buf, view, p, sv);
+    cmds.push(cmd); p = cmd.endPos;
+  }
+  return { commands: cmds, endPos: p };
+}
+
+function readScene(buf, view, p, sv) {
+  var nameBS = readBS(buf, p); if (!nameBS) return null; p += nameBS.l;
+  var flagBytes = []; for (var fb = 0; fb < 4; fb++) flagBytes.push(new Uint8Array(buf)[p + fb]); p += 4;
+  var prop1 = view.getUint32(p, true); p += 4;
+  var prop2 = view.getUint32(p, true); p += 4;
+  var prop3 = view.getUint32(p, true); p += 4;
+
+  var s1 = readBS(buf, p); p += s1 ? s1.l : 4;
+  var s2 = readBS(buf, p); p += s2 ? s2.l : 4;
+  var val1 = view.getUint32(p, true); p += 4;
+  var s3 = readBS(buf, p); p += s3 ? s3.l : 4;
+  var val2 = view.getUint32(p, true); p += 4;
+  var s4 = readBS(buf, p); p += s4 ? s4.l : 4;
+  var val3 = view.getUint32(p, true); p += 4;
+  var s5 = readBS(buf, p); p += s5 ? s5.l : 4;
+  var val4 = view.getUint32(p, true); p += 4;
+  var s6 = readBS(buf, p); p += s6 ? s6.l : 4;
+  var val5 = view.getUint32(p, true); p += 4;
+
+  var rect = {
+    left: view.getInt32(p, true), top: view.getInt32(p+4, true),
+    right: view.getInt32(p+8, true), bottom: view.getInt32(p+12, true)
+  }; p += 16;
+
+  view.getUint32(p, true); p += 4; // val6
+
+  var hotspotCount = view.getUint32(p, true); p += 4;
+  var hotspot = null;
+  if (hotspotCount > 0) {
+    var timerValue = view.getUint32(p, true); p += 4;
+    var collCount = view.getUint32(p, true); p += 4;
+    var objects = [];
+    for (var hi = 0; hi < collCount; hi++) {
+      var obj = readObject(buf, view, p);
+      objects.push({ type: obj.type, string: obj.string });
+      p = obj.endPos;
+    }
+    hotspot = { timerValue: timerValue, objects: objects };
+  }
+
+  var cmdListValue = view.getInt32(p, true); p += 4;
+  var cmdListData = [];
+  if (cmdListValue !== 0) {
+    for (var ci = 0; ci < 5; ci++) { cmdListData.push(view.getUint32(p, true)); p += 4; }
+  }
+
+  var contentCol = readContentCollection(buf, view, p, sv);
+  p = contentCol.endPos;
+
+  return {
+    name: nameBS.s, flagBytes: flagBytes, prop1: prop1, prop2: prop2, prop3: prop3,
+    fields: {
+      string1: s1 ? s1.s : '', string2: s2 ? s2.s : '', val1: val1,
+      string3: s3 ? s3.s : '', val2: val2, string4: s4 ? s4.s : '', val3: val3,
+      resource: s5 ? s5.s : '', val4: val4, string6: s6 ? s6.s : '', val5: val5
+    },
+    rect: rect, hotspotCount: hotspotCount, hotspot: hotspot,
+    cmdListValue: cmdListValue, cmdListData: cmdListData,
+    commands: contentCol.commands, endPos: p
+  };
+}
+
+function parseVND(arrayBuffer) {
+  var buf = arrayBuffer;
+  var view = new DataView(buf);
+  var p = 5; // skip stream header
+
+  var magic = readBS(buf, p); p += magic.l;
+  if (magic.s !== 'VNFILE') throw new Error('Invalid magic: ' + magic.s);
+  var version = readBS(buf, p); p += version.l;
+  var sceneCount = view.getUint32(p, true); p += 4;
+  var projectName = readBS(buf, p); p += projectName.l;
+  var editor = readBS(buf, p); p += editor.l;
+  var serial = readBS(buf, p); p += serial.l;
+  var projectIDStr = readBS(buf, p); p += projectIDStr.l;
+  var registry = readBS(buf, p); p += registry.l;
+  var width = view.getUint32(p, true); p += 4;
+  var height = view.getUint32(p, true); p += 4;
+  var depth = view.getUint32(p, true); p += 4;
+  var flag = view.getUint32(p, true); p += 4;
+  var u1 = view.getUint32(p, true); p += 4;
+  var u2 = view.getUint32(p, true); p += 4;
+  var reserved = view.getUint32(p, true); p += 4;
+  var dllPath = readBS(buf, p); p += dllPath.l;
+  var varCount = view.getUint32(p, true); p += 4;
+
+  var vars = [];
+  for (var vi = 0; vi < varCount; vi++) {
+    var vname = readBS(buf, p); p += vname.l;
+    var vval = view.getUint32(p, true); p += 4;
+    vars.push({ name: vname.s, value: vval });
+  }
+
+  var vp = version.s.split('.');
+  var sv = (parseInt(vp[0]) << 16) | parseInt(vp[1] || '0');
+
+  var scenes = [];
+  for (var si = 0; si < sceneCount; si++) {
+    var scene = readScene(buf, view, p, sv);
+    if (!scene) break;
+    scenes.push(scene); p = scene.endPos;
+  }
+
+  return {
+    header: {
+      magic: magic.s, version: version.s, sceneCount: sceneCount,
+      projectName: projectName.s, editor: editor.s,
+      width: width, height: height, depth: depth
+    },
+    variables: vars, scenes: scenes,
+    bytesRemaining: buf.byteLength - p
+  };
+}
+
+// =============================================================================
+// COMMANDE TYPES
+// =============================================================================
+
+var CMD_NAMES = {
+  0:'QUIT', 1:'ABOUT', 2:'PREFS', 3:'PREV', 4:'NEXT', 5:'ZOOM',
+  6:'SCENE', 7:'HOTSPOT', 8:'TIPTEXT', 9:'PLAYAVI', 10:'PLAYBMP',
+  11:'PLAYWAV', 12:'PLAYMID', 13:'PLAYHTML', 14:'ZOOMIN', 15:'ZOOMOUT',
+  16:'PAUSE', 17:'EXEC', 18:'EXPLORE', 19:'PLAYCDA', 20:'PLAYSEQ',
+  21:'IF', 22:'SET_VAR', 23:'INC_VAR', 24:'DEC_VAR', 25:'INVALIDATE',
+  26:'DEFCURSOR', 27:'ADDBMP', 28:'DELBMP', 29:'SHOWBMP', 30:'HIDEBMP',
+  31:'RUNPRJ', 32:'UPDATE', 33:'RUNDLL', 34:'MSGBOX', 35:'PLAYCMD',
+  36:'CLOSEWAV', 37:'CLOSEDLL', 38:'PLAYTEXT', 39:'FONT', 40:'REM',
+  41:'ADDTEXT', 42:'DELOBJ', 43:'SHOWOBJ', 44:'HIDEOBJ',
+  45:'LOAD', 46:'SAVE', 47:'CLOSEAVI', 48:'CLOSEMID', 105:'POLYGON'
+};
+
+// Convertir 2 paires (rect top-left/bottom-right) en 4 coins
+function expandRect(pairs) {
+  if (pairs.length === 2) {
+    return [
+      { a: pairs[0].a, b: pairs[0].b },
+      { a: pairs[1].a, b: pairs[0].b },
+      { a: pairs[1].a, b: pairs[1].b },
+      { a: pairs[0].a, b: pairs[1].b }
+    ];
+  }
+  return pairs;
+}
+
+// Compute polygon area using the Shoelace formula (works for any simple polygon)
+function polygonArea(pairs) {
+  var pts = expandRect(pairs);
+  var n = pts.length;
+  if (n < 3) return Infinity;
+  var area = 0;
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    area += pts[i].a * pts[j].b;
+    area -= pts[j].a * pts[i].b;
+  }
+  return Math.abs(area) / 2;
+}
+
+// Couleurs de polygones par type de commande
+var POLY_COLORS = {
+  100: 'rgba(255,100,100,0.4)',
+  101: 'rgba(100,255,100,0.4)',
+  103: 'rgba(255,255,100,0.4)',
+  105: 'rgba(100,150,255,0.4)',
+  106: 'rgba(255,150,100,0.4)',
+  107: 'rgba(150,100,255,0.4)',
+  108: 'rgba(100,255,200,0.4)',
+};
+var POLY_STROKE = {
+  100: '#ff6464',
+  101: '#64ff64',
+  103: '#ffff64',
+  105: '#6496ff',
+  106: '#ff9664',
+  107: '#9664ff',
+  108: '#64ffc8',
+};
+
+// =============================================================================
+// APP STATE
+// =============================================================================
+
+var project = null;
+var currentSceneIndex = -1;
+var currentVNDEntry = null; // Current VND_LIST entry for cross-project navigation
+var sceneHistory = []; // Stack for PREV navigation - stores {entry, sceneIndex} for cross-project support
+var waitingForVideoEnd = false; // Block clicks while video plays with deferred navigation
+var resources = {}; // path -> Image
+var showPolygons = true;
+var showLabels = true;
+var fillPolygons = false;
+var hoveredCmd = null;
+var scrollX = 0; // offset de scroll horizontal pour scènes larges
+var activePlayText = null; // text from IF-triggered playtext actions
+var activePlayTextFont = null; // font for activePlayText
+var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
+var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
+var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
+var toolbarSceneIndex = -1; // index of the "Toolbar" scene
+
+var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+var container = document.getElementById('canvas-container');
+
+// =============================================================================
+// CANVAS SCALING (640x480 interne, CSS plein conteneur)
+// =============================================================================
+
+// Calculer la largeur réelle d'une scène (max X des polygones ou header)
+function getSceneWidth(scene) {
+  var w = project ? project.header.width : 640;
+  if (!scene) return w;
+  // Utiliser la largeur de l'image de fond si chargée - cette valeur fait autorité
+  var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
+  if (resources[resKey] && resources[resKey].naturalWidth > w) {
+    w = resources[resKey].naturalWidth;
+  }
+  // NOTE: On ne fait PAS de fallback sur les coords max des polygones.
+  // Certaines scenes (ex: couleurs1 scene 6) ont des polygones places
+  // volontairement hors du fond (x > bgWidth) qui ne doivent pas etendre
+  // la zone scrollable au-dela de l'image de fond reelle.
+  return w;
+}
+
+function resizeCanvas() {
+  var cw = container.clientWidth;
+  var ch = container.clientHeight;
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  canvas.width = gameW;
+  canvas.height = gameH;
+  var scale = Math.min(cw / gameW, ch / gameH);
+  var dispW = Math.floor(gameW * scale);
+  var dispH = Math.floor(gameH * scale);
+  canvas.style.width = dispW + 'px';
+  canvas.style.height = dispH + 'px';
+
+  positionCursorIndicator();
+  render();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+// Convertir coordonnées écran -> coordonnées jeu
+function screenToGame(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = gameW / rect.width;
+  var scaleY = gameH / rect.height;
+  return {
+    x: (clientX - rect.left) * scaleX + scrollX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+// =============================================================================
+// RENDU
+// =============================================================================
+
+function render() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  if (!scene) return;
+  var w = project.header.width;
+  var h = project.header.height;
+  var sceneW = getSceneWidth(scene);
+
+  // Limiter le scroll
+  var maxScroll = Math.max(0, sceneW - w);
+  if (scrollX > maxScroll) scrollX = maxScroll;
+  if (scrollX < 0) scrollX = 0;
+
+  // Fond
+  ctx.fillStyle = '#2a2a4a';
+  ctx.fillRect(0, 0, w, h);
+
+  // Appliquer le scroll
+  ctx.save();
+  ctx.translate(-scrollX, 0);
+
+  // Image de fond si disponible
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  if (resources[resKey]) {
+    ctx.drawImage(resources[resKey], 0, 0);
+  } else if (scene.fields.resource) {
+    // Fond placeholder avec nom de ressource
+    ctx.fillStyle = '#1a1a3a';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#444';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Resource: ' + scene.fields.resource, w/2, h/2);
+    ctx.textAlign = 'start';
+  }
+
+  // Overlay images (ADDBMP) — scene overlays only (not toolbar zone)
+  Object.keys(overlayImages).forEach(function(name) {
+    var ov = overlayImages[name];
+    if (ov.visible && ov.img.complete && ov.y < 400) {
+      ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+    }
+  });
+
+  // Polygones
+  if (showPolygons) {
+    scene.commands.forEach(function(cmd, idx) {
+      if (cmd.paramPairs.length < 2) return;
+      var pts = expandRect(cmd.paramPairs);
+      var color = POLY_COLORS[cmd.commandType] || 'rgba(200,200,200,0.3)';
+      var stroke = POLY_STROKE[cmd.commandType] || '#ccc';
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].a, pts[0].b);
+      for (var i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].a, pts[i].b);
+      }
+      ctx.closePath();
+
+      if (fillPolygons || cmd === hoveredCmd) {
+        ctx.fillStyle = cmd === hoveredCmd ? 'rgba(255,255,255,0.3)' : color;
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = cmd === hoveredCmd ? '#fff' : stroke;
+      ctx.lineWidth = cmd === hoveredCmd ? 2.5 : 1.5;
+      ctx.stroke();
+
+      // Labels
+      if (showLabels) {
+        var cx = 0, cy = 0;
+        pts.forEach(function(p) { cx += p.a; cy += p.b; });
+        cx /= pts.length;
+        cy /= pts.length;
+
+        var label = CMD_NAMES[cmd.commandType] || ('CMD_' + cmd.commandType);
+        // Extraire la cible scène si string type 6
+        var sceneStr = cmd.strings.find(function(s) { return s.type === 6; });
+        if (sceneStr) {
+          var si = parseInt(sceneStr.string, 10);
+          if (!isNaN(si) && project && si >= 1 && (si - 1) < project.scenes.length && project.scenes[si - 1].name) {
+            label = si + ': ' + project.scenes[si - 1].name;
+          } else {
+            label = sceneStr.string;
+          }
+        }
+
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        var tw = ctx.measureText(label).width;
+        ctx.fillRect(cx - tw/2 - 2, cy - 6, tw + 4, 14);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, cx, cy + 4);
+        ctx.textAlign = 'start';
+      }
+    });
+  }
+
+  // Render a PLAYTEXT string on the canvas
+  // textVal: "x1 y1 x2 y2 flags text", fontVal: "size flags color fontname" (optional)
+  function renderPlayTextBox(textVal, fontVal, noBackground) {
+    var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
+    if (!tp) return;
+    var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
+    var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
+    var tw = tx2 - tx, th = ty2 - ty;
+    var text = tp[5];
+    if (tw <= 0) tw = 300;
+    if (th <= 0) th = 40;
+
+    var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
+    if (fontVal) {
+      var fp = fontVal.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+      if (fp) {
+        fontSize = Math.abs(parseInt(fp[1]));
+        fontColor = fp[2];
+        fontName = fp[3];
+      }
+    }
+    if (fontSize < 6) fontSize = 12;
+    // Sanitize color: fix invalid hex chars (e.g. #bbrrff -> #bb00ff)
+    if (fontColor) {
+      var hex = fontColor.replace('#', '').replace(/[^0-9a-fA-F]/g, '0');
+      if (hex.length < 6) hex = (hex + '000000').substring(0, 6);
+      fontColor = '#' + hex;
+      var r = parseInt(hex.substr(0, 2), 16) || 0;
+      var g = parseInt(hex.substr(2, 2), 16) || 0;
+      var b = parseInt(hex.substr(4, 2), 16) || 0;
+      var luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+      // Only override near-black to white; keep colored text as-is (blue #0000ff has luminance 29)
+      if (luminance < 20) fontColor = '#ffffff';
+    }
+
+    ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+
+    // Word-wrap text into lines
+    var words = text.split(' ');
+    var lines = [];
+    var line = '';
+    var maxW = tw - 8;
+    var maxLineWidth = 0;
+    for (var wi = 0; wi < words.length; wi++) {
+      var test = line ? line + ' ' + words[wi] : words[wi];
+      var testWidth = ctx.measureText(test).width;
+      if (testWidth > maxW && line) {
+        var lineWidth = ctx.measureText(line).width;
+        if (lineWidth > maxLineWidth) maxLineWidth = lineWidth;
+        lines.push(line);
+        line = words[wi];
+      } else {
+        line = test;
+      }
+    }
+    if (line) {
+      var lineWidth = ctx.measureText(line).width;
+      if (lineWidth > maxLineWidth) maxLineWidth = lineWidth;
+      lines.push(line);
+    }
+
+    var lineH = fontSize + 4;
+    var textH = lines.length * lineH;
+    // Always use calculated text height, ignore VND coordinates (often much larger)
+    var boxH = textH + 8;
+    // Dynamic width: use actual text width + small padding (8px = 4px each side)
+    var boxW = maxLineWidth + 8;
+
+    // Only draw background if this is a standalone text (not part of multi-line set)
+    if (!noBackground) {
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillRect(tx, ty, boxW, boxH);
+    }
+    ctx.fillStyle = fontColor;
+    ctx.textAlign = 'start';
+    for (var li = 0; li < lines.length; li++) {
+      ctx.fillText(lines[li], tx + 4, ty + fontSize + 2 + li * lineH);
+    }
+  }
+
+  // PLAYTEXT overlay pour la commande survolée (ONFOCUS strings only)
+  if (hoveredCmd) {
+    var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
+    var fontStr = hoveredCmd.strings.find(function(s) {
+      return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
+    });
+    var fontVal = fontStr ? fontStr.string : null;
+    // Render ONFOCUS type 38 strings (subIndex=0 for interactive commands)
+    hoveredCmd.strings.forEach(function(s) {
+      if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
+        renderPlayTextBox(s.string, fontVal);
+      }
+    });
+  }
+
+  // IF-triggered playtext (from hover evaluation or executeAction)
+  activePlayTexts.forEach(function(pt) {
+    renderPlayTextBox(pt.text, pt.font);
+  });
+  if (activePlayText) {
+    renderPlayTextBox(activePlayText, activePlayTextFont);
+  }
+
+  ctx.restore(); // fin du scroll
+
+  // Toolbar overlays (fixed, not scrolled)
+  if (isToolbarVisible()) {
+    {
+      Object.keys(overlayImages).forEach(function(name) {
+        var ov = overlayImages[name];
+        if (ov.visible && ov.img.complete && ov.y >= 400) {
+          ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+        }
+      });
+      // Toolbar texts (ADDTEXT)
+      Object.keys(overlayTexts).forEach(function(name) {
+        var ot = overlayTexts[name];
+        var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
+          return String(getVar(vname));
+        });
+        var fontFamily = ot.family || 'Comic Sans MS';
+        ctx.font = 'bold ' + ot.fontSize + 'px "' + fontFamily + '", sans-serif';
+        ctx.fillStyle = ot.color;
+        ctx.textAlign = 'start';
+        ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
+      });
+    }
+  }
+
+  // Info scène (fixe, pas scrollée)
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, 0, w, 22);
+  ctx.font = '12px monospace';
+  ctx.fillStyle = '#e94560';
+  ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
+  var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
+  if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
+  ctx.fillStyle = '#888';
+  ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+
+  // Barre de scroll horizontale si scène plus large que la fenêtre
+  if (sceneW > w) {
+    var barY = h - 6;
+    var barH = 4;
+    var viewRatio = w / sceneW;
+    var barW = Math.max(20, w * viewRatio);
+    var barX = (scrollX / (sceneW - w)) * (w - barW);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(0, barY, w, barH);
+    ctx.fillStyle = 'rgba(233,69,96,0.7)';
+    ctx.fillRect(barX, barY, barW, barH);
+  }
+
+  // Keep video overlay in sync with scroll position
+  updateVideoPosition(currentVideo);
+}
+
+// =============================================================================
+// COMMAND EXECUTION ENGINE
+// =============================================================================
+
+// --- AUDIO ---
+var audioElements = {}; // key -> HTMLAudioElement
+var masterVolume = parseFloat(localStorage.getItem('europeo_volume')) || 1.0; // Volume global persistant
+var lastNonLoopingAudio = null; // Dernier son non-bouclé joué (pour PAUSE apres PLAYWAV)
+var audioUnlocked = false;
+var pendingAudioPlays = []; // audio elements waiting for user gesture
+var audioContext = null;
+
+// Unlock audio on first user interaction (critical for mobile browsers)
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  // Create and resume AudioContext (required for iOS/Android)
+  try {
+    if (!audioContext) {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) audioContext = new AudioCtx();
+    }
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  } catch (e) {
+    console.warn('AudioContext unlock failed:', e);
+  }
+
+  // Play silent audio to unlock on iOS (belt and suspenders)
+  var silentAudio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRwmHAAAAAAD/+1DEAAAFeANX9AAACM8K6f80IAIAAD/JBAEBQdB0P/E4Pg+CAIAgCAYfB8uD4Pgh//y4nw+H5c+D7//8vKAgGPt/Lhj//////1gQB8Hw///AgCAI=');
+  silentAudio.play().catch(function() {});
+
+  audioUnlocked = true;
+  console.log('Audio unlocked');
+
+  // Replay any pending audio
+  pendingAudioPlays.forEach(function(audio) {
+    audio.play().catch(function() {});
+  });
+  pendingAudioPlays = [];
+
+  // Play pending video if any (that was blocked by autoplay policy)
+  if (pendingVideoPlay && currentVideo === pendingVideoPlay) {
+    var video = pendingVideoPlay;
+    pendingVideoPlay = null;
+    video.play().catch(function(e) {
+      console.warn('Video play still failed:', e.message);
+    });
+  }
+
+  // Re-trigger scene background WAV if it exists and isn't playing
+  if (project && currentSceneIndex >= 0) {
+    var scene = project.scenes[currentSceneIndex];
+    if (scene.fields.string3) {
+      var wavFile = scene.fields.string3;
+      var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+      var loops = scene.fields.val2 || 1;
+      // Check if this WAV isn't already playing
+      var existing = audioElements[wavKey];
+      if (!existing || existing.paused || existing.ended) {
+        console.log('Unlock: re-triggering scene WAV:', wavFile);
+        playWav(wavFile + ' ' + loops);
+      }
+    }
+  }
+}
+
+['click', 'touchstart', 'touchend', 'keydown'].forEach(function(evt) {
+  document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+});
+
+function resolveWavPath(wavRef) {
+  var normalized = wavRef.toLowerCase().replace(/\\/g, '/');
+  var wavDir = 'digit/'; // default
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['WAV'] || '';
+    wavDir = dir.replace(/\\/g, '/');
+    if (wavDir && !wavDir.endsWith('/')) wavDir += '/';
+  }
+  return '/game-data/' + currentBasePath + wavDir + normalized;
+}
+
+function playWav(wavStr) {
+  // Format: "filename loop_count" ex: "music.wav 2"
+  var parts = wavStr.trim().split(/\s+/);
+  var file = parts[0];
+  var loops = parseInt(parts[1]) || 1;
+  var url = resolveWavPath(file);
+  var key = file.toLowerCase();
+
+  // If same sound is already playing, don't restart
+  if (audioElements[key] && !audioElements[key].paused && !audioElements[key].ended) {
+    return;
+  }
+
+  var audio = new Audio(url);
+  audio.volume = masterVolume;
+  audio.loop = (loops > 1 || loops === 0); // 0 = infinite
+  audioElements[key] = audio;
+  if (!audio.loop) lastNonLoopingAudio = audio;
+  recentlyStartedAudio[key] = true;
+  audio.play().catch(function(e) {
+    if (e.name === 'NotAllowedError') {
+      console.warn('Audio blocked (waiting for user gesture):', file);
+      pendingAudioPlays.push(audio);
+    } else {
+      console.warn('Audio play failed:', url, e.message);
+    }
+  });
+  console.log('PLAYWAV:', file, 'loops:', loops);
+}
+
+function stopAllAudio() {
+  Object.keys(audioElements).forEach(function(key) {
+    audioElements[key].pause();
+    audioElements[key].currentTime = 0;
+  });
+  audioElements = {};
+}
+
+// Collect WAV keys that a scene will play on enter (auto-execute commands + background WAV)
+function getSceneAutoWavKeys(scene) {
+  var keys = {};
+  // Include scene's background WAV (string3 field)
+  if (scene.fields.string3) {
+    keys[scene.fields.string3.toLowerCase().split(/\s+/)[0]] = true;
+  }
+  // Include WAVs from non-interactive commands
+  scene.commands.forEach(function(cmd) {
+    if (cmd.paramPairs.length > 0) return; // interactive, skip
+    cmd.strings.forEach(function(s) {
+      if (s.type === 11 && s.string) {
+        keys[s.string.trim().split(/\s+/)[0].toLowerCase()] = true;
+      }
+    });
+  });
+  return keys;
+}
+
+var recentlyStartedAudio = {}; // keys started in current click cycle
+
+// Stop audio except keys that the next scene will play or were just started
+function stopAudioExcept(keepKeys) {
+  Object.keys(audioElements).forEach(function(key) {
+    if (!keepKeys[key] && !recentlyStartedAudio[key]) {
+      audioElements[key].pause();
+      audioElements[key].currentTime = 0;
+      delete audioElements[key];
+    }
+  });
+  recentlyStartedAudio = {};
+}
+
+// --- RUNPRJ ---
+// Map VNP path to VND_LIST entry
+// Input: "..\france\france.vnp 18" -> { entry, sceneIndex }
+function parseRunPrj(runPrjStr) {
+  var parts = runPrjStr.trim().split(/\s+/);
+  var vnpPath = parts[0].toLowerCase().replace(/\\/g, '/');
+  var sceneIdx = parseInt(parts[1]) || 1;
+
+  // Extract folder/name from path like "../france/france.vnp"
+  var match = vnpPath.match(/([^/]+)\/([^/]+)\.vnp$/);
+  if (!match) return null;
+
+  var folder = match[1];
+  var name = match[2];
+
+  // Find in VND_LIST
+  var entry = VND_LIST.find(function(e) {
+    return e.base.replace(/\/$/, '').toLowerCase() === folder ||
+           e.vnd.toLowerCase().indexOf(name + '.vnd') >= 0;
+  });
+
+  return entry ? { entry: entry, sceneIndex: sceneIdx } : null;
+}
+
+function executeRunPrj(runPrjStr) {
+  var parsed = parseRunPrj(runPrjStr);
+  if (!parsed) {
+    console.warn('RUNPRJ: cannot resolve', runPrjStr);
+    return;
+  }
+  console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
+  stopAllAudio();
+  clearCursorItem();
+
+  currentBasePath = parsed.entry.base;
+  var targetScene = parsed.sceneIndex;
+  var targetEntry = parsed.entry;
+
+  // Load both VNP and VND, but wait for BOTH before going to scene
+  // This ensures currentVNPConfig is set correctly for video path resolution
+  var vnpPromise = fetch('/game-data/' + parsed.entry.vnp)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      currentVNPConfig = parseVNP(text);
+      console.log('VNP loaded for', targetEntry.name, ':', currentVNPConfig);
+    })
+    .catch(function() { currentVNPConfig = null; });
+
+  var vndPromise = fetch('/game-data/' + targetEntry.vnd)
+    .then(function(r) { return r.arrayBuffer(); });
+
+  // Wait for both VNP and VND to load
+  Promise.all([vnpPromise, vndPromise]).then(function(results) {
+    var buf = results[1];
+    loadVNDFile(buf, targetEntry.vnd, true);
+    currentVNDEntry = targetEntry; // Track current VND for cross-project PREV
+    // Update VND selector
+    var vndIdx = VND_LIST.indexOf(targetEntry);
+    if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
+    preloadResources(function() {
+      if (targetScene >= 1 && (targetScene - 1) < project.scenes.length) {
+        goToScene(targetScene - 1);
+      } else {
+        goToScene(0);
+      }
+    });
+  }).catch(function(e) {
+    console.error('RUNPRJ load failed:', e);
+  });
+}
+
+// --- VARIABLES ---
+var gameVars = {}; // variable store: { name: value }
+var activeCursorItem = null; // inventory item selected as cursor (defcursor)
+
+function setCursorItem(itemName) {
+  activeCursorItem = itemName;
+  var indicator = document.getElementById('cursor-indicator');
+  if (!itemName) {
+    indicator.style.display = 'none';
+    indicator.innerHTML = '';
+    return;
+  }
+  // Show indicator with item icon (.CUR from barre/cur/)
+  // Try uppercase .CUR first (original file extension), fallback to lowercase
+  var basePath = '/game-data/barre/cur/' + itemName;
+  var img = document.createElement('img');
+  img.src = basePath + '.CUR';
+  img.alt = itemName;
+  img.onerror = function() {
+    if (img.src.endsWith('.CUR')) {
+      // Try lowercase extension
+      img.src = basePath + '.cur';
+    } else {
+      // Both failed - show item name as text fallback
+      indicator.innerHTML = '';
+      var lbl = document.createElement('span');
+      lbl.className = 'cursor-label';
+      lbl.textContent = itemName;
+      indicator.appendChild(lbl);
+    }
+  };
+  indicator.innerHTML = '';
+  indicator.appendChild(img);
+  indicator.style.display = 'flex';
+  positionCursorIndicator();
+}
+
+function positionCursorIndicator() {
+  var indicator = document.getElementById('cursor-indicator');
+  if (indicator.style.display === 'none') return;
+  var canvasRect = canvas.getBoundingClientRect();
+  var containerRect = container.getBoundingClientRect();
+  // Position top-right of the canvas area, with a small margin
+  var topOffset = canvasRect.top - containerRect.top + 6;
+  var rightOffset = containerRect.right - canvasRect.right + 6;
+  indicator.style.top = topOffset + 'px';
+  indicator.style.right = rightOffset + 'px';
+}
+
+function clearCursorItem() {
+  if (activeCursorItem) {
+    // Put the item back in the bag (var 2 → 1)
+    var key = activeCursorItem.toLowerCase();
+    if (gameVars[key] === 2) {
+      gameVars[key] = 1;
+      console.log('Cursor item returned to bag:', key, '2 → 1');
+    }
+    setCursorItem(null);
+  }
+}
+
+function getVar(name) {
+  return gameVars[name.toLowerCase()] || 0;
+}
+
+function setVar(name, val) {
+  gameVars[name.toLowerCase()] = val;
+  console.log('SET_VAR:', name, '=', val);
+}
+
+// Resolve <random N M> and <varname> tokens in a value string
+// Returns an integer
+function resolveValue(str) {
+  str = str.trim();
+  // <random N M> — random integer from M to N (inclusive)
+  var randomMatch = str.match(/^<random\s+(\d+)\s+(\d+)>$/i);
+  if (randomMatch) {
+    var hi = parseInt(randomMatch[1]);
+    var lo = parseInt(randomMatch[2]);
+    if (lo > hi) { var tmp = lo; lo = hi; hi = tmp; }
+    return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  }
+  // <varname> — resolve to variable value
+  var varRefMatch = str.match(/^<(\w+)>$/);
+  if (varRefMatch) {
+    return getVar(varRefMatch[1]);
+  }
+  // Plain number
+  return parseInt(str) || 0;
+}
+
+// --- IF EVALUATOR ---
+// Format: "variable op value then action [else action]"
+// Actions: "runprj path sceneIdx", "scene idx", "dec_var name val", "inc_var name val",
+//          "playavi path flags", "set_var name val"
+function evaluateIf(ifStr) {
+  // Split on " then " to get condition and actions
+  var thenIdx = ifStr.indexOf(' then ');
+  if (thenIdx < 0) return null;
+
+  var condStr = ifStr.substring(0, thenIdx).trim();
+  var rest = ifStr.substring(thenIdx + 6).trim();
+
+  // Parse condition: "variable op value" (value can be number or <varname>)
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
+  if (!condMatch) return null;
+
+  var varName = condMatch[1];
+  var op = condMatch[2];
+  var val = resolveValue(condMatch[3]);
+  var actual = getVar(varName);
+
+  var result = false;
+  switch (op) {
+    case '=': result = (actual === val); break;
+    case '<': result = (actual < val); break;
+    case '>': result = (actual > val); break;
+    case '>=': result = (actual >= val); break;
+    case '<=': result = (actual <= val); break;
+    case '!=': case '<>': result = (actual !== val); break;
+  }
+
+  // Split on " else " — careful: "else" can appear in action strings
+  // Look for " else " that's followed by a known command keyword
+  var elseIdx = -1;
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
+  if (elseMatch) {
+    elseIdx = rest.indexOf(elseMatch[0]);
+  } else {
+    // Try simple " else " split
+    var simpleElse = rest.indexOf(' else ');
+    if (simpleElse >= 0) elseIdx = simpleElse;
+  }
+
+  var thenAction, elseAction;
+  if (elseIdx >= 0) {
+    thenAction = rest.substring(0, elseIdx).trim();
+    elseAction = rest.substring(elseIdx + 6).trim();
+  } else {
+    thenAction = rest.trim();
+    elseAction = null;
+  }
+
+  console.log('IF:', varName, op, val, '(actual=' + actual + ') →', result ? 'THEN' : 'ELSE');
+  return result ? thenAction : elseAction;
+}
+
+// Execute a hotspot command: process ONCLICK (subIndex=1) strings of command N-1 (1-based).
+// Used for flow control: "hotspot 18" triggers the 18th command's click processing.
+var _hotspotDepth = 0;
+function executeHotspot(n) {
+  if (!project || currentSceneIndex < 0) return;
+  if (_hotspotDepth > 20) {
+    console.warn('Hotspot recursion limit reached (depth=' + _hotspotDepth + '), aborting hotspot', n);
+    return;
+  }
+  var scene = project.scenes[currentSceneIndex];
+  var cmdIdx = n - 1; // 1-based to 0-based
+  if (cmdIdx < 0 || cmdIdx >= scene.commands.length) {
+    console.log('Hotspot', n, '- command index', cmdIdx, 'out of range');
+    return;
+  }
+  var cmd = scene.commands[cmdIdx];
+  // Filter to ONCLICK strings (subIndex=1) if available, else use all strings
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
+  console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + onclickStrings.length + '/' + cmd.strings.length + ' ONCLICK strings)');
+  // Create a shallow copy with filtered strings for resumeCommandProcessing
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  _hotspotDepth++;
+  resumeCommandProcessing(filteredCmd, 0);
+  _hotspotDepth--;
+}
+
+// Flag pour PAUSE inline dans les IF - lu par le runner async de resumeCommandProcessing
+var pendingPauseMs = 0;
+
+// Relancer le WAV de fond de la scène s'il a été stoppé (CLOSEWAV) et qu'on ne navigue pas
+function restoreSceneWav() {
+  if (!project || currentSceneIndex < 0) return;
+  if (currentVideo) return; // Ne pas relancer pendant une vidéo
+  var scene = project.scenes[currentSceneIndex];
+  if (!scene.fields.string3) return; // Pas de WAV de scène
+  var wavFile = scene.fields.string3;
+  var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+  var existing = audioElements[wavKey];
+  if (existing && !existing.paused && !existing.ended) return; // Déjà en cours
+  var loops = scene.fields.val2 || 1;
+  // Attendre la fin du son en cours avant de relancer l'ambiance
+  waitForAudioThenDelay(0, function() {
+    // Re-vérifier qu'on est toujours sur la même scène
+    if (!project || currentSceneIndex < 0) return;
+    var curScene = project.scenes[currentSceneIndex];
+    if (curScene !== scene) return;
+    console.log('Restoring scene WAV:', wavFile);
+    playWav(wavFile + ' ' + loops);
+  });
+}
+
+// Attendre la fin du son en cours avant d'appliquer un delai
+// Si un son non-bouclé est en cours, attend sa fin puis ajoute le delai
+function waitForAudioThenDelay(ms, callback) {
+  if (lastNonLoopingAudio && !lastNonLoopingAudio.paused && !lastNonLoopingAudio.ended) {
+    var audio = lastNonLoopingAudio;
+    var onEnd = function() {
+      audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('error', onEnd);
+      if (ms > 0) {
+        setTimeout(callback, ms);
+      } else {
+        callback();
+      }
+    };
+    audio.addEventListener('ended', onEnd);
+    audio.addEventListener('error', onEnd);
+  } else {
+    setTimeout(callback, ms);
+  }
+}
+
+// Execute an action string (from IF then/else branch)
+function executeAction(action) {
+  if (!action) return;
+  var parts = action.trim().split(/\s+/);
+  var cmd = parts[0].toLowerCase();
+
+  if (cmd === 'runprj') {
+    executeRunPrj(parts.slice(1).join(' '));
+  } else if (cmd === 'scene') {
+    var idx = parseInt(parts[1]);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
+    }
+  } else if (cmd === 'set_var') {
+    setVar(parts[1], resolveValue(parts.slice(2).join(' ')));
+  } else if (cmd === 'inc_var') {
+    setVar(parts[1], getVar(parts[1]) + (parseInt(parts[2]) || 1));
+  } else if (cmd === 'dec_var') {
+    setVar(parts[1], getVar(parts[1]) - (parseInt(parts[2]) || 1));
+  } else if (cmd === 'playwav') {
+    playWav(parts.slice(1).join(' '));
+  } else if (cmd === 'playavi') {
+    playAvi(parts.slice(1).join(' '));
+  } else if (cmd === 'playhtml') {
+    playHtml(parts.slice(1).join(' '));
+  } else if (cmd === 'playbmp') {
+    addBmpOverlay('_playbmp ' + parts.slice(1).join(' '));
+  } else if (cmd === 'addbmp') {
+    addBmpOverlay(parts.slice(1).join(' '));
+  } else if (cmd === 'delbmp') {
+    delBmpOverlay(parts[1] || '');
+  } else if (cmd === 'showbmp') {
+    showBmpOverlay(parts[1] || '');
+  } else if (cmd === 'hidebmp') {
+    hideBmpOverlay(parts[1] || '');
+  } else if (cmd === 'closewav') {
+    stopAllAudio();
+  } else if (cmd === 'addtext') {
+    addTextOverlay(parts.slice(1).join(' '));
+  } else if (cmd === 'rundll') {
+    runDll(parts.slice(1).join(' '));
+  } else if (cmd === 'closedll') {
+    closeDll();
+  } else if (cmd === 'font') {
+    // Font change from IF action - store for next playtext and ADDTEXT
+    activePlayTextFont = parts.slice(1).join(' ');
+    setFont(parts.slice(1).join(' '));
+  } else if (cmd === 'invalidate' || cmd === 'update') {
+    render();
+  } else if (cmd === 'playtext') {
+    // playtext x1 y1 x2 y2 flags text
+    activePlayText = parts.slice(1).join(' ');
+    render();
+  } else if (cmd === 'defcursor') {
+    // Set active cursor to an inventory item or reset to default
+    var cursorItem = parts[1] || '0';
+    if (cursorItem === '0' || cursorItem.toLowerCase().endsWith('.cur')) {
+      setCursorItem(null);
+    } else {
+      setCursorItem(cursorItem.toLowerCase());
+    }
+  } else if (cmd === 'hotspot') {
+    var hsIdx = parseInt(parts[1]);
+    if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+  } else if (cmd === 'pause') {
+    // PAUSE inline dans un IF: signaler au runner async via pendingPauseMs
+    var ms = parseInt(parts[1]) || 300;
+    pendingPauseMs = ms;
+    console.log('PAUSE (inline):', ms + 'ms');
+  } else if (cmd === 'if') {
+    // Nested IF: "if var op val then action"
+    var nestedAction = evaluateIf(parts.slice(1).join(' '));
+    if (nestedAction) executeAction(nestedAction);
+  } else {
+    console.log('Unhandled action:', action);
+  }
+}
+
+// --- OVERLAY BMP ---
+var overlayImages = {}; // name -> { img, x, y, w, h, visible }
+var imagesAddedThisClick = {}; // Track images added in current click to prevent immediate DELBMP
+var hoverAddedImages = {}; // Track images added during hover (should be removed on unhover)
+
+function resolveOverlayPath(bmpRef) {
+  // Could be relative like "rollover\all.bmp" or absolute path
+  var normalized = bmpRef.toLowerCase().replace(/\\/g, '/');
+  var imgDir = 'img24/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['IMG24'] || currentVNPConfig['IMG8'] || '';
+    imgDir = dir.replace(/\\/g, '/');
+    if (imgDir && !imgDir.endsWith('/')) imgDir += '/';
+  }
+  // Also try with ../ paths for cross-module resources
+  if (normalized.indexOf('..') >= 0) {
+    // "../barre/images/barre.bmp" -> resolve relative to game-data
+    var parts = normalized.split('/');
+    var resolved = [];
+    // Start from current base
+    var baseParts = currentBasePath.replace(/\/$/, '').split('/');
+    resolved = baseParts.slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + imgDir + normalized;
+}
+
+function addBmpOverlay(addbmpStr) {
+  // Format: "name path flags x y [x2 y2]"
+  // When 7 parts: x,y = top-left, x2,y2 = bottom-right (coordinates, not width/height)
+  // When 5 parts: x,y = position, size from image
+  var parts = addbmpStr.trim().split(/\s+/);
+  if (parts.length < 4) return;
+  var name = parts[0].toLowerCase();
+  // Track that this image was added in the current click event
+  // This prevents overlapping DELBMP commands from immediately removing it
+  imagesAddedThisClick[name] = true;
+  var path = parts[1];
+  // Skip flags (parts[2])
+  var x = parseInt(parts[3]) || 0;
+  var y = parseInt(parts[4]) || 0;
+  var x2 = parts.length > 5 ? parseInt(parts[5]) : 0;
+  var y2 = parts.length > 6 ? parseInt(parts[6]) : 0;
+
+  var url = resolveOverlayPath(path);
+  var img = new Image();
+  var gen = overlayGeneration;
+  img.onload = function() {
+    if (gen !== overlayGeneration) return; // scene changed, discard stale overlay
+    var w, h;
+    if (x2 > x && y2 > y) {
+      w = x2 - x; h = y2 - y;
+    } else {
+      w = img.width; h = img.height;
+    }
+    overlayImages[name] = { img: img, x: x, y: y, w: w, h: h, visible: true };
+    console.log('ADDBMP:', name, url, x, y, w, h);
+    render();
+  };
+  img.onerror = function() { console.warn('ADDBMP failed:', url); };
+  img.src = url;
+}
+
+function delBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  // Skip deletion if image was just added in the same click event
+  // This handles overlapping polygons where one adds and another deletes
+  if (imagesAddedThisClick[name]) {
+    console.log('DELBMP skipped (image added this click):', name);
+    return;
+  }
+  if (overlayImages[name]) {
+    delete overlayImages[name];
+    console.log('DELBMP:', name);
+    render();
+  }
+}
+
+function showBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  if (overlayImages[name]) { overlayImages[name].visible = true; render(); }
+}
+
+function hideBmpOverlay(name) {
+  name = name.trim().toLowerCase();
+  if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
+}
+
+function setFont(val) {
+  // Format: "size style color fontfamily" e.g. "18 0 #ffffff Comic sans MS"
+  var parts = val.trim().split(/\s+/);
+  if (parts.length >= 1) currentTextFont.size = parseInt(parts[0]) || 18;
+  if (parts.length >= 2) currentTextFont.style = parseInt(parts[1]) || 0;
+  if (parts.length >= 3) currentTextFont.color = parts[2] || '#ffffff';
+  if (parts.length >= 4) currentTextFont.family = parts.slice(3).join(' ') || 'Comic Sans MS';
+  console.log('FONT:', currentTextFont.size + 'px', currentTextFont.color, currentTextFont.family);
+}
+
+function addTextOverlay(val) {
+  // Format: "name layer x y x2 y2 flags text" (layer=display layer, not font size)
+  var parts = val.trim().split(/\s+/);
+  if (parts.length < 7) return;
+  var name = parts[0].toLowerCase();
+  // parts[1] = layer (display layer, same as ADDBMP)
+  var x = parseInt(parts[2]) || 0;
+  var y = parseInt(parts[3]) || 0;
+  var w = parseInt(parts[4]) || 200;
+  var h = parseInt(parts[5]) || 30;
+  // parts[6] = flags
+  var textPart = parts.slice(7).join(' ');
+  overlayTexts[name] = {
+    text: textPart, fontSize: currentTextFont.size,
+    x: x, y: y, w: w, h: h,
+    color: currentTextFont.color, family: currentTextFont.family
+  };
+  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y, 'font:', currentTextFont.size + 'px', currentTextFont.family);
+  render();
+}
+
+// --- PLAYHTML ---
+function resolveHtmlPath(htmlRef) {
+  var normalized = htmlRef.toLowerCase().replace(/\\/g, '/');
+  var htmlDir = 'html/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['TXT'] || '';
+    htmlDir = dir.replace(/\\/g, '/');
+    if (htmlDir && !htmlDir.endsWith('/')) htmlDir += '/';
+  }
+  if (normalized.indexOf('..') >= 0) {
+    var parts = normalized.split('/');
+    var resolved = currentBasePath.replace(/\/$/, '').split('/').slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + htmlDir + normalized;
+}
+
+function playHtml(htmlStr) {
+  // Format: "filename [flags x y w h]" or just "filename"
+  var parts = htmlStr.trim().split(/\s+/);
+  if (parts.length < 1) return;
+  var file = parts[0];
+
+  // Use scene-html (transparent, integrated) instead of html-overlay (white box)
+  var el = document.getElementById('scene-html');
+  if (el.style.display === 'block') {
+    console.log('PLAYHTML skipped (scene-html already visible):', file);
+    return;
+  }
+
+  // Mark that playhtml was triggered (prevents string6 default HTM from loading)
+  playhtmlTriggered = true;
+
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var flags = parts.length > 1 ? parseInt(parts[1]) || 0 : 0;
+  var x = parts.length > 2 ? parseInt(parts[2]) || 0 : 0;
+  var y = parts.length > 3 ? parseInt(parts[3]) || 0 : 0;
+  var w = parts.length > 4 ? parseInt(parts[4]) || gameW : gameW;
+  var h = parts.length > 5 ? parseInt(parts[5]) || gameH : gameH;
+
+  var url = resolveHtmlPath(file);
+  console.log('PLAYHTML:', file, 'at', x, y, w, h);
+
+  var content = el.querySelector('.scene-html-content');
+
+  // Position relative to canvas
+  var canvasRect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var scaleX = canvasRect.width / gameW;
+  var scaleY = canvasRect.height / gameH;
+
+  el.style.left = (canvasRect.left - contRect.left + x * scaleX) + 'px';
+  el.style.top = (canvasRect.top - contRect.top + y * scaleY) + 'px';
+  el.style.width = (w * scaleX) + 'px';
+  el.style.height = (h * scaleY) + 'px';
+  el.style.display = 'block';
+  content.style.fontSize = Math.max(10, Math.round(12 * scaleY)) + 'px';
+
+  fetchLatin1(url).then(function(html) {
+    var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    content.innerHTML = bodyMatch ? bodyMatch[1] : html;
+  }).catch(function(e) {
+    content.innerHTML = '<p style="color:red">Erreur: ' + e.message + '</p>';
+  });
+}
+
+// Fetch a file as Latin1 (ISO-8859-1) text
+function fetchLatin1(url) {
+  return fetch(url).then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
+    return new TextDecoder('iso-8859-1').decode(buf);
+  });
+}
+
+// --- SCENE HTML (string6 auto-loaded HTM) ---
+function loadSceneHtml(htmFile, rect) {
+  var url = resolveHtmlPath(htmFile);
+  console.log('Scene HTM:', htmFile, 'rect:', rect);
+
+  var el = document.getElementById('scene-html');
+  var content = el.querySelector('.scene-html-content');
+
+  // Position relative to canvas
+  var canvasRect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = canvasRect.width / gameW;
+  var scaleY = canvasRect.height / gameH;
+
+  el.style.left = (canvasRect.left - contRect.left + rect.left * scaleX) + 'px';
+  el.style.top = (canvasRect.top - contRect.top + rect.top * scaleY) + 'px';
+  el.style.width = ((rect.right - rect.left) * scaleX) + 'px';
+  el.style.height = ((rect.bottom - rect.top) * scaleY) + 'px';
+  el.style.display = 'block';
+  // Scale font size with canvas
+  content.style.fontSize = Math.max(10, Math.round(12 * scaleY)) + 'px';
+
+  fetchLatin1(url).then(function(html) {
+    var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    content.innerHTML = bodyMatch ? bodyMatch[1] : html;
+  }).catch(function(e) {
+    console.warn('Scene HTM load failed:', url, e.message);
+    el.style.display = 'none';
+  });
+}
+
+
+function closeSceneHtml() {
+  document.getElementById('scene-html').style.display = 'none';
+}
+
+// --- DLL MINI-GAMES (loaded as HTML in iframe) ---
+// Maps DLL filename (lowercase) to HTML path relative to /demo/dll/
+var DLL_HTML_MAP = {
+  'roue.dll':     'dll/roue/roue-coffre.html',
+  'francs.dll':   'dll/francs/francs-conversion.html',
+  'memory.dll':   'dll/memory/memory-game.html',
+  'probleme.dll': 'dll/probleme/probleme-math.html',
+  'inv.dll':      'dll/inv/inv-inventory.html',
+  'pepe.dll':     'dll/pepe/pepe-game.html',
+  'frog.dll':     'dll/frog/frog-simon.html',
+  'vnoption.dll': 'dll/vnoption/vnoption-menu.html',
+  'bateau.dll':   'dll/bateau/bateau-game.html',
+  'costume.dll':  'dll/costume/costume.html',
+  'euro32.dll':   'dll/euro32/calculatrice.html'
+};
+// Native sizes for DLL forms (width x height). Default is 640x400.
+var DLL_NATIVE_SIZE = {
+  'inv.dll': { w: 330, h: 337 },
+  'vnoption.dll': { w: 250, h: 240 },
+  'euro32.dll': { w: 177, h: 291 }
+};
+var currentDllIframe = null;
+
+function runDll(dllName) {
+  var key = dllName.toLowerCase().replace(/.*[\\\/]/, ''); // strip path, keep filename
+  var htmlPath = DLL_HTML_MAP[key];
+  if (!htmlPath) {
+    console.warn('RUNDLL: no HTML port for', dllName);
+    return;
+  }
+  console.log('RUNDLL:', dllName, '→', htmlPath);
+
+  var overlay = document.getElementById('dll-overlay');
+  var iframe = document.getElementById('dll-iframe');
+
+  // Use per-DLL native size (default 640x400 for mini-games)
+  var nativeSize = DLL_NATIVE_SIZE[key] || { w: 640, h: 400 };
+  var dllW = nativeSize.w, dllH = nativeSize.h;
+  var isDialog = !!DLL_NATIVE_SIZE[key]; // Smaller DLLs (inv) = dialog style
+
+  // Position over the canvas, scale iframe to fit
+  var rect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var scale = Math.min(rect.width / dllW, rect.height / dllH);
+  // Dialog DLLs: limiter le scale pour ne pas remplir tout le canvas
+  if (isDialog) scale = Math.min(scale, Math.min(rect.width * 0.65 / dllW, rect.height * 0.65 / dllH));
+
+  overlay.style.left = (rect.left - contRect.left) + 'px';
+  overlay.style.top = (rect.top - contRect.top) + 'px';
+  overlay.style.width = rect.width + 'px';
+  overlay.style.height = rect.height + 'px';
+
+  // Dialog-style DLLs (inv): transparent bg, centered iframe, scene visible behind
+  // Full-size DLLs (roue, etc.): opaque black bg, iframe scaled from top-left
+  if (isDialog) {
+    overlay.className = 'dll-transparent';
+    overlay.style.display = 'flex';
+  } else {
+    overlay.className = '';
+    overlay.style.display = 'block';
+  }
+
+  // Set iframe to native DLL size, then CSS-scale to fit the overlay
+  iframe.style.width = dllW + 'px';
+  iframe.style.height = dllH + 'px';
+  iframe.style.transform = 'scale(' + scale + ')';
+
+  iframe.src = htmlPath;
+  currentDllIframe = iframe;
+
+  // When iframe loads, connect the mini-game's sendCommand to our engine
+  iframe.onload = function() {
+    try {
+      var iframeWin = iframe.contentWindow;
+      // Look for known game objects and wire up onCommand callback
+      var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog ||
+                    iframeWin.vnoption || iframeWin.bateau || iframeWin.costume || iframeWin.calculatrice ||
+                    iframeWin.game;
+      if (gameObj && typeof gameObj.setOnCommand === 'function') {
+        gameObj.setOnCommand(function(cmd) {
+          console.log('DLL command:', cmd);
+          handleDllCommand(cmd);
+        });
+      }
+      // Also provide a global callback the iframe can use
+      iframeWin.__vnCommand = function(cmd) {
+        console.log('DLL command (global):', cmd);
+        handleDllCommand(cmd);
+      };
+
+      // Special: inventory DLL - pass owned items (gameVars where value = 1 or 2)
+      // var=1: in bag, var=2: selected/in-hand (still owned, shown in inventory)
+      if (key === 'inv.dll' && iframeWin.inventory && typeof iframeWin.inventory.populateItems === 'function') {
+        var owned = [];
+        Object.keys(gameVars).forEach(function(v) {
+          if ((gameVars[v] === 1 || gameVars[v] === 2) && iframeWin.ITEMS_TABLE && iframeWin.ITEMS_TABLE[v]) {
+            owned.push(v);
+          }
+        });
+        // Cursor icons path: /game-data/barre/cur/ (files have .CUR extension)
+        var curPath = '/game-data/barre/cur/';
+        iframeWin.inventory.populateItems(owned, curPath);
+        console.log('INV: populated', owned.length, 'items:', owned);
+      }
+    } catch (e) {
+      console.warn('DLL iframe connect failed:', e.message);
+    }
+  };
+}
+
+function handleDllCommand(cmd) {
+  if (!cmd) return;
+  // Strip 'playcmd' prefix (used by some DLLs like bateau.dll)
+  var cleaned = cmd.trim();
+  if (cleaned.toLowerCase().indexOf('playcmd ') === 0) {
+    cleaned = cleaned.substring(8);
+  }
+  var parts = cleaned.split(/\s+/);
+  var action = parts[0].toLowerCase();
+
+  // scene navigation: close DLL, then navigate (wait for video if playing)
+  if (action === 'scene') {
+    closeDll();
+    var idx = parseInt(parts[1]);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      var sceneIdx = idx - 1;
+      // If a video is currently playing, wait for it to end before navigating
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid = currentVideo;
+        function onDllVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onDllVideoEnd);
+          vid.removeEventListener('error', onDllVideoEnd);
+          vid.removeEventListener('click', onDllVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          goToScene(sceneIdx);
+        }
+        vid.addEventListener('ended', onDllVideoEnd);
+        vid.addEventListener('error', onDllVideoEnd);
+        vid.addEventListener('click', onDllVideoEnd);
+      } else {
+        goToScene(sceneIdx);
+      }
+    }
+  } else if (action === 'closedll') {
+    closeDll();
+  } else if (action === 'quit') {
+    closeDll();
+    // Reinitialiser l'etat du jeu et retour a l'ecran titre (scene 3 = Frontal)
+    gameVars = {};
+    sceneHistory = [];
+    clearCursorItem();
+    executeRunPrj('frontal\\start.vnp 3');
+  } else if (action === 'newgame') {
+    closeDll();
+    // Nouvelle partie: reset complet et demarrage couleurs1 scene 1
+    gameVars = {};
+    sceneHistory = [];
+    clearCursorItem();
+    executeRunPrj('couleurs1\\couleurs1.vnp 1');
+  } else if (action === 'runprj') {
+    closeDll();
+    executeRunPrj(parts.slice(1).join(' '));
+  } else if (action === 'playavi') {
+    // Hide DLL overlay so the video is visible (DLL z-index 20 > video z-index 16)
+    // Don't fully close (src=about:blank) because subsequent DLL callbacks (inc_var, scene)
+    // still need to fire from the iframe's setTimeout
+    document.getElementById('dll-overlay').style.display = 'none';
+    executeAction(cleaned);
+  } else {
+    // Other commands: playwav, inc_var, set_var, pause, etc.
+    executeAction(cleaned);
+  }
+}
+
+function closeDll() {
+  var overlay = document.getElementById('dll-overlay');
+  var iframe = document.getElementById('dll-iframe');
+  overlay.style.display = 'none';
+  overlay.className = '';
+  iframe.src = 'about:blank';
+  currentDllIframe = null;
+}
+
+var pendingAfterHtml = null; // command to resume after HTML overlay closed
+
+function closeHtmlOverlay() {
+  document.getElementById('html-overlay').style.display = 'none';
+  // Also close scene-html (used by playHtml for transparent PLAYHTML)
+  document.getElementById('scene-html').style.display = 'none';
+  // Resume pending command processing or navigation
+  if (pendingAfterHtml) {
+    var pending = pendingAfterHtml;
+    pendingAfterHtml = null;
+    if (pending.nav) {
+      doNavigation(pending.nav);
+    } else if (pending.cmd) {
+      resumeCommandProcessing(pending.cmd, pending.startIdx);
+    }
+  }
+}
+
+// --- PLAYAVI ---
+var currentVideo = null;
+var pendingVideoPlay = null; // Video waiting for user gesture to play
+var pendingVideoNav = null; // Navigation to execute after video ends
+
+function resolveAviPath(aviRef) {
+  var normalized = aviRef.toLowerCase().replace(/\\/g, '/');
+  var aviDir = 'movie/';
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['AVI'] || '';
+    aviDir = dir.replace(/\\/g, '/');
+    if (aviDir && !aviDir.endsWith('/')) aviDir += '/';
+  }
+  if (normalized.indexOf('..') >= 0) {
+    var parts = normalized.split('/');
+    var resolved = currentBasePath.replace(/\/$/, '').split('/').slice();
+    parts.forEach(function(p) {
+      if (p === '..') resolved.pop();
+      else if (p !== '.') resolved.push(p);
+    });
+    return '/game-data/' + resolved.join('/');
+  }
+  return '/game-data/' + currentBasePath + aviDir + normalized;
+}
+
+// Update video DOM element position to account for scroll and canvas resize
+function updateVideoPosition(video) {
+  if (!video) return;
+  var rect = canvas.getBoundingClientRect();
+  var contRect = container.getBoundingClientRect();
+  var gameW = project ? project.header.width : 640;
+  var gameH = project ? project.header.height : 480;
+  var scaleX = rect.width / gameW;
+  var scaleY = rect.height / gameH;
+  var x1 = video._gameX1 || 0;
+  var y1 = video._gameY1 || 0;
+  var x2 = video._gameX2 || 0;
+  var y2 = video._gameY2 || 0;
+
+  if (x2 > x1 && y2 > y1) {
+    // Positioned overlay: account for scrollX in game coordinates
+    video.style.left = (rect.left - contRect.left + (x1 - scrollX) * scaleX) + 'px';
+    video.style.top = (rect.top - contRect.top + y1 * scaleY) + 'px';
+    video.style.width = ((x2 - x1) * scaleX) + 'px';
+    video.style.height = ((y2 - y1) * scaleY) + 'px';
+  } else {
+    // Fullscreen over canvas
+    video.style.left = (rect.left - contRect.left) + 'px';
+    video.style.top = (rect.top - contRect.top) + 'px';
+    video.style.width = rect.width + 'px';
+    video.style.height = rect.height + 'px';
+  }
+}
+
+function playAvi(aviStr) {
+  // Format: "filename flags [x1 y1 x2 y2]"
+  var parts = aviStr.trim().split(/\s+/);
+  if (parts.length < 1) return;
+  var file = parts[0];
+  var flags = parseInt(parts[1]) || 0;
+  var x1 = parseInt(parts[2]) || 0;
+  var y1 = parseInt(parts[3]) || 0;
+  var x2 = parseInt(parts[4]) || 0;
+  var y2 = parseInt(parts[5]) || 0;
+
+  var url = resolveAviPath(file);
+  var webmUrl = url.replace(/\.avi$/i, '.webm');
+  console.log('PLAYAVI:', file, 'pos:', x1, y1, x2, y2);
+
+  closeVideo();
+
+  var video = document.createElement('video');
+  video.playsInline = true;
+  video.setAttribute('playsinline', ''); // iOS requires attribute
+  video.setAttribute('webkit-playsinline', ''); // older iOS
+  var srcWebm = document.createElement('source');
+  srcWebm.src = webmUrl;
+  srcWebm.type = 'video/webm';
+  var srcAvi = document.createElement('source');
+  srcAvi.src = url;
+  srcAvi.type = 'video/avi';
+  video.appendChild(srcWebm);
+  video.appendChild(srcAvi);
+  video.style.position = 'absolute';
+  video.style.zIndex = '16';
+  // Vidéos avec coordonnées = overlay (transparent), sans coordonnées = plein écran (fond noir)
+  var isOverlay = (x1 !== 0 || y1 !== 0 || x2 !== 0 || y2 !== 0);
+  video.style.background = isOverlay ? 'transparent' : '#000';
+
+  // Store game coordinates for scroll-aware repositioning
+  video._gameX1 = x1;
+  video._gameY1 = y1;
+  video._gameX2 = x2;
+  video._gameY2 = y2;
+  updateVideoPosition(video);
+
+  video.addEventListener('ended', function() {
+    // If resumeCommandProcessing registered its own onVideoEnd handler (for
+    // deferred navigation), let that handler manage the close + navigate flow.
+    // We only close here for standalone video plays with no pending navigation.
+    if (currentVideo === video && !waitingForVideoEnd) closeVideo();
+  });
+  video.addEventListener('error', function() {
+    console.warn('AVI playback failed (codec not supported):', url);
+    // Only close if this is still the active video AND no source loaded successfully.
+    // When using <source> elements (webm + avi fallback), the browser fires 'error'
+    // on the <video> once all sources fail. If readyState > 0, a source is working
+    // (e.g. webm loaded fine) and we must NOT close - the onVideoEnd handler from
+    // resumeCommandProcessing will handle navigation when the video actually ends.
+    if (currentVideo === video && video.readyState === 0) {
+      closeVideo();
+    }
+  });
+  // Click on video: if paused (autoplay blocked), try to play; if playing, skip
+  video.addEventListener('click', function() {
+    if (video.paused) {
+      video.play().catch(function() { closeVideo(); });
+    } else if (!waitingForVideoEnd) {
+      // Only close directly if no deferred navigation is pending.
+      // When waitingForVideoEnd is true, onVideoEnd in resumeCommandProcessing
+      // will handle the close + navigation flow via its own click listener.
+      closeVideo();
+    }
+    // When waitingForVideoEnd is true, the onVideoEnd handler (also listening
+    // for 'click' on this element) will fire and handle close + navigate.
+  });
+
+  // Add to DOM immediately (needed for video events to work)
+  container.appendChild(video);
+  currentVideo = video;
+
+  // Try to play - handle autoplay policy on mobile
+  var playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(function(e) {
+      if (e.name === 'NotAllowedError') {
+        console.warn('Video autoplay blocked, waiting for user interaction:', file);
+        // Store as pending video to play on next user interaction
+        pendingVideoPlay = video;
+      } else {
+        console.warn('Video play failed:', e.message);
+      }
+    });
+  } else {
+    // Old browsers without promise - just add to DOM
+    container.appendChild(video);
+    currentVideo = video;
+  }
+}
+
+function closeVideo() {
+  if (currentVideo) {
+    var vid = currentVideo;
+    currentVideo = null; // Clear reference FIRST to prevent stale event handlers from closing the next video
+    vid.pause();
+    // Remove all source elements and reset src to stop loading
+    while (vid.firstChild) vid.removeChild(vid.firstChild);
+    vid.removeAttribute('src');
+    // NOTE: Do NOT call vid.load() here - it triggers spurious 'error' events
+    // that can race with onVideoEnd handlers and prevent navigation.
+    // Removing from DOM is sufficient to release the resource.
+    if (vid.parentNode) vid.parentNode.removeChild(vid);
+  }
+  pendingVideoPlay = null;
+  waitingForVideoEnd = false; // Re-enable clicks
+  // Execute pending navigation if video was blocked by autoplay and just finished
+  if (pendingVideoNav) {
+    var nav = pendingVideoNav;
+    pendingVideoNav = null;
+    console.log('closeVideo: executing pending nav', nav);
+    doNavigation(nav);
+  }
+}
+
+// --- SCENE COMMANDS ---
+// Execute all string sub-commands of a VND command
+function executeStringCommand(strType, strValue) {
+  var val = (strValue || '').trim();
+  if (!val && strType !== 25 && strType !== 36) return;
+
+  switch (strType) {
+    case 11: // PLAYWAV
+      playWav(val);
+      break;
+    case 22: // SET_VAR: "name value" or "name <random N M>" or "name <varname>"
+      var sp = val.split(/\s+/);
+      if (sp.length >= 2) setVar(sp[0], resolveValue(sp.slice(1).join(' ')));
+      break;
+    case 23: // INC_VAR: "name value"
+      var ip = val.split(/\s+/);
+      if (ip.length >= 2) setVar(ip[0], getVar(ip[0]) + (parseInt(ip[1]) || 1));
+      break;
+    case 24: // DEC_VAR: "name value"
+      var dp = val.split(/\s+/);
+      if (dp.length >= 2) setVar(dp[0], getVar(dp[0]) - (parseInt(dp[1]) || 1));
+      break;
+    case 27: // ADDBMP
+      addBmpOverlay(val);
+      break;
+    case 28: // DELBMP
+      delBmpOverlay(val);
+      break;
+    case 29: // SHOWBMP
+      showBmpOverlay(val);
+      break;
+    case 30: // HIDEBMP
+      hideBmpOverlay(val);
+      break;
+    case 36: // CLOSEWAV
+      stopAllAudio();
+      break;
+    case 16: // PAUSE
+      // TODO: implement actual pause/delay
+      break;
+    case 25: // INVALIDATE
+      render();
+      break;
+    case 26: // DEFCURSOR
+      executeAction('defcursor ' + val);
+      break;
+    case 32: // UPDATE
+      render();
+      break;
+    case 33: // RUNDLL
+      runDll(val);
+      break;
+    case 37: // CLOSEDLL
+      closeDll();
+      break;
+    case 40: // REM (comment)
+      break;
+    case 13: // PLAYHTML
+      playHtml(val);
+      break;
+    case 9: // PLAYAVI
+      playAvi(val);
+      break;
+    case 10: // PLAYBMP (direct, not named overlay)
+      // Format: "path flags x y" — similar to ADDBMP but unnamed
+      // Use fixed name so each PLAYBMP replaces the previous one
+      if (val.split(/\s+/).length >= 1) {
+        addBmpOverlay('_playbmp ' + val);
+      }
+      break;
+    case 41: // ADDTEXT: "name layer x y x2 y2 flags text"
+      addTextOverlay(val);
+      break;
+    case 39: // FONT: "size style color fontfamily"
+      setFont(val);
+      break;
+    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 3 (PREV), 7 (HOTSPOT)
+    default:
+      break;
+  }
+}
+
+// Execute non-interactive commands of a scene (on scene enter)
+var overlayGeneration = 0; // incremented on scene change to cancel stale async loads
+var playhtmlTriggered = false; // track if playhtml was called during scene load
+
+function executeSceneCommands(scene) {
+  // Clear overlays from previous scene
+  overlayImages = {};
+  overlayGeneration++;
+  playhtmlTriggered = false; // reset for new scene
+
+  // Reset auto-play flags on all commands so revisiting a scene replays setup videos/images
+  scene.commands.forEach(function(cmd) {
+    cmd.autoPlayedVideo = false;
+    cmd.autoShowedBmp = false;
+  });
+
+  // Reset click-guard variable 'jeu' to 0 on scene entry
+  // This variable is used in library scenes to prevent double-clicks:
+  // Pattern: INC_VAR jeu 1 + IF jeu = 1 then runprj
+  // Without resetting, returning to the scene leaves jeu at 1, breaking future clicks
+  if (gameVars['jeu'] !== undefined) {
+    gameVars['jeu'] = 0;
+  }
+
+  // Pass 0: Execute INIT/AFTERINIT commands from interactive commands (subIndex >= 2)
+  // The VND subIndex tells us which strings run on scene entry vs on click/hover.
+  // For non-interactive commands, all strings run on entry (handled in Pass 2).
+  // For interactive commands, only subIndex >= 2 strings run on entry:
+  //   - ADDBMP/DELBMP/SHOWBMP/HIDEBMP (display overlays like qcasta.bmp)
+  //   - PLAYAVI (scene setup videos like casta1.avi asking a question)
+  //   - PLAYWAV, CLOSEWAV (scene audio)
+  //   - SET_VAR, INC_VAR, DEC_VAR (scene state setup like casta=1)
+  //   - IF conditions (nested IFs for transvecteur machine, etc.)
+  //   - PAUSE (type 16) delays between commands (e.g. transvecteur item reveal)
+  var pass0DeferredNav = null; // Collect deferred navigation from ONINIT IFs
+  var pass0Queue = []; // Async queue for ONINIT strings with PAUSE support
+  var pass0HasPause = false;
+  scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
+
+    cmd.strings.forEach(function(s) {
+      // For interactive commands, only execute ONINIT (2) and AFTERINIT (3) strings
+      if (isInteractive && s.subIndex < 2) return;
+
+      if (isInteractive) {
+        pass0Queue.push({ s: s, cmd: cmd });
+        if (s.type === 16) pass0HasPause = true;
+      } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        // Non-interactive direct display commands
+        executeStringCommand(s.type, s.string);
+      }
+    });
+  });
+
+  // Process a single ONINIT/AFTERINIT string from the queue
+  function executePass0Item(item) {
+    var s = item.s;
+    var cmd = item.cmd;
+    if (s.type === 39) {
+      setFont(s.string);
+    } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 9 && !cmd.autoPlayedVideo) {
+      console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
+      cmd.autoPlayedVideo = true;
+      playAvi(s.string);
+    } else if (s.type === 22 || s.type === 23 || s.type === 24) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 36) {
+      // CLOSEWAV from INIT/AFTERINIT - SKIP
+    } else if (s.type === 11) {
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 7) {
+      // HOTSPOT: trigger another command's ONCLICK processing
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 6) {
+      // SCENE navigation from ONINIT/AFTERINIT - defer until after all Pass 0 items
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: s.string };
+    } else if (s.type === 31) {
+      // RUNPRJ from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: s.string };
+    } else if (s.type === 3) {
+      // PREV from ONINIT/AFTERINIT
+      if (!pass0DeferredNav) pass0DeferredNav = { type: 'prev', value: '' };
+    } else if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+        action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+      }
+      if (action) {
+        var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+        if (actLower === 'scene') {
+          var idx = action.trim().split(/\s+/)[1];
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'scene', value: idx };
+        } else if (actLower === 'runprj') {
+          if (!pass0DeferredNav) pass0DeferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+        } else {
+          executeAction(action);
+        }
+      }
+    }
+    // type 16 (PAUSE) is handled as a delay in the queue runner, not here
+  }
+
+  // Finalize Pass 0: handle deferred navigation, then continue to Pass 1/2
+  function finalizePass0() {
+    if (pass0DeferredNav) {
+      if (currentVideo) {
+        var nav0 = pass0DeferredNav;
+        var vid0 = currentVideo;
+        waitingForVideoEnd = true;
+        function onPass0VideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid0.readyState > 0) return;
+          vid0.removeEventListener('ended', onPass0VideoEnd);
+          vid0.removeEventListener('error', onPass0VideoEnd);
+          vid0.removeEventListener('click', onPass0VideoEnd);
+          if (currentVideo !== vid0) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          doNavigation(nav0);
+        }
+        vid0.addEventListener('ended', onPass0VideoEnd);
+        vid0.addEventListener('error', onPass0VideoEnd);
+        vid0.addEventListener('click', onPass0VideoEnd);
+      } else {
+        doNavigation(pass0DeferredNav);
+      }
+      pass0DeferredNav = null;
+    }
+  }
+
+  if (pass0HasPause) {
+    // Async processing: execute items with PAUSE delays between them
+    var sceneGeneration = overlayGeneration; // Track if scene changed during async
+    (function runPass0Async(qi) {
+      if (qi >= pass0Queue.length || overlayGeneration !== sceneGeneration) {
+        finalizePass0();
+        render();
+        return;
+      }
+      var item = pass0Queue[qi];
+      if (item.s.type === 16) {
+        // PAUSE: delay, render current state, then continue
+        var ms = parseInt(item.s.string) || 300;
+        render();
+        setTimeout(function() { runPass0Async(qi + 1); }, ms);
+      } else {
+        executePass0Item(item);
+        runPass0Async(qi + 1);
+      }
+    })(0);
+  } else {
+    // Sync processing (fast path for most scenes)
+    pass0Queue.forEach(executePass0Item);
+    finalizePass0();
+  }
+
+  // Pass 1: Execute IF conditions with display actions from NON-INTERACTIVE commands
+  // (Interactive command IFs are already fully handled in Pass 0)
+  // The VND subIndex field determines WHEN a string command executes:
+  //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
+  // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
+  scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
+    if (isInteractive) return; // Already handled in Pass 0
+    cmd.strings.forEach(function(s) {
+      if (s.type === 21) {
+        var lowerStr = s.string.toLowerCase();
+        // Only execute IF conditions that affect display state
+        if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp')) {
+          var action = evaluateIf(s.string);
+          if (action) {
+            var actLower = action.toLowerCase().trim().split(/\s+/)[0];
+            // Only execute display-related actions
+            if (actLower === 'addbmp' || actLower === 'delbmp' ||
+                actLower === 'showbmp' || actLower === 'hidebmp') {
+              executeAction(action);
+            }
+          }
+        }
+      }
+    });
+  });
+
+  // Pass 2: Execute non-interactive commands (without polygons)
+  // These are auto-execute commands that run on scene load.
+  // Uses two-pass logic similar to resumeCommandProcessing:
+  // first execute all side-effects, then handle video+navigation deferral.
+  scene.commands.forEach(function(cmd) {
+    // Only execute commands without polygons (auto-execute on scene load)
+    // Commands with polygons are interactive (click/hover)
+    if (cmd.paramPairs.length > 0) return;
+
+    var deferredNav = null;
+    var videoPlaying = false;
+    var deferredAudio = [];
+
+    // Check if a playwav string is looping/ambient (defer) vs one-shot SFX (play now)
+    function isLoopingWav(wavArgs) {
+      var parts = wavArgs.trim().split(/\s+/);
+      var loops = parseInt(parts[1]) || 1;
+      return loops > 1 || loops === 0;
+    }
+
+    cmd.strings.forEach(function(s) {
+      // Skip types handled interactively or in rendering
+      if (s.type === 38 || s.type === 3) return;
+      if (s.type === 39) { setFont(s.string); return; }
+      // Skip direct display commands - already handled in Pass 0
+      if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
+
+      // SCENE navigation - defer until after video (if any)
+      if (s.type === 6) {
+        if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
+        return;
+      }
+      // RUNPRJ navigation - defer similarly
+      if (s.type === 31) {
+        if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
+        return;
+      }
+
+      // PLAYAVI - play and track for deferral
+      if (s.type === 9) {
+        if (!videoPlaying) {
+          playAvi(s.string);
+          videoPlaying = true;
+        }
+        return;
+      }
+
+      // Looping PLAYWAV after PLAYAVI - defer until video ends
+      // Ambient/background music (loops>1) shouldn't play over video dialogue
+      // One-shot SFX (loops=1) play alongside the video
+      if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
+        deferredAudio.push('playwav ' + s.string);
+        return;
+      }
+
+      // HOTSPOT: trigger another command's processing
+      if (s.type === 7) {
+        var hsIdx = parseInt(s.string);
+        if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+        return;
+      }
+
+      if (s.type === 21) {
+        // IF - evaluate and execute (skip display commands, already handled in Pass 1)
+        var action = evaluateIf(s.string);
+        if (action) {
+          var actParts = action.trim().split(/\s+/);
+          var actLower = actParts[0].toLowerCase();
+          if (actLower === 'scene') {
+            if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'runprj') {
+            if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
+          } else if (actLower === 'playavi') {
+            if (!videoPlaying) {
+              playAvi(actParts.slice(1).join(' '));
+              videoPlaying = true;
+            }
+          } else if (actLower === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
+            deferredAudio.push(action);
+          } else if (actLower !== 'addbmp' && actLower !== 'delbmp' &&
+                     actLower !== 'showbmp' && actLower !== 'hidebmp') {
+            executeAction(action);
+          }
+        }
+        return;
+      }
+
+      executeStringCommand(s.type, s.string);
+    });
+
+    function executeDeferredAudio() {
+      deferredAudio.forEach(function(action) { executeAction(action); });
+    }
+
+    // Handle deferred navigation (with optional video wait)
+    if (deferredNav) {
+      if (videoPlaying && currentVideo) {
+        // Video playing - wait for it to end before navigating
+        waitingForVideoEnd = true;
+        var nav = deferredNav;
+        var vid = currentVideo;
+        function onVideoEnd(evt) {
+          if (evt && evt.type === 'error' && vid.readyState > 0) return;
+          vid.removeEventListener('ended', onVideoEnd);
+          vid.removeEventListener('error', onVideoEnd);
+          vid.removeEventListener('click', onVideoEnd);
+          if (currentVideo !== vid) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+          doNavigation(nav);
+        }
+        vid.addEventListener('ended', onVideoEnd);
+        vid.addEventListener('error', onVideoEnd);
+        vid.addEventListener('click', onVideoEnd);
+      } else if (videoPlaying && pendingVideoPlay) {
+        waitingForVideoEnd = true;
+        pendingVideoNav = deferredNav;
+      } else {
+        executeDeferredAudio();
+        doNavigation(deferredNav);
+      }
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      // Video playing with deferred audio but NO navigation
+      if (currentVideo) {
+        waitingForVideoEnd = true; // Prevent playAvi's ended handler from closing video first
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
+      } else {
+        // No video actually loaded (all sources failed), execute audio immediately
+        executeDeferredAudio();
+      }
+    }
+  });
+
+  // Init variables from VND header (only if not already set)
+  if (project && project.variables) {
+    project.variables.forEach(function(v) {
+      if (gameVars[v.name.toLowerCase()] === undefined) {
+        gameVars[v.name.toLowerCase()] = v.value;
+      }
+    });
+  }
+
+  // Auto-load HTM from scene string6 field ONLY if no playhtml was triggered
+  // This allows conditional playhtml (like bonus questions) to override the default
+  if (scene.fields.string6 && scene.fields.string6.toLowerCase().endsWith('.htm')) {
+    if (!playhtmlTriggered) {
+      var htmToLoad = scene.fields.string6;
+
+      // WORKAROUND: Fix for bonus question scenes with incorrect VND conditions
+      // The VND has wrong mappings (e.g., scene expects bonus1,5,4 but navigations use bonus1,2,3)
+      // Auto-detect which bonusX=1 and load the corresponding bonusX.htm
+      if (htmToLoad.toLowerCase() === 'bonus1.htm') {
+        for (var bi = 1; bi <= 12; bi++) {
+          if (getVar('bonus' + bi) === 1) {
+            htmToLoad = 'bonus' + bi + '.htm';
+            console.log('Bonus question workaround: bonus' + bi + '=1, loading', htmToLoad);
+            break;
+          }
+        }
+      }
+
+      loadSceneHtml(htmToLoad, scene.rect);
+    } else {
+      console.log('Skipping string6 HTM (playhtml already triggered):', scene.fields.string6);
+    }
+  }
+
+  // Auto-play scene background WAV (string3 field)
+  // This is the ambient/background music for the scene
+  if (scene.fields.string3) {
+    var wavFile = scene.fields.string3;
+    var loops = scene.fields.val2 || 1;
+    var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+    // Only play if not already playing this WAV
+    if (!audioElements[wavKey] || audioElements[wavKey].paused || audioElements[wavKey].ended) {
+      console.log('Auto-playing scene WAV:', wavFile, 'loops:', loops);
+      playWav(wavFile + ' ' + loops);
+    }
+  }
+
+  // Note: string4 AVI field is NOT auto-played here.
+  // Videos should be triggered by commands (type 9 PLAYAVI) for proper control.
+  // The string4 field seems to be informational/unused in most VNDs.
+
+  // Special case: Interactive commands with PLAYAVI + PREV
+  // These are "farewell videos" that should play on scene arrival, not on click
+  // The button click should just do PREV (return)
+  // Check both direct PLAYAVI (type 9) and PLAYAVI inside IF conditions (type 21)
+  scene.commands.forEach(function(cmd, cmdIndex) {
+    if (cmd.paramPairs.length === 0) return; // Only interactive commands
+
+    // Check for direct PLAYAVI (type 9)
+    var hasDirectPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
+
+    // Check for PLAYAVI inside IF conditions (type 21)
+    var hasIfPlayAvi = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      return str.indexOf('playavi') >= 0;
+    });
+
+    var hasPlayAvi = hasDirectPlayAvi || hasIfPlayAvi;
+
+    // Check for direct PREV (type 3) or PREV inside IF conditions
+    var hasDirectPrev = cmd.strings.some(function(s) { return s.type === 3; });
+    var hasIfPrev = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      // Check if "prev" appears as an action (not as part of variable name)
+      return /\bthen\s+prev\b/.test(str) || /\belse\s+prev\b/.test(str);
+    });
+
+    var hasPrev = hasDirectPrev || hasIfPrev;
+
+    console.log('Auto-play check C' + cmdIndex + ': hasPlayAvi=' + hasPlayAvi +
+                ' (direct=' + hasDirectPlayAvi + ', if=' + hasIfPlayAvi +
+                '), hasPrev=' + hasPrev +
+                ' (direct=' + hasDirectPrev + ', if=' + hasIfPrev + ')');
+
+    if (hasPlayAvi && hasPrev) {
+      // Mark command for special handling (skip PLAYAVI on click)
+      cmd.autoPlayedVideo = true;
+      console.log('Auto-play: marking C' + cmdIndex + ' as autoPlayedVideo');
+
+      // Find and auto-play the video now
+      // First check direct PLAYAVI
+      var aviStr = cmd.strings.find(function(s) { return s.type === 9; });
+      if (aviStr) {
+        console.log('Auto-playing video from PLAYAVI+PREV command:', aviStr.string);
+        playAvi(aviStr.string);
+      } else {
+        // Check IF conditions for PLAYAVI
+        var ifStr = cmd.strings.find(function(s) {
+          return s.type === 21 && s.string.toLowerCase().indexOf('playavi') >= 0;
+        });
+        if (ifStr) {
+          // Parse the IF to get the PLAYAVI action
+          var action = evaluateIf(ifStr.string);
+          if (action) {
+            var actParts = action.trim().split(/\s+/);
+            if (actParts[0].toLowerCase() === 'playavi') {
+              console.log('Auto-playing video from IF+PLAYAVI+PREV command:', actParts.slice(1).join(' '));
+              playAvi(actParts.slice(1).join(' '));
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Special case: Interactive commands with ADDBMP + PREV (but no PLAYAVI)
+  // These are "static farewell scenes" with an image overlay
+  // The ADDBMP should show on scene arrival, not on click
+  scene.commands.forEach(function(cmd, cmdIndex) {
+    if (cmd.paramPairs.length === 0) return; // Only interactive commands
+    if (cmd.autoPlayedVideo) return; // Already handled as video scene
+
+    // Check for ADDBMP (type 27)
+    var hasAddBmp = cmd.strings.some(function(s) { return s.type === 27; });
+
+    // Check for PREV (direct or in IF)
+    var hasDirectPrev = cmd.strings.some(function(s) { return s.type === 3; });
+    var hasIfPrev = cmd.strings.some(function(s) {
+      if (s.type !== 21) return false;
+      var str = s.string.toLowerCase();
+      return /\bthen\s+prev\b/.test(str) || /\belse\s+prev\b/.test(str);
+    });
+    var hasPrev = hasDirectPrev || hasIfPrev;
+
+    // Check there's NO PLAYAVI (those are handled above)
+    var hasPlayAvi = cmd.strings.some(function(s) { return s.type === 9; });
+
+    if (hasAddBmp && hasPrev && !hasPlayAvi) {
+      console.log('Auto-showing ADDBMP for ADDBMP+PREV command C' + cmdIndex);
+      cmd.autoShowedBmp = true;
+      // Execute all ADDBMP commands in this command
+      cmd.strings.forEach(function(s) {
+        if (s.type === 27) {
+          console.log('Auto ADDBMP:', s.string);
+          addBmpOverlay(s.string);
+        }
+      });
+    }
+  });
+}
+
+function isToolbarVisible() {
+  if (toolbarSceneIndex < 0 || !project || currentSceneIndex === toolbarSceneIndex) return false;
+  var scene = project.scenes[currentSceneIndex];
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var bgImg = resources[resKey];
+  return !(bgImg && bgImg.height >= 480);
+}
+
+function executeToolbar() {
+  // Execute the toolbar scene's C0 ONINIT strings (subIndex >= 2) to add barre overlay + conditional icons
+  // ONFOCUS (sub=0) strings like ordi.bmp/textetm.bmp only show on hover, not on init
+  // ONCLICK (sub=1) strings like RUNDLL vnoption.dll only run on click
+  if (toolbarSceneIndex < 0 || !project) return;
+  var tbScene = project.scenes[toolbarSceneIndex];
+  if (!tbScene || !tbScene.commands.length) return;
+  var cmd = tbScene.commands[0]; // C0 is the main toolbar setup command
+  cmd.strings.forEach(function(s) {
+    if (s.subIndex < 2) return; // Only ONINIT (2) and AFTERINIT (3)
+    if (s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.type === 39) {
+      setFont(s.string);
+      return;
+    }
+    if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      if (action) executeAction(action);
+    } else if (s.type === 33) {
+      // RUNDLL - skip
+    } else {
+      executeStringCommand(s.type, s.string);
+    }
+  });
+}
+
+// =============================================================================
+// HIT TESTING
+// =============================================================================
+
+function pointInPolygon(x, y, pairs) {
+  if (pairs.length < 3) return false;
+  var inside = false;
+  for (var i = 0, j = pairs.length - 1; i < pairs.length; j = i++) {
+    var xi = pairs[i].a, yi = pairs[i].b;
+    var xj = pairs[j].a, yj = pairs[j].b;
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function isPolygonInBounds(pairs, sceneW) {
+  // Check if at least part of the polygon is within the scene image
+  var minX = Infinity;
+  for (var i = 0; i < pairs.length; i++) {
+    if (pairs[i].a < minX) minX = pairs[i].a;
+  }
+  return minX < sceneW;
+}
+
+function findCommandAtPoint(x, y) {
+  if (!project || currentSceneIndex < 0) return null;
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+
+  // Find all matching commands and return the smallest one (most specific)
+  var matches = [];
+  for (var i = 0; i < scene.commands.length; i++) {
+    var cmd = scene.commands[i];
+    if (cmd.paramPairs.length >= 2 && isPolygonInBounds(cmd.paramPairs, sceneW) && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+      // Calculate polygon area (approximate using bounding box)
+      var bounds = cmd.paramPairs.reduce(function(acc, p) {
+        return {
+          minX: Math.min(acc.minX, p.a), maxX: Math.max(acc.maxX, p.a),
+          minY: Math.min(acc.minY, p.b), maxY: Math.max(acc.maxY, p.b)
+        };
+      }, {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity});
+      var area = (bounds.maxX - bounds.minX) * (bounds.maxY - bounds.minY);
+      matches.push({ cmd: cmd, area: area });
+    }
+  }
+
+  // Return the smallest polygon (most specific) for hover
+  if (matches.length > 0) {
+    matches.sort(function(a, b) { return a.area - b.area; });
+    return matches[0].cmd;
+  }
+
+  // Check toolbar commands for hover
+  if (isToolbarVisible()) {
+    var tbScene = project.scenes[toolbarSceneIndex];
+    for (var j = tbScene.commands.length - 1; j >= 0; j--) {
+      var tbCmd = tbScene.commands[j];
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+        return tbCmd;
+      }
+    }
+  }
+  return null;
+}
+
+// Pour le clic : priorité aux commandes navigables (avec string type 6)
+// Un rollover plein écran ne doit pas bloquer un polygone de navigation en dessous
+function findClickableCommandAtPoint(x, y) {
+  if (!project || currentSceneIndex < 0) return null;
+  var scene = project.scenes[currentSceneIndex];
+  var navigable = null;
+  var fallback = null;
+  for (var i = scene.commands.length - 1; i >= 0; i--) {
+    var cmd = scene.commands[i];
+    if (cmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(cmd.paramPairs))) {
+      var hasScene = cmd.strings.some(function(s) { return s.type === 6; });
+      if (hasScene && !navigable) {
+        navigable = cmd;
+      }
+      if (!fallback) {
+        fallback = cmd;
+      }
+    }
+  }
+  return navigable || fallback;
+}
+
+function findAllCommandsAtPoint(x, y) {
+  if (!project || currentSceneIndex < 0) return [];
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+  var result = [];
+  for (var i = scene.commands.length - 1; i >= 0; i--) {
+    var cmd = scene.commands[i];
+    var hasPairs = cmd.paramPairs.length >= 2;
+    var inBounds = hasPairs && isPolygonInBounds(cmd.paramPairs, sceneW);
+    var inPoly = inBounds && pointInPolygon(x, y, expandRect(cmd.paramPairs));
+    if (hasPairs && inBounds && inPoly) {
+      result.push(cmd);
+    }
+  }
+  // Also check toolbar scene commands if toolbar is visible
+  if (isToolbarVisible()) {
+    var tbScene = project.scenes[toolbarSceneIndex];
+    for (var j = tbScene.commands.length - 1; j >= 0; j--) {
+      var tbCmd = tbScene.commands[j];
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+        result.push(tbCmd);
+      }
+    }
+  }
+  // Sort by polygon area (smallest first) so the most specific polygon wins
+  result.sort(function(a, b) {
+    return polygonArea(a.paramPairs) - polygonArea(b.paramPairs);
+  });
+  return result;
+}
+
+// =============================================================================
+// INTERACTIONS
+// =============================================================================
+
+canvas.addEventListener('mousemove', function(e) {
+  var pos = screenToGame(e.clientX, e.clientY);
+  var cmd = findCommandAtPoint(pos.x, pos.y);
+
+  if (cmd !== hoveredCmd) {
+    // Clean up images added by previous hover
+    Object.keys(hoverAddedImages).forEach(function(name) {
+      if (overlayImages[name]) {
+        delete overlayImages[name];
+        console.log('HOVER cleanup:', name);
+      }
+    });
+    hoverAddedImages = {};
+
+    hoveredCmd = cmd;
+    activePlayTexts = [];
+    canvas.style.cursor = cmd ? 'pointer' : 'default';
+    if (cmd) evaluateHoverEffects(cmd);
+    render();
+  }
+
+  // Tooltip
+  var tooltip = document.getElementById('tooltip');
+  if (cmd) {
+    var lines = [CMD_NAMES[cmd.commandType] || 'CMD_' + cmd.commandType];
+    cmd.strings.forEach(function(s) {
+      lines.push('  [' + s.type + '] ' + s.string);
+    });
+    if (cmd.flags) lines.push('  flags=' + cmd.flags);
+    tooltip.textContent = lines.join('\n');
+    tooltip.style.whiteSpace = 'pre';
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY + 12) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+// Evaluate IF conditions on a command for HOVER (visual effects only: playtext, addbmp, delbmp, showbmp, hidebmp)
+function evaluateHoverEffects(cmd) {
+  activePlayTexts = [];
+  // Get font from ONFOCUS strings only (subIndex=0)
+  var isInteractive = cmd.paramPairs && cmd.paramPairs.length > 0;
+  var fontStr = cmd.strings.find(function(s) {
+    return s.type === 39 && (!isInteractive || s.subIndex === 0);
+  });
+  var font = fontStr ? fontStr.string : null;
+
+  cmd.strings.forEach(function(s) {
+    // Only process ONFOCUS strings (subIndex=0) for hover - skip ONCLICK/ONINIT
+    if (isInteractive && s.subIndex !== 0) return;
+    // Direct display commands (ADDBMP, DELBMP, HIDEBMP, SHOWBMP)
+    if (s.type === 27) {
+      var imgName = s.string.trim().split(/\s+/)[0].toLowerCase();
+      if (imgName && !overlayImages[imgName]) {
+        hoverAddedImages[imgName] = true;
+      }
+      addBmpOverlay(s.string);
+    } else if (s.type === 28) {
+      delBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 29) {
+      hideBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 30) {
+      showBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 21) {
+      var action = evaluateIfReadOnly(s.string);
+      if (!action) return;
+      var parts = action.trim().split(/\s+/);
+      var act = parts[0].toLowerCase();
+      if (act === 'playtext') {
+        activePlayTexts.push({ text: parts.slice(1).join(' '), font: font });
+      } else if (act === 'addbmp') {
+        // Track this as a hover-added image ONLY if it doesn't already exist
+        // (existing images are persistent from scene entry and shouldn't be removed on unhover)
+        var imgNameIf = parts[1] ? parts[1].toLowerCase() : '';
+        if (imgNameIf && !overlayImages[imgNameIf]) {
+          hoverAddedImages[imgNameIf] = true;
+          console.log('HOVER adding NEW image:', imgNameIf);
+        }
+        addBmpOverlay(parts.slice(1).join(' '));
+      } else if (act === 'delbmp') {
+        delBmpOverlay(parts[1] || '');
+      } else if (act === 'showbmp') {
+        showBmpOverlay(parts[1] || '');
+      } else if (act === 'hidebmp') {
+        hideBmpOverlay(parts[1] || '');
+      }
+    }
+  });
+}
+
+// Read-only IF evaluator (same as evaluateIf but doesn't log)
+function evaluateIfReadOnly(ifStr) {
+  var thenIdx = ifStr.indexOf(' then ');
+  if (thenIdx < 0) return null;
+
+  var condStr = ifStr.substring(0, thenIdx).trim();
+  var rest = ifStr.substring(thenIdx + 6).trim();
+
+  var condMatch = condStr.match(/^(\S+)\s*(>=|<=|!=|<>|=|<|>)\s*(.+)$/);
+  if (!condMatch) return null;
+
+  var varName = condMatch[1];
+  var op = condMatch[2];
+  var val = resolveValue(condMatch[3]);
+  var actual = getVar(varName);
+
+  var result = false;
+  switch (op) {
+    case '=': result = (actual === val); break;
+    case '<': result = (actual < val); break;
+    case '>': result = (actual > val); break;
+    case '>=': result = (actual >= val); break;
+    case '<=': result = (actual <= val); break;
+    case '!=': case '<>': result = (actual !== val); break;
+  }
+
+  var elseIdx = -1;
+  var elseMatch = rest.match(/\s+else\s+(runprj|scene|dec_var|inc_var|set_var|playavi|playwav|playbmp|playtext|playhtml|addbmp|delbmp|closewav|hotspot|if)\s/i);
+  if (elseMatch) {
+    elseIdx = rest.indexOf(elseMatch[0]);
+  } else {
+    var simpleElse = rest.indexOf(' else ');
+    if (simpleElse >= 0) elseIdx = simpleElse;
+  }
+
+  var thenAction, elseAction;
+  if (elseIdx >= 0) {
+    thenAction = rest.substring(0, elseIdx).trim();
+    elseAction = rest.substring(elseIdx + 6).trim();
+  } else {
+    thenAction = rest.trim();
+    elseAction = null;
+  }
+
+  return result ? thenAction : elseAction;
+}
+
+// Polygones orphelins/debug dans les données originales du jeu à ignorer au clic
+// suede s1 C5: raccourci debug dans le ciel vers scène récompense (scene 14)
+// couleurs1 s5 C2: zone de sortie redondante sans label
+var BLOCKED_CLICKS = [
+  { base: 'suede/', scene: 0, cmd: 5 },
+  { base: 'couleurs1/', scene: 4, cmd: 2 }
+];
+
+// Action commune clic / tap
+function handleCommandClick(cmd) {
+  // Ignorer les polygones debug/orphelins identifiés dans les données originales
+  if (project && currentSceneIndex >= 0) {
+    var scene = project.scenes[currentSceneIndex];
+    var cmdIdx = scene.commands.indexOf(cmd);
+    var blocked = BLOCKED_CLICKS.some(function(b) {
+      return currentBasePath === b.base && currentSceneIndex === b.scene && cmdIdx === b.cmd;
+    });
+    if (blocked) {
+      console.log('Click ignored: blocked debug polygon C' + cmdIdx + ' in ' + currentBasePath + ' scene ' + (currentSceneIndex + 1));
+      return;
+    }
+  }
+  console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
+  // If this command had auto-played video and video is still playing, close it first
+  if (cmd.autoPlayedVideo && currentVideo) {
+    console.log('Closing auto-played video on button click');
+    closeVideo();
+  }
+  // Filter to ONCLICK strings (subIndex=1) if available.
+  // Fallback: if NO strings have subIndex=1 (e.g. biblio hymnes), use ALL strings.
+  var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
+  var filteredCmd = {};
+  for (var k in cmd) filteredCmd[k] = cmd[k];
+  filteredCmd.strings = onclickStrings;
+  resumeCommandProcessing(filteredCmd, 0);
+  // After click processing, re-evaluate ONINIT display IFs to refresh overlays
+  // This handles cases like quiz scenes where clicking an answer changes a variable
+  // and another command's ONINIT IFs control which image is displayed
+  refreshOninitOverlays();
+}
+
+// Re-evaluate ONINIT/AFTERINIT IF conditions that control display overlays.
+// Called after clicks that may change variables affecting displayed images.
+function refreshOninitOverlays() {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var deferredNav = null;
+  scene.commands.forEach(function(cmd) {
+    var isInteractive = cmd.paramPairs.length > 0;
+    cmd.strings.forEach(function(s) {
+      // For interactive commands, skip ONFOCUS/ONCLICK strings (subIndex 0/1)
+      if (isInteractive && s.subIndex < 2) return;
+      if (s.type === 21) {
+        var lowerStr = s.string.toLowerCase();
+        if (lowerStr.includes('addbmp') || lowerStr.includes('delbmp') ||
+            lowerStr.includes('showbmp') || lowerStr.includes('hidebmp') ||
+            lowerStr.includes('scene') || lowerStr.includes('runprj')) {
+          var action = evaluateIf(s.string);
+          // Resolve nested IFs
+          while (action && action.trim().split(/\s+/)[0].toLowerCase() === 'if') {
+            action = evaluateIf(action.trim().replace(/^if\s+/i, ''));
+          }
+          if (action) {
+            var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+            if (actLower === 'addbmp' || actLower === 'delbmp' ||
+                actLower === 'showbmp' || actLower === 'hidebmp') {
+              executeAction(action);
+            } else if (actLower === 'scene' || actLower === 'runprj') {
+              // Defer navigation until after all overlays processed
+              if (!deferredNav) deferredNav = action;
+            }
+          }
+        }
+      }
+    });
+  });
+  render();
+  // Execute deferred navigation after render
+  if (deferredNav) {
+    console.log('[refreshOninit] Deferred navigation:', deferredNav);
+    executeAction(deferredNav);
+  }
+}
+
+function resumeCommandProcessing(cmd, startIdx) {
+  // Two-pass: execute ALL side-effects first, then navigate/show HTML last.
+  // This ensures SET_VAR, INC_VAR, ADDBMP etc. run even when followed by SCENE.
+  var deferredNav = null;   // { type:'scene'|'runprj', value:string }
+  var deferredHtml = null;  // { value:string, idx:number }
+  var videoPlaying = false;
+  var deferredAudio = [];   // PLAYWAV commands to execute after video ends
+
+  // Check if a playwav string represents looping/ambient audio (should defer during video)
+  // vs one-shot SFX like cling.wav (should play alongside video)
+  function isLoopingWav(wavArgs) {
+    var parts = wavArgs.trim().split(/\s+/);
+    var loops = parseInt(parts[1]) || 1;
+    return loops > 1 || loops === 0; // 0=infinite, >1=looping ambient
+  }
+
+  // Process a single string command (shared between sync and async paths)
+  function processOneString(s, si) {
+    if (s.type === 21) {
+      var action = evaluateIf(s.string);
+      if (action) {
+        var actParts = action.trim().split(/\s+/);
+        var actCmd = actParts[0].toLowerCase();
+        if (actCmd === 'playhtml') {
+          if (!deferredHtml) deferredHtml = { value: actParts.slice(1).join(' '), idx: si };
+        } else if (actCmd === 'scene') {
+          if (!deferredNav) deferredNav = { type: 'scene', value: actParts.slice(1).join(' ') };
+        } else if (actCmd === 'runprj') {
+          if (!deferredNav) deferredNav = { type: 'runprj', value: actParts.slice(1).join(' ') };
+        } else if (actCmd === 'playavi') {
+          if (!cmd.autoPlayedVideo && !videoPlaying) {
+            playAvi(actParts.slice(1).join(' '));
+            videoPlaying = true;
+          }
+        } else if (actCmd === 'prev') {
+          if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+        } else if (actCmd === 'playwav' && videoPlaying && isLoopingWav(actParts.slice(1).join(' '))) {
+          deferredAudio.push(action);
+        } else {
+          executeAction(action);
+        }
+      }
+    } else if (s.type === 9) {
+      if (!cmd.autoPlayedVideo && !videoPlaying) {
+        playAvi(s.string);
+        videoPlaying = true;
+      }
+    } else if (s.type === 11 && videoPlaying && isLoopingWav(s.string)) {
+      deferredAudio.push('playwav ' + s.string);
+    } else if (s.type === 6) {
+      if (!deferredNav) deferredNav = { type: 'scene', value: s.string };
+    } else if (s.type === 31) {
+      if (!deferredNav) deferredNav = { type: 'runprj', value: s.string };
+    } else if (s.type === 13) {
+      if (!deferredHtml) deferredHtml = { value: s.string, idx: si };
+    } else if (s.type === 3) {
+      if (!deferredNav) deferredNav = { type: 'prev', value: '' };
+    } else if (s.type === 7) {
+      var hsIdx = parseInt(s.string);
+      if (!isNaN(hsIdx)) executeHotspot(hsIdx);
+    } else if (s.type === 38 || s.type === 39) {
+      // PLAYTEXT, FONT - handled in render
+    } else if (s.type === 27 && cmd.autoShowedBmp) {
+      console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
+    } else if (s.type === 16) {
+      // PAUSE - handled by async runner, skip in sync path
+    } else {
+      executeStringCommand(s.type, s.string);
+    }
+  }
+
+  // Helper: execute deferred audio commands (PLAYWAV after video)
+  function executeDeferredAudio() {
+    deferredAudio.forEach(function(action) {
+      executeAction(action);
+    });
+  }
+
+  // Finalize: handle deferred HTML and/or navigation after all strings processed
+  function finalize() {
+    if (deferredHtml) {
+      playHtml(deferredHtml.value);
+      if (deferredNav) {
+        pendingAfterHtml = { nav: deferredNav };
+      } else {
+        pendingAfterHtml = { cmd: cmd, startIdx: deferredHtml.idx + 1 };
+      }
+    } else if (deferredNav) {
+      if (videoPlaying) {
+        if (currentVideo) {
+          waitingForVideoEnd = true;
+          var nav = deferredNav;
+          var vid = currentVideo;
+          function onVideoEnd(evt) {
+            if (evt && evt.type === 'error' && vid.readyState > 0) return;
+            vid.removeEventListener('ended', onVideoEnd);
+            vid.removeEventListener('error', onVideoEnd);
+            vid.removeEventListener('click', onVideoEnd);
+            if (currentVideo !== vid) return;
+            waitingForVideoEnd = false;
+            closeVideo();
+            executeDeferredAudio();
+            doNavigation(nav);
+          }
+          vid.addEventListener('ended', onVideoEnd);
+          vid.addEventListener('error', onVideoEnd);
+          vid.addEventListener('click', onVideoEnd);
+        } else if (pendingVideoPlay) {
+          waitingForVideoEnd = true;
+          pendingVideoNav = deferredNav;
+        } else {
+          executeDeferredAudio();
+          doNavigation(deferredNav);
+        }
+      } else {
+        doNavigation(deferredNav);
+      }
+    } else if (videoPlaying && deferredAudio.length > 0) {
+      if (currentVideo) {
+        waitingForVideoEnd = true;
+        var vid2 = currentVideo;
+        function onVideoEndAudio(evt) {
+          if (evt && evt.type === 'error' && vid2.readyState > 0) return;
+          vid2.removeEventListener('ended', onVideoEndAudio);
+          vid2.removeEventListener('error', onVideoEndAudio);
+          vid2.removeEventListener('click', onVideoEndAudio);
+          if (currentVideo !== vid2) return;
+          waitingForVideoEnd = false;
+          closeVideo();
+          executeDeferredAudio();
+        }
+        vid2.addEventListener('ended', onVideoEndAudio);
+        vid2.addEventListener('error', onVideoEndAudio);
+        vid2.addEventListener('click', onVideoEndAudio);
+      } else {
+        executeDeferredAudio();
+      }
+    }
+  }
+
+  // Check if any string has PAUSE (type 16 ou inline dans IF) — if so, use async processing
+  var hasPause = false;
+  pendingPauseMs = 0; // Reset au debut de chaque commande
+  for (var pi = startIdx; pi < cmd.strings.length; pi++) {
+    if (cmd.strings[pi].type === 16) { hasPause = true; break; }
+    // Detecter aussi PAUSE inline dans les IF (ex: "seche = 0 then pause 1000")
+    if (cmd.strings[pi].type === 21 && /\bthen\s+pause\s+\d/i.test(cmd.strings[pi].string)) {
+      hasPause = true; break;
+    }
+  }
+
+  if (hasPause) {
+    // Async processing: pause at PAUSE commands, render, then continue
+    waitingForVideoEnd = true; // Block clicks during pause sequence
+    (function runAsync(si) {
+      if (si >= cmd.strings.length) {
+        waitingForVideoEnd = false;
+        var willNavigate = !!deferredNav || !!deferredHtml;
+        finalize();
+        if (!willNavigate) restoreSceneWav();
+        render();
+        return;
+      }
+      var s = cmd.strings[si];
+      if (s.type === 16) {
+        var ms = parseInt(s.string) || 300;
+        // Clear imagesAddedThisClick so DELBMP after PAUSE can remove
+        // images that were added before the pause (they've been visible)
+        imagesAddedThisClick = {};
+        render();
+        waitForAudioThenDelay(ms, function() { runAsync(si + 1); });
+      } else {
+        processOneString(s, si);
+        // Verifier si processOneString a declenche un PAUSE inline (via executeAction)
+        if (pendingPauseMs > 0) {
+          var pms = pendingPauseMs;
+          pendingPauseMs = 0;
+          imagesAddedThisClick = {};
+          render();
+          waitForAudioThenDelay(pms, function() { runAsync(si + 1); });
+        } else {
+          runAsync(si + 1);
+        }
+      }
+    })(startIdx);
+  } else {
+    // Sync processing (fast path — no PAUSE in this command)
+    for (var si = startIdx; si < cmd.strings.length; si++) {
+      processOneString(cmd.strings[si], si);
+    }
+    var willNavigate = !!deferredNav || !!deferredHtml;
+    finalize();
+    if (!willNavigate) restoreSceneWav();
+  }
+}
+
+function logHistory(action) {
+  var stack = sceneHistory.map(function(h) { return h.entry.name + ':' + (h.sceneIndex + 1); });
+  var current = (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (currentSceneIndex + 1);
+  var blocked = waitingForVideoEnd ? ' [BLOCKED]' : '';
+  var msg = action + ' | ' + current + blocked + ' | [' + (stack.length ? stack.join(', ') : '-') + ']';
+  console.log('  HISTORY:', msg);
+  var dbg = document.getElementById('debug-history');
+  if (dbg) dbg.textContent = msg;
+}
+
+function doNavigation(nav) {
+  if (nav.type === 'scene') {
+    // Push current location to history before navigating (same project)
+    if (currentSceneIndex >= 0 && currentVNDEntry) {
+      sceneHistory.push({ entry: currentVNDEntry, sceneIndex: currentSceneIndex });
+      logHistory('SCENE ' + nav.value + ' - pushed ' + currentVNDEntry.name + ':' + (currentSceneIndex + 1));
+    }
+    var idx = parseInt(nav.value, 10);
+    if (!isNaN(idx) && idx >= 1 && (idx - 1) < project.scenes.length) {
+      goToScene(idx - 1);
+    } else if (project) {
+      var target = project.scenes.findIndex(function(sc) {
+        return sc.name.toLowerCase() === nav.value.toLowerCase();
+      });
+      if (target >= 0) goToScene(target);
+    }
+  } else if (nav.type === 'runprj') {
+    // Push current location to history before external navigation
+    if (currentSceneIndex >= 0 && currentVNDEntry) {
+      sceneHistory.push({ entry: currentVNDEntry, sceneIndex: currentSceneIndex });
+      logHistory('RUNPRJ ' + nav.value + ' - pushed ' + currentVNDEntry.name + ':' + (currentSceneIndex + 1));
+    }
+    executeRunPrj(nav.value);
+  } else if (nav.type === 'prev') {
+    // Go back to previous location in history (supports cross-project)
+    if (sceneHistory.length > 0) {
+      var prev = sceneHistory.pop();
+      // Validate history entry
+      if (!prev || !prev.entry) {
+        console.error('NAV: PREV - invalid history entry:', prev);
+        logHistory('PREV - invalid entry (skipped)');
+        return;
+      }
+      logHistory('PREV - popped ' + prev.entry.name + ':' + (prev.sceneIndex + 1));
+      // Check if we need to load a different project
+      if (prev.entry !== currentVNDEntry) {
+        // Cross-project navigation: reload the previous VND
+        console.log('NAV: PREV - cross-project to', prev.entry.name);
+        loadVNDEntryAndGoToScene(prev.entry, prev.sceneIndex);
+      } else {
+        // Same project, just go to scene
+        goToScene(prev.sceneIndex);
+      }
+    } else {
+      console.log('NAV: PREV - history empty, staying at', currentVNDEntry ? currentVNDEntry.name : '?', 'scene', currentSceneIndex + 1);
+    }
+  }
+}
+
+// Load a VND entry and go to a specific scene (for cross-project PREV)
+function loadVNDEntryAndGoToScene(entry, sceneIndex) {
+  // Validate entry object
+  if (!entry || !entry.vnd || !entry.name) {
+    console.error('CROSS-PROJECT: invalid entry', entry);
+    waitingForVideoEnd = false;
+    return;
+  }
+  console.log('CROSS-PROJECT: loading', entry.name, 'scene', sceneIndex + 1);
+  waitingForVideoEnd = true; // Block clicks during cross-project loading
+  stopAllAudio();
+  currentBasePath = entry.base;
+
+  // Load both VNP and VND, but wait for BOTH before going to scene
+  var vnpPromise = fetch('/game-data/' + entry.vnp)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      currentVNPConfig = parseVNP(text);
+      console.log('VNP loaded for', entry.name);
+    })
+    .catch(function() { currentVNPConfig = null; });
+
+  var vndPromise = fetch('/game-data/' + entry.vnd)
+    .then(function(r) { return r.arrayBuffer(); });
+
+  Promise.all([vnpPromise, vndPromise]).then(function(results) {
+    var buf = results[1];
+    loadVNDFile(buf, entry.vnd, true);
+    currentVNDEntry = entry;
+    // Update VND selector
+    var vndIdx = VND_LIST.indexOf(entry);
+    if (vndIdx >= 0) document.getElementById('vnd-select').value = vndIdx;
+    preloadResources(function() {
+      waitingForVideoEnd = false; // Re-enable clicks
+      console.log('CROSS-PROJECT: now going to scene', sceneIndex + 1);
+      goToScene(sceneIndex);
+    });
+  }).catch(function(e) {
+    console.error('PREV cross-project load failed:', e);
+    waitingForVideoEnd = false; // Re-enable clicks on error
+  });
+}
+
+canvas.addEventListener('click', function(e) {
+  // Block clicks while waiting for video to end
+  if (waitingForVideoEnd) {
+    console.log('Click blocked: waiting for video to end, waitingForVideoEnd=' + waitingForVideoEnd);
+    return;
+  }
+  // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
+  imagesAddedThisClick = {};
+  // Convert hover-added images to permanent (user clicked, so they want to keep them)
+  hoverAddedImages = {};
+  var pos = screenToGame(e.clientX, e.clientY);
+  console.log('Canvas click at game coords:', pos.x, pos.y);
+  // Find all commands at click point (sorted by area, smallest first)
+  var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
+  if (allCmds.length === 0) {
+    console.log('No commands found at click point');
+    return;
+  }
+  console.log('Found', allCmds.length, 'command(s) at click point:', allCmds.map(function(c) {
+    var scene = project.scenes[currentSceneIndex];
+    return 'C' + scene.commands.indexOf(c);
+  }).join(', '));
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // This prevents large "error zone" polygons from firing when a small "correct answer"
+  // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
+  });
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
+  }
+  if (clickCmd) handleCommandClick(clickCmd);
+});
+
+// =============================================================================
+// NAVIGATION
+// =============================================================================
+
+function goToScene(index) {
+  if (!project || index < 0 || index >= project.scenes.length) return;
+  // Frontal/start scene 1 = "Quitter" (QUIT) - pas de sens sur le web, rester sur scene 3 (Frontal)
+  if (currentVNDEntry && currentVNDEntry.name === 'start' && index === 0) {
+    index = 2; // scene 3 (0-indexed = 2)
+  }
+  currentSceneIndex = index;
+  scrollX = 0;
+  // Clear recentlyStartedAudio so that sounds started during the same click
+  // that triggered navigation are NOT protected from being stopped.
+  // Only the target scene's own sounds should persist.
+  recentlyStartedAudio = {};
+  // Smart audio: keep sounds that the new scene will also play
+  var keepKeys = getSceneAutoWavKeys(project.scenes[index]);
+  stopAudioExcept(keepKeys);
+  closeHtmlOverlay();
+  closeDll();
+  closeSceneHtml();
+  closeVideo();
+  clearCursorItem();
+  activePlayText = null;
+  activePlayTextFont = null;
+  activePlayTexts = [];
+  overlayTexts = {};
+  loadSceneBackground(project.scenes[index]);
+
+  // DEBUG: Log scene structure for analysis
+  var scene = project.scenes[index];
+  console.log('=== SCENE ' + (index+1) + ': ' + scene.name + ' ===');
+  console.log('Fields:', JSON.stringify(scene.fields));
+  console.log('Hotspot:', scene.hotspot ? JSON.stringify(scene.hotspot) : 'none');
+  scene.commands.forEach(function(cmd, ci) {
+    var hasPolygon = cmd.paramPairs.length > 0;
+    var strDescr = cmd.strings.map(function(s) {
+      return '[' + s.type + ':' + (CMD_NAMES[s.type] || '?') + '] ' + s.string.substring(0, 80);
+    }).join(' | ');
+    console.log('  C' + ci + (hasPolygon ? ' (poly)' : '') + ': type=' + cmd.commandType + ' ' + strDescr);
+  });
+
+  executeSceneCommands(project.scenes[index]);
+  // Load toolbar overlay if available and not navigating to toolbar itself
+  if (toolbarSceneIndex >= 0 && index !== toolbarSceneIndex) {
+    executeToolbar();
+  }
+  updateUI();
+  resizeCanvas();
+  // Update debug display
+  logHistory('AT ' + (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (index + 1));
+}
+
+function updateUI() {
+  if (!project) return;
+  var scene = project.scenes[currentSceneIndex];
+  var select = document.getElementById('scene-select');
+  select.value = currentSceneIndex;
+
+  document.getElementById('scene-info').textContent =
+    project.header.projectName + ' - ' + project.header.width + 'x' + project.header.height;
+
+  // Scene list
+  var items = document.querySelectorAll('#scene-list .scene-item');
+  items.forEach(function(el, i) {
+    el.classList.toggle('active', i === currentSceneIndex);
+  });
+}
+
+// =============================================================================
+// CHARGEMENT VND
+// =============================================================================
+
+function loadVNDFile(arrayBuffer, fileName, skipFirstScene) {
+  try {
+    // Reset scene index before replacing project to prevent stale index
+    // accessing non-existent scenes in the new project (render loop, etc.)
+    currentSceneIndex = 0;
+    project = parseVND(arrayBuffer);
+    console.log('Loaded:', project.header.projectName, project.scenes.length, 'scenes', project.bytesRemaining, 'bytes remaining');
+
+    // Init variables from VND header (only set if not already defined — preserves cross-module vars)
+    if (project.variables) {
+      project.variables.forEach(function(v) {
+        if (gameVars[v.name.toLowerCase()] === undefined) {
+          gameVars[v.name.toLowerCase()] = v.value;
+        }
+      });
+      console.log('Variables:', JSON.stringify(gameVars));
+    }
+
+    // Setup canvas internal size
+    canvas.width = project.header.width;
+    canvas.height = project.header.height;
+    resizeCanvas();
+
+    // Scene select
+    var select = document.getElementById('scene-select');
+    select.innerHTML = '';
+    project.scenes.forEach(function(s, i) {
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = (i + 1) + ': ' + (s.name || '(vide)');
+      select.appendChild(opt);
+    });
+
+    // Scene list
+    var list = document.getElementById('scene-list');
+    list.innerHTML = '';
+    project.scenes.forEach(function(s, i) {
+      var div = document.createElement('div');
+      div.className = 'scene-item';
+      var cmdCount = s.commands.length;
+      var polyCount = s.commands.filter(function(c) { return c.paramPairs.length > 0; }).length;
+      div.innerHTML = '<div class="scene-name">' + (i + 1) + ': ' + (s.name || '(vide)') + '</div>' +
+        '<div class="scene-meta">' + cmdCount + ' cmds, ' + polyCount + ' polys' +
+        (s.fields.resource ? ', res: ' + s.fields.resource : '') +
+        (s.hotspot ? ', hotspot t=' + s.hotspot.timerValue : '') + '</div>';
+      div.onclick = function() { goToScene(i); };
+      list.appendChild(div);
+    });
+
+    // Detect toolbar scene
+    toolbarSceneIndex = -1;
+    for (var ti = 0; ti < project.scenes.length; ti++) {
+      if (project.scenes[ti].name && project.scenes[ti].name.toLowerCase() === 'toolbar') {
+        toolbarSceneIndex = ti;
+        console.log('Toolbar scene found at index', ti);
+        break;
+      }
+    }
+
+    // Cacher la dropzone
+    document.getElementById('dropzone').classList.add('hidden');
+
+    // Aller à la première scène (sauf si preloading)
+    if (!skipFirstScene) goToScene(0);
+
+  } catch (e) {
+    alert('Erreur de chargement: ' + e.message);
+    console.error(e);
+  }
+}
+
+// =============================================================================
+// CHARGEMENT RESSOURCES
+// =============================================================================
+
+function loadResourceFiles(fileList) {
+  Array.from(fileList).forEach(function(file) {
+    var name = file.name.toLowerCase();
+    if (!name.endsWith('.bmp') && !name.endsWith('.jpg') && !name.endsWith('.png')) return;
+
+    var path = (file.webkitRelativePath || file.name).toLowerCase().replace(/\\/g, '/');
+    // Garder le chemin relatif (ex: "interface/jeu.bmp")
+    var parts = path.split('/');
+    // Stocker sous différentes clés pour maximiser les chances de match
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        // Clé = nom du fichier
+        resources[name] = img;
+        // Clé = chemin relatif depuis le dernier dossier connu
+        for (var i = 0; i < parts.length; i++) {
+          resources[parts.slice(i).join('/')] = img;
+        }
+        console.log('Loaded resource:', path);
+        render(); // Re-render si on est déjà sur une scène
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// =============================================================================
+// SERVER-BASED LOADING
+// =============================================================================
+
+// Liste des VND disponibles sur le serveur
+var VND_LIST = [
+  { name: 'couleurs1', vnd: 'couleurs1/couleurs1.vnd', vnp: 'couleurs1/couleurs1.vnp', base: 'couleurs1/' },
+  { name: 'start', vnd: 'frontal/start.vnd', vnp: 'frontal/start.vnp', base: 'frontal/' },
+  { name: 'barre', vnd: 'barre/barre.vnd', vnp: 'barre/barre.vnp', base: 'barre/' },
+  { name: 'allem', vnd: 'allem/allem.vnd', vnp: 'allem/allem.vnp', base: 'allem/' },
+  { name: 'angleterre', vnd: 'angl/angleterre.vnd', vnp: 'angl/angleterre.vnp', base: 'angl/' },
+  { name: 'autriche', vnd: 'autr/autr.vnd', vnp: 'autr/autr.vnp', base: 'autr/' },
+  { name: 'belgique', vnd: 'belge/belge.vnd', vnp: 'belge/belge.vnp', base: 'belge/' },
+  { name: 'biblio', vnd: 'biblio/biblio.vnd', vnp: 'biblio/biblio.vnp', base: 'biblio/' },
+  { name: 'danemark', vnd: 'danem/danem.vnd', vnp: 'danem/danem.vnp', base: 'danem/' },
+  { name: 'ecosse', vnd: 'ecosse/ecosse.vnd', vnp: 'ecosse/ecosse.vnp', base: 'ecosse/' },
+  { name: 'espagne', vnd: 'espa/espa.vnd', vnp: 'espa/espa.vnp', base: 'espa/' },
+  { name: 'finlande', vnd: 'finlan/finlan.vnd', vnp: 'finlan/finlan.vnp', base: 'finlan/' },
+  { name: 'france', vnd: 'france/france.vnd', vnp: 'france/france.vnp', base: 'france/' },
+  { name: 'grece', vnd: 'grece/grece.vnd', vnp: 'grece/grece.vnp', base: 'grece/' },
+  { name: 'hollande', vnd: 'holl/holl.vnd', vnp: 'holl/holl.vnp', base: 'holl/' },
+  { name: 'irlande', vnd: 'irland/irland.vnd', vnp: 'irland/irland.vnp', base: 'irland/' },
+  { name: 'italie', vnd: 'italie/italie.vnd', vnp: 'italie/italie.vnp', base: 'italie/' },
+  { name: 'portugal', vnd: 'portu/portu.vnd', vnp: 'portu/portu.vnp', base: 'portu/' },
+  { name: 'suede', vnd: 'suede/suede.vnd', vnp: 'suede/suede.vnp', base: 'suede/' },
+];
+
+var currentVNPConfig = null; // parsed VNP config
+var currentBasePath = ''; // ex: 'couleurs1/'
+
+// Populer le select VND
+var vndSelect = document.getElementById('vnd-select');
+VND_LIST.forEach(function(entry, i) {
+  var opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = entry.name;
+  vndSelect.appendChild(opt);
+});
+
+// Charger un VND depuis le serveur
+function loadFromServer(entry) {
+  stopAllAudio();
+  currentBasePath = entry.base;
+  currentVNDEntry = entry; // Track current VND for cross-project PREV
+  sceneHistory = []; // Reset history when loading from UI (new game session)
+  // Charger le VNP d'abord pour les paths
+  fetch('/game-data/' + entry.vnp).then(function(r) { return r.text(); }).then(function(text) {
+    currentVNPConfig = parseVNP(text);
+    console.log('VNP config:', currentVNPConfig);
+  }).catch(function() { currentVNPConfig = null; });
+
+  // Charger le VND
+  fetch('/game-data/' + entry.vnd).then(function(r) {
+    return r.arrayBuffer();
+  }).then(function(buf) {
+    loadVNDFile(buf, entry.vnd, true); // skipFirstScene=true
+    preloadResources(function() {
+      goToScene(0);
+    });
+  }).catch(function(e) {
+    alert('Erreur chargement: ' + e.message);
+  });
+}
+
+// Parser un VNP (format INI simple)
+function parseVNP(text) {
+  var config = {};
+  text.split('\n').forEach(function(line) {
+    line = line.trim();
+    if (!line || line.startsWith('[') || line.startsWith(';')) return;
+    var eq = line.indexOf('=');
+    if (eq < 0) return;
+    config[line.substring(0, eq).trim().toUpperCase()] = line.substring(eq + 1).trim();
+  });
+  return config;
+}
+
+// Résoudre le chemin d'une ressource BMP
+// VND ref: "euroland\bureaubanquier.bmp" -> /game-data/couleurs1/img24/euroland/bureaubanquier.bmp
+function resolveResourcePath(resRef) {
+  var normalized = resRef.toLowerCase().replace(/\\/g, '/');
+  var imgDir = 'img24/'; // default
+  if (currentVNPConfig) {
+    var dir = currentVNPConfig['IMG24'] || currentVNPConfig['IMG8'] || '';
+    imgDir = dir.replace(/\\/g, '/');
+    if (imgDir && !imgDir.endsWith('/')) imgDir += '/';
+  }
+  return '/game-data/' + currentBasePath + imgDir + normalized;
+}
+
+// Charger automatiquement l'image de fond d'une scène
+function loadSceneBackground(scene) {
+  if (!scene.fields.resource) return;
+  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  if (resources[resKey]) return; // déjà chargé
+
+  var url = resolveResourcePath(scene.fields.resource);
+  var img = new Image();
+  img.onload = function() {
+    resources[resKey] = img;
+    console.log('Loaded BMP:', resKey, img.width + 'x' + img.height);
+    render();
+  };
+  img.onerror = function() {
+    console.warn('Failed to load:', url);
+  };
+  img.src = url;
+}
+
+// =============================================================================
+// PRE-LOADING / CACHE
+// =============================================================================
+
+var preloadCache = {}; // url -> Image (persistent across scenes)
+
+function collectAllResourceUrls() {
+  if (!project) return [];
+  var urls = {};
+
+  project.scenes.forEach(function(scene) {
+    // Background BMP
+    if (scene.fields.resource) {
+      var url = resolveResourcePath(scene.fields.resource);
+      urls[url] = true;
+    }
+    // Scan commands for ADDBMP, PLAYBMP, etc.
+    scene.commands.forEach(function(cmd) {
+      cmd.strings.forEach(function(s) {
+        if (s.type === 27) { // ADDBMP: "name path flags x y [w h]"
+          var parts = s.string.trim().split(/\s+/);
+          if (parts.length >= 2) urls[resolveOverlayPath(parts[1])] = true;
+        } else if (s.type === 10) { // PLAYBMP: "path flags x y"
+          var parts = s.string.trim().split(/\s+/);
+          if (parts.length >= 1) urls[resolveOverlayPath(parts[0])] = true;
+        }
+      });
+    });
+  });
+
+  return Object.keys(urls);
+}
+
+function preloadResources(onComplete) {
+  var urls = collectAllResourceUrls();
+  if (urls.length === 0) { onComplete(); return; }
+
+  var overlay = document.getElementById('loading-overlay');
+  var barFill = document.getElementById('loading-bar-fill');
+  var loadingText = document.getElementById('loading-text');
+  overlay.classList.add('visible');
+
+  // Try to load noir.bmp as background
+  var noirUrl = '/game-data/' + currentBasePath + (currentVNPConfig ? (currentVNPConfig['IMG24'] || 'img24').replace(/\\/g, '/') : 'img24') + '/interface/noir.bmp';
+  var bgCanvas = document.getElementById('loading-bg');
+  var bgCtx = bgCanvas.getContext('2d');
+  bgCtx.fillStyle = '#000';
+  bgCtx.fillRect(0, 0, 640, 480);
+
+  var noirImg = new Image();
+  noirImg.onload = function() { bgCtx.drawImage(noirImg, 0, 0, 640, 480); };
+  noirImg.src = noirUrl;
+
+  var loaded = 0;
+  var total = urls.length;
+
+  function tick() {
+    loaded++;
+    var pct = Math.round(loaded / total * 100);
+    barFill.style.width = pct + '%';
+    loadingText.textContent = loaded + '/' + total + ' ressources';
+    if (loaded >= total) {
+      overlay.classList.remove('visible');
+      onComplete();
+    }
+  }
+
+  urls.forEach(function(url) {
+    if (preloadCache[url]) { tick(); return; }
+    var img = new Image();
+    img.onload = function() {
+      preloadCache[url] = img;
+      // Also store in resources dict by key
+      var resKey = url.replace(/^\/game-data\/[^/]+\/(?:img24|img8)\//i, '').toLowerCase();
+      resources[resKey] = img;
+      tick();
+    };
+    img.onerror = function() { tick(); }; // count failures too
+    img.src = url;
+  });
+}
+
+vndSelect.onchange = function() {
+  var idx = parseInt(vndSelect.value);
+  if (!isNaN(idx) && VND_LIST[idx]) {
+    loadFromServer(VND_LIST[idx]);
+  }
+};
+
+// =============================================================================
+// EVENT HANDLERS
+// =============================================================================
+
+// File input
+document.getElementById('file-input').addEventListener('change', function(e) {
+  if (e.target.files.length > 0) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev) { loadVNDFile(ev.target.result, file.name); };
+    reader.readAsArrayBuffer(file);
+  }
+});
+
+document.getElementById('res-input').addEventListener('change', function(e) {
+  if (e.target.files.length > 0) loadResourceFiles(e.target.files);
+});
+
+// Buttons
+document.getElementById('btn-load').onclick = function() { document.getElementById('file-input').click(); };
+document.getElementById('btn-load-res').onclick = function() { document.getElementById('res-input').click(); };
+document.getElementById('btn-prev').onclick = function() { if (currentSceneIndex > 0) goToScene(currentSceneIndex - 1); };
+document.getElementById('btn-next').onclick = function() { if (project && currentSceneIndex < project.scenes.length - 1) goToScene(currentSceneIndex + 1); };
+document.getElementById('scene-select').onchange = function(e) { goToScene(parseInt(e.target.value)); };
+
+document.getElementById('btn-scenes').onclick = function() {
+  document.getElementById('scene-list').classList.toggle('visible');
+};
+
+document.getElementById('chk-polygons').onchange = function(e) { showPolygons = e.target.checked; render(); };
+document.getElementById('chk-labels').onchange = function(e) { showLabels = e.target.checked; render(); };
+document.getElementById('chk-fill').onchange = function(e) { fillPolygons = e.target.checked; render(); };
+
+// Fullscreen
+document.getElementById('btn-fullscreen').onclick = function() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen();
+  }
+};
+document.addEventListener('fullscreenchange', function() {
+  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
+  setTimeout(resizeCanvas, 100);
+});
+
+// Drag & drop
+var dropArea = document.getElementById('drop-area');
+dropArea.onclick = function() { document.getElementById('file-input').click(); };
+
+['dragenter', 'dragover'].forEach(function(ev) {
+  document.body.addEventListener(ev, function(e) {
+    e.preventDefault();
+    dropArea.classList.add('dragover');
+  });
+});
+['dragleave', 'drop'].forEach(function(ev) {
+  document.body.addEventListener(ev, function(e) {
+    e.preventDefault();
+    dropArea.classList.remove('dragover');
+  });
+});
+document.body.addEventListener('drop', function(e) {
+  e.preventDefault();
+  var files = e.dataTransfer.files;
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].name.toLowerCase().endsWith('.vnd')) {
+      var reader = new FileReader();
+      var file = files[i];
+      reader.onload = function(ev) { loadVNDFile(ev.target.result, file.name); };
+      reader.readAsArrayBuffer(file);
+    }
+  }
+});
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (!project) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (currentSceneIndex > 0) goToScene(currentSceneIndex - 1);
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (currentSceneIndex < project.scenes.length - 1) goToScene(currentSceneIndex + 1);
+    e.preventDefault();
+  } else if (e.key === 'f' || e.key === 'F') {
+    document.getElementById('btn-fullscreen').click();
+  } else if (e.key === 'p' || e.key === 'P') {
+    document.getElementById('chk-polygons').click();
+  } else if (e.key === 'l' || e.key === 'L') {
+    document.getElementById('chk-labels').click();
+  }
+});
+
+// Scroll horizontal pour scènes larges
+var isDragging = false;
+var dragStartX = 0;
+var dragStartScroll = 0;
+
+canvas.addEventListener('wheel', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+  var gameW = project.header.width;
+  if (sceneW <= gameW) return;
+  e.preventDefault();
+  scrollX += e.deltaY || e.deltaX;
+  scrollX = Math.max(0, Math.min(scrollX, sceneW - gameW));
+  render();
+}, { passive: false });
+
+canvas.addEventListener('mousedown', function(e) {
+  if (!project || currentSceneIndex < 0) return;
+  var scene = project.scenes[currentSceneIndex];
+  if (getSceneWidth(scene) <= project.header.width) return;
+  if (e.button === 1 || e.shiftKey) { // middle-click ou shift+clic
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartScroll = scrollX;
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', function(e) {
+  if (!isDragging) return;
+  var rect = canvas.getBoundingClientRect();
+  var gameW = project.header.width;
+  var scale = gameW / rect.width;
+  scrollX = dragStartScroll - (e.clientX - dragStartX) * scale;
+  var scene = project.scenes[currentSceneIndex];
+  scrollX = Math.max(0, Math.min(scrollX, getSceneWidth(scene) - gameW));
+  render();
+});
+
+window.addEventListener('mouseup', function() { isDragging = false; });
+
+// Touch pour mobile : scroll + tap + long-press
+var touchStartX = 0;
+var touchStartY = 0;
+var touchStartScroll = 0;
+var touchMoved = false;
+var longPressTimer = null;
+var longPressTriggered = false;
+
+canvas.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  if (!project || currentSceneIndex < 0) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchStartScroll = scrollX;
+  touchMoved = false;
+  longPressTriggered = false;
+
+  // Long-press : afficher le texte rollover après 400ms
+  clearTimeout(longPressTimer);
+  var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+  longPressTimer = setTimeout(function() {
+    if (touchMoved) return;
+    longPressTriggered = true;
+    var pos = screenToGame(tx, ty);
+    var cmd = findCommandAtPoint(pos.x, pos.y);
+    if (cmd !== hoveredCmd) {
+      // Clean up previous hover images before showing new ones
+      Object.keys(hoverAddedImages).forEach(function(name) {
+        if (overlayImages[name]) {
+          delete overlayImages[name];
+        }
+      });
+      hoverAddedImages = {};
+
+      hoveredCmd = cmd;
+      activePlayTexts = [];
+      if (cmd) evaluateHoverEffects(cmd);
+      render();
+    }
+  }, 400);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  if (!project || currentSceneIndex < 0) return;
+  var dx = Math.abs(e.touches[0].clientX - touchStartX);
+  var dy = Math.abs(e.touches[0].clientY - touchStartY);
+  if (dx > 8 || dy > 8) {
+    touchMoved = true;
+    clearTimeout(longPressTimer);
+  }
+  // Scroll horizontal
+  var scene = project.scenes[currentSceneIndex];
+  var sceneW = getSceneWidth(scene);
+  var gameW = project.header.width;
+  if (sceneW <= gameW) return;
+  var rect = canvas.getBoundingClientRect();
+  var scale = gameW / rect.width;
+  scrollX = touchStartScroll - (e.touches[0].clientX - touchStartX) * scale;
+  scrollX = Math.max(0, Math.min(scrollX, sceneW - gameW));
+  render();
+}, { passive: false });
+
+canvas.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  clearTimeout(longPressTimer);
+
+  // Clean up hover-added images (from long-press or previous interactions)
+  Object.keys(hoverAddedImages).forEach(function(name) {
+    if (overlayImages[name]) {
+      delete overlayImages[name];
+      console.log('TOUCH cleanup hover image:', name);
+    }
+  });
+  hoverAddedImages = {};
+
+  // Si long-press actif, juste masquer le hover
+  if (longPressTriggered) {
+    hoveredCmd = null;
+    render();
+    return;
+  }
+
+  if (touchMoved || !project || currentSceneIndex < 0) return;
+
+  // Block taps while PAUSE sequence or video is playing
+  if (waitingForVideoEnd) return;
+
+  // Tap = clic - use same logic as desktop click (find ALL overlapping commands)
+  var touch = e.changedTouches[0];
+  var pos = screenToGame(touch.clientX, touch.clientY);
+  console.log('Touch tap at game coords:', pos.x, pos.y);
+
+  // Clear hover state after tap to avoid stuck tooltips/rollovers
+  hoveredCmd = null;
+  activePlayTexts = [];
+
+  // Clear click-scope tracking and hover tracking
+  imagesAddedThisClick = {};
+
+  // Find ALL commands at tap point (same as desktop click)
+  var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
+  if (allCmds.length === 0) {
+    console.log('No commands found at tap point');
+    render();
+    return;
+  }
+  console.log('Touch found', allCmds.length, 'command(s) at tap point');
+
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
+  });
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
+  }
+  if (clickCmd) handleCommandClick(clickCmd);
+
+  // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
+  // since there is no hover on touch devices. Set hoveredCmd to the
+  // first non-navigable tapped command so render() draws its ONFOCUS
+  // PLAYTEXT overlays, giving visual feedback.
+  // Show even during PAUSE sequences so player sees which button they tapped.
+  if (allCmds.length > 0) {
+    hoveredCmd = allCmds[0];
+    evaluateHoverEffects(allCmds[0]);
+  }
+
+  render(); // Refresh display after action (e.g., item pickup)
+}, { passive: false });
+
+// =============================================================================
+// DEBUG PANEL
+// =============================================================================
+
+var debugVisible = false;
+document.getElementById('btn-debug').onclick = function() {
+  debugVisible = !debugVisible;
+  document.getElementById('debug-panel').style.display = debugVisible ? 'block' : 'none';
+};
+
+var debugLogEl = document.getElementById('debug-log');
+var _origLog = console.log;
+var _origWarn = console.warn;
+var _origError = console.error;
+
+function debugLog(color, args) {
+  var text = Array.from(args).map(function(a) {
+    if (typeof a === 'object') return JSON.stringify(a, null, 1);
+    return String(a);
+  }).join(' ');
+  var line = document.createElement('div');
+  line.style.color = color;
+  line.style.borderBottom = '1px solid #222';
+  line.style.padding = '1px 0';
+  line.textContent = text;
+  debugLogEl.appendChild(line);
+  // Keep max 200 lines
+  while (debugLogEl.children.length > 200) debugLogEl.removeChild(debugLogEl.firstChild);
+  debugLogEl.scrollTop = debugLogEl.scrollHeight;
+}
+
+console.log = function() { _origLog.apply(console, arguments); debugLog('#0f0', arguments); };
+console.warn = function() { _origWarn.apply(console, arguments); debugLog('#ff0', arguments); };
+console.error = function() { _origError.apply(console, arguments); debugLog('#f44', arguments); };
+
+function debugClearLog() { debugLogEl.innerHTML = ''; }
+
+function debugDumpVars() {
+  var nonZero = {};
+  Object.keys(gameVars).forEach(function(k) { if (gameVars[k] !== 0) nonZero[k] = gameVars[k]; });
+  console.log('=== VARIABLES (non-zero) ===');
+  console.log(nonZero);
+  console.log('Total vars:', Object.keys(gameVars).length, ', non-zero:', Object.keys(nonZero).length);
+}
+
+function debugDumpScene() {
+  if (!project || currentSceneIndex < 0) return;
+  var s = project.scenes[currentSceneIndex];
+  console.log('=== SCENE', currentSceneIndex + 1, ':', s.name, '===');
+  console.log('Resource:', s.fields.resource);
+  console.log('Rect:', s.rect);
+  console.log('Commands:', s.commands.length);
+  console.log('Hotspot:', s.hotspot);
+}
+
+function debugDumpCmds() {
+  if (!project || currentSceneIndex < 0) return;
+  var s = project.scenes[currentSceneIndex];
+  console.log('=== COMMANDS for scene', currentSceneIndex + 1, '===');
+  s.commands.forEach(function(c, i) {
+    var strDesc = c.strings.map(function(s) { return '[' + s.type + '] ' + s.string; }).join(' | ');
+    console.log('#' + i + ' type=' + c.commandType + ' poly=' + c.paramPairs.length + 'pts: ' + strDesc);
+  });
+}
+
+function debugSetVar() {
+  var name = document.getElementById('debug-var-name').value;
+  var val = parseInt(document.getElementById('debug-var-val').value) || 0;
+  if (name) {
+    setVar(name, val);
+    console.log('DEBUG SET:', name, '=', val);
+  }
+}
+
+// Burger menu for mobile
+function openBurgerMenu() {
+  // Sync checkbox states before opening
+  document.getElementById('chk-polygons-mobile').checked = document.getElementById('chk-polygons').checked;
+  document.getElementById('chk-labels-mobile').checked = document.getElementById('chk-labels').checked;
+  document.getElementById('chk-fill-mobile').checked = document.getElementById('chk-fill').checked;
+  document.getElementById('burger-menu').classList.add('open');
+}
+
+// Handle clicks on scene-html that should go to canvas polygons
+// (allows clicking answer polygons in bonus questions while HTM overlay is visible)
+document.querySelector('#scene-html .scene-html-content').addEventListener('click', function(e) {
+  // Convert click position to game coordinates
+  var pos = screenToGame(e.clientX, e.clientY);
+  // Check if there's a polygon at this position
+  var cmds = findAllCommandsAtPoint(pos.x, pos.y);
+  if (cmds.length > 0) {
+    console.log('HTM click forwarded to polygon at', pos.x, pos.y);
+    // Prevent default to avoid double-handling
+    e.stopPropagation();
+    // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
+    imagesAddedThisClick = {};
+    // Simulate canvas click by directly calling the click handler logic
+    if (!waitingForVideoEnd) {
+      var clickCmd = cmds.find(function(cmd) {
+        return cmd.strings.some(function(s) { return s.subIndex === 1; });
+      });
+      if (!clickCmd) {
+        clickCmd = cmds.find(function(cmd) {
+          return cmd.strings.length > 0;
+        });
+      }
+      if (clickCmd) handleCommandClick(clickCmd);
+    }
+  }
+});
+
+// Initial resize
+resizeCanvas();
+
+// Chargement automatique: frontal/start scene 3 (menu principal)
+executeRunPrj('frontal\\start.vnp 3');
+// Mettre le select sur 'start'
+var startIdx = VND_LIST.findIndex(function(e) { return e.name === 'start'; });
+if (startIdx >= 0) vndSelect.value = startIdx;
+</script>
+
+<!-- Debug elements outside canvas-container for reliable mobile positioning -->
+<div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
+<button id="debug-toggle" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">DBG</button>
+</body>
+</html>

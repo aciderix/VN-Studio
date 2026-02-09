@@ -2295,10 +2295,10 @@ function executeSceneCommands(scene) {
       if (isInteractive) {
         pass0Queue.push({ s: s, cmd: cmd });
         if (s.type === 16) pass0HasPause = true;
-      } else {
-        // Non-interactive (AUTO) commands: queue all strings for processing
-        pass0Queue.push({ s: s, cmd: cmd });
-        if (s.type === 16) pass0HasPause = true;
+      } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+        // Non-interactive direct display commands (handled early in Pass 0,
+        // skipped in Pass 2 to avoid double execution)
+        executeStringCommand(s.type, s.string);
       }
     });
   });
@@ -2350,12 +2350,6 @@ function executeSceneCommands(scene) {
           executeAction(action);
         }
       }
-    } else if (s.type === 25 || s.type === 32) {
-      // INVALIDATE / UPDATE from ONINIT
-      render();
-    } else if (s.type === 33) {
-      // RUNDLL from ONINIT (e.g. costume.dll in italie scene 31)
-      runDll(s.string);
     }
     // type 16 (PAUSE) is handled as a delay in the queue runner, not here
   }
@@ -2417,7 +2411,7 @@ function executeSceneCommands(scene) {
   // (Interactive command IFs are already fully handled in Pass 0)
   // The VND subIndex field determines WHEN a string command executes:
   //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
-  // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
+  // Non-interactive commands can have various subIndex values; all are processed on scene entry.
   scene.commands.forEach(function(cmd) {
     var isInteractive = cmd.paramPairs.length > 0;
     if (isInteractive) return; // Already handled in Pass 0

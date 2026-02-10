@@ -172,9 +172,12 @@
       touch-action: none;
     }
 
-    /* Fullscreen */
-    body.fullscreen #toolbar { display: none; }
-    body.fullscreen #canvas-container { height: 100vh; }
+    /* Mode jeu par defaut: toolbar masquee, canvas plein ecran */
+    #toolbar { display: none; }
+    #canvas-container { height: 100vh; }
+    /* Mode debug: toolbar visible, canvas sous la toolbar */
+    body.debug-mode #toolbar { display: flex; }
+    body.debug-mode #canvas-container { height: calc(100vh - 44px); }
 
     /* Panneau latéral scènes */
     #scene-list {
@@ -363,8 +366,8 @@
   <button id="btn-prev">&larr;</button>
   <select id="scene-select"></select>
   <button id="btn-next">&rarr;</button>
-  <label class="desktop-only"><input type="checkbox" id="chk-polygons" checked> Polygones</label>
-  <label class="desktop-only"><input type="checkbox" id="chk-labels" checked> Labels</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-polygons"> Polygones</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-labels"> Labels</label>
   <label class="desktop-only"><input type="checkbox" id="chk-fill"> Remplir</label>
   <button id="btn-fullscreen" class="desktop-only">Plein écran</button>
   <button id="btn-debug" class="desktop-only">Debug</button>
@@ -388,8 +391,8 @@
 
     <div class="menu-section">
       <div class="menu-section-title">Affichage</div>
-      <label><input type="checkbox" id="chk-polygons-mobile" checked onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
-      <label><input type="checkbox" id="chk-labels-mobile" checked onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
+      <label><input type="checkbox" id="chk-polygons-mobile" onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
+      <label><input type="checkbox" id="chk-labels-mobile" onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
       <label><input type="checkbox" id="chk-fill-mobile" onchange="document.getElementById('chk-fill').checked=this.checked;document.getElementById('chk-fill').dispatchEvent(new Event('change'))"> Remplir polygones</label>
     </div>
 
@@ -694,9 +697,10 @@ var currentVNDEntry = null; // Current VND_LIST entry for cross-project navigati
 var sceneHistory = []; // Stack for PREV navigation - stores {entry, sceneIndex} for cross-project support
 var waitingForVideoEnd = false; // Block clicks while video plays with deferred navigation
 var resources = {}; // path -> Image
-var showPolygons = true;
-var showLabels = true;
+var showPolygons = false;
+var showLabels = false;
 var fillPolygons = false;
+var debugMode = false; // mode debug: affiche toolbar, info scene, bouton DBG
 var hoveredCmd = null;
 var scrollX = 0; // offset de scroll horizontal pour scènes larges
 var activePlayText = null; // text from IF-triggered playtext actions (single)
@@ -1022,16 +1026,18 @@ function render() {
     }
   }
 
-  // Info scène (fixe, pas scrollée)
-  ctx.fillStyle = 'rgba(0,0,0,0.6)';
-  ctx.fillRect(0, 0, w, 22);
-  ctx.font = '12px monospace';
-  ctx.fillStyle = '#e94560';
-  ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
-  var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
-  if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
-  ctx.fillStyle = '#888';
-  ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+  // Info scène (fixe, pas scrollée) - uniquement en mode debug
+  if (debugMode) {
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, w, 22);
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#e94560';
+    ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
+    var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
+    if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
+    ctx.fillStyle = '#888';
+    ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+  }
 
   // PLAYTEXT overlays — dessines en dernier (au-dessus de tout: toolbar, info scene)
   // Appliquer le scroll pour que les coordonnees soient en espace jeu
@@ -4145,6 +4151,14 @@ document.addEventListener('keydown', function(e) {
     document.getElementById('chk-polygons').click();
   } else if (e.key === 'l' || e.key === 'L') {
     document.getElementById('chk-labels').click();
+  } else if (e.key === 'd' || e.key === 'D') {
+    // Basculer mode debug: toolbar, info scene, bouton DBG
+    debugMode = !debugMode;
+    document.body.classList.toggle('debug-mode', debugMode);
+    document.getElementById('debug-toggle').style.display = debugMode ? '' : 'none';
+    if (!debugMode) document.getElementById('debug-history').style.display = 'none';
+    render();
+    setTimeout(resizeCanvas, 100);
   }
 });
 
@@ -4485,7 +4499,7 @@ if (startIdx >= 0) vndSelect.value = startIdx;
 </script>
 
 <!-- Debug elements outside canvas-container for reliable mobile positioning -->
-<div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
-<button id="debug-toggle" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">DBG</button>
+<div id="debug-history" style="display:none;position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
+<button id="debug-toggle" style="display:none;position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';">DBG</button>
 </body>
 </html>

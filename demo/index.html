@@ -1252,6 +1252,14 @@ var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function setCursorItem(itemName) {
+  // Reposer l'ancien item dans le sac (2 → 1) avant d'en prendre un nouveau
+  if (activeCursorItem && activeCursorItem !== itemName) {
+    var oldKey = activeCursorItem.toLowerCase();
+    if (gameVars[oldKey] === 2) {
+      gameVars[oldKey] = 1;
+      console.log('Previous cursor item returned to bag:', oldKey, '2 → 1');
+    }
+  }
   activeCursorItem = itemName;
   var indicator = document.getElementById('cursor-indicator');
   if (!itemName) {
@@ -3431,6 +3439,11 @@ canvas.addEventListener('click', function(e) {
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {
     console.log('No commands found at click point');
+    // Clic dans le vide : reposer l'item en main dans le sac
+    if (activeCursorItem) {
+      clearCursorItem();
+      render();
+    }
     return;
   }
   console.log('Found', allCmds.length, 'command(s) at click point:', allCmds.map(function(c) {
@@ -4066,6 +4079,8 @@ canvas.addEventListener('touchend', function(e) {
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {
     console.log('No commands found at tap point');
+    // Tap dans le vide : reposer l'item en main dans le sac
+    if (activeCursorItem) clearCursorItem();
     render();
     return;
   }

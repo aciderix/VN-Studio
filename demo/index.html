@@ -699,10 +699,12 @@ var showLabels = true;
 var fillPolygons = false;
 var hoveredCmd = null;
 var scrollX = 0; // offset de scroll horizontal pour scènes larges
-var activePlayText = null; // text from IF-triggered playtext actions
+var activePlayText = null; // text from IF-triggered playtext actions (single)
 var activePlayTextFont = null; // font for activePlayText
-var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
+var activePlayTexts = []; // array of {text, font} for hover IF playtext lines
 var activePlayTextTimer = null; // timer pour auto-dismiss du playtext clic
+var clickPlayTexts = []; // PLAYTEXT directs (type 38) declenches par ONCLICK
+var clickPlayTextsFont = null; // font pour clickPlayTexts
 var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
 var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
 var toolbarSceneIndex = -1; // index of the "Toolbar" scene
@@ -1056,6 +1058,12 @@ function render() {
   }
   if (activePlayText) {
     renderPlayTextBox(activePlayText, activePlayTextFont);
+  }
+  if (clickPlayTexts.length > 0) {
+    renderPlayTextGroup(
+      clickPlayTexts.map(function(pt) { return pt.text; }),
+      clickPlayTexts[0].font
+    );
   }
   ctx.restore();
 
@@ -3128,6 +3136,7 @@ function handleCommandClick(cmd) {
   // Effacer le PLAYTEXT hover/longpress — on passe en mode clic
   hoveredCmd = null;
   activePlayTexts = [];
+  clickPlayTexts = [];
   // Ignorer les polygones debug/orphelins identifiés dans les données originales
   if (project && currentSceneIndex >= 0) {
     var scene = project.scenes[currentSceneIndex];
@@ -3266,13 +3275,14 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 39) {
       // FONT - store for subsequent PLAYTEXT/ADDTEXT
       setFont(s.string);
-      activePlayTextFont = s.string;
+      clickPlayTextsFont = s.string;
     } else if (s.type === 38) {
       // PLAYTEXT direct dans ONCLICK : afficher avec auto-dismiss
-      activePlayTexts.push({ text: s.string, font: activePlayTextFont });
+      // Utilise clickPlayTexts (pas activePlayTexts) pour ne pas etre efface par le hover
+      clickPlayTexts.push({ text: s.string, font: clickPlayTextsFont });
       if (activePlayTextTimer) clearTimeout(activePlayTextTimer);
       activePlayTextTimer = setTimeout(function() {
-        activePlayTexts = [];
+        clickPlayTexts = [];
         activePlayTextTimer = null;
         render();
       }, 2000);
@@ -3582,6 +3592,7 @@ function goToScene(index) {
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];
+  clickPlayTexts = [];
   if (activePlayTextTimer) { clearTimeout(activePlayTextTimer); activePlayTextTimer = null; }
   if (tapFeedbackTimer) { clearTimeout(tapFeedbackTimer); tapFeedbackTimer = null; }
   overlayTexts = {};

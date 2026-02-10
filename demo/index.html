@@ -702,6 +702,7 @@ var scrollX = 0; // offset de scroll horizontal pour scènes larges
 var activePlayText = null; // text from IF-triggered playtext actions
 var activePlayTextFont = null; // font for activePlayText
 var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
+var activePlayTextTimer = null; // timer pour auto-dismiss du playtext clic
 var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
 var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
 var toolbarSceneIndex = -1; // index of the "Toolbar" scene
@@ -866,13 +867,12 @@ function render() {
   }
 
   // Render a PLAYTEXT string on the canvas
-  // textVal: "x1 y1 x2 y2 flags text", fontVal: "size flags color fontname" (optional)
+  // textVal: "x y w h flags text", fontVal: "size flags color fontname" (optional)
   function renderPlayTextBox(textVal, fontVal, noBackground) {
     var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
     if (!tp) return;
     var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
-    var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
-    var tw = tx2 - tx, th = ty2 - ty;
+    var tw = parseInt(tp[3]), th = parseInt(tp[4]);
     var text = tp[5];
     if (tw <= 0) tw = 300;
     if (th <= 0) th = 40;
@@ -1529,8 +1529,15 @@ function executeAction(action) {
   } else if (cmd === 'invalidate' || cmd === 'update') {
     render();
   } else if (cmd === 'playtext') {
-    // playtext x1 y1 x2 y2 flags text
+    // playtext x1 y1 x2 y2 flags text — auto-dismiss apres 2s
     activePlayText = parts.slice(1).join(' ');
+    if (activePlayTextTimer) clearTimeout(activePlayTextTimer);
+    activePlayTextTimer = setTimeout(function() {
+      activePlayText = null;
+      activePlayTextFont = null;
+      activePlayTextTimer = null;
+      render();
+    }, 2000);
     render();
   } else if (cmd === 'defcursor') {
     // Set active cursor to an inventory item or reset to default
@@ -3506,6 +3513,7 @@ function goToScene(index) {
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];
+  if (activePlayTextTimer) { clearTimeout(activePlayTextTimer); activePlayTextTimer = null; }
   overlayTexts = {};
   loadSceneBackground(project.scenes[index]);
 

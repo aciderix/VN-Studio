@@ -945,25 +945,79 @@ function render() {
     }
   }
 
+  // Render un groupe de PLAYTEXT avec un seul fond noir fusionne
+  function renderPlayTextGroup(textVals, fontVal) {
+    if (textVals.length === 0) return;
+    if (textVals.length === 1) { renderPlayTextBox(textVals[0], fontVal); return; }
+    // Passe 1 : calculer la bounding box englobante
+    var bx1 = Infinity, by1 = Infinity, bx2 = 0, by2 = 0;
+    var fontSize = 14, fontName = 'Comic Sans MS';
+    if (fontVal) {
+      var fp = fontVal.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+      if (fp) { fontSize = Math.abs(parseInt(fp[1])); fontName = fp[3]; }
+    }
+    if (fontSize < 6) fontSize = 12;
+    ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+    var lineH = fontSize + 4;
+    textVals.forEach(function(textVal) {
+      var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
+      if (!tp) return;
+      var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
+      var tw = parseInt(tp[3]);
+      if (tw <= 0) tw = 300;
+      var maxW = tw - 8;
+      var text = tp[5];
+      // Word-wrap pour calculer la hauteur
+      var words = text.split(' ');
+      var line = '', nLines = 0, maxLW = 0;
+      for (var wi = 0; wi < words.length; wi++) {
+        var test = line ? line + ' ' + words[wi] : words[wi];
+        if (ctx.measureText(test).width > maxW && line) {
+          var lw = ctx.measureText(line).width;
+          if (lw > maxLW) maxLW = lw;
+          nLines++; line = words[wi];
+        } else { line = test; }
+      }
+      if (line) { var lw = ctx.measureText(line).width; if (lw > maxLW) maxLW = lw; nLines++; }
+      var textH = nLines * lineH;
+      if (tx < bx1) bx1 = tx;
+      if (ty < by1) by1 = ty;
+      if (tx + maxLW + 8 > bx2) bx2 = tx + maxLW + 8;
+      if (ty + textH + 8 > by2) by2 = ty + textH + 8;
+    });
+    // Dessiner un seul fond
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(bx1, by1, bx2 - bx1, by2 - by1);
+    // Passe 2 : dessiner les textes sans fond
+    textVals.forEach(function(textVal) {
+      renderPlayTextBox(textVal, fontVal, true);
+    });
+  }
+
   // PLAYTEXT overlay pour la commande survolée (ONFOCUS strings only)
+  // Fond noir unique pour tous les PLAYTEXT d'un meme groupe
   if (hoveredCmd) {
     var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
     var fontStr = hoveredCmd.strings.find(function(s) {
       return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
     });
     var fontVal = fontStr ? fontStr.string : null;
-    // Render ONFOCUS type 38 strings (subIndex=0 for interactive commands)
+    var hoverTexts = [];
     hoveredCmd.strings.forEach(function(s) {
       if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
-        renderPlayTextBox(s.string, fontVal);
+        hoverTexts.push(s.string);
       }
     });
+    renderPlayTextGroup(hoverTexts, fontVal);
   }
 
   // IF-triggered playtext (from hover evaluation or executeAction)
-  activePlayTexts.forEach(function(pt) {
-    renderPlayTextBox(pt.text, pt.font);
-  });
+  if (activePlayTexts.length > 0) {
+    renderPlayTextGroup(
+      activePlayTexts.map(function(pt) { return pt.text; }),
+      activePlayTexts[0].font
+    );
+  }
   if (activePlayText) {
     renderPlayTextBox(activePlayText, activePlayTextFont);
   }
@@ -3071,6 +3125,9 @@ var BLOCKED_CLICKS = [
 
 // Action commune clic / tap
 function handleCommandClick(cmd) {
+  // Effacer le PLAYTEXT hover/longpress — on passe en mode clic
+  hoveredCmd = null;
+  activePlayTexts = [];
   // Ignorer les polygones debug/orphelins identifiés dans les données originales
   if (project && currentSceneIndex >= 0) {
     var scene = project.scenes[currentSceneIndex];

@@ -708,6 +708,7 @@ var clickPlayTextsFont = null; // font pour clickPlayTexts
 var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
 var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
 var toolbarSceneIndex = -1; // index of the "Toolbar" scene
+var hotspotTimer = null; // timer pour le HOTSPOT timer des scenes (auto-navigation apres delai)
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -1269,6 +1270,8 @@ function executeRunPrj(runPrjStr) {
     return;
   }
   console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
+  // Annuler le timer hotspot de la scene courante (eviter qu'il fire pendant le chargement async)
+  if (hotspotTimer) { clearTimeout(hotspotTimer); hotspotTimer = null; }
   stopAllAudio();
   clearCursorItem();
 
@@ -1314,10 +1317,11 @@ var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function setCursorItem(itemName) {
-  // Quand on prend un NOUVEL item, reposer l'ancien dans le sac (2 → 1).
-  // Ne PAS reset quand itemName=null (defcursor 0/fleche.cur) car le VND
-  // gere la variable lui-meme avec set_var item -1.
-  if (itemName && activeCursorItem && activeCursorItem !== itemName) {
+  // Quand on change d'item OU qu'on reset le curseur, reposer l'ancien dans le sac (2 → 1).
+  // Pour defcursor 0: le VND est CENSE faire set_var item -1 avant, mais certains chemins
+  // oublient, laissant l'item a 2 (fantome). On reset toujours par securite:
+  // si le VND a deja mis l'item a -1, la condition gameVars[key]===2 sera fausse → pas d'effet.
+  if (activeCursorItem && activeCursorItem !== itemName) {
     var oldKey = activeCursorItem.toLowerCase();
     if (gameVars[oldKey] === 2) {
       gameVars[oldKey] = 1;
@@ -1385,7 +1389,15 @@ function getVar(name) {
 }
 
 function setVar(name, val) {
-  gameVars[name.toLowerCase()] = val;
+  var key = name.toLowerCase();
+  // Protection: empecher une fiole deposee (-1) d'etre re-donnee (1).
+  // Bug connu Suede scene 3: la logique VND teste fiolesuede=1 mais pas -1,
+  // donc apres depot a la fontaine, la femme re-donne la fiole.
+  if (key.indexOf('fiole') === 0 && gameVars[key] === -1 && val > 0) {
+    console.log('SET_VAR blocked: fiole', key, 'already deposited (-1), refusing →', val);
+    return;
+  }
+  gameVars[key] = val;
   console.log('SET_VAR:', name, '=', val);
 }
 
@@ -3601,6 +3613,8 @@ function goToScene(index) {
   }
   currentSceneIndex = index;
   scrollX = 0;
+  // Annuler le timer hotspot de la scene precedente
+  if (hotspotTimer) { clearTimeout(hotspotTimer); hotspotTimer = null; }
   // Clear recentlyStartedAudio so that sounds started during the same click
   // that triggered navigation are NOT protected from being stopped.
   // Only the target scene's own sounds should persist.
@@ -3644,6 +3658,82 @@ function goToScene(index) {
   resizeCanvas();
   // Update debug display
   logHistory('AT ' + (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (index + 1));
+
+  // TIMER HOTSPOT: demarrer un timer si la scene en a un.
+  // Apres timerValue ms, les commandes du hotspot s'executent (SCENE, PLAYAVI, ADDBMP, etc.)
+  // Exemples: ecosse scenes 25-28 (timer=3000ms → SCENE 7), danem scene 9 (timer=3000ms → PLAYAVI+SCENE)
+  if (scene.hotspot && scene.hotspot.timerValue > 0 && scene.hotspot.objects.length > 0) {
+    var hotspotSceneIndex = index; // capturer l'index pour verifier coherence
+    hotspotTimer = setTimeout(function() {
+      hotspotTimer = null;
+      // Verifier qu'on est toujours sur la meme scene (pas de navigation entre-temps)
+      if (currentSceneIndex !== hotspotSceneIndex) return;
+      console.log('HOTSPOT TIMER fired (' + scene.hotspot.timerValue + 'ms) for scene ' + (hotspotSceneIndex + 1));
+
+      var deferredNav = null;
+      var videoPlaying = false;
+      scene.hotspot.objects.forEach(function(obj) {
+        if (obj.type === 6) {
+          // SCENE
+          if (!deferredNav) deferredNav = { type: 'scene', value: obj.string };
+        } else if (obj.type === 31) {
+          // RUNPRJ
+          if (!deferredNav) deferredNav = { type: 'runprj', value: obj.string };
+        } else if (obj.type === 9) {
+          // PLAYAVI
+          if (!videoPlaying) {
+            playAvi(obj.string);
+            videoPlaying = true;
+          }
+        } else if (obj.type === 27) {
+          // ADDBMP
+          executeStringCommand(obj.type, obj.string);
+        } else if (obj.type === 21) {
+          // IF condition
+          var action = evaluateIf(obj.string);
+          if (action) {
+            var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+            if (actLower === 'scene') {
+              if (!deferredNav) deferredNav = { type: 'scene', value: action.trim().split(/\s+/).slice(1).join(' ') };
+            } else if (actLower === 'runprj') {
+              if (!deferredNav) deferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+            } else {
+              executeAction(action);
+            }
+          }
+        } else {
+          // Autres types (SET_VAR, PLAYWAV, etc.)
+          executeStringCommand(obj.type, obj.string);
+        }
+      });
+
+      // Executer la navigation differee (attendre fin video si necessaire)
+      if (deferredNav) {
+        if (videoPlaying && currentVideo) {
+          waitingForVideoEnd = true;
+          var nav = deferredNav;
+          var vid = currentVideo;
+          function onHotspotVideoEnd(evt) {
+            if (evt && evt.type === 'error' && vid.readyState > 0) return;
+            vid.removeEventListener('ended', onHotspotVideoEnd);
+            vid.removeEventListener('error', onHotspotVideoEnd);
+            vid.removeEventListener('click', onHotspotVideoEnd);
+            if (currentVideo !== vid) return;
+            waitingForVideoEnd = false;
+            closeVideo();
+            doNavigation(nav);
+          }
+          vid.addEventListener('ended', onHotspotVideoEnd);
+          vid.addEventListener('error', onHotspotVideoEnd);
+          vid.addEventListener('click', onHotspotVideoEnd);
+        } else {
+          doNavigation(deferredNav);
+        }
+      }
+      render();
+    }, scene.hotspot.timerValue);
+    console.log('HOTSPOT TIMER started:', scene.hotspot.timerValue + 'ms, ' + scene.hotspot.objects.length + ' commands');
+  }
 }
 
 function updateUI() {

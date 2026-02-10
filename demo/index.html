@@ -993,34 +993,6 @@ function render() {
     });
   }
 
-  // PLAYTEXT overlay pour la commande survolée (ONFOCUS strings only)
-  // Fond noir unique pour tous les PLAYTEXT d'un meme groupe
-  if (hoveredCmd) {
-    var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
-    var fontStr = hoveredCmd.strings.find(function(s) {
-      return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
-    });
-    var fontVal = fontStr ? fontStr.string : null;
-    var hoverTexts = [];
-    hoveredCmd.strings.forEach(function(s) {
-      if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
-        hoverTexts.push(s.string);
-      }
-    });
-    renderPlayTextGroup(hoverTexts, fontVal);
-  }
-
-  // IF-triggered playtext (from hover evaluation or executeAction)
-  if (activePlayTexts.length > 0) {
-    renderPlayTextGroup(
-      activePlayTexts.map(function(pt) { return pt.text; }),
-      activePlayTexts[0].font
-    );
-  }
-  if (activePlayText) {
-    renderPlayTextBox(activePlayText, activePlayTextFont);
-  }
-
   ctx.restore(); // fin du scroll
 
   // Toolbar overlays (fixed, not scrolled)
@@ -1057,6 +1029,35 @@ function render() {
   if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
   ctx.fillStyle = '#888';
   ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+
+  // PLAYTEXT overlays — dessines en dernier (au-dessus de tout: toolbar, info scene)
+  // Appliquer le scroll pour que les coordonnees soient en espace jeu
+  ctx.save();
+  ctx.translate(-scrollX, 0);
+  if (hoveredCmd) {
+    var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
+    var fontStr = hoveredCmd.strings.find(function(s) {
+      return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
+    });
+    var fontVal = fontStr ? fontStr.string : null;
+    var hoverTexts = [];
+    hoveredCmd.strings.forEach(function(s) {
+      if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
+        hoverTexts.push(s.string);
+      }
+    });
+    renderPlayTextGroup(hoverTexts, fontVal);
+  }
+  if (activePlayTexts.length > 0) {
+    renderPlayTextGroup(
+      activePlayTexts.map(function(pt) { return pt.text; }),
+      activePlayTexts[0].font
+    );
+  }
+  if (activePlayText) {
+    renderPlayTextBox(activePlayText, activePlayTextFont);
+  }
+  ctx.restore();
 
   // Barre de scroll horizontale si scène plus large que la fenêtre
   if (sceneW > w) {

@@ -945,52 +945,51 @@ function render() {
     }
   }
 
-  // Render un groupe de PLAYTEXT avec un seul fond noir fusionne
+  // Render un groupe de PLAYTEXT avec un seul fond noir fusionne.
+  // Dans un groupe multi-lignes VND, chaque PLAYTEXT = une ligne a sa position Y,
+  // pas de word-wrap individuel (le VND gere les retours a la ligne manuellement).
   function renderPlayTextGroup(textVals, fontVal) {
     if (textVals.length === 0) return;
     if (textVals.length === 1) { renderPlayTextBox(textVals[0], fontVal); return; }
-    // Passe 1 : calculer la bounding box englobante
-    var bx1 = Infinity, by1 = Infinity, bx2 = 0, by2 = 0;
-    var fontSize = 14, fontName = 'Comic Sans MS';
+    var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
     if (fontVal) {
       var fp = fontVal.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
-      if (fp) { fontSize = Math.abs(parseInt(fp[1])); fontName = fp[3]; }
+      if (fp) { fontSize = Math.abs(parseInt(fp[1])); fontColor = fp[2]; fontName = fp[3]; }
     }
     if (fontSize < 6) fontSize = 12;
+    // Sanitize color
+    if (fontColor) {
+      var hex = fontColor.replace('#', '').replace(/[^0-9a-fA-F]/g, '0');
+      if (hex.length < 6) hex = (hex + '000000').substring(0, 6);
+      fontColor = '#' + hex;
+      var lum = 0.299 * (parseInt(hex.substr(0,2),16)||0) + 0.587 * (parseInt(hex.substr(2,2),16)||0) + 0.114 * (parseInt(hex.substr(4,2),16)||0);
+      if (lum < 20) fontColor = '#ffffff';
+    }
     ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
-    var lineH = fontSize + 4;
+    // Passe 1 : parser et calculer la bounding box (une seule ligne par PLAYTEXT)
+    var items = [];
+    var bx1 = Infinity, by1 = Infinity, bx2 = 0, by2 = 0;
     textVals.forEach(function(textVal) {
       var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
       if (!tp) return;
       var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
-      var tw = parseInt(tp[3]);
-      if (tw <= 0) tw = 300;
-      var maxW = tw - 8;
       var text = tp[5];
-      // Word-wrap pour calculer la hauteur
-      var words = text.split(' ');
-      var line = '', nLines = 0, maxLW = 0;
-      for (var wi = 0; wi < words.length; wi++) {
-        var test = line ? line + ' ' + words[wi] : words[wi];
-        if (ctx.measureText(test).width > maxW && line) {
-          var lw = ctx.measureText(line).width;
-          if (lw > maxLW) maxLW = lw;
-          nLines++; line = words[wi];
-        } else { line = test; }
-      }
-      if (line) { var lw = ctx.measureText(line).width; if (lw > maxLW) maxLW = lw; nLines++; }
-      var textH = nLines * lineH;
+      var tw = ctx.measureText(text).width;
+      items.push({ x: tx, y: ty, text: text });
       if (tx < bx1) bx1 = tx;
       if (ty < by1) by1 = ty;
-      if (tx + maxLW + 8 > bx2) bx2 = tx + maxLW + 8;
-      if (ty + textH + 8 > by2) by2 = ty + textH + 8;
+      if (tx + tw > bx2) bx2 = tx + tw;
+      if (ty + fontSize + 4 > by2) by2 = ty + fontSize + 4;
     });
-    // Dessiner un seul fond
+    if (items.length === 0) return;
+    // Dessiner un seul fond englobant avec marge
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.fillRect(bx1, by1, bx2 - bx1, by2 - by1);
-    // Passe 2 : dessiner les textes sans fond
-    textVals.forEach(function(textVal) {
-      renderPlayTextBox(textVal, fontVal, true);
+    ctx.fillRect(bx1 - 4, by1 - 2, (bx2 - bx1) + 8, (by2 - by1) + 4);
+    // Passe 2 : dessiner chaque texte (une ligne, pas de wrap)
+    ctx.fillStyle = fontColor;
+    ctx.textAlign = 'start';
+    items.forEach(function(it) {
+      ctx.fillText(it.text, it.x, it.y + fontSize);
     });
   }
 
@@ -3571,6 +3570,7 @@ function goToScene(index) {
   activePlayTextFont = null;
   activePlayTexts = [];
   if (activePlayTextTimer) { clearTimeout(activePlayTextTimer); activePlayTextTimer = null; }
+  if (tapFeedbackTimer) { clearTimeout(tapFeedbackTimer); tapFeedbackTimer = null; }
   overlayTexts = {};
   loadSceneBackground(project.scenes[index]);
 
@@ -4061,6 +4061,7 @@ var touchStartScroll = 0;
 var touchMoved = false;
 var longPressTimer = null;
 var longPressTriggered = false;
+var tapFeedbackTimer = null; // auto-dismiss du ONFOCUS feedback apres tap
 
 canvas.addEventListener('touchstart', function(e) {
   e.preventDefault();
@@ -4178,13 +4179,17 @@ canvas.addEventListener('touchend', function(e) {
   if (clickCmd) handleCommandClick(clickCmd);
 
   // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
-  // since there is no hover on touch devices. Set hoveredCmd to the
-  // first non-navigable tapped command so render() draws its ONFOCUS
-  // PLAYTEXT overlays, giving visual feedback.
-  // Show even during PAUSE sequences so player sees which button they tapped.
+  // since there is no hover on touch devices. Auto-dismiss apres 1.5s.
+  if (tapFeedbackTimer) { clearTimeout(tapFeedbackTimer); tapFeedbackTimer = null; }
   if (allCmds.length > 0) {
     hoveredCmd = allCmds[0];
     evaluateHoverEffects(allCmds[0]);
+    tapFeedbackTimer = setTimeout(function() {
+      hoveredCmd = null;
+      activePlayTexts = [];
+      tapFeedbackTimer = null;
+      render();
+    }, 1500);
   }
 
   render(); // Refresh display after action (e.g., item pickup)

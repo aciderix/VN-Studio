@@ -1252,8 +1252,10 @@ var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function setCursorItem(itemName) {
-  // Reposer l'ancien item dans le sac (2 → 1) avant d'en prendre un nouveau
-  if (activeCursorItem && activeCursorItem !== itemName) {
+  // Quand on prend un NOUVEL item, reposer l'ancien dans le sac (2 → 1).
+  // Ne PAS reset quand itemName=null (defcursor 0/fleche.cur) car le VND
+  // gere la variable lui-meme avec set_var item -1.
+  if (itemName && activeCursorItem && activeCursorItem !== itemName) {
     var oldKey = activeCursorItem.toLowerCase();
     if (gameVars[oldKey] === 2) {
       gameVars[oldKey] = 1;

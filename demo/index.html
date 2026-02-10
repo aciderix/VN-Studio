@@ -2360,6 +2360,18 @@ function executeSceneCommands(scene) {
           executeAction(action);
         }
       }
+    } else if (s.type === 41) {
+      // ADDTEXT from ONINIT/AFTERINIT (ex: quiz capitales Italie scene 16)
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 25 || s.type === 32) {
+      // INVALIDATE / UPDATE from ONINIT/AFTERINIT - force render
+      render();
+    } else if (s.type === 33) {
+      // RUNDLL from ONINIT/AFTERINIT
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 26) {
+      // DEFCURSOR from ONINIT/AFTERINIT
+      executeAction('defcursor ' + s.string);
     }
     // type 16 (PAUSE) is handled as a delay in the queue runner, not here
   }

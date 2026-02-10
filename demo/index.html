@@ -1630,6 +1630,7 @@ function executeAction(action) {
 var overlayImages = {}; // name -> { img, x, y, w, h, visible }
 var imagesAddedThisClick = {}; // Track images added in current click to prevent immediate DELBMP
 var hoverAddedImages = {}; // Track images added during hover (should be removed on unhover)
+var hoverDeletedImages = {}; // Track images deleted during hover (should be restored on unhover)
 
 function resolveOverlayPath(bmpRef) {
   // Could be relative like "rollover\all.bmp" or absolute path
@@ -2915,11 +2916,13 @@ function findCommandAtPoint(x, y) {
   }
 
   // Check toolbar commands for hover
+  // La toolbar est rendue en coordonnees fixes (pas de scroll), donc on soustrait scrollX
   if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
+    var tbX = x - scrollX; // coordonnees ecran fixes pour la toolbar
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];
-      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(tbX, y, expandRect(tbCmd.paramPairs))) {
         return tbCmd;
       }
     }
@@ -2964,11 +2967,13 @@ function findAllCommandsAtPoint(x, y) {
     }
   }
   // Also check toolbar scene commands if toolbar is visible
+  // La toolbar est rendue en coordonnees fixes (pas de scroll), donc on soustrait scrollX
   if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
+    var tbX = x - scrollX; // coordonnees ecran fixes pour la toolbar
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];
-      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(tbX, y, expandRect(tbCmd.paramPairs))) {
         result.push(tbCmd);
       }
     }
@@ -2997,6 +3002,14 @@ canvas.addEventListener('mousemove', function(e) {
       }
     });
     hoverAddedImages = {};
+    // Restaurer les images supprimees pendant le hover
+    Object.keys(hoverDeletedImages).forEach(function(name) {
+      if (!overlayImages[name]) {
+        overlayImages[name] = hoverDeletedImages[name];
+        console.log('HOVER restore:', name);
+      }
+    });
+    hoverDeletedImages = {};
 
     hoveredCmd = cmd;
     activePlayTexts = [];
@@ -3044,7 +3057,12 @@ function evaluateHoverEffects(cmd) {
       }
       addBmpOverlay(s.string);
     } else if (s.type === 28) {
-      delBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+      // Sauvegarder l'etat avant DELBMP pour restaurer au unhover
+      var delName = (s.string.trim().split(/\s+/)[0] || '').toLowerCase();
+      if (delName && overlayImages[delName] && !hoverDeletedImages[delName]) {
+        hoverDeletedImages[delName] = Object.assign({}, overlayImages[delName]);
+      }
+      delBmpOverlay(delName);
     } else if (s.type === 29) {
       hideBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
     } else if (s.type === 30) {
@@ -3066,6 +3084,11 @@ function evaluateHoverEffects(cmd) {
         }
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {
+        // Sauvegarder l'etat avant DELBMP pour restaurer au unhover
+        var delNameIf = parts[1] ? parts[1].toLowerCase() : '';
+        if (delNameIf && overlayImages[delNameIf] && !hoverDeletedImages[delNameIf]) {
+          hoverDeletedImages[delNameIf] = Object.assign({}, overlayImages[delNameIf]);
+        }
         delBmpOverlay(parts[1] || '');
       } else if (act === 'showbmp') {
         showBmpOverlay(parts[1] || '');
@@ -3531,8 +3554,9 @@ canvas.addEventListener('click', function(e) {
   }
   // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
   imagesAddedThisClick = {};
-  // Convert hover-added images to permanent (user clicked, so they want to keep them)
+  // Convert hover changes to permanent (user clicked, so effects are kept)
   hoverAddedImages = {};
+  hoverDeletedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
   console.log('Canvas click at game coords:', pos.x, pos.y);
   // Find all commands at click point (sorted by area, smallest first)
@@ -4081,6 +4105,7 @@ var touchStartX = 0;
 var touchStartY = 0;
 var touchStartScroll = 0;
 var touchMoved = false;
+var touchInToolbar = false; // true si le touch a demarre dans la zone toolbar
 var longPressTimer = null;
 var longPressTriggered = false;
 var tapFeedbackTimer = null; // auto-dismiss du ONFOCUS feedback apres tap
@@ -4093,6 +4118,11 @@ canvas.addEventListener('touchstart', function(e) {
   touchStartScroll = scrollX;
   touchMoved = false;
   longPressTriggered = false;
+  // Detecter si le touch demarre dans la zone toolbar (y >= 400 en coordonnees jeu)
+  var rect = canvas.getBoundingClientRect();
+  var gameH = project ? project.header.height : 480;
+  var touchGameY = (touchStartY - rect.top) * (gameH / rect.height);
+  touchInToolbar = isToolbarVisible() && touchGameY >= 400;
 
   // Long-press : afficher le texte rollover après 400ms
   clearTimeout(longPressTimer);
@@ -4110,6 +4140,13 @@ canvas.addEventListener('touchstart', function(e) {
         }
       });
       hoverAddedImages = {};
+      // Restaurer les images supprimees pendant le hover precedent
+      Object.keys(hoverDeletedImages).forEach(function(name) {
+        if (!overlayImages[name]) {
+          overlayImages[name] = hoverDeletedImages[name];
+        }
+      });
+      hoverDeletedImages = {};
 
       hoveredCmd = cmd;
       activePlayTexts = [];
@@ -4128,6 +4165,8 @@ canvas.addEventListener('touchmove', function(e) {
     touchMoved = true;
     clearTimeout(longPressTimer);
   }
+  // Pas de scroll si le touch a demarre dans la toolbar
+  if (touchInToolbar) return;
   // Scroll horizontal
   var scene = project.scenes[currentSceneIndex];
   var sceneW = getSceneWidth(scene);
@@ -4152,6 +4191,14 @@ canvas.addEventListener('touchend', function(e) {
     }
   });
   hoverAddedImages = {};
+  // Restaurer les images supprimees pendant le hover
+  Object.keys(hoverDeletedImages).forEach(function(name) {
+    if (!overlayImages[name]) {
+      overlayImages[name] = hoverDeletedImages[name];
+      console.log('TOUCH restore:', name);
+    }
+  });
+  hoverDeletedImages = {};
 
   // Si long-press actif, juste masquer le hover
   if (longPressTriggered) {
@@ -4210,6 +4257,15 @@ canvas.addEventListener('touchend', function(e) {
       hoveredCmd = null;
       activePlayTexts = [];
       tapFeedbackTimer = null;
+      // Nettoyer les images de hover et restaurer les supprimees
+      Object.keys(hoverAddedImages).forEach(function(name) {
+        if (overlayImages[name]) delete overlayImages[name];
+      });
+      hoverAddedImages = {};
+      Object.keys(hoverDeletedImages).forEach(function(name) {
+        if (!overlayImages[name]) overlayImages[name] = hoverDeletedImages[name];
+      });
+      hoverDeletedImages = {};
       render();
     }, 1500);
   }

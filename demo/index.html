@@ -1317,11 +1317,11 @@ var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function setCursorItem(itemName) {
-  // Quand on change d'item OU qu'on reset le curseur, reposer l'ancien dans le sac (2 → 1).
-  // Pour defcursor 0: le VND est CENSE faire set_var item -1 avant, mais certains chemins
-  // oublient, laissant l'item a 2 (fantome). On reset toujours par securite:
-  // si le VND a deja mis l'item a -1, la condition gameVars[key]===2 sera fausse → pas d'effet.
-  if (activeCursorItem && activeCursorItem !== itemName) {
+  // Quand on prend un NOUVEL item (itemName truthy et different), reposer l'ancien (2 → 1).
+  // NE PAS reset quand itemName=null (defcursor 0/fleche.cur) car le VND fait TOUJOURS
+  // set_var item -1 APRES defcursor avec la MEME condition IF item=2.
+  // Si on resetait ici (2→1), le set_var echouerait car la condition item=2 ne serait plus vraie.
+  if (itemName && activeCursorItem && activeCursorItem !== itemName) {
     var oldKey = activeCursorItem.toLowerCase();
     if (gameVars[oldKey] === 2) {
       gameVars[oldKey] = 1;

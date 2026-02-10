@@ -720,7 +720,7 @@ function getSceneWidth(scene) {
   var w = project ? project.header.width : 640;
   if (!scene) return w;
   // Utiliser la largeur de l'image de fond si chargée - cette valeur fait autorité
-  var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
+  var resKey = scene.fields.resource ? resolveResourcePath(scene.fields.resource) : '';
   if (resources[resKey] && resources[resKey].naturalWidth > w) {
     w = resources[resKey].naturalWidth;
   }
@@ -789,7 +789,7 @@ function render() {
   ctx.translate(-scrollX, 0);
 
   // Image de fond si disponible
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var resKey = resolveResourcePath(scene.fields.resource);
   if (resources[resKey]) {
     ctx.drawImage(resources[resKey], 0, 0);
   } else if (scene.fields.resource) {
@@ -2820,7 +2820,7 @@ function executeSceneCommands(scene) {
 function isToolbarVisible() {
   if (toolbarSceneIndex < 0 || !project || currentSceneIndex === toolbarSceneIndex) return false;
   var scene = project.scenes[currentSceneIndex];
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var resKey = resolveResourcePath(scene.fields.resource);
   var bgImg = resources[resKey];
   return !(bgImg && bgImg.height >= 480);
 }
@@ -3814,14 +3814,13 @@ function resolveResourcePath(resRef) {
 // Charger automatiquement l'image de fond d'une scène
 function loadSceneBackground(scene) {
   if (!scene.fields.resource) return;
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
-  if (resources[resKey]) return; // déjà chargé
-
   var url = resolveResourcePath(scene.fields.resource);
+  if (resources[url]) return; // deja charge (cle = URL complete pour eviter collisions entre pays)
+
   var img = new Image();
   img.onload = function() {
-    resources[resKey] = img;
-    console.log('Loaded BMP:', resKey, img.width + 'x' + img.height);
+    resources[url] = img;
+    console.log('Loaded BMP:', url, img.width + 'x' + img.height);
     render();
   };
   img.onerror = function() {
@@ -3902,9 +3901,8 @@ function preloadResources(onComplete) {
     var img = new Image();
     img.onload = function() {
       preloadCache[url] = img;
-      // Also store in resources dict by key
-      var resKey = url.replace(/^\/game-data\/[^/]+\/(?:img24|img8)\//i, '').toLowerCase();
-      resources[resKey] = img;
+      // Store in resources dict by full URL (avoids collisions between countries)
+      resources[url] = img;
       tick();
     };
     img.onerror = function() { tick(); }; // count failures too

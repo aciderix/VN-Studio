@@ -3263,8 +3263,20 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 7) {
       var hsIdx = parseInt(s.string);
       if (!isNaN(hsIdx)) executeHotspot(hsIdx);
-    } else if (s.type === 38 || s.type === 39) {
-      // PLAYTEXT, FONT - handled in render
+    } else if (s.type === 39) {
+      // FONT - store for subsequent PLAYTEXT/ADDTEXT
+      setFont(s.string);
+      activePlayTextFont = s.string;
+    } else if (s.type === 38) {
+      // PLAYTEXT direct dans ONCLICK : afficher avec auto-dismiss
+      activePlayTexts.push({ text: s.string, font: activePlayTextFont });
+      if (activePlayTextTimer) clearTimeout(activePlayTextTimer);
+      activePlayTextTimer = setTimeout(function() {
+        activePlayTexts = [];
+        activePlayTextTimer = null;
+        render();
+      }, 2000);
+      render();
     } else if (s.type === 27 && cmd.autoShowedBmp) {
       console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
     } else if (s.type === 16) {

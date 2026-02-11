@@ -727,7 +727,7 @@ function cmdScene(file, sceneNum, json) {
       type: cmd.commandType,
       interactive: cmd.paramPairs.length > 0,
       polygon: cmd.paramPairs,
-      strings: cmd.strings.map(s => ({ type: s.type, typeName: typeName(s.type), value: s.string }))
+      strings: cmd.strings.map(s => ({ type: s.type, typeName: typeName(s.type), value: s.string, subIndex: s.subIndex }))
     }))
   };
 
@@ -752,7 +752,7 @@ function cmdScene(file, sceneNum, json) {
     const polyStr = cmd.polygon.length > 0 ?
       (cmd.polygon.length === 2 ? `rect(${cmd.polygon[0].a},${cmd.polygon[0].b}->${cmd.polygon[1].a},${cmd.polygon[1].b})` : `poly(${cmd.polygon.length}pts)`) : '';
     console.log(`\n${cmd.id} [${mode}] ${polyStr}`);
-    cmd.strings.forEach(s => console.log(`  [${s.typeName.padEnd(10)}] ${s.value}`));
+    cmd.strings.forEach(s => console.log(`  [sub=${s.subIndex}] [${s.typeName.padEnd(10)}] ${s.value}`));
   });
 }
 

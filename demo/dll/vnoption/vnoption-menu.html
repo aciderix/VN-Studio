@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="windows-1252">
+<title>Options</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 250px; height: 240px;
+  overflow: hidden;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+  font-size: 8pt;
+  user-select: none;
+}
+
+/* Fond metallique bleu */
+.panel {
+  position: absolute;
+  width: 250px; height: 240px;
+  background: url('background.bmp') no-repeat;
+  background-size: 250px 240px;
+  display: none;
+}
+.panel.active { display: block; }
+
+/* Boutons sur image */
+.menu-btn {
+  position: absolute;
+  left: 23px;
+  width: 204px; height: 24px;
+  background: url('btn_normal.bmp') no-repeat;
+  background-size: 204px 24px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
+  text-align: center;
+  line-height: 24px;
+  outline: none;
+}
+.menu-btn:hover, .menu-btn:focus {
+  background-image: url('btn_hover.bmp');
+}
+.menu-btn:active {
+  background-image: url('btn_hover.bmp');
+  padding-top: 1px;
+}
+
+/* Panel Volume */
+.vol-label {
+  position: absolute;
+  left: 12px; top: 14px;
+  color: #000;
+  font-size: 8pt;
+}
+.vol-slider {
+  position: absolute;
+  left: 18px; top: 32px;
+  width: 216px; height: 20px;
+  accent-color: #4466aa;
+}
+.vol-value {
+  position: absolute;
+  left: 77px; top: 58px;
+  width: 90px; height: 14px;
+  color: #000;
+  font-size: 8pt;
+  text-align: center;
+}
+.vol-close {
+  position: absolute;
+  left: 23px; top: 86px;
+}
+
+/* Panel Save/Load */
+.save-list {
+  position: absolute;
+  left: 18px; top: 18px;
+  width: 210px; height: 158px;
+  background: #fff;
+  border: 1px inset #888;
+  overflow-y: auto;
+  font-size: 8pt;
+}
+.save-list .item {
+  padding: 3px 6px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+.save-list .item:hover { background: #cce; }
+.save-list .item.selected { background: #4466aa; color: #fff; }
+.save-list .item .detail { font-size: 7pt; color: #666; }
+.save-list .item.selected .detail { color: #cce; }
+
+.save-btns {
+  position: absolute;
+  left: 18px; top: 182px;
+  width: 210px;
+  display: flex;
+  gap: 6px;
+}
+.save-btns .menu-btn {
+  position: static;
+  width: 66px;
+  font-size: 7pt;
+}
+
+/* Confirm dialog */
+.confirm-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 250px; height: 240px;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  z-index: 10;
+}
+.confirm-box {
+  position: absolute;
+  top: 60px; left: 25px;
+  width: 200px;
+  background: #c0c0c0;
+  border: 2px outset #ddd;
+  padding: 16px;
+  text-align: center;
+  font-size: 9pt;
+}
+.confirm-box .confirm-btns {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.confirm-box button {
+  min-width: 70px;
+  padding: 3px 12px;
+  font-size: 8pt;
+  cursor: pointer;
+}
+
+/* Hidden file input for import */
+#importFile { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Panel 1: Menu Principal -->
+<div id="panelMenu" class="panel active">
+  <button class="menu-btn" style="top:12px" onclick="onNewGame()">Nouvelle partie</button>
+  <button class="menu-btn" style="top:42px" onclick="onLoad()">Charger une partie...</button>
+  <button class="menu-btn" style="top:72px" onclick="onSave()">Sauvegarder la partie...</button>
+  <button class="menu-btn" style="top:102px" onclick="showPanel('panelVolume')">Volume sonore...</button>
+  <button class="menu-btn" style="top:144px" onclick="onClose()">Revenir au jeu en cours</button>
+  <button class="menu-btn" style="top:174px" onclick="onQuit()">Retour au menu principal</button>
+</div>
+
+<!-- Panel 2: Volume -->
+<div id="panelVolume" class="panel">
+  <span class="vol-label">Volume sonore :</span>
+  <input type="range" id="volSlider" class="vol-slider" min="0" max="100" value="100"
+         oninput="onVolumeChange(this.value)">
+  <span id="volValue" class="vol-value">100%</span>
+  <button class="menu-btn vol-close" onclick="showPanel('panelMenu')">Fermer</button>
+</div>
+
+<!-- Panel 3: Charger -->
+<div id="panelLoad" class="panel">
+  <div id="loadList" class="save-list"></div>
+  <div class="save-btns">
+    <button class="menu-btn" onclick="doLoad()">Charger</button>
+    <button class="menu-btn" onclick="doImport()">Importer</button>
+    <button class="menu-btn" onclick="showPanel('panelMenu')">Annuler</button>
+  </div>
+</div>
+
+<!-- Panel 4: Sauvegarder -->
+<div id="panelSave" class="panel">
+  <div id="saveList" class="save-list"></div>
+  <div class="save-btns">
+    <button class="menu-btn" onclick="doSave()">Sauver</button>
+    <button class="menu-btn" onclick="doExport()">Exporter</button>
+    <button class="menu-btn" onclick="showPanel('panelMenu')">Annuler</button>
+  </div>
+</div>
+
+<!-- Confirmation overlay -->
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <div id="confirmText"></div>
+    <div class="confirm-btns">
+      <button onclick="confirmYes()">OK</button>
+      <button onclick="confirmNo()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import file input -->
+<input type="file" id="importFile" accept=".json,.sav" onchange="handleImport(this)">
+
+<script>
+// Communication avec le moteur VN
+var onCommandCallback = null;
+var vnoption = {
+  setOnCommand: function(cb) { onCommandCallback = cb; }
+};
+window.vnoption = vnoption;
+
+function sendCommand(cmd) {
+  console.log('VNOption command:', cmd);
+  if (onCommandCallback) onCommandCallback(cmd);
+  else if (window.__vnCommand) window.__vnCommand(cmd);
+  else if (parent && parent !== window) {
+    try { parent.handleDllCommand(cmd); } catch(e) {}
+  }
+}
+
+// Navigation entre panels
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (id === 'panelVolume') initVolume();
+}
+
+// Confirmation dialog
+var pendingConfirm = null;
+function showConfirm(text, callback) {
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmOverlay').style.display = 'block';
+  pendingConfirm = callback;
+}
+function confirmYes() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+  if (pendingConfirm) pendingConfirm(true);
+  pendingConfirm = null;
+}
+function confirmNo() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+  if (pendingConfirm) pendingConfirm(false);
+  pendingConfirm = null;
+}
+
+// === Fermer (revenir au jeu) ===
+function onClose() {
+  sendCommand('closedll');
+}
+
+// === Retour au menu principal (frontal/start) ===
+function onQuit() {
+  showConfirm('Retourner au menu principal ?', function(yes) {
+    if (yes) {
+      sendCommand('quit');
+    }
+  });
+}
+
+// === Nouvelle partie ===
+function onNewGame() {
+  showConfirm('Commencer une nouvelle partie ?\nLa progression en cours sera perdue.', function(yes) {
+    if (yes) {
+      sendCommand('newgame');
+    }
+  });
+}
+
+// === Volume ===
+function initVolume() {
+  var vol = 100;
+  try {
+    if (parent && parent.masterVolume !== undefined) {
+      vol = Math.round(parent.masterVolume * 100);
+    }
+  } catch(e) {}
+  document.getElementById('volSlider').value = vol;
+  document.getElementById('volValue').textContent = vol + '%';
+}
+
+function onVolumeChange(val) {
+  document.getElementById('volValue').textContent = val + '%';
+  try {
+    if (parent && parent !== window) {
+      parent.masterVolume = val / 100;
+      try { localStorage.setItem('europeo_volume', val / 100); } catch(e2) {}
+      // Appliquer aux audio en cours
+      var audios = parent.audioElements || {};
+      Object.keys(audios).forEach(function(k) {
+        if (audios[k] && !audios[k].paused) {
+          audios[k].volume = val / 100;
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+// === Sauvegarde / Chargement (localStorage) ===
+var SAVE_PREFIX = 'europeo_save_';
+var MAX_SLOTS = 10;
+var selectedSlot = -1;
+
+// Lire l'etat complet du jeu depuis le parent
+function getGameState() {
+  var state = { gameVars: {}, sceneIndex: 0, vnpPath: '', vndName: '', cursorItem: null };
+  try {
+    if (parent && parent !== window) {
+      state.gameVars = JSON.parse(JSON.stringify(parent.gameVars || {}));
+      state.sceneIndex = parent.currentSceneIndex || 0;
+      if (parent.currentVNDEntry) {
+        state.vnpPath = parent.currentVNDEntry.vnp || '';
+        state.vndName = parent.currentVNDEntry.name || '';
+      }
+      state.cursorItem = parent.activeCursorItem || null;
+    }
+  } catch(e) {}
+  return state;
+}
+
+// Nom lisible du module
+function moduleName(name) {
+  var names = {
+    'couleurs1': 'Europe', 'start': 'Accueil', 'allem': 'Allemagne',
+    'angleterre': 'Angleterre', 'autr': 'Autriche', 'belge': 'Belgique',
+    'biblio': 'Biblioth\xe8que', 'danem': 'Danemark', 'ecosse': '\xc9cosse',
+    'espa': 'Espagne', 'finlan': 'Finlande', 'france': 'France',
+    'grece': 'Gr\xe8ce', 'holl': 'Hollande', 'irland': 'Irlande',
+    'italie': 'Italie', 'portu': 'Portugal', 'suede': 'Su\xe8de'
+  };
+  return names[name] || name;
+}
+
+function getSaves() {
+  var saves = [];
+  for (var i = 0; i < MAX_SLOTS; i++) {
+    var raw = localStorage.getItem(SAVE_PREFIX + i);
+    if (raw) {
+      try { saves.push({ slot: i, data: JSON.parse(raw) }); }
+      catch(e) { saves.push({ slot: i, data: null }); }
+    } else {
+      saves.push({ slot: i, data: null });
+    }
+  }
+  return saves;
+}
+
+function renderSaveList(listId, allowEmpty) {
+  var list = document.getElementById(listId);
+  list.innerHTML = '';
+  selectedSlot = -1;
+  var saves = getSaves();
+  saves.forEach(function(s) {
+    var div = document.createElement('div');
+    div.className = 'item';
+    if (s.data) {
+      var d = s.data.date ? new Date(s.data.date).toLocaleString('fr-FR') : '?';
+      var loc = moduleName(s.data.vndName || s.data.scenePath || '?');
+      var sc = (s.data.sceneIndex || 0) + 1;
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> ' + loc + ' - Sc\xe8ne ' + sc +
+                      '<br><span class="detail">' + d + '</span>';
+    } else if (allowEmpty) {
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> (vide)';
+    } else {
+      div.innerHTML = '<b>' + (s.slot+1) + '.</b> <span class="detail">(vide)</span>';
+      div.style.opacity = '0.4';
+    }
+    div.onclick = function() {
+      if (!allowEmpty && !s.data) return;
+      list.querySelectorAll('.item').forEach(function(it) { it.classList.remove('selected'); });
+      div.classList.add('selected');
+      selectedSlot = s.slot;
+    };
+    list.appendChild(div);
+  });
+}
+
+function onSave() {
+  renderSaveList('saveList', true);
+  showPanel('panelSave');
+}
+
+function onLoad() {
+  renderSaveList('loadList', false);
+  showPanel('panelLoad');
+}
+
+function doSave() {
+  if (selectedSlot < 0) return;
+  var state = getGameState();
+  var saveData = {
+    version: 1,
+    date: new Date().toISOString(),
+    gameVars: state.gameVars,
+    sceneIndex: state.sceneIndex,
+    vnpPath: state.vnpPath,
+    vndName: state.vndName,
+    cursorItem: state.cursorItem
+  };
+  localStorage.setItem(SAVE_PREFIX + selectedSlot, JSON.stringify(saveData));
+  showPanel('panelMenu');
+}
+
+function restoreFromSave(s) {
+  try {
+    if (parent && parent !== window) {
+      // Restaurer les variables
+      Object.keys(parent.gameVars).forEach(function(k) { delete parent.gameVars[k]; });
+      if (s.gameVars) {
+        Object.keys(s.gameVars).forEach(function(k) {
+          parent.gameVars[k] = s.gameVars[k];
+        });
+      }
+      // Restaurer le curseur
+      if (s.cursorItem) {
+        sendCommand('defcursor ' + s.cursorItem);
+      } else {
+        sendCommand('defcursor 0');
+      }
+      sendCommand('closedll');
+      // Naviguer vers la scene sauvegardee via RUNPRJ
+      var vnp = s.vnpPath || '';
+      if (!vnp && s.basePath && s.scenePath) {
+        // Compatibilite avec anciennes sauvegardes (v0)
+        vnp = s.basePath + s.scenePath + '.vnp';
+      }
+      if (vnp) {
+        sendCommand('runprj ' + vnp + ' ' + ((s.sceneIndex || 0) + 1));
+      }
+    }
+  } catch(e) {
+    console.error('Load failed:', e);
+  }
+}
+
+function doLoad() {
+  if (selectedSlot < 0) return;
+  var raw = localStorage.getItem(SAVE_PREFIX + selectedSlot);
+  if (!raw) return;
+  try {
+    restoreFromSave(JSON.parse(raw));
+  } catch(e) {
+    console.error('Load parse failed:', e);
+  }
+}
+
+// === Export: telecharger la sauvegarde en fichier JSON ===
+function doExport() {
+  if (selectedSlot < 0) return;
+  var raw = localStorage.getItem(SAVE_PREFIX + selectedSlot);
+  if (!raw) return;
+  var blob = new Blob([raw], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var s = JSON.parse(raw);
+  var name = 'europeo_' + (moduleName(s.vndName || '').replace(/\s/g, '_') || 'save') +
+             '_s' + ((s.sceneIndex || 0) + 1) + '.json';
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+// === Import: charger un fichier de sauvegarde ===
+function doImport() {
+  document.getElementById('importFile').click();
+}
+
+function handleImport(input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var s = JSON.parse(e.target.result);
+      if (!s.gameVars || !s.vnpPath) {
+        alert('Fichier de sauvegarde invalide.');
+        return;
+      }
+      showConfirm('Charger cette sauvegarde ?\n' + moduleName(s.vndName || '') +
+                   ' - Sc\xe8ne ' + ((s.sceneIndex || 0) + 1), function(yes) {
+        if (yes) restoreFromSave(s);
+      });
+    } catch(err) {
+      alert('Erreur: fichier invalide.');
+    }
+  };
+  reader.readAsText(input.files[0]);
+  input.value = ''; // reset pour pouvoir reimporter le meme fichier
+}
+</script>
+</body>
+</html>

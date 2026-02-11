@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>EuroConverter Calc</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #808080;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+        }
+        
+        /* Panel principal - dimensions et couleur exactes DLL */
+        #calc-container {
+            position: relative;
+            width: 177px;
+            height: 291px;
+            background: #FF8F7F; /* 16732415 en décimal */
+            border: 2px outset #ccc;
+        }
+        
+        /* Onglets - positions exactes DLL */
+        .tab {
+            position: absolute;
+            width: 40px;
+            height: 25px;
+            cursor: pointer;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        #tab1 { left: 38px; top: 44px; }
+        #tab2 { left: 96px; top: 44px; }
+        
+        .tab.active { z-index: 2; }
+        .tab:not(.active) { filter: brightness(0.85); }
+        
+        /* Images drapeaux - positions exactes DLL */
+        .flag {
+            position: absolute;
+            width: 25px;
+            height: 21px;
+            cursor: pointer;
+        }
+        #flag1 { left: 8px; top: 48px; }
+        #flag2 { left: 148px; top: 48px; }
+        
+        /* Labels monnaies - positions exactes DLL */
+        .currency-label {
+            position: absolute;
+            width: 57px;
+            height: 13px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #808080;
+            text-align: center;
+            cursor: pointer;
+        }
+        #label1 { left: 30px; top: 50px; }
+        #label2 { left: 88px; top: 50px; }
+        
+        /* Bouton move - position exacte DLL */
+        #btn-move {
+            position: absolute;
+            left: 132px;
+            top: 80px;
+            width: 32px;
+            height: 32px;
+            cursor: move;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        /* Bouton quitter - position exacte DLL */
+        #btn-quitter {
+            position: absolute;
+            left: 6px;
+            top: 76px;
+            width: 50px;
+            height: 52px;
+            cursor: pointer;
+            background-size: contain;
+            background-repeat: no-repeat;
+            border: none;
+            background-color: transparent;
+        }
+        #btn-quitter:hover { filter: brightness(1.1); }
+        
+        /* Zone clavier - position exacte DLL */
+        #keyboard-area {
+            position: absolute;
+            left: 8px;
+            top: 132px;
+            width: 161px;
+            height: 153px;
+        }
+        
+        /* Affichage des valeurs */
+        #display1, #display2 {
+            position: absolute;
+            width: 75px;
+            height: 20px;
+            background: #fff;
+            border: 1px inset #888;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: right;
+            padding: 2px 4px;
+            overflow: hidden;
+        }
+        #display1 { left: 8px; top: 20px; }
+        #display2 { left: 92px; top: 20px; }
+        
+        /* Grille de touches - 6 colonnes, glyphs 27x27 */
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 27px);
+            grid-template-rows: repeat(5, 27px);
+            gap: 1px;
+        }
+        
+        .key {
+            width: 27px;
+            height: 27px;
+            background: #d0d0d0;
+            border: 2px outset #fff;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .key:active {
+            border: 2px inset #888;
+            background: #b0b0b0;
+        }
+        .key.wide { grid-column: span 2; width: 55px; }
+        
+        /* Menu déroulant des devises */
+        #currency-menu {
+            position: absolute;
+            display: none;
+            background: #fff;
+            border: 1px solid #000;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #currency-menu.show { display: block; }
+        
+        .currency-option {
+            display: flex;
+            align-items: center;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .currency-option:hover { background: #0078d7; color: #fff; }
+        .currency-option img {
+            width: 20px;
+            height: 16px;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div id="calc-container">
+        <!-- Affichages -->
+        <input type="text" id="display1" value="0" readonly>
+        <input type="text" id="display2" value="0" readonly>
+        
+        <!-- Onglets -->
+        <div id="tab1" class="tab active"></div>
+        <div id="tab2" class="tab"></div>
+        
+        <!-- Drapeaux -->
+        <img id="flag1" class="flag" src="Image_18.png" title="France">
+        <img id="flag2" class="flag" src="Image_13.png" title="Euro">
+        
+        <!-- Labels monnaies -->
+        <div id="label1" class="currency-label">FRF</div>
+        <div id="label2" class="currency-label">EUR</div>
+        
+        <!-- Boutons -->
+        <div id="btn-move" style="background-image: url('Image_28.png');"></div>
+        <button id="btn-quitter" style="background-image: url('Image_31.png');"></button>
+        
+        <!-- Zone clavier -->
+        <div id="keyboard-area">
+            <div class="keyboard-grid">
+                <!-- Ligne 1 -->
+                <button class="key" data-key="7">7</button>
+                <button class="key" data-key="8">8</button>
+                <button class="key" data-key="9">9</button>
+                <button class="key" data-key="C">C</button>
+                <button class="key wide" data-key="CE">CE</button>
+                <!-- Ligne 2 -->
+                <button class="key" data-key="4">4</button>
+                <button class="key" data-key="5">5</button>
+                <button class="key" data-key="6">6</button>
+                <button class="key" data-key="←">←</button>
+                <button class="key wide" data-key="000">000</button>
+                <!-- Ligne 3 -->
+                <button class="key" data-key="1">1</button>
+                <button class="key" data-key="2">2</button>
+                <button class="key" data-key="3">3</button>
+                <button class="key" data-key="00">00</button>
+                <button class="key wide" data-key="0">0</button>
+                <!-- Ligne 4 -->
+                <button class="key wide" data-key=".">.</button>
+                <button class="key wide" data-key="=">=</button>
+                <button class="key wide" data-key="INV">INV</button>
+            </div>
+        </div>
+        
+        <!-- Menu déroulant des devises -->
+        <div id="currency-menu"></div>
+    </div>
+
+    <script>
+    // VN-Studio callback system
+    var vnCallback = null;
+
+    function setOnCommand(callback) {
+        vnCallback = callback;
+    }
+
+    function vnCommand(cmd) {
+        console.log('[VN-Studio]', cmd);
+        if (vnCallback) {
+            vnCallback(cmd);
+        } else if (window.__vnCommand) {
+            window.__vnCommand(cmd);
+        }
+    }
+
+    // Taux de change depuis eccalc.tbl (taux fixes historiques)
+    const currencies = {
+        'EUR': { rate: 1, name: 'Euro', flag: 'Image_13.png' },
+        'FRF': { rate: 6.55957, name: 'Franc français', flag: 'Image_18.png' },
+        'DEM': { rate: 1.95583, name: 'Mark allemand', flag: 'Image_19.png' },
+        'BEF': { rate: 40.3399, name: 'Franc belge', flag: 'Image_8.png' },
+        'LUF': { rate: 40.3399, name: 'Franc luxembourgeois', flag: 'Image_15.png' },
+        'ESP': { rate: 166.386, name: 'Peseta espagnole', flag: 'Image_5.png' },
+        'IEP': { rate: 0.787564, name: 'Livre irlandaise', flag: 'Image_16.png' },
+        'ITL': { rate: 1936.27, name: 'Lire italienne', flag: 'Image_21.png' },
+        'NLG': { rate: 2.20371, name: 'Florin néerlandais', flag: 'Image_11.png' },
+        'ATS': { rate: 13.7603, name: 'Schilling autrichien', flag: 'Image_9.png' },
+        'PTE': { rate: 200.482, name: 'Escudo portugais', flag: 'Image_4.png' },
+        'FIM': { rate: 5.94573, name: 'Mark finlandais', flag: 'Image_7.png' },
+        'GRD': { rate: 340.750, name: 'Drachme grecque', flag: 'Image_3.png' }
+    };
+    
+    // État
+    let currency1 = 'FRF';
+    let currency2 = 'EUR';
+    let activeTab = 1;
+    let currentValue = '0';
+    let menuTarget = null;
+    
+    const display1 = document.getElementById('display1');
+    const display2 = document.getElementById('display2');
+    const flag1 = document.getElementById('flag1');
+    const flag2 = document.getElementById('flag2');
+    const label1 = document.getElementById('label1');
+    const label2 = document.getElementById('label2');
+    const tab1 = document.getElementById('tab1');
+    const tab2 = document.getElementById('tab2');
+    const menu = document.getElementById('currency-menu');
+    
+    // Initialisation des onglets avec images
+    tab1.style.backgroundImage = "url('Image_23.png')";
+    tab2.style.backgroundImage = "url('Image_25.png')";
+    
+    // Construire le menu des devises
+    function buildCurrencyMenu() {
+        menu.innerHTML = '';
+        for (const [code, data] of Object.entries(currencies)) {
+            const option = document.createElement('div');
+            option.className = 'currency-option';
+            option.dataset.code = code;
+            option.innerHTML = `<img src="${data.flag}"><span>${code} - ${data.name}</span>`;
+            option.addEventListener('click', () => selectCurrency(code));
+            menu.appendChild(option);
+        }
+    }
+    
+    function showMenu(target, x, y) {
+        menuTarget = target;
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.classList.add('show');
+    }
+    
+    function hideMenu() {
+        menu.classList.remove('show');
+        menuTarget = null;
+    }
+    
+    function selectCurrency(code) {
+        if (menuTarget === 1) {
+            currency1 = code;
+            flag1.src = currencies[code].flag;
+            label1.textContent = code;
+        } else {
+            currency2 = code;
+            flag2.src = currencies[code].flag;
+            label2.textContent = code;
+        }
+        hideMenu();
+        convert();
+    }
+    
+    // Conversion
+    function convert() {
+        const value = parseFloat(currentValue) || 0;
+        let result;
+        
+        if (activeTab === 1) {
+            // Convertir currency1 -> currency2
+            const euroValue = value / currencies[currency1].rate;
+            result = euroValue * currencies[currency2].rate;
+            display1.value = formatNumber(value);
+            display2.value = formatNumber(result);
+        } else {
+            // Convertir currency2 -> currency1
+            const euroValue = value / currencies[currency2].rate;
+            result = euroValue * currencies[currency1].rate;
+            display2.value = formatNumber(value);
+            display1.value = formatNumber(result);
+        }
+    }
+    
+    function formatNumber(n) {
+        if (n === 0) return '0';
+        // Max 8 décimales comme dans la DLL
+        const formatted = n.toFixed(8).replace(/\.?0+$/, '');
+        // Limiter la longueur pour l'affichage
+        if (formatted.length > 12) {
+            return n.toExponential(4);
+        }
+        return formatted;
+    }
+    
+    // Gestion du clavier
+    function handleKey(key) {
+        switch(key) {
+            case 'C':
+            case 'CE':
+                currentValue = '0';
+                break;
+            case '←':
+                currentValue = currentValue.slice(0, -1) || '0';
+                break;
+            case '.':
+                if (!currentValue.includes('.')) {
+                    currentValue += '.';
+                }
+                break;
+            case '=':
+                convert();
+                return;
+            case 'INV':
+                // Inverser les devises
+                [currency1, currency2] = [currency2, currency1];
+                flag1.src = currencies[currency1].flag;
+                flag2.src = currencies[currency2].flag;
+                label1.textContent = currency1;
+                label2.textContent = currency2;
+                break;
+            case '0':
+            case '00':
+            case '000':
+                if (currentValue === '0') {
+                    currentValue = key === '0' ? '0' : key;
+                } else {
+                    currentValue += key;
+                }
+                break;
+            default:
+                if (currentValue === '0') {
+                    currentValue = key;
+                } else {
+                    currentValue += key;
+                }
+        }
+        // Limiter à 15 caractères (Maximum dans la DLL)
+        if (currentValue.length > 15) {
+            currentValue = currentValue.slice(0, 15);
+        }
+        convert();
+    }
+    
+    // Event listeners
+    document.querySelectorAll('.key').forEach(key => {
+        key.addEventListener('click', () => handleKey(key.dataset.key));
+    });
+    
+    // Onglets
+    tab1.addEventListener('click', () => {
+        activeTab = 1;
+        tab1.classList.add('active');
+        tab2.classList.remove('active');
+        tab1.style.backgroundImage = "url('Image_23.png')";
+        tab2.style.backgroundImage = "url('Image_25.png')";
+        currentValue = '0';
+        convert();
+    });
+    
+    tab2.addEventListener('click', () => {
+        activeTab = 2;
+        tab2.classList.add('active');
+        tab1.classList.remove('active');
+        tab1.style.backgroundImage = "url('Image_24.png')";
+        tab2.style.backgroundImage = "url('Image_26.png')";
+        currentValue = '0';
+        convert();
+    });
+    
+    // Menus devises
+    flag1.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showMenu(1, 8, 70);
+    });
+    label1.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showMenu(1, 8, 70);
+    });
+    
+    flag2.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showMenu(2, 92, 70);
+    });
+    label2.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showMenu(2, 92, 70);
+    });
+    
+    // Fermer menu au clic ailleurs
+    document.addEventListener('click', hideMenu);
+    
+    // Bouton quitter
+    document.getElementById('btn-quitter').addEventListener('click', function() {
+        vnCommand('closedll');
+    });
+    
+    // Rollover bouton quitter
+    const btnQuitter = document.getElementById('btn-quitter');
+    btnQuitter.addEventListener('mouseenter', () => {
+        btnQuitter.style.backgroundImage = "url('Image_30.png')";
+    });
+    btnQuitter.addEventListener('mouseleave', () => {
+        btnQuitter.style.backgroundImage = "url('Image_31.png')";
+    });
+    
+    // Bouton move (drag de la fenêtre - désactivé en HTML)
+    const btnMove = document.getElementById('btn-move');
+    btnMove.addEventListener('mouseenter', () => {
+        btnMove.style.backgroundImage = "url('Image_27.png')";
+    });
+    btnMove.addEventListener('mouseleave', () => {
+        btnMove.style.backgroundImage = "url('Image_28.png')";
+    });
+    
+    // Initialisation
+    buildCurrencyMenu();
+    convert();
+
+    // Expose API for VN-Studio engine integration
+    window.calculatrice = {
+        setOnCommand: setOnCommand,
+        reset: function() {
+            currentValue = '0';
+            currency1 = 'FRF';
+            currency2 = 'EUR';
+            activeTab = 1;
+            flag1.src = currencies['FRF'].flag;
+            flag2.src = currencies['EUR'].flag;
+            label1.textContent = 'FRF';
+            label2.textContent = 'EUR';
+            convert();
+        },
+        quit: function() {
+            vnCommand('closedll');
+        }
+    };
+    </script>
+</body>
+</html>

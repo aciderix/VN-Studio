@@ -61,6 +61,8 @@
             cursor: pointer;
             user-select: none;
             height: 36px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .item-entry:hover { background: #e0e0e0; }
@@ -127,11 +129,14 @@
     <script>
     // Table des items (87 items extraits du DLL)
     var ITEMS_TABLE = {
+        "ail": "Ail",
+        "api": "Tenue d'apiculteur",
         "ballon1": "Ballon",
         "bouee": "Bouée",
         "bout_plo": "Bouteille de plongée",
+        "bus": "Bus miniature",
         "castagnette": "Castagnettes",
-        "ciseaux": "Ciseaux",
+        "ciseau": "Ciseaux",
         "clejaune": "Clé jaune",
         "guitare": "Guitare",
         "harpon": "Harpon",
@@ -165,6 +170,7 @@
         "rouedent": "Roue dentée",
         "pierreor": "Pierre philosophale",
         "papiercado": "Rouleau de papier",
+        "riz": "Riz",
         "hotte": "Hotte du Père Noël",
         "levure": "Sachet de levure",
         "bouteille": "Bouteille vide",
@@ -221,6 +227,10 @@
     var items = new Map();
     var selectedItem = null;
     var cursorBasePath = '';
+    
+    // FIX: Stockage global des timestamps de double-tap par item
+    // Ceci permet au timestamp de survivre au re-rendu de la liste
+    var lastTapByItem = {};
 
     var listEl = document.getElementById('itemList');
     var emptyEl = document.getElementById('emptyMessage');
@@ -283,11 +293,27 @@
                 renderList();
             });
 
-            entry.addEventListener('dblclick', function() {
-                // Double-click = use item: set_var item 2 + defcursor item
+            // Double-click/double-tap = use item: set_var item 2 + defcursor item
+            function useItem() {
                 sendCommand('set_var ' + internal + ' 2');
                 sendCommand('defcursor ' + internal);
                 sendCommand('closedll');
+            }
+            entry.addEventListener('dblclick', useItem);
+            
+            // FIX: Double-tap pour mobile - utilise lastTapByItem au lieu d'une closure locale
+            // Avant, le timestamp était perdu quand renderList() recréait les éléments
+            // car chaque nouvelle closure commençait avec lastTap = 0
+            entry.addEventListener('touchend', function(e) {
+                var now = Date.now();
+                var lastTap = lastTapByItem[internal] || 0;
+                if (now - lastTap < 400) {
+                    e.preventDefault();
+                    useItem();
+                    lastTapByItem[internal] = 0;
+                } else {
+                    lastTapByItem[internal] = now;
+                }
             });
 
             listEl.appendChild(entry);

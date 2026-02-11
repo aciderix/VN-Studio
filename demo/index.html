@@ -172,9 +172,10 @@
       touch-action: none;
     }
 
-    /* Fullscreen */
-    body.fullscreen #toolbar { display: none; }
-    body.fullscreen #canvas-container { height: 100vh; }
+    /* Mode jeu par defaut: toolbar masquee, canvas remplit via flex:1 */
+    #toolbar { display: none; }
+    /* Mode debug: toolbar visible */
+    body.debug-mode #toolbar { display: flex; }
 
     /* Panneau latéral scènes */
     #scene-list {
@@ -363,8 +364,8 @@
   <button id="btn-prev">&larr;</button>
   <select id="scene-select"></select>
   <button id="btn-next">&rarr;</button>
-  <label class="desktop-only"><input type="checkbox" id="chk-polygons" checked> Polygones</label>
-  <label class="desktop-only"><input type="checkbox" id="chk-labels" checked> Labels</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-polygons"> Polygones</label>
+  <label class="desktop-only"><input type="checkbox" id="chk-labels"> Labels</label>
   <label class="desktop-only"><input type="checkbox" id="chk-fill"> Remplir</label>
   <button id="btn-fullscreen" class="desktop-only">Plein écran</button>
   <button id="btn-debug" class="desktop-only">Debug</button>
@@ -388,8 +389,8 @@
 
     <div class="menu-section">
       <div class="menu-section-title">Affichage</div>
-      <label><input type="checkbox" id="chk-polygons-mobile" checked onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
-      <label><input type="checkbox" id="chk-labels-mobile" checked onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
+      <label><input type="checkbox" id="chk-polygons-mobile" onchange="document.getElementById('chk-polygons').checked=this.checked;document.getElementById('chk-polygons').dispatchEvent(new Event('change'))"> Polygones</label>
+      <label><input type="checkbox" id="chk-labels-mobile" onchange="document.getElementById('chk-labels').checked=this.checked;document.getElementById('chk-labels').dispatchEvent(new Event('change'))"> Labels</label>
       <label><input type="checkbox" id="chk-fill-mobile" onchange="document.getElementById('chk-fill').checked=this.checked;document.getElementById('chk-fill').dispatchEvent(new Event('change'))"> Remplir polygones</label>
     </div>
 
@@ -420,7 +421,7 @@
   <div id="scene-list"></div>
   <div id="tooltip"></div>
   <div id="html-overlay"><span class="html-close" onclick="closeHtmlOverlay()">&times;</span><div class="html-content"></div></div>
-  <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div id="dll-overlay"><iframe id="dll-iframe" sandbox="allow-scripts allow-same-origin allow-downloads"></iframe></div>
   <div id="cursor-indicator"></div>
   <div id="scene-html" style="position:absolute;background:transparent;z-index:14;display:none;overflow:hidden;pointer-events:none;"><div class="scene-html-content" style="padding:4px;font-family:'Comic Sans MS',sans-serif;font-size:12px;color:#000;overflow:auto;width:100%;height:100%;box-sizing:border-box;pointer-events:auto;"></div></div>
   <div id="loading-overlay"><canvas id="loading-bg" width="640" height="480"></canvas><div id="loading-bar-bg"><div id="loading-bar-fill"></div></div><div id="loading-text"></div></div>
@@ -694,16 +695,22 @@ var currentVNDEntry = null; // Current VND_LIST entry for cross-project navigati
 var sceneHistory = []; // Stack for PREV navigation - stores {entry, sceneIndex} for cross-project support
 var waitingForVideoEnd = false; // Block clicks while video plays with deferred navigation
 var resources = {}; // path -> Image
-var showPolygons = true;
-var showLabels = true;
+var showPolygons = false;
+var showLabels = false;
 var fillPolygons = false;
+var debugMode = false; // mode debug: affiche toolbar, info scene, bouton DBG
 var hoveredCmd = null;
 var scrollX = 0; // offset de scroll horizontal pour scènes larges
-var activePlayText = null; // text from IF-triggered playtext actions
+var activePlayText = null; // text from IF-triggered playtext actions (single)
 var activePlayTextFont = null; // font for activePlayText
-var activePlayTexts = []; // array of {text, font} for multiple IF playtext lines
-var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color }
+var activePlayTexts = []; // array of {text, font} for hover IF playtext lines
+var activePlayTextTimer = null; // timer pour auto-dismiss du playtext clic
+var clickPlayTexts = []; // PLAYTEXT directs (type 38) declenches par ONCLICK
+var clickPlayTextsFont = null; // font pour clickPlayTexts
+var overlayTexts = {}; // name -> { text, fontSize, x, y, w, h, color, family }
+var currentTextFont = { size: 18, style: 0, color: '#ffffff', family: 'Comic Sans MS' };
 var toolbarSceneIndex = -1; // index of the "Toolbar" scene
+var hotspotTimer = null; // timer pour le HOTSPOT timer des scenes (auto-navigation apres delai)
 
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
@@ -718,7 +725,7 @@ function getSceneWidth(scene) {
   var w = project ? project.header.width : 640;
   if (!scene) return w;
   // Utiliser la largeur de l'image de fond si chargée - cette valeur fait autorité
-  var resKey = scene.fields.resource ? scene.fields.resource.toLowerCase().replace(/\\/g, '/') : '';
+  var resKey = scene.fields.resource ? resolveResourcePath(scene.fields.resource) : '';
   if (resources[resKey] && resources[resKey].naturalWidth > w) {
     w = resources[resKey].naturalWidth;
   }
@@ -787,7 +794,7 @@ function render() {
   ctx.translate(-scrollX, 0);
 
   // Image de fond si disponible
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var resKey = resolveResourcePath(scene.fields.resource);
   if (resources[resKey]) {
     ctx.drawImage(resources[resKey], 0, 0);
   } else if (scene.fields.resource) {
@@ -865,13 +872,12 @@ function render() {
   }
 
   // Render a PLAYTEXT string on the canvas
-  // textVal: "x1 y1 x2 y2 flags text", fontVal: "size flags color fontname" (optional)
+  // textVal: "x y w h flags text", fontVal: "size flags color fontname" (optional)
   function renderPlayTextBox(textVal, fontVal, noBackground) {
     var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
     if (!tp) return;
     var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
-    var tx2 = parseInt(tp[3]), ty2 = parseInt(tp[4]);
-    var tw = tx2 - tx, th = ty2 - ty;
+    var tw = parseInt(tp[3]), th = parseInt(tp[4]);
     var text = tp[5];
     if (tw <= 0) tw = 300;
     if (th <= 0) th = 40;
@@ -886,14 +892,17 @@ function render() {
       }
     }
     if (fontSize < 6) fontSize = 12;
-    // Ensure text is readable on dark background: convert dark colors to white
+    // Sanitize color: fix invalid hex chars (e.g. #bbrrff -> #bb00ff)
     if (fontColor) {
-      var hex = fontColor.replace('#', '');
+      var hex = fontColor.replace('#', '').replace(/[^0-9a-fA-F]/g, '0');
+      if (hex.length < 6) hex = (hex + '000000').substring(0, 6);
+      fontColor = '#' + hex;
       var r = parseInt(hex.substr(0, 2), 16) || 0;
       var g = parseInt(hex.substr(2, 2), 16) || 0;
       var b = parseInt(hex.substr(4, 2), 16) || 0;
       var luminance = (0.299 * r + 0.587 * g + 0.114 * b);
-      if (luminance < 128) fontColor = '#ffffff';
+      // Only override near-black to white; keep colored text as-is (blue #0000ff has luminance 29)
+      if (luminance < 20) fontColor = '#ffffff';
     }
 
     ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
@@ -941,24 +950,52 @@ function render() {
     }
   }
 
-  // PLAYTEXT overlay pour la commande survolée
-  if (hoveredCmd) {
-    var fontStr = hoveredCmd.strings.find(function(s) { return s.type === 39; });
-    var fontVal = fontStr ? fontStr.string : null;
-    // Render ALL type 38 strings (multiple lines at different positions)
-    hoveredCmd.strings.forEach(function(s) {
-      if (s.type === 38 && s.string) {
-        renderPlayTextBox(s.string, fontVal);
-      }
+  // Render un groupe de PLAYTEXT avec un seul fond noir fusionne.
+  // Dans un groupe multi-lignes VND, chaque PLAYTEXT = une ligne a sa position Y,
+  // pas de word-wrap individuel (le VND gere les retours a la ligne manuellement).
+  function renderPlayTextGroup(textVals, fontVal) {
+    if (textVals.length === 0) return;
+    if (textVals.length === 1) { renderPlayTextBox(textVals[0], fontVal); return; }
+    var fontSize = 14, fontColor = '#ffffff', fontName = 'Comic Sans MS';
+    if (fontVal) {
+      var fp = fontVal.match(/^(-?\d+)\s+\d+\s+(#[0-9a-fA-F]+)\s+(.+)$/);
+      if (fp) { fontSize = Math.abs(parseInt(fp[1])); fontColor = fp[2]; fontName = fp[3]; }
+    }
+    if (fontSize < 6) fontSize = 12;
+    // Sanitize color
+    if (fontColor) {
+      var hex = fontColor.replace('#', '').replace(/[^0-9a-fA-F]/g, '0');
+      if (hex.length < 6) hex = (hex + '000000').substring(0, 6);
+      fontColor = '#' + hex;
+      var lum = 0.299 * (parseInt(hex.substr(0,2),16)||0) + 0.587 * (parseInt(hex.substr(2,2),16)||0) + 0.114 * (parseInt(hex.substr(4,2),16)||0);
+      if (lum < 20) fontColor = '#ffffff';
+    }
+    ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+    // Passe 1 : parser et calculer la bounding box (une seule ligne par PLAYTEXT)
+    var items = [];
+    var bx1 = Infinity, by1 = Infinity, bx2 = 0, by2 = 0;
+    textVals.forEach(function(textVal) {
+      var tp = textVal.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+([\s\S]+)$/);
+      if (!tp) return;
+      var tx = parseInt(tp[1]), ty = parseInt(tp[2]);
+      var text = tp[5];
+      var tw = ctx.measureText(text).width;
+      items.push({ x: tx, y: ty, text: text });
+      if (tx < bx1) bx1 = tx;
+      if (ty < by1) by1 = ty;
+      if (tx + tw > bx2) bx2 = tx + tw;
+      if (ty + fontSize + 4 > by2) by2 = ty + fontSize + 4;
     });
-  }
-
-  // IF-triggered playtext (from hover evaluation or executeAction)
-  activePlayTexts.forEach(function(pt) {
-    renderPlayTextBox(pt.text, pt.font);
-  });
-  if (activePlayText) {
-    renderPlayTextBox(activePlayText, activePlayTextFont);
+    if (items.length === 0) return;
+    // Dessiner un seul fond englobant avec marge
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(bx1 - 4, by1 - 2, (bx2 - bx1) + 8, (by2 - by1) + 4);
+    // Passe 2 : dessiner chaque texte (une ligne, pas de wrap)
+    ctx.fillStyle = fontColor;
+    ctx.textAlign = 'start';
+    items.forEach(function(it) {
+      ctx.fillText(it.text, it.x, it.y + fontSize);
+    });
   }
 
   ctx.restore(); // fin du scroll
@@ -978,7 +1015,8 @@ function render() {
         var displayText = ot.text.replace(/<(\w+)>/g, function(m, vname) {
           return String(getVar(vname));
         });
-        ctx.font = 'bold ' + ot.fontSize + 'px "Comic Sans MS", sans-serif';
+        var fontFamily = ot.family || 'Comic Sans MS';
+        ctx.font = 'bold ' + ot.fontSize + 'px "' + fontFamily + '", sans-serif';
         ctx.fillStyle = ot.color;
         ctx.textAlign = 'start';
         ctx.fillText(displayText, ot.x, ot.y + ot.fontSize);
@@ -986,16 +1024,53 @@ function render() {
     }
   }
 
-  // Info scène (fixe, pas scrollée)
-  ctx.fillStyle = 'rgba(0,0,0,0.6)';
-  ctx.fillRect(0, 0, w, 22);
-  ctx.font = '12px monospace';
-  ctx.fillStyle = '#e94560';
-  ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
-  var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
-  if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
-  ctx.fillStyle = '#888';
-  ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+  // Info scène (fixe, pas scrollée) - uniquement en mode debug
+  if (debugMode) {
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, w, 22);
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#e94560';
+    ctx.fillText('Scene ' + (currentSceneIndex + 1) + '/' + project.scenes.length + ': "' + scene.name + '"', 8, 15);
+    var info = scene.commands.length + ' cmds, ' + scene.commands.filter(function(c) { return c.paramPairs.length > 0; }).length + ' polys';
+    if (scene.hotspot) info += ', hotspot timer=' + scene.hotspot.timerValue;
+    ctx.fillStyle = '#888';
+    ctx.fillText(info, w - ctx.measureText(info).width - 8, 15);
+  }
+
+  // PLAYTEXT overlays — dessines en dernier (au-dessus de tout: toolbar, info scene)
+  // Appliquer le scroll pour que les coordonnees soient en espace jeu
+  ctx.save();
+  ctx.translate(-scrollX, 0);
+  if (hoveredCmd) {
+    var hIsInteractive = hoveredCmd.paramPairs && hoveredCmd.paramPairs.length > 0;
+    var fontStr = hoveredCmd.strings.find(function(s) {
+      return s.type === 39 && (!hIsInteractive || s.subIndex === 0);
+    });
+    var fontVal = fontStr ? fontStr.string : null;
+    var hoverTexts = [];
+    hoveredCmd.strings.forEach(function(s) {
+      if (s.type === 38 && s.string && (!hIsInteractive || s.subIndex === 0)) {
+        hoverTexts.push(s.string);
+      }
+    });
+    renderPlayTextGroup(hoverTexts, fontVal);
+  }
+  if (activePlayTexts.length > 0) {
+    renderPlayTextGroup(
+      activePlayTexts.map(function(pt) { return pt.text; }),
+      activePlayTexts[0].font
+    );
+  }
+  if (activePlayText) {
+    renderPlayTextBox(activePlayText, activePlayTextFont);
+  }
+  if (clickPlayTexts.length > 0) {
+    renderPlayTextGroup(
+      clickPlayTexts.map(function(pt) { return pt.text; }),
+      clickPlayTexts[0].font
+    );
+  }
+  ctx.restore();
 
   // Barre de scroll horizontale si scène plus large que la fenêtre
   if (sceneW > w) {
@@ -1020,6 +1095,8 @@ function render() {
 
 // --- AUDIO ---
 var audioElements = {}; // key -> HTMLAudioElement
+var masterVolume = parseFloat(localStorage.getItem('europeo_volume')) || 1.0; // Volume global persistant
+var lastNonLoopingAudio = null; // Dernier son non-bouclé joué (pour PAUSE apres PLAYWAV)
 var audioUnlocked = false;
 var pendingAudioPlays = []; // audio elements waiting for user gesture
 var audioContext = null;
@@ -1109,8 +1186,10 @@ function playWav(wavStr) {
   }
 
   var audio = new Audio(url);
+  audio.volume = masterVolume;
   audio.loop = (loops > 1 || loops === 0); // 0 = infinite
   audioElements[key] = audio;
+  if (!audio.loop) lastNonLoopingAudio = audio;
   recentlyStartedAudio[key] = true;
   audio.play().catch(function(e) {
     if (e.name === 'NotAllowedError') {
@@ -1195,6 +1274,8 @@ function executeRunPrj(runPrjStr) {
     return;
   }
   console.log('RUNPRJ:', parsed.entry.name, 'scene', parsed.sceneIndex);
+  // Annuler le timer hotspot de la scene courante (eviter qu'il fire pendant le chargement async)
+  if (hotspotTimer) { clearTimeout(hotspotTimer); hotspotTimer = null; }
   stopAllAudio();
   clearCursorItem();
 
@@ -1240,6 +1321,17 @@ var gameVars = {}; // variable store: { name: value }
 var activeCursorItem = null; // inventory item selected as cursor (defcursor)
 
 function setCursorItem(itemName) {
+  // Quand on prend un NOUVEL item (itemName truthy et different), reposer l'ancien (2 → 1).
+  // NE PAS reset quand itemName=null (defcursor 0/fleche.cur) car le VND fait TOUJOURS
+  // set_var item -1 APRES defcursor avec la MEME condition IF item=2.
+  // Si on resetait ici (2→1), le set_var echouerait car la condition item=2 ne serait plus vraie.
+  if (itemName && activeCursorItem && activeCursorItem !== itemName) {
+    var oldKey = activeCursorItem.toLowerCase();
+    if (gameVars[oldKey] === 2) {
+      gameVars[oldKey] = 1;
+      console.log('Previous cursor item returned to bag:', oldKey, '2 → 1');
+    }
+  }
   activeCursorItem = itemName;
   var indicator = document.getElementById('cursor-indicator');
   if (!itemName) {
@@ -1301,7 +1393,15 @@ function getVar(name) {
 }
 
 function setVar(name, val) {
-  gameVars[name.toLowerCase()] = val;
+  var key = name.toLowerCase();
+  // Protection: empecher une fiole deposee (-1) d'etre re-donnee (1).
+  // Bug connu Suede scene 3: la logique VND teste fiolesuede=1 mais pas -1,
+  // donc apres depot a la fontaine, la femme re-donne la fiole.
+  if (key.indexOf('fiole') === 0 && gameVars[key] === -1 && val > 0) {
+    console.log('SET_VAR blocked: fiole', key, 'already deposited (-1), refusing →', val);
+    return;
+  }
+  gameVars[key] = val;
   console.log('SET_VAR:', name, '=', val);
 }
 
@@ -1398,8 +1498,9 @@ function executeHotspot(n) {
     return;
   }
   var cmd = scene.commands[cmdIdx];
-  // Filter to ONCLICK strings only (subIndex=1) to avoid re-triggering ONINIT hotspots
+  // Filter to ONCLICK strings (subIndex=1) if available, else use all strings
   var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
   console.log('Hotspot', n, '→ CMD_' + cmd.commandType, '(' + onclickStrings.length + '/' + cmd.strings.length + ' ONCLICK strings)');
   // Create a shallow copy with filtered strings for resumeCommandProcessing
   var filteredCmd = {};
@@ -1408,6 +1509,52 @@ function executeHotspot(n) {
   _hotspotDepth++;
   resumeCommandProcessing(filteredCmd, 0);
   _hotspotDepth--;
+}
+
+// Flag pour PAUSE inline dans les IF - lu par le runner async de resumeCommandProcessing
+var pendingPauseMs = 0;
+
+// Relancer le WAV de fond de la scène s'il a été stoppé (CLOSEWAV) et qu'on ne navigue pas
+function restoreSceneWav() {
+  if (!project || currentSceneIndex < 0) return;
+  if (currentVideo) return; // Ne pas relancer pendant une vidéo
+  var scene = project.scenes[currentSceneIndex];
+  if (!scene.fields.string3) return; // Pas de WAV de scène
+  var wavFile = scene.fields.string3;
+  var wavKey = wavFile.toLowerCase().split(/\s+/)[0];
+  var existing = audioElements[wavKey];
+  if (existing && !existing.paused && !existing.ended) return; // Déjà en cours
+  var loops = scene.fields.val2 || 1;
+  // Attendre la fin du son en cours avant de relancer l'ambiance
+  waitForAudioThenDelay(0, function() {
+    // Re-vérifier qu'on est toujours sur la même scène
+    if (!project || currentSceneIndex < 0) return;
+    var curScene = project.scenes[currentSceneIndex];
+    if (curScene !== scene) return;
+    console.log('Restoring scene WAV:', wavFile);
+    playWav(wavFile + ' ' + loops);
+  });
+}
+
+// Attendre la fin du son en cours avant d'appliquer un delai
+// Si un son non-bouclé est en cours, attend sa fin puis ajoute le delai
+function waitForAudioThenDelay(ms, callback) {
+  if (lastNonLoopingAudio && !lastNonLoopingAudio.paused && !lastNonLoopingAudio.ended) {
+    var audio = lastNonLoopingAudio;
+    var onEnd = function() {
+      audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('error', onEnd);
+      if (ms > 0) {
+        setTimeout(callback, ms);
+      } else {
+        callback();
+      }
+    };
+    audio.addEventListener('ended', onEnd);
+    audio.addEventListener('error', onEnd);
+  } else {
+    setTimeout(callback, ms);
+  }
 }
 
 // Execute an action string (from IF then/else branch)
@@ -1454,13 +1601,21 @@ function executeAction(action) {
   } else if (cmd === 'closedll') {
     closeDll();
   } else if (cmd === 'font') {
-    // Font change from IF action - store for next playtext
+    // Font change from IF action - store for next playtext and ADDTEXT
     activePlayTextFont = parts.slice(1).join(' ');
+    setFont(parts.slice(1).join(' '));
   } else if (cmd === 'invalidate' || cmd === 'update') {
     render();
   } else if (cmd === 'playtext') {
-    // playtext x1 y1 x2 y2 flags text
+    // playtext x1 y1 x2 y2 flags text — auto-dismiss apres 2s
     activePlayText = parts.slice(1).join(' ');
+    if (activePlayTextTimer) clearTimeout(activePlayTextTimer);
+    activePlayTextTimer = setTimeout(function() {
+      activePlayText = null;
+      activePlayTextFont = null;
+      activePlayTextTimer = null;
+      render();
+    }, 2000);
     render();
   } else if (cmd === 'defcursor') {
     // Set active cursor to an inventory item or reset to default
@@ -1474,8 +1629,10 @@ function executeAction(action) {
     var hsIdx = parseInt(parts[1]);
     if (!isNaN(hsIdx)) executeHotspot(hsIdx);
   } else if (cmd === 'pause') {
-    // Pause N ms - used by DLL mini-games; they handle their own setTimeout
-    // so this is a no-op when called via handleDllCommand
+    // PAUSE inline dans un IF: signaler au runner async via pendingPauseMs
+    var ms = parseInt(parts[1]) || 300;
+    pendingPauseMs = ms;
+    console.log('PAUSE (inline):', ms + 'ms');
   } else if (cmd === 'if') {
     // Nested IF: "if var op val then action"
     var nestedAction = evaluateIf(parts.slice(1).join(' '));
@@ -1489,6 +1646,7 @@ function executeAction(action) {
 var overlayImages = {}; // name -> { img, x, y, w, h, visible }
 var imagesAddedThisClick = {}; // Track images added in current click to prevent immediate DELBMP
 var hoverAddedImages = {}; // Track images added during hover (should be removed on unhover)
+var hoverDeletedImages = {}; // Track images deleted during hover (should be restored on unhover)
 
 function resolveOverlayPath(bmpRef) {
   // Could be relative like "rollover\all.bmp" or absolute path
@@ -1577,22 +1735,34 @@ function hideBmpOverlay(name) {
   if (overlayImages[name]) { overlayImages[name].visible = false; render(); }
 }
 
+function setFont(val) {
+  // Format: "size style color fontfamily" e.g. "18 0 #ffffff Comic sans MS"
+  var parts = val.trim().split(/\s+/);
+  if (parts.length >= 1) currentTextFont.size = parseInt(parts[0]) || 18;
+  if (parts.length >= 2) currentTextFont.style = parseInt(parts[1]) || 0;
+  if (parts.length >= 3) currentTextFont.color = parts[2] || '#ffffff';
+  if (parts.length >= 4) currentTextFont.family = parts.slice(3).join(' ') || 'Comic Sans MS';
+  console.log('FONT:', currentTextFont.size + 'px', currentTextFont.color, currentTextFont.family);
+}
+
 function addTextOverlay(val) {
-  // Format: "name fontSize x y w h flags <varname>" or "name fontSize x y w h flags text"
+  // Format: "name layer x y x2 y2 flags text" (layer=display layer, not font size)
   var parts = val.trim().split(/\s+/);
   if (parts.length < 7) return;
   var name = parts[0].toLowerCase();
-  var fontSize = parseInt(parts[1]) || 14;
-  // VND font sizes are Windows point sizes; scale up small sizes for readability
-  if (fontSize <= 12) fontSize = Math.max(fontSize * 2, 12);
+  // parts[1] = layer (display layer, same as ADDBMP)
   var x = parseInt(parts[2]) || 0;
   var y = parseInt(parts[3]) || 0;
   var w = parseInt(parts[4]) || 200;
   var h = parseInt(parts[5]) || 30;
   // parts[6] = flags
   var textPart = parts.slice(7).join(' ');
-  overlayTexts[name] = { text: textPart, fontSize: fontSize, x: x, y: y, w: w, h: h, color: '#ffffff' };
-  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y);
+  overlayTexts[name] = {
+    text: textPart, fontSize: currentTextFont.size,
+    x: x, y: y, w: w, h: h,
+    color: currentTextFont.color, family: currentTextFont.family
+  };
+  console.log('ADDTEXT:', name, '=', textPart, 'at', x, y, 'font:', currentTextFont.size + 'px', currentTextFont.family);
   render();
 }
 
@@ -1720,11 +1890,18 @@ var DLL_HTML_MAP = {
   'memory.dll':   'dll/memory/memory-game.html',
   'probleme.dll': 'dll/probleme/probleme-math.html',
   'inv.dll':      'dll/inv/inv-inventory.html',
-  'pepe.dll':     'dll/pepe/pepe-game.html'
+  'pepe.dll':     'dll/pepe/pepe-game.html',
+  'frog.dll':     'dll/frog/frog-simon.html',
+  'vnoption.dll': 'dll/vnoption/vnoption-menu.html',
+  'bateau.dll':   'dll/bateau/bateau-game.html',
+  'costume.dll':  'dll/costume/costume.html',
+  'euro32.dll':   'dll/euro32/calculatrice.html'
 };
 // Native sizes for DLL forms (width x height). Default is 640x400.
 var DLL_NATIVE_SIZE = {
-  'inv.dll': { w: 330, h: 337 }
+  'inv.dll': { w: 330, h: 337 },
+  'vnoption.dll': { w: 250, h: 240 },
+  'euro32.dll': { w: 177, h: 291 }
 };
 var currentDllIframe = null;
 
@@ -1749,6 +1926,8 @@ function runDll(dllName) {
   var rect = canvas.getBoundingClientRect();
   var contRect = container.getBoundingClientRect();
   var scale = Math.min(rect.width / dllW, rect.height / dllH);
+  // Dialog DLLs: limiter le scale pour ne pas remplir tout le canvas
+  if (isDialog) scale = Math.min(scale, Math.min(rect.width * 0.65 / dllW, rect.height * 0.65 / dllH));
 
   overlay.style.left = (rect.left - contRect.left) + 'px';
   overlay.style.top = (rect.top - contRect.top) + 'px';
@@ -1779,7 +1958,9 @@ function runDll(dllName) {
       var iframeWin = iframe.contentWindow;
       // Look for known game objects and wire up onCommand callback
       var gameObj = iframeWin.coffre || iframeWin.francs || iframeWin.memory ||
-                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.game;
+                    iframeWin.probleme || iframeWin.inventory || iframeWin.pepe || iframeWin.frog ||
+                    iframeWin.vnoption || iframeWin.bateau || iframeWin.costume || iframeWin.calculatrice ||
+                    iframeWin.game;
       if (gameObj && typeof gameObj.setOnCommand === 'function') {
         gameObj.setOnCommand(function(cmd) {
           console.log('DLL command:', cmd);
@@ -1814,7 +1995,12 @@ function runDll(dllName) {
 
 function handleDllCommand(cmd) {
   if (!cmd) return;
-  var parts = cmd.trim().split(/\s+/);
+  // Strip 'playcmd' prefix (used by some DLLs like bateau.dll)
+  var cleaned = cmd.trim();
+  if (cleaned.toLowerCase().indexOf('playcmd ') === 0) {
+    cleaned = cleaned.substring(8);
+  }
+  var parts = cleaned.split(/\s+/);
   var action = parts[0].toLowerCase();
 
   // scene navigation: close DLL, then navigate (wait for video if playing)
@@ -1846,15 +2032,32 @@ function handleDllCommand(cmd) {
     }
   } else if (action === 'closedll') {
     closeDll();
+  } else if (action === 'quit') {
+    closeDll();
+    // Reinitialiser l'etat du jeu et retour a l'ecran titre (scene 3 = Frontal)
+    gameVars = {};
+    sceneHistory = [];
+    clearCursorItem();
+    executeRunPrj('frontal\\start.vnp 3');
+  } else if (action === 'newgame') {
+    closeDll();
+    // Nouvelle partie: reset complet et demarrage couleurs1 scene 1
+    gameVars = {};
+    sceneHistory = [];
+    clearCursorItem();
+    executeRunPrj('couleurs1\\couleurs1.vnp 1');
+  } else if (action === 'runprj') {
+    closeDll();
+    executeRunPrj(parts.slice(1).join(' '));
   } else if (action === 'playavi') {
     // Hide DLL overlay so the video is visible (DLL z-index 20 > video z-index 16)
     // Don't fully close (src=about:blank) because subsequent DLL callbacks (inc_var, scene)
     // still need to fire from the iframe's setTimeout
     document.getElementById('dll-overlay').style.display = 'none';
-    executeAction(cmd);
+    executeAction(cleaned);
   } else {
     // Other commands: playwav, inc_var, set_var, pause, etc.
-    executeAction(cmd);
+    executeAction(cleaned);
   }
 }
 
@@ -1970,7 +2173,9 @@ function playAvi(aviStr) {
   video.appendChild(srcAvi);
   video.style.position = 'absolute';
   video.style.zIndex = '16';
-  video.style.background = '#000';
+  // Vidéos avec coordonnées = overlay (transparent), sans coordonnées = plein écran (fond noir)
+  var isOverlay = (x1 !== 0 || y1 !== 0 || x2 !== 0 || y2 !== 0);
+  video.style.background = isOverlay ? 'transparent' : '#000';
 
   // Store game coordinates for scroll-aware repositioning
   video._gameX1 = x1;
@@ -2127,10 +2332,13 @@ function executeStringCommand(strType, strValue) {
         addBmpOverlay('_playbmp ' + val);
       }
       break;
-    case 41: // ADDTEXT: "name fontSize x y w h flags <varname>"
+    case 41: // ADDTEXT: "name layer x y x2 y2 flags text"
       addTextOverlay(val);
       break;
-    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 39 (FONT), 3 (PREV), 7 (HOTSPOT)
+    case 39: // FONT: "size style color fontfamily"
+      setFont(val);
+      break;
+    // Types handled elsewhere: 6 (SCENE), 21 (IF), 31 (RUNPRJ), 38 (PLAYTEXT), 3 (PREV), 7 (HOTSPOT)
     default:
       break;
   }
@@ -2184,7 +2392,8 @@ function executeSceneCommands(scene) {
         pass0Queue.push({ s: s, cmd: cmd });
         if (s.type === 16) pass0HasPause = true;
       } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
-        // Non-interactive direct display commands
+        // Non-interactive direct display commands (handled early in Pass 0,
+        // skipped in Pass 2 to avoid double execution)
         executeStringCommand(s.type, s.string);
       }
     });
@@ -2194,7 +2403,9 @@ function executeSceneCommands(scene) {
   function executePass0Item(item) {
     var s = item.s;
     var cmd = item.cmd;
-    if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
+    if (s.type === 39) {
+      setFont(s.string);
+    } else if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) {
       executeStringCommand(s.type, s.string);
     } else if (s.type === 9 && !cmd.autoPlayedVideo) {
       console.log('Pass 0: Auto-playing PLAYAVI (subIndex=' + s.subIndex + '):', s.string);
@@ -2235,6 +2446,18 @@ function executeSceneCommands(scene) {
           executeAction(action);
         }
       }
+    } else if (s.type === 41) {
+      // ADDTEXT from ONINIT/AFTERINIT (ex: quiz capitales Italie scene 16)
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 25 || s.type === 32) {
+      // INVALIDATE / UPDATE from ONINIT/AFTERINIT - force render
+      render();
+    } else if (s.type === 33) {
+      // RUNDLL from ONINIT/AFTERINIT
+      executeStringCommand(s.type, s.string);
+    } else if (s.type === 26) {
+      // DEFCURSOR from ONINIT/AFTERINIT
+      executeAction('defcursor ' + s.string);
     }
     // type 16 (PAUSE) is handled as a delay in the queue runner, not here
   }
@@ -2296,7 +2519,7 @@ function executeSceneCommands(scene) {
   // (Interactive command IFs are already fully handled in Pass 0)
   // The VND subIndex field determines WHEN a string command executes:
   //   0 = ONFOCUS (hover)  1 = ONCLICK (click)  2 = ONINIT (scene entry)  3 = AFTERINIT
-  // For non-interactive commands (no polygon) subIndex is always 0, so we process all of them.
+  // Non-interactive commands can have various subIndex values; all are processed on scene entry.
   scene.commands.forEach(function(cmd) {
     var isInteractive = cmd.paramPairs.length > 0;
     if (isInteractive) return; // Already handled in Pass 0
@@ -2342,7 +2565,8 @@ function executeSceneCommands(scene) {
 
     cmd.strings.forEach(function(s) {
       // Skip types handled interactively or in rendering
-      if (s.type === 38 || s.type === 39 || s.type === 3) return;
+      if (s.type === 38 || s.type === 3) return;
+      if (s.type === 39) { setFont(s.string); return; }
       // Skip direct display commands - already handled in Pass 0
       if (s.type === 27 || s.type === 28 || s.type === 29 || s.type === 30) return;
 
@@ -2622,19 +2846,26 @@ function executeSceneCommands(scene) {
 function isToolbarVisible() {
   if (toolbarSceneIndex < 0 || !project || currentSceneIndex === toolbarSceneIndex) return false;
   var scene = project.scenes[currentSceneIndex];
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
+  var resKey = resolveResourcePath(scene.fields.resource);
   var bgImg = resources[resKey];
   return !(bgImg && bgImg.height >= 480);
 }
 
 function executeToolbar() {
-  // Execute the toolbar scene's C0 command strings to add barre overlay + conditional icons
+  // Execute the toolbar scene's C0 ONINIT strings (subIndex >= 2) to add barre overlay + conditional icons
+  // ONFOCUS (sub=0) strings like ordi.bmp/textetm.bmp only show on hover, not on init
+  // ONCLICK (sub=1) strings like RUNDLL vnoption.dll only run on click
   if (toolbarSceneIndex < 0 || !project) return;
   var tbScene = project.scenes[toolbarSceneIndex];
   if (!tbScene || !tbScene.commands.length) return;
   var cmd = tbScene.commands[0]; // C0 is the main toolbar setup command
   cmd.strings.forEach(function(s) {
-    if (s.type === 39 || s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.subIndex < 2) return; // Only ONINIT (2) and AFTERINIT (3)
+    if (s.type === 38 || s.type === 3 || s.type === 7) return;
+    if (s.type === 39) {
+      setFont(s.string);
+      return;
+    }
     if (s.type === 21) {
       var action = evaluateIf(s.string);
       if (action) executeAction(action);
@@ -2701,11 +2932,13 @@ function findCommandAtPoint(x, y) {
   }
 
   // Check toolbar commands for hover
+  // La toolbar est rendue en coordonnees fixes (pas de scroll), donc on soustrait scrollX
   if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
+    var tbX = x - scrollX; // coordonnees ecran fixes pour la toolbar
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];
-      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(tbX, y, expandRect(tbCmd.paramPairs))) {
         return tbCmd;
       }
     }
@@ -2750,11 +2983,13 @@ function findAllCommandsAtPoint(x, y) {
     }
   }
   // Also check toolbar scene commands if toolbar is visible
+  // La toolbar est rendue en coordonnees fixes (pas de scroll), donc on soustrait scrollX
   if (isToolbarVisible()) {
     var tbScene = project.scenes[toolbarSceneIndex];
+    var tbX = x - scrollX; // coordonnees ecran fixes pour la toolbar
     for (var j = tbScene.commands.length - 1; j >= 0; j--) {
       var tbCmd = tbScene.commands[j];
-      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(x, y, expandRect(tbCmd.paramPairs))) {
+      if (tbCmd.paramPairs.length >= 2 && pointInPolygon(tbX, y, expandRect(tbCmd.paramPairs))) {
         result.push(tbCmd);
       }
     }
@@ -2783,6 +3018,14 @@ canvas.addEventListener('mousemove', function(e) {
       }
     });
     hoverAddedImages = {};
+    // Restaurer les images supprimees pendant le hover
+    Object.keys(hoverDeletedImages).forEach(function(name) {
+      if (!overlayImages[name]) {
+        overlayImages[name] = hoverDeletedImages[name];
+        console.log('HOVER restore:', name);
+      }
+    });
+    hoverDeletedImages = {};
 
     hoveredCmd = cmd;
     activePlayTexts = [];
@@ -2812,12 +3055,35 @@ canvas.addEventListener('mousemove', function(e) {
 // Evaluate IF conditions on a command for HOVER (visual effects only: playtext, addbmp, delbmp, showbmp, hidebmp)
 function evaluateHoverEffects(cmd) {
   activePlayTexts = [];
-  // Get font from command
-  var fontStr = cmd.strings.find(function(s) { return s.type === 39; });
+  // Get font from ONFOCUS strings only (subIndex=0)
+  var isInteractive = cmd.paramPairs && cmd.paramPairs.length > 0;
+  var fontStr = cmd.strings.find(function(s) {
+    return s.type === 39 && (!isInteractive || s.subIndex === 0);
+  });
   var font = fontStr ? fontStr.string : null;
 
   cmd.strings.forEach(function(s) {
-    if (s.type === 21) {
+    // Only process ONFOCUS strings (subIndex=0) for hover - skip ONCLICK/ONINIT
+    if (isInteractive && s.subIndex !== 0) return;
+    // Direct display commands (ADDBMP, DELBMP, HIDEBMP, SHOWBMP)
+    if (s.type === 27) {
+      var imgName = s.string.trim().split(/\s+/)[0].toLowerCase();
+      if (imgName && !overlayImages[imgName]) {
+        hoverAddedImages[imgName] = true;
+      }
+      addBmpOverlay(s.string);
+    } else if (s.type === 28) {
+      // Sauvegarder l'etat avant DELBMP pour restaurer au unhover
+      var delName = (s.string.trim().split(/\s+/)[0] || '').toLowerCase();
+      if (delName && overlayImages[delName] && !hoverDeletedImages[delName]) {
+        hoverDeletedImages[delName] = Object.assign({}, overlayImages[delName]);
+      }
+      delBmpOverlay(delName);
+    } else if (s.type === 29) {
+      hideBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 30) {
+      showBmpOverlay(s.string.trim().split(/\s+/)[0] || '');
+    } else if (s.type === 21) {
       var action = evaluateIfReadOnly(s.string);
       if (!action) return;
       var parts = action.trim().split(/\s+/);
@@ -2827,13 +3093,18 @@ function evaluateHoverEffects(cmd) {
       } else if (act === 'addbmp') {
         // Track this as a hover-added image ONLY if it doesn't already exist
         // (existing images are persistent from scene entry and shouldn't be removed on unhover)
-        var imgName = parts[1] ? parts[1].toLowerCase() : '';
-        if (imgName && !overlayImages[imgName]) {
-          hoverAddedImages[imgName] = true;
-          console.log('HOVER adding NEW image:', imgName);
+        var imgNameIf = parts[1] ? parts[1].toLowerCase() : '';
+        if (imgNameIf && !overlayImages[imgNameIf]) {
+          hoverAddedImages[imgNameIf] = true;
+          console.log('HOVER adding NEW image:', imgNameIf);
         }
         addBmpOverlay(parts.slice(1).join(' '));
       } else if (act === 'delbmp') {
+        // Sauvegarder l'etat avant DELBMP pour restaurer au unhover
+        var delNameIf = parts[1] ? parts[1].toLowerCase() : '';
+        if (delNameIf && overlayImages[delNameIf] && !hoverDeletedImages[delNameIf]) {
+          hoverDeletedImages[delNameIf] = Object.assign({}, overlayImages[delNameIf]);
+        }
         delBmpOverlay(parts[1] || '');
       } else if (act === 'showbmp') {
         showBmpOverlay(parts[1] || '');
@@ -2891,16 +3162,42 @@ function evaluateIfReadOnly(ifStr) {
   return result ? thenAction : elseAction;
 }
 
+// Polygones orphelins/debug dans les données originales du jeu à ignorer au clic
+// suede s1 C5: raccourci debug dans le ciel vers scène récompense (scene 14)
+// couleurs1 s5 C2: zone de sortie redondante sans label
+var BLOCKED_CLICKS = [
+  { base: 'suede/', scene: 0, cmd: 5 },
+  { base: 'couleurs1/', scene: 4, cmd: 2 }
+];
+
 // Action commune clic / tap
 function handleCommandClick(cmd) {
+  // Effacer le PLAYTEXT hover/longpress — on passe en mode clic
+  hoveredCmd = null;
+  activePlayTexts = [];
+  clickPlayTexts = [];
+  // Ignorer les polygones debug/orphelins identifiés dans les données originales
+  if (project && currentSceneIndex >= 0) {
+    var scene = project.scenes[currentSceneIndex];
+    var cmdIdx = scene.commands.indexOf(cmd);
+    var blocked = BLOCKED_CLICKS.some(function(b) {
+      return currentBasePath === b.base && currentSceneIndex === b.scene && cmdIdx === b.cmd;
+    });
+    if (blocked) {
+      console.log('Click ignored: blocked debug polygon C' + cmdIdx + ' in ' + currentBasePath + ' scene ' + (currentSceneIndex + 1));
+      return;
+    }
+  }
   console.log('Click: CMD_' + cmd.commandType, cmd.strings.map(function(s) { return '[' + s.type + ']' + s.string; }).join(' | '));
   // If this command had auto-played video and video is still playing, close it first
   if (cmd.autoPlayedVideo && currentVideo) {
     console.log('Closing auto-played video on button click');
     closeVideo();
   }
-  // Filter to ONCLICK strings only (subIndex=1) — don't re-run ONINIT (2) or ONFOCUS (0)
+  // Filter to ONCLICK strings (subIndex=1) if available.
+  // Fallback: if NO strings have subIndex=1 (e.g. biblio hymnes), use ALL strings.
   var onclickStrings = cmd.strings.filter(function(s) { return s.subIndex === 1; });
+  if (onclickStrings.length === 0) onclickStrings = cmd.strings;
   var filteredCmd = {};
   for (var k in cmd) filteredCmd[k] = cmd[k];
   filteredCmd.strings = onclickStrings;
@@ -3014,8 +3311,21 @@ function resumeCommandProcessing(cmd, startIdx) {
     } else if (s.type === 7) {
       var hsIdx = parseInt(s.string);
       if (!isNaN(hsIdx)) executeHotspot(hsIdx);
-    } else if (s.type === 38 || s.type === 39) {
-      // PLAYTEXT, FONT - handled in render
+    } else if (s.type === 39) {
+      // FONT - store for subsequent PLAYTEXT/ADDTEXT
+      setFont(s.string);
+      clickPlayTextsFont = s.string;
+    } else if (s.type === 38) {
+      // PLAYTEXT direct dans ONCLICK : afficher avec auto-dismiss
+      // Utilise clickPlayTexts (pas activePlayTexts) pour ne pas etre efface par le hover
+      clickPlayTexts.push({ text: s.string, font: clickPlayTextsFont });
+      if (activePlayTextTimer) clearTimeout(activePlayTextTimer);
+      activePlayTextTimer = setTimeout(function() {
+        clickPlayTexts = [];
+        activePlayTextTimer = null;
+        render();
+      }, 2000);
+      render();
     } else if (s.type === 27 && cmd.autoShowedBmp) {
       console.log('Skipping ADDBMP (auto-showed on arrival):', s.string);
     } else if (s.type === 16) {
@@ -3094,10 +3404,15 @@ function resumeCommandProcessing(cmd, startIdx) {
     }
   }
 
-  // Check if any string has PAUSE (type 16) — if so, use async processing
+  // Check if any string has PAUSE (type 16 ou inline dans IF) — if so, use async processing
   var hasPause = false;
+  pendingPauseMs = 0; // Reset au debut de chaque commande
   for (var pi = startIdx; pi < cmd.strings.length; pi++) {
     if (cmd.strings[pi].type === 16) { hasPause = true; break; }
+    // Detecter aussi PAUSE inline dans les IF (ex: "seche = 0 then pause 1000")
+    if (cmd.strings[pi].type === 21 && /\bthen\s+pause\s+\d/i.test(cmd.strings[pi].string)) {
+      hasPause = true; break;
+    }
   }
 
   if (hasPause) {
@@ -3106,7 +3421,9 @@ function resumeCommandProcessing(cmd, startIdx) {
     (function runAsync(si) {
       if (si >= cmd.strings.length) {
         waitingForVideoEnd = false;
+        var willNavigate = !!deferredNav || !!deferredHtml;
         finalize();
+        if (!willNavigate) restoreSceneWav();
         render();
         return;
       }
@@ -3117,10 +3434,19 @@ function resumeCommandProcessing(cmd, startIdx) {
         // images that were added before the pause (they've been visible)
         imagesAddedThisClick = {};
         render();
-        setTimeout(function() { runAsync(si + 1); }, ms);
+        waitForAudioThenDelay(ms, function() { runAsync(si + 1); });
       } else {
         processOneString(s, si);
-        runAsync(si + 1);
+        // Verifier si processOneString a declenche un PAUSE inline (via executeAction)
+        if (pendingPauseMs > 0) {
+          var pms = pendingPauseMs;
+          pendingPauseMs = 0;
+          imagesAddedThisClick = {};
+          render();
+          waitForAudioThenDelay(pms, function() { runAsync(si + 1); });
+        } else {
+          runAsync(si + 1);
+        }
       }
     })(startIdx);
   } else {
@@ -3128,7 +3454,9 @@ function resumeCommandProcessing(cmd, startIdx) {
     for (var si = startIdx; si < cmd.strings.length; si++) {
       processOneString(cmd.strings[si], si);
     }
+    var willNavigate = !!deferredNav || !!deferredHtml;
     finalize();
+    if (!willNavigate) restoreSceneWav();
   }
 }
 
@@ -3242,33 +3570,39 @@ canvas.addEventListener('click', function(e) {
   }
   // Clear the click-scope image tracking (prevents DELBMP from removing just-added images)
   imagesAddedThisClick = {};
-  // Convert hover-added images to permanent (user clicked, so they want to keep them)
+  // Convert hover changes to permanent (user clicked, so effects are kept)
   hoverAddedImages = {};
+  hoverDeletedImages = {};
   var pos = screenToGame(e.clientX, e.clientY);
   console.log('Canvas click at game coords:', pos.x, pos.y);
-  // Find ALL commands at click point, execute side effects for all
+  // Find all commands at click point (sorted by area, smallest first)
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {
     console.log('No commands found at click point');
+    // Clic dans le vide : reposer l'item en main dans le sac
+    if (activeCursorItem) {
+      clearCursorItem();
+      render();
+    }
     return;
   }
   console.log('Found', allCmds.length, 'command(s) at click point:', allCmds.map(function(c) {
     var scene = project.scenes[currentSceneIndex];
     return 'C' + scene.commands.indexOf(c);
   }).join(', '));
-  // Execute non-navigable commands first (set_var, addbmp, etc.)
-  allCmds.forEach(function(cmd) {
-    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-    if (!hasNav) handleCommandClick(cmd);
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // This prevents large "error zone" polygons from firing when a small "correct answer"
+  // polygon on top of them is clicked (e.g. irland scene 5 quiz).
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
-  // Then execute the navigable command (if any)
-  var navCmd = allCmds.find(function(cmd) {
-    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-  });
-  if (navCmd) handleCommandClick(navCmd);
-  else if (allCmds.length > 0) {
-    // All were non-navigable, already handled above
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
   }
+  if (clickCmd) handleCommandClick(clickCmd);
 });
 
 // =============================================================================
@@ -3277,8 +3611,14 @@ canvas.addEventListener('click', function(e) {
 
 function goToScene(index) {
   if (!project || index < 0 || index >= project.scenes.length) return;
+  // Frontal/start scene 1 = "Quitter" (QUIT) - pas de sens sur le web, rester sur scene 3 (Frontal)
+  if (currentVNDEntry && currentVNDEntry.name === 'start' && index === 0) {
+    index = 2; // scene 3 (0-indexed = 2)
+  }
   currentSceneIndex = index;
   scrollX = 0;
+  // Annuler le timer hotspot de la scene precedente
+  if (hotspotTimer) { clearTimeout(hotspotTimer); hotspotTimer = null; }
   // Clear recentlyStartedAudio so that sounds started during the same click
   // that triggered navigation are NOT protected from being stopped.
   // Only the target scene's own sounds should persist.
@@ -3294,6 +3634,9 @@ function goToScene(index) {
   activePlayText = null;
   activePlayTextFont = null;
   activePlayTexts = [];
+  clickPlayTexts = [];
+  if (activePlayTextTimer) { clearTimeout(activePlayTextTimer); activePlayTextTimer = null; }
+  if (tapFeedbackTimer) { clearTimeout(tapFeedbackTimer); tapFeedbackTimer = null; }
   overlayTexts = {};
   loadSceneBackground(project.scenes[index]);
 
@@ -3319,6 +3662,82 @@ function goToScene(index) {
   resizeCanvas();
   // Update debug display
   logHistory('AT ' + (currentVNDEntry ? currentVNDEntry.name : '?') + ':' + (index + 1));
+
+  // TIMER HOTSPOT: demarrer un timer si la scene en a un.
+  // Apres timerValue ms, les commandes du hotspot s'executent (SCENE, PLAYAVI, ADDBMP, etc.)
+  // Exemples: ecosse scenes 25-28 (timer=3000ms → SCENE 7), danem scene 9 (timer=3000ms → PLAYAVI+SCENE)
+  if (scene.hotspot && scene.hotspot.timerValue > 0 && scene.hotspot.objects.length > 0) {
+    var hotspotSceneIndex = index; // capturer l'index pour verifier coherence
+    hotspotTimer = setTimeout(function() {
+      hotspotTimer = null;
+      // Verifier qu'on est toujours sur la meme scene (pas de navigation entre-temps)
+      if (currentSceneIndex !== hotspotSceneIndex) return;
+      console.log('HOTSPOT TIMER fired (' + scene.hotspot.timerValue + 'ms) for scene ' + (hotspotSceneIndex + 1));
+
+      var deferredNav = null;
+      var videoPlaying = false;
+      scene.hotspot.objects.forEach(function(obj) {
+        if (obj.type === 6) {
+          // SCENE
+          if (!deferredNav) deferredNav = { type: 'scene', value: obj.string };
+        } else if (obj.type === 31) {
+          // RUNPRJ
+          if (!deferredNav) deferredNav = { type: 'runprj', value: obj.string };
+        } else if (obj.type === 9) {
+          // PLAYAVI
+          if (!videoPlaying) {
+            playAvi(obj.string);
+            videoPlaying = true;
+          }
+        } else if (obj.type === 27) {
+          // ADDBMP
+          executeStringCommand(obj.type, obj.string);
+        } else if (obj.type === 21) {
+          // IF condition
+          var action = evaluateIf(obj.string);
+          if (action) {
+            var actLower = action.trim().split(/\s+/)[0].toLowerCase();
+            if (actLower === 'scene') {
+              if (!deferredNav) deferredNav = { type: 'scene', value: action.trim().split(/\s+/).slice(1).join(' ') };
+            } else if (actLower === 'runprj') {
+              if (!deferredNav) deferredNav = { type: 'runprj', value: action.trim().split(/\s+/).slice(1).join(' ') };
+            } else {
+              executeAction(action);
+            }
+          }
+        } else {
+          // Autres types (SET_VAR, PLAYWAV, etc.)
+          executeStringCommand(obj.type, obj.string);
+        }
+      });
+
+      // Executer la navigation differee (attendre fin video si necessaire)
+      if (deferredNav) {
+        if (videoPlaying && currentVideo) {
+          waitingForVideoEnd = true;
+          var nav = deferredNav;
+          var vid = currentVideo;
+          function onHotspotVideoEnd(evt) {
+            if (evt && evt.type === 'error' && vid.readyState > 0) return;
+            vid.removeEventListener('ended', onHotspotVideoEnd);
+            vid.removeEventListener('error', onHotspotVideoEnd);
+            vid.removeEventListener('click', onHotspotVideoEnd);
+            if (currentVideo !== vid) return;
+            waitingForVideoEnd = false;
+            closeVideo();
+            doNavigation(nav);
+          }
+          vid.addEventListener('ended', onHotspotVideoEnd);
+          vid.addEventListener('error', onHotspotVideoEnd);
+          vid.addEventListener('click', onHotspotVideoEnd);
+        } else {
+          doNavigation(deferredNav);
+        }
+      }
+      render();
+    }, scene.hotspot.timerValue);
+    console.log('HOTSPOT TIMER started:', scene.hotspot.timerValue + 'ms, ' + scene.hotspot.objects.length + ' commands');
+  }
 }
 
 function updateUI() {
@@ -3537,14 +3956,13 @@ function resolveResourcePath(resRef) {
 // Charger automatiquement l'image de fond d'une scène
 function loadSceneBackground(scene) {
   if (!scene.fields.resource) return;
-  var resKey = scene.fields.resource.toLowerCase().replace(/\\/g, '/');
-  if (resources[resKey]) return; // déjà chargé
-
   var url = resolveResourcePath(scene.fields.resource);
+  if (resources[url]) return; // deja charge (cle = URL complete pour eviter collisions entre pays)
+
   var img = new Image();
   img.onload = function() {
-    resources[resKey] = img;
-    console.log('Loaded BMP:', resKey, img.width + 'x' + img.height);
+    resources[url] = img;
+    console.log('Loaded BMP:', url, img.width + 'x' + img.height);
     render();
   };
   img.onerror = function() {
@@ -3625,9 +4043,8 @@ function preloadResources(onComplete) {
     var img = new Image();
     img.onload = function() {
       preloadCache[url] = img;
-      // Also store in resources dict by key
-      var resKey = url.replace(/^\/game-data\/[^/]+\/(?:img24|img8)\//i, '').toLowerCase();
-      resources[resKey] = img;
+      // Store in resources dict by full URL (avoids collisions between countries)
+      resources[url] = img;
       tick();
     };
     img.onerror = function() { tick(); }; // count failures too
@@ -3732,6 +4149,14 @@ document.addEventListener('keydown', function(e) {
     document.getElementById('chk-polygons').click();
   } else if (e.key === 'l' || e.key === 'L') {
     document.getElementById('chk-labels').click();
+  } else if (e.key === 'd' || e.key === 'D') {
+    // Basculer mode debug: toolbar, info scene, bouton DBG
+    debugMode = !debugMode;
+    document.body.classList.toggle('debug-mode', debugMode);
+    document.getElementById('debug-toggle').style.display = debugMode ? '' : 'none';
+    if (!debugMode) document.getElementById('debug-history').style.display = 'none';
+    render();
+    setTimeout(resizeCanvas, 100);
   }
 });
 
@@ -3782,8 +4207,10 @@ var touchStartX = 0;
 var touchStartY = 0;
 var touchStartScroll = 0;
 var touchMoved = false;
+var touchInToolbar = false; // true si le touch a demarre dans la zone toolbar
 var longPressTimer = null;
 var longPressTriggered = false;
+var tapFeedbackTimer = null; // auto-dismiss du ONFOCUS feedback apres tap
 
 canvas.addEventListener('touchstart', function(e) {
   e.preventDefault();
@@ -3793,6 +4220,11 @@ canvas.addEventListener('touchstart', function(e) {
   touchStartScroll = scrollX;
   touchMoved = false;
   longPressTriggered = false;
+  // Detecter si le touch demarre dans la zone toolbar (y >= 400 en coordonnees jeu)
+  var rect = canvas.getBoundingClientRect();
+  var gameH = project ? project.header.height : 480;
+  var touchGameY = (touchStartY - rect.top) * (gameH / rect.height);
+  touchInToolbar = isToolbarVisible() && touchGameY >= 400;
 
   // Long-press : afficher le texte rollover après 400ms
   clearTimeout(longPressTimer);
@@ -3810,6 +4242,13 @@ canvas.addEventListener('touchstart', function(e) {
         }
       });
       hoverAddedImages = {};
+      // Restaurer les images supprimees pendant le hover precedent
+      Object.keys(hoverDeletedImages).forEach(function(name) {
+        if (!overlayImages[name]) {
+          overlayImages[name] = hoverDeletedImages[name];
+        }
+      });
+      hoverDeletedImages = {};
 
       hoveredCmd = cmd;
       activePlayTexts = [];
@@ -3828,6 +4267,8 @@ canvas.addEventListener('touchmove', function(e) {
     touchMoved = true;
     clearTimeout(longPressTimer);
   }
+  // Pas de scroll si le touch a demarre dans la toolbar
+  if (touchInToolbar) return;
   // Scroll horizontal
   var scene = project.scenes[currentSceneIndex];
   var sceneW = getSceneWidth(scene);
@@ -3852,6 +4293,14 @@ canvas.addEventListener('touchend', function(e) {
     }
   });
   hoverAddedImages = {};
+  // Restaurer les images supprimees pendant le hover
+  Object.keys(hoverDeletedImages).forEach(function(name) {
+    if (!overlayImages[name]) {
+      overlayImages[name] = hoverDeletedImages[name];
+      console.log('TOUCH restore:', name);
+    }
+  });
+  hoverDeletedImages = {};
 
   // Si long-press actif, juste masquer le hover
   if (longPressTriggered) {
@@ -3881,30 +4330,46 @@ canvas.addEventListener('touchend', function(e) {
   var allCmds = findAllCommandsAtPoint(pos.x, pos.y);
   if (allCmds.length === 0) {
     console.log('No commands found at tap point');
+    // Tap dans le vide : reposer l'item en main dans le sac
+    if (activeCursorItem) clearCursorItem();
     render();
     return;
   }
   console.log('Touch found', allCmds.length, 'command(s) at tap point');
 
-  // Execute non-navigable commands first (set_var, addbmp, etc.)
-  allCmds.forEach(function(cmd) {
-    var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-    if (!hasNav) handleCommandClick(cmd);
+  // Execute only the most specific (smallest) command that has ONCLICK strings.
+  // Fallback: commands with no subIndex=1 (e.g. biblio hymnes) are also clickable.
+  var clickCmd = allCmds.find(function(cmd) {
+    return cmd.strings.some(function(s) { return s.subIndex === 1; });
   });
-  // Then execute the navigable command (if any)
-  var navCmd = allCmds.find(function(cmd) {
-    return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-  });
-  if (navCmd) handleCommandClick(navCmd);
+  if (!clickCmd) {
+    clickCmd = allCmds.find(function(cmd) {
+      return cmd.strings.length > 0;
+    });
+  }
+  if (clickCmd) handleCommandClick(clickCmd);
 
   // On mobile tap, show ONFOCUS feedback (PLAYTEXT, cursor, etc.)
-  // since there is no hover on touch devices. Set hoveredCmd to the
-  // first non-navigable tapped command so render() draws its ONFOCUS
-  // PLAYTEXT overlays, giving visual feedback.
-  // Skip if async processing (PAUSE) is running — it manages its own display.
-  if (!navCmd && !waitingForVideoEnd && allCmds.length > 0) {
+  // since there is no hover on touch devices. Auto-dismiss apres 1.5s.
+  if (tapFeedbackTimer) { clearTimeout(tapFeedbackTimer); tapFeedbackTimer = null; }
+  if (allCmds.length > 0) {
     hoveredCmd = allCmds[0];
     evaluateHoverEffects(allCmds[0]);
+    tapFeedbackTimer = setTimeout(function() {
+      hoveredCmd = null;
+      activePlayTexts = [];
+      tapFeedbackTimer = null;
+      // Nettoyer les images de hover et restaurer les supprimees
+      Object.keys(hoverAddedImages).forEach(function(name) {
+        if (overlayImages[name]) delete overlayImages[name];
+      });
+      hoverAddedImages = {};
+      Object.keys(hoverDeletedImages).forEach(function(name) {
+        if (!overlayImages[name]) overlayImages[name] = hoverDeletedImages[name];
+      });
+      hoverDeletedImages = {};
+      render();
+    }, 1500);
   }
 
   render(); // Refresh display after action (e.g., item pickup)
@@ -4008,24 +4473,31 @@ document.querySelector('#scene-html .scene-html-content').addEventListener('clic
     imagesAddedThisClick = {};
     // Simulate canvas click by directly calling the click handler logic
     if (!waitingForVideoEnd) {
-      cmds.forEach(function(cmd) {
-        var hasNav = cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-        if (!hasNav) handleCommandClick(cmd);
+      var clickCmd = cmds.find(function(cmd) {
+        return cmd.strings.some(function(s) { return s.subIndex === 1; });
       });
-      var navCmd = cmds.find(function(cmd) {
-        return cmd.strings.some(function(s) { return s.type === 6 || s.type === 31 || s.type === 3; });
-      });
-      if (navCmd) handleCommandClick(navCmd);
+      if (!clickCmd) {
+        clickCmd = cmds.find(function(cmd) {
+          return cmd.strings.length > 0;
+        });
+      }
+      if (clickCmd) handleCommandClick(clickCmd);
     }
   }
 });
 
 // Initial resize
 resizeCanvas();
+
+// Chargement automatique: frontal/start scene 3 (menu principal)
+executeRunPrj('frontal\\start.vnp 3');
+// Mettre le select sur 'start'
+var startIdx = VND_LIST.findIndex(function(e) { return e.name === 'start'; });
+if (startIdx >= 0) vndSelect.value = startIdx;
 </script>
 
 <!-- Debug elements outside canvas-container for reliable mobile positioning -->
-<div id="debug-history" style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
-<button id="debug-toggle" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">DBG</button>
+<div id="debug-history" style="display:none;position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font:11px monospace;padding:6px 8px;z-index:9999;max-height:80px;overflow:auto;word-break:break-all;"></div>
+<button id="debug-toggle" style="display:none;position:fixed;bottom:10px;right:10px;z-index:9999;background:#222;color:#0f0;border:2px solid #0f0;padding:10px 14px;font:bold 14px monospace;border-radius:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;" onclick="var d=document.getElementById('debug-history');d.style.display=d.style.display==='none'?'block':'none';">DBG</button>
 </body>
 </html>

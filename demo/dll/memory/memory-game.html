@@ -335,9 +335,9 @@
         // Initialiser au chargement
         initGame();
         
-        // API pour intégration VN-Studio
-        window.memoryGame = {
-            setCallback: setVNCallback,
+        // API pour intégration VN-Studio (convention: window.<dllName> avec setOnCommand)
+        window.memory = {
+            setOnCommand: setVNCallback,
             reset: initGame,
             quit: quit,
             getAttempts: () => attempts

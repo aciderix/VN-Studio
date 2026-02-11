@@ -227,6 +227,10 @@
     var items = new Map();
     var selectedItem = null;
     var cursorBasePath = '';
+    
+    // FIX: Stockage global des timestamps de double-tap par item
+    // Ceci permet au timestamp de survivre au re-rendu de la liste
+    var lastTapByItem = {};
 
     var listEl = document.getElementById('itemList');
     var emptyEl = document.getElementById('emptyMessage');
@@ -296,20 +300,21 @@
                 sendCommand('closedll');
             }
             entry.addEventListener('dblclick', useItem);
-            // Fallback double-tap pour mobile (dblclick pas fiable sur tactile)
-            (function() {
-                var lastTap = 0;
-                entry.addEventListener('touchend', function(e) {
-                    var now = Date.now();
-                    if (now - lastTap < 400) {
-                        e.preventDefault();
-                        useItem();
-                        lastTap = 0;
-                    } else {
-                        lastTap = now;
-                    }
-                });
-            })();
+            
+            // FIX: Double-tap pour mobile - utilise lastTapByItem au lieu d'une closure locale
+            // Avant, le timestamp était perdu quand renderList() recréait les éléments
+            // car chaque nouvelle closure commençait avec lastTap = 0
+            entry.addEventListener('touchend', function(e) {
+                var now = Date.now();
+                var lastTap = lastTapByItem[internal] || 0;
+                if (now - lastTap < 400) {
+                    e.preventDefault();
+                    useItem();
+                    lastTapByItem[internal] = 0;
+                } else {
+                    lastTapByItem[internal] = now;
+                }
+            });
 
             listEl.appendChild(entry);
         });

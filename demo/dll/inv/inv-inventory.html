@@ -61,6 +61,8 @@
             cursor: pointer;
             user-select: none;
             height: 36px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .item-entry:hover { background: #e0e0e0; }
@@ -287,12 +289,27 @@
                 renderList();
             });
 
-            entry.addEventListener('dblclick', function() {
-                // Double-click = use item: set_var item 2 + defcursor item
+            // Double-click/double-tap = use item: set_var item 2 + defcursor item
+            function useItem() {
                 sendCommand('set_var ' + internal + ' 2');
                 sendCommand('defcursor ' + internal);
                 sendCommand('closedll');
-            });
+            }
+            entry.addEventListener('dblclick', useItem);
+            // Fallback double-tap pour mobile (dblclick pas fiable sur tactile)
+            (function() {
+                var lastTap = 0;
+                entry.addEventListener('touchend', function(e) {
+                    var now = Date.now();
+                    if (now - lastTap < 400) {
+                        e.preventDefault();
+                        useItem();
+                        lastTap = 0;
+                    } else {
+                        lastTap = now;
+                    }
+                });
+            })();
 
             listEl.appendChild(entry);
         });

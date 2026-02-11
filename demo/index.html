@@ -172,12 +172,10 @@
       touch-action: none;
     }
 
-    /* Mode jeu par defaut: toolbar masquee, canvas plein ecran */
+    /* Mode jeu par defaut: toolbar masquee, canvas remplit via flex:1 */
     #toolbar { display: none; }
-    #canvas-container { height: 100vh; }
-    /* Mode debug: toolbar visible, canvas sous la toolbar */
+    /* Mode debug: toolbar visible */
     body.debug-mode #toolbar { display: flex; }
-    body.debug-mode #canvas-container { height: calc(100vh - 44px); }
 
     /* Panneau latéral scènes */
     #scene-list {
